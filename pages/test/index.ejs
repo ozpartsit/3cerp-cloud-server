@@ -1,0 +1,11 @@
+
+<html>
+  <head>
+    <%- include('header') %>  
+  </head>
+  <body>
+    <div><%= data.company %> <%= __('Hello')%></div>
+    <%- include('partials/'+(view||'home')) %>  
+    <%- include('footer') %>  
+  </body>
+</html>
