@@ -17,6 +17,7 @@
 //     return element ? element.name : "";
 //   }
 // }
+const countries = ["PL", "GB"];
+export default countries;
+export function getCountries(query: any) { return countries }
 
-// export default new Countries();
-export default ["PL", "GB"];

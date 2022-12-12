@@ -28,5 +28,6 @@
 //   }
 // }
 
-// export default new Currencies();
-export default ["PLN", "EUR"];
+const currencies = ["PLN", "EUR"];
+export default currencies;
+export function getCurrencies(query: any) { return currencies }

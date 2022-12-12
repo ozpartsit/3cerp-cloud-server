@@ -33,8 +33,9 @@ export interface ITransaction extends IExtendedDocument {
   billingAddress2?: string;
   billingZip?: string;
   billingCity: string;
+  billingState?: string;
   billingCountry: string;
-  billingPhone: string;
+  billingPhone?: string;
 
   shippingName?: string;
   shippingAddressee?: string;
@@ -42,8 +43,9 @@ export interface ITransaction extends IExtendedDocument {
   shippingAddress2?: string;
   shippingZip?: string;
   shippingCity: string;
+  shippingState?: string;
   shippingCountry: string;
-  shippingPhone: string;
+  shippingPhone?: string;
   recalc(): any;
   autoName(): any;
 }
@@ -119,6 +121,10 @@ const TransactionSchema = {
   billingCity: {
     type: String
   },
+  billingState: {
+    type: String,
+    input: "select"
+  },
   billingCountry: {
     type: String,
     enum: Countries,
@@ -144,6 +150,10 @@ const TransactionSchema = {
   },
   shippingCity: {
     type: String
+  },
+  shippingState: {
+    type: String,
+    input: "select"
   },
   shippingCountry: {
     type: String,

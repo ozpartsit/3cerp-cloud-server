@@ -3,9 +3,10 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import path from "path";
 import i18n from "../config/i18n";
 
-import countries from "../constants/countries";
-
-const constants = { countries };
+import { getCountries } from "../constants/countries";
+import { getStates } from "../constants/states";
+import { getCurrencies } from "../constants/currencies";
+const constants = { countries: getCountries, states: getStates, currencies: getCurrencies };
 export default class controller {
     public async get(req: Request, res: Response, next: NextFunction) {
 
@@ -15,7 +16,7 @@ export default class controller {
         });
 
         try {
-            const values = constants[req.params.recordtype];
+            const values = await constants[req.params.recordtype](req.query);
             let result = values.map(value => {
                 return { _id: value, name: res.__(value) }
             })

@@ -3,6 +3,7 @@ import http from "http";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
+import compression from "compression";
 import DB from "./config/database";
 import i18n from "./config/i18n";
 import RoutesCore from "./routes/core";
@@ -43,6 +44,7 @@ export class App3CERP {
     this.storage.init();
   }
   private config(): void {
+    this.app.use(compression()); // compress all responses
     this.app.use(cors());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
