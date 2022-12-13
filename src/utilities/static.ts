@@ -13,7 +13,7 @@ export async function loadDocument(this: any, id: string) {
 //API
 export async function addDocument(this: any, data: Object) {
   let document = new this(data);
-  document.recalcRecord();
+  await document.recalcRecord();
   let msg = await document.validateSync();
   // insert document to cache
   cache.addCache(document);
@@ -28,7 +28,8 @@ export async function getDocument(this: any, id: string, mode: string) {
       document = await this.loadDocument(id);
       cache.addCache(document);
     }
-    await document.autoPopulate();
+    if (document)
+      await document.autoPopulate();
   } else {
     document = await this.loadDocument(id);
     if (document)
@@ -39,21 +40,26 @@ export async function getDocument(this: any, id: string, mode: string) {
 
 export async function saveDocument(this: any, id: string) {
   let document = cache.getCache(id);
-  document.save();
+  await document.save();
+  cache.delCache(id);
   return id;
 }
 
 export async function updateDocument(this: any, id: string, list: string, subrecord: string, field: string, value: any) {
   let document = cache.getCache(id);
-  let msg = await document.setValue(list, subrecord, field, value);
-  document.recalcRecord();
+  await document.setValue(list, subrecord, field, value);
+  let msg = await document.recalcRecord();
   await document.autoPopulate();
   return { document, msg };
 }
 
 export async function deleteDocument(this: any, id: string) {
-  // this.remove({ _id: id })
-  // to do
+  let document = cache.getCache(id);
+  document.deleted = true;
+  await document.recalcRecord();
+  cache.delCache(id);
+  document.remove();
+
   return id;
 }
 

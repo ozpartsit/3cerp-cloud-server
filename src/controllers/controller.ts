@@ -12,9 +12,10 @@ export default class controller {
 
     public async add(req: Request, res: Response, next: NextFunction) {
         // init Model and create new Document
+
         const model = this.setModel(req.params.recordtype);
         try {
-            let document = model.addDocument(req.body)
+            let document = await model.addDocument(req.body);
             res.json(document);
         } catch (error) {
             return next(error);
@@ -65,7 +66,11 @@ export default class controller {
 
         try {
             let document = await model.getDocument(id, mode);
-            res.json(document);
+            if (!document) res.status(404).json({
+                message: 'Document not found'
+            })
+            else
+                res.json(document);
         } catch (error) {
             return next(error);
         }

@@ -22,14 +22,21 @@ export default async function validateVirtuals(this: any, save: boolean) {
           });
           console.log("save", save);
           // Validate or validate and save
-          if (save) {
-            // before save validate is automatic
-            if (line.deleted) await line.remove();
-            else await line.save();
-          } else {
-            // Catch errors from validate all virtual list
-            let error = await line.validate();
-            if (error) errors.push(error);
+          try {
+            if (save) {
+              // before save validate is automatic
+              if (this.deleted) line.deleted = true;
+              if (line.deleted) await line.remove();
+              else await line.save();
+            } else {
+              // Catch errors from validate all virtual list
+              await line.validate();
+            }
+          } catch (err: any) {
+            //console.log(err)
+            err._id = line._id;
+            err.list = list.path;
+            errors.push(err);
           }
           //await line.autoPopulate();
           this[list.path][index] = line;
@@ -40,6 +47,9 @@ export default async function validateVirtuals(this: any, save: boolean) {
     }
   }
   if (errors.length > 0) {
-    throw new Error(errors);
+    console.log(errors.length)
+    if (save)
+      throw errors;
+    else return errors;
   }
 }

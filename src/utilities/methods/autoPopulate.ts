@@ -22,7 +22,7 @@ export default async function autoPopulate(this: any, req: any) {
     if (list.options.ref && list.options.autopopulate) {
       if (Array.isArray(this[list.path]))
         for (let item of this[list.path]) {
-          await item.autoPopulate(item, true);
+          await item.autoPopulate();
         }
     }
   }

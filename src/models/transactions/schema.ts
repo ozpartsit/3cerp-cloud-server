@@ -54,7 +54,7 @@ interface ITransactionModel extends Model<ITransaction>, IExtendedModel { }
 
 const TransactionSchema = {
   name: { type: String, input: "text", set: (v: any) => v.toLowerCase() },
-  date: { type: Date, input: "date" },
+  date: { type: Date, input: "date", required: true, },
   company: {
     type: Schema.Types.ObjectId,
     ref: "Company",

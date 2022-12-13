@@ -48,7 +48,7 @@ export default class Routes {
   
   public routeWarehouses() {
     // Warehouses
-    this.Router.route("/warehouses").get(
+    this.Router.route("/warehouses/:recordtype").get(
       this.warehouseController.find.bind(this.warehouseController) as any
     );
   }

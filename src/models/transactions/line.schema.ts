@@ -4,7 +4,7 @@ import { ITransaction } from "./schema";
 import actions from "./line.actions";
 import TranLineTypes from "../../constants/transaction.lines.types";
 import { roundToPrecision } from "../../utilities/usefull";
-
+import { Error } from "mongoose";
 export interface ILine {
   _id: Schema.Types.ObjectId;
   parent?: any;
@@ -100,6 +100,7 @@ schema.method("components", async function () {
 schema.pre("validate", async function (next) {
   console.log("pre valide line");
 
+  //if (this.deleted) throw new Error.ValidationError();
   let triggers: any[] = await this.changeLogs();
   for (let trigger of triggers) {
     if (actions[trigger.field]) await actions[trigger.field](this);
@@ -113,7 +114,7 @@ schema.pre("validate", async function (next) {
 
   next();
 });
-schema.pre("save", async function (doc, next) {});
+schema.pre("save", async function (doc, next) { });
 
 schema.index({ transaction: 1 });
 

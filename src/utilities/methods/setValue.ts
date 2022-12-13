@@ -6,29 +6,33 @@ export default async function setValue(
   field: string,
   value: any
 ) {
-  console.log("setValue", field, list);
-  let changeLogs = this.getChanges();
-  if (list) {
-    let SubDocument = this[list].find((element: any) => {
-      return element._id.toString() === subrecord;
-    });
-    if (SubDocument) {
-      SubDocument[field] = value;
-    } else {
-      let virtual: any = this.schema.virtuals[list];
-      if (field) {
-        SubDocument = new models[virtual.options.ref]();
+  try {
+    console.log("setValue", field, list);
+    let changeLogs = this.getChanges();
+    if (list) {
+      let SubDocument = this[list].find((element: any) => {
+        return element._id.toString() === subrecord;
+      });
+      if (SubDocument) {
         SubDocument[field] = value;
-        this[list].push(SubDocument);
-      } else console.log("The list does not exist");
+      } else {
+        let virtual: any = this.schema.virtuals[list];
+        if (field) {
+          SubDocument = new models[virtual.options.ref]();
+          SubDocument[field] = value;
+          this[list].push(SubDocument);
+        } else console.log("The list does not exist");
+      }
+      //await SubDocument.validate();
+      changeLogs[list] = SubDocument.getChanges();
+    } else {
+      this[field] = value;
+      await this.populate(field, "name displayname type _id");
+      changeLogs = this.getChanges();
     }
-
-    changeLogs[list] = SubDocument.getChanges();
-  } else {
-    this[field] = value;
-    await this.populate(field, "name displayname type _id");
-    changeLogs = this.getChanges();
+    await this.validate();
+  } catch (err) {
+    return err;
   }
-  await this.validate();
-  return await this.validateSync();
+
 }

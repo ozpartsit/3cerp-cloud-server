@@ -6,7 +6,7 @@ export default class DataCache {
     this.resetCache = this.resetCache.bind(this);
   }
   addCache(Document: any) {
-    if (!this.getCache(Document._id)) {
+    if (Document && !this.getCache(Document._id)) {
       this.cache[Document._id] = Document;
     } else {
       //throw new Error("the document is now open!");

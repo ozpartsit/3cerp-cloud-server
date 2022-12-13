@@ -7,16 +7,17 @@ import totalVirtuals from "./methods/totalVirtuals";
 import addToVirtuals from "./methods/addToVirtuals";
 export default function methods(schema: any, options: any) {
   // apply method to pre
-  function handler(this: any, next: any) {
+  async function handler(this: any, next: any) {
     console.log("recalcRecord");
-    this.validateVirtuals();
+    let msg = await this.validateVirtuals();
     this.totalVirtuals();
     this.changeLogs();
     if (next) next();
+    return msg;
   }
-  function handlerSave(this: any, next: any) {
+  async function handlerSave(this: any, next: any) {
     console.log("SaveRecord");
-    this.validateVirtuals(true);
+    await this.validateVirtuals(true);
     this.totalVirtuals();
     this.changeLogs();
     if (next) next();
@@ -35,6 +36,7 @@ export default function methods(schema: any, options: any) {
   schema.methods.recalcRecord = handler;
 
   schema.pre("save", handlerSave);
+  schema.pre("remove", handlerSave);
   //schema.pre("validate", handler);
 }
 

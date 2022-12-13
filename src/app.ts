@@ -58,7 +58,7 @@ export class App3CERP {
     this.routesCore.start(this.app);
     this.routesMaintenance.start(this.app, this);
     this.emitEvents.start(this.app);
-    //this.app.use(errorHandler);
+    this.app.use(errorHandler);
   }
 
   private dbConnect(): void {

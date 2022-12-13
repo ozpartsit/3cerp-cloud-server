@@ -8,13 +8,14 @@ const options = {
   toObject: { virtuals: true }
 };
 
-export interface ILineSalesOrder extends ILine {}
+export interface ILineSalesOrder extends ILine { }
 const schema = new Schema<ILineSalesOrder>({}, options);
 
 schema.pre("validate", async function (next) {
   console.log("pre valide line SO");
   if (this.kit) {
-    this.quantity = this.multiplyquantity * this.kit.quantity;
+    console.log(this.multiplyquantity,this.kit.quantity )
+    this.quantity = (this.multiplyquantity || 1) * (this.kit.quantity || 1);
   }
   next();
 });

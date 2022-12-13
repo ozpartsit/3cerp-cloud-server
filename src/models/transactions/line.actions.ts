@@ -10,14 +10,14 @@ const actions: any = {
       line.description = line.item.description || "";
       line.price = await line.item.getPrice(line);
       // kitItem
-      if (line.item.type === "KitItem") {
+      if (line.item && line.item.type === "KitItem") {
         await line.item.syncComponents(line);
       }
       line.depopulate("item");
     }
   },
   quantity: async (line: any) => {
-    if (line.item.type === "KitItem") {
+    if (line.item && line.item.type === "KitItem") {
       await line.item.syncComponents(line);
     }
   }
