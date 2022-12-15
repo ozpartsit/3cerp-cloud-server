@@ -9,11 +9,11 @@ export interface ISalesOrder extends ITransaction {
   shippingCost: number;
   lines: ILineSalesOrder[];
 }
-export interface ISalesOrderModel extends Model<ISalesOrder>, IExtendedModel {}
+export interface ISalesOrderModel extends Model<ISalesOrder>, IExtendedModel { }
 
 const schema = new Schema<ISalesOrder>(
   {
-    shippingCost: { type: Number, default: 0, input: "currency" }
+    shippingCost: { type: Number, default: 0, input: "currency" },
   },
   options
 );

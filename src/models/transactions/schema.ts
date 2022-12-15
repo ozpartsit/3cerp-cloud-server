@@ -26,7 +26,8 @@ export interface ITransaction extends IExtendedDocument {
   amount: number;
   grossAmount: number;
   taxAmount: number;
-
+  taxNumber: string;
+  referenceNumber: string;
   billingName?: string;
   billingAddressee?: string;
   billingAddress?: string;
@@ -36,6 +37,7 @@ export interface ITransaction extends IExtendedDocument {
   billingState?: string;
   billingCountry: string;
   billingPhone?: string;
+  billingEmail?: string;
 
   shippingName?: string;
   shippingAddressee?: string;
@@ -46,6 +48,7 @@ export interface ITransaction extends IExtendedDocument {
   shippingState?: string;
   shippingCountry: string;
   shippingPhone?: string;
+  shippingEmail?: string;
   recalc(): any;
   autoName(): any;
 }
@@ -133,6 +136,9 @@ const TransactionSchema = {
   billingPhone: {
     type: String
   },
+  billingEmail: {
+    type: String
+  },
   shippingName: {
     type: String
   },
@@ -163,6 +169,9 @@ const TransactionSchema = {
   shippingPhone: {
     type: String
   },
+  shippingEmail: {
+    type: String
+  },
   type: {
     type: String,
     required: true,
@@ -175,6 +184,8 @@ const TransactionSchema = {
     i18n: true,
     enum: TranStatus
   },
+  taxNumber: { type: String },
+  referenceNumber: { type: String },
 };
 const options = {
   discriminatorKey: "type",

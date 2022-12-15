@@ -8,7 +8,7 @@ const options = { discriminatorKey: "type", collection: "items" };
 export interface IKitItem extends IItem {
   components: IComponent[];
 }
-export interface IKitItemModel extends Model<IKitItem>, IExtendedModel {}
+export interface IKitItemModel extends Model<IKitItem>, IExtendedModel { }
 
 const schema = new Schema<IKitItem>({}, options);
 schema.virtual("components", {
@@ -36,11 +36,8 @@ schema.virtual("components", {
 schema.method("syncComponents", async function (line: any) {
   let exists = false;
   line.parent.lines.forEach((existline: any) => {
-    if (existline.kit && existline.kit.id === line.id) {
-      // console.log(existline.multiplyquantity, line.quantity);
-      // existline.quantity = existline.multiplyquantity * line.quantity;
-      // console.log(existline.quantity, existline.description);
-      // existline.description = "sdasd";
+    if (existline.kit && existline.kit._id.toString() === line._id.toString()) {
+      existline.quantity = existline.multiplyquantity * line.quantity;
       exists = true;
     }
   });
@@ -53,7 +50,7 @@ schema.method("syncComponents", async function (line: any) {
         description: component.description,
         multiplyquantity: component.quantity,
         type: "KitComponent",
-        kit: line
+        kit: line._id
       };
       if (line.parent.lines) {
         line.parent.addToVirtuals("lines", newline, line.index + 1 + subindex);
