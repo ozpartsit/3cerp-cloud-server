@@ -45,7 +45,7 @@ export default class Routes {
       this.constantController.get as any
     );
   }
-  
+
   public routeWarehouses() {
     // Warehouses
     this.Router.route("/warehouses/:recordtype").get(
@@ -59,9 +59,7 @@ export default class Routes {
       this.Auth.authenticate.bind(this.Auth) as any,
       this.transactionController.find.bind(this.transactionController) as any
     );
-    // this.Router.route("/transactions/:recordtype").post(
-    //   this.transactionController.add as any
-    // );
+
     this.Router.route("/transactions/:recordtype/new/create").post(
       this.transactionController.add.bind(this.transactionController) as any
     );
@@ -92,22 +90,20 @@ export default class Routes {
   }
   public routeUsers() {
     // Users
-    this.Router.route("/entities/").get(
-      this.Auth.authenticate.bind(this.Auth) as any,
-      this.entityController.find.bind(this.entityController) as any
-    );
     this.Router.route("/entities/:recordtype").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.entityController.find.bind(this.entityController) as any
     );
-    this.Router.route("/entities/:recordtype").post(
-      this.Auth.authenticate.bind(this.Auth) as any,
+
+    this.Router.route("/entities/:recordtype/new/create").post(
       this.entityController.add.bind(this.entityController) as any
     );
-    this.Router.route("/entities/:recordtype/:id")
-      .get(this.Auth.authenticate.bind(this.Auth) as any, this.entityController.get.bind(this.entityController))
-      .put(this.Auth.authenticate.bind(this.Auth) as any, this.entityController.update.bind(this.entityController))
-      .delete(this.Auth.authenticate.bind(this.Auth) as any, this.entityController.delete.bind(this.entityController));
+
+    this.Router.route("/entities/:recordtype/:id/:mode")
+      .get(this.entityController.get.bind(this.entityController) as any)
+      .put(this.entityController.update.bind(this.entityController) as any)
+      .post(this.entityController.save.bind(this.entityController) as any)
+      .delete(this.entityController.delete.bind(this.entityController) as any);
   }
   public routeAuth() {
     // Auth
