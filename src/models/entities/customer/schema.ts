@@ -7,8 +7,8 @@ const contactModel = model("Contact", Contact);
 const balanceModel = model("Balance", Balance);
 const addressModel = model("Address", Address);
 export interface ICustomer extends IEntity {
-  billingAddress: IAddress;
-  shippingAddress: IAddress;
+  // billingAddress: IAddress;
+  // shippingAddress: IAddress;
   contacts?: IContact[];
   balances?: IBalance[];
 }
@@ -16,16 +16,16 @@ export interface ICustomer extends IEntity {
 const options = { discriminatorKey: "type", collection: "entities" };
 const schema = new Schema<ICustomer>(
   {
-    billingAddress: {
-      type: Address,
-      get: (v: any) =>
-        `${v.addressee}\n${v.address}, ${v.address2}\n${v.zip} ${v.city}\n${v.country}`
-    },
-    shippingAddress: {
-      type: Address,
-      get: (v: any) =>
-        `${v.addressee}\n${v.address}, ${v.address2}\n${v.zip} ${v.city}\n${v.country}`
-    }
+    // billingAddress: {
+    //   type: Address,
+    //   get: (v: any) =>
+    //     `${v.addressee}\n${v.address}, ${v.address2}\n${v.zip} ${v.city}\n${v.country}`
+    // },
+    // shippingAddress: {
+    //   type: Address,
+    //   get: (v: any) =>
+    //     `${v.addressee}\n${v.address}, ${v.address2}\n${v.zip} ${v.city}\n${v.country}`
+    // }
   },
   options
 );

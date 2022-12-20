@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import subdomain from "express-subdomain";
 import Auth from "../middleware/auth";
 import express, { Request, Response, NextFunction } from "express";
@@ -13,6 +14,7 @@ export default class Routes {
   public Router: express.Router = express.Router();
   public Router2: express.Router = express.Router();
   public RouterFiles: express.Router = express.Router();
+  public RouterCustom: express.Router = express.Router();
   public Auth: Auth = new Auth();
   public entityController: EntityController = new EntityController();
   public warehouseController: WarehouseController = new WarehouseController();
@@ -32,10 +34,38 @@ export default class Routes {
     this.routeAuth();
     this.routeFiles();
     this.routeHosting();
+    this.routeCustom();
     //app.use(subdomain("hosting", this.Router2));
     app.use("/hosting", this.Router2);
     app.use("/core", this.Router);
     app.use("/files", this.RouterFiles);
+    //Custom
+    app.use("/custom", this.RouterCustom);
+  }
+
+  public routeCustom() {
+    // Constants
+    this.RouterCustom.route("/items").get(
+      async function (req, res) {
+
+        // let db = mongoose.connection.db;
+        // let items = await db.collection('items').find().toArray();
+        // console.log(items.length)
+        // if (items.length) {
+        //   let tmp = await db.collection('transactions.lines').findOne();
+        //   if (tmp) {
+            
+        //     for (let item of items) {
+        //       console.log(item.name);
+        //       await db.collection('items').updateOne({ name: item.name }, { $set: { type: 'InvItem' } })
+        //       delete tmp._id;
+        //       tmp.item = item._id;
+        //       await db.collection('transactions.lines').insertOne(tmp);
+        //     }
+        //   }
+        // }
+      }
+    );
   }
 
 

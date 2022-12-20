@@ -104,7 +104,6 @@ const TransactionSchema = {
     //get: (v: any) => Currencies.getName(v),
     enum: Currencies,
     default: "PLN",
-    input: "select"
   },
   billingName: {
     type: String
@@ -126,12 +125,10 @@ const TransactionSchema = {
   },
   billingState: {
     type: String,
-    input: "select"
   },
   billingCountry: {
     type: String,
     enum: Countries,
-    input: "select"
   },
   billingPhone: {
     type: String
@@ -159,12 +156,10 @@ const TransactionSchema = {
   },
   shippingState: {
     type: String,
-    input: "select"
   },
   shippingCountry: {
     type: String,
     enum: Countries,
-    input: "select"
   },
   shippingPhone: {
     type: String

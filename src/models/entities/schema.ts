@@ -1,6 +1,8 @@
 import { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 
+import Currencies from "../../constants/currencies";
+import Countries from "../../constants/countries";
 export interface IEntity {
   _id: Schema.Types.ObjectId;
   name: string;
@@ -9,6 +11,31 @@ export interface IEntity {
   type: string;
   email?: string;
   password?: string;
+
+  currency?: string;
+  taxNumber: string;
+  billingName?: string;
+  billingAddressee?: string;
+  billingAddress?: string;
+  billingAddress2?: string;
+  billingZip?: string;
+  billingCity: string;
+  billingState?: string;
+  billingCountry: string;
+  billingPhone?: string;
+  billingEmail?: string;
+
+  shippingName?: string;
+  shippingAddressee?: string;
+  shippingAddress?: string;
+  shippingAddress2?: string;
+  shippingZip?: string;
+  shippingCity: string;
+  shippingState?: string;
+  shippingCountry: string;
+  shippingPhone?: string;
+  shippingEmail?: string;
+
   validatePassword(password: string): boolean;
   hashPassword(): any;
 }
@@ -38,7 +65,78 @@ const schema = new Schema<IEntity>(
       default: "customer",
       input: "select"
     },
-    password: { type: String, input: "password" }
+    password: { type: String, input: "password" },
+
+    currency: {
+      type: String,
+      required: true,
+      //get: (v: any) => Currencies.getName(v),
+      enum: Currencies,
+      default: "PLN",
+    },
+    billingName: {
+      type: String
+    },
+    billingAddressee: {
+      type: String
+    },
+    billingAddress: {
+      type: String
+    },
+    billingAddress2: {
+      type: String
+    },
+    billingZip: {
+      type: String
+    },
+    billingCity: {
+      type: String
+    },
+    billingState: {
+      type: String,
+    },
+    billingCountry: {
+      type: String,
+      enum: Countries,
+    },
+    billingPhone: {
+      type: String
+    },
+    billingEmail: {
+      type: String
+    },
+    shippingName: {
+      type: String
+    },
+    shippingAddressee: {
+      type: String
+    },
+    shippingAddress: {
+      type: String
+    },
+    shippingAddress2: {
+      type: String
+    },
+    shippingZip: {
+      type: String
+    },
+    shippingCity: {
+      type: String
+    },
+    shippingState: {
+      type: String,
+    },
+    shippingCountry: {
+      type: String,
+      enum: Countries,
+    },
+    shippingPhone: {
+      type: String
+    },
+    shippingEmail: {
+      type: String
+    },
+    taxNumber: { type: String },
   },
   options
 );

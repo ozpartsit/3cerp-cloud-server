@@ -18,15 +18,19 @@ export default async function autoPopulate(this: any, req: any) {
   });
   // Virtuals
   const virtuals: any[] = Object.values(this.schema.virtuals);
+  let Promises: any[] = [];
   for (let list of virtuals) {
     if (list.options.ref && list.options.autopopulate) {
       if (Array.isArray(this[list.path]))
         for (let item of this[list.path]) {
-          await item.autoPopulate();
+          Promises.push(item.autoPopulate());
         }
     }
   }
   for (let path of paths) {
-    await this.populate(path.field, path.select);
+    if (!this.populated(path.field))
+      Promises.push(await this.populate(path.field, path.select));
+    //console.log(path.field,this[path.field], this[path.field]._id)
   }
+  await Promise.all(Promises);
 }
