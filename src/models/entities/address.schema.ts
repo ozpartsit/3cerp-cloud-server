@@ -1,10 +1,11 @@
 import { Schema } from "mongoose";
 import axios from "axios";
-import Countries from "../../../constants/countries";
-import { IEntity } from "../schema";
+import Countries from "../../constants/countries";
+import { IEntity } from "./schema";
 export interface IAddress {
   _id: Schema.Types.ObjectId;
   entity: IEntity["_id"];
+  name?: string;
   addressee?: string;
   address: string;
   address2?: string;
@@ -24,6 +25,7 @@ const options = {
 const schema = new Schema<IAddress>(
   {
     entity: { type: Schema.Types.ObjectId },
+    name: { type: String, input: "text" },
     addressee: { type: String, input: "text" },
     address: { type: String, required: true, input: "text" },
     address2: { type: String, input: "text" },

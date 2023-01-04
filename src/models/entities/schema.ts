@@ -1,8 +1,16 @@
-import { Schema } from "mongoose";
+import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
-
+import Contact, { IContact } from "./contact.schema";
+import Address, { IAddress } from "./address.schema";
+import Balance, { IBalance } from "./balance.schema";
+import GroupLevel, { IGroupLevel } from "./grouplevel.schema";
 import Currencies from "../../constants/currencies";
 import Countries from "../../constants/countries";
+
+const contactModel = model("Contact", Contact);
+const balanceModel = model("Balance", Balance);
+const addressModel = model("Address", Address);
+const groupLevelModel = model("GroupLevel", GroupLevel);
 export interface IEntity {
   _id: Schema.Types.ObjectId;
   name: string;
@@ -12,6 +20,7 @@ export interface IEntity {
   email?: string;
   password?: string;
 
+  salesRep: Schema.Types.ObjectId;
   currency?: string;
   taxNumber: string;
   billingName?: string;
@@ -36,6 +45,10 @@ export interface IEntity {
   shippingPhone?: string;
   shippingEmail?: string;
 
+  contacts?: IContact[];
+  balances?: IBalance[];
+  addresses?: IAddress[];
+  groupLevels?: IGroupLevel[];
   validatePassword(password: string): boolean;
   hashPassword(): any;
 }
@@ -67,6 +80,11 @@ const schema = new Schema<IEntity>(
     },
     password: { type: String, input: "password" },
 
+    salesRep: {
+      type: Schema.Types.ObjectId,
+      ref: "Entity",
+      autopopulate: true,
+    },
     currency: {
       type: String,
       required: true,
@@ -140,6 +158,38 @@ const schema = new Schema<IEntity>(
   },
   options
 );
+schema.virtual("addresses", {
+  ref: "Address",
+  localField: "_id",
+  foreignField: "entity",
+  justOne: false,
+  autopopulate: true,
+  model: addressModel
+});
+schema.virtual("contacts", {
+  ref: "Contact",
+  localField: "_id",
+  foreignField: "entity",
+  justOne: false,
+  autopopulate: true,
+  model: contactModel
+});
+schema.virtual("balances", {
+  ref: "Balance",
+  localField: "_id",
+  foreignField: "entity",
+  justOne: false,
+  autopopulate: true,
+  model: balanceModel
+});
+schema.virtual("groupLevels", {
+  ref: "GroupLevel",
+  localField: "_id",
+  foreignField: "entity",
+  justOne: false,
+  autopopulate: true,
+  model: groupLevelModel
+});
 // Methods
 schema.methods.hashPassword = async function () {
   const salt = await bcrypt.genSalt(SALT_WORK_FACTOR);

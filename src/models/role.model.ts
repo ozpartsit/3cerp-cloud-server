@@ -53,4 +53,8 @@ export const schema = new Schema<IRole>(
   { collection: "roles" }
 );
 schema.index({ name: 1 });
-export default model("Role", schema);
+const Role = model("Role", schema);
+Role.init().then(function (Event) {
+  console.log('Role Builded');
+})
+export default Role;

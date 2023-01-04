@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { IEntity } from "../schema";
+import { IEntity } from "./schema";
 
 export interface IContact {
   _id: Schema.Types.ObjectId;
@@ -13,7 +13,8 @@ export interface IContact {
 }
 const options = {
   discriminatorKey: "entity",
-  collection: "entities.contacts"
+  collection: "entities.contacts",
+  type: "contact"
 };
 const schema = new Schema<IContact>(
   {

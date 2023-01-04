@@ -22,5 +22,9 @@ export const schema = new Schema<IWarehouse>(
   { collection: "warehouses" }
 );
 schema.index({ name: 1 });
-//schema.loadClass(warehouseClass);
-export default model("Warehouse", schema);
+const Warehouse = model("Warehouse", schema);
+Warehouse.init().then(function (Event) {
+  console.log('Warehouse Builded');
+})
+export default Warehouse;
+

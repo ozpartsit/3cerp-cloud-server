@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
-import { IEntity } from "../schema";
-import Currencies from "../../../constants/currencies";
+import { IEntity } from "./schema";
+import Currencies from "../../constants/currencies";
 export interface IBalance {
   _id: Schema.Types.ObjectId;
   entity: IEntity["_id"];
