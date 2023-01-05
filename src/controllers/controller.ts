@@ -63,7 +63,6 @@ export default class controller {
     public async get(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
         const model = this.setModel(recordtype);
-
         try {
             let document = await model.getDocument(id, mode);
             if (!document) res.status(404).json({

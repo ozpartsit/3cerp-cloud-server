@@ -3,6 +3,7 @@ import subdomain from "express-subdomain";
 import Auth from "../middleware/auth";
 import express, { Request, Response, NextFunction } from "express";
 import WarehouseController from "../controllers/warehouses";
+import ClassificationController from "../controllers/classifications";
 import EntityController from "../controllers/entities";
 import TransactionController from "../controllers/transactions";
 import ItemController from "../controllers/items";
@@ -17,6 +18,7 @@ export default class Routes {
   public RouterCustom: express.Router = express.Router();
   public Auth: Auth = new Auth();
   public entityController: EntityController = new EntityController();
+  public classificationController: ClassificationController = new ClassificationController();
   public warehouseController: WarehouseController = new WarehouseController();
   public transactionController: TransactionController = new TransactionController();
   public itemController: ItemController = new ItemController();
@@ -29,6 +31,7 @@ export default class Routes {
     this.routeConstants();
     this.routeTransactions();
     this.routeWarehouses();
+    this.routeClassifications();
     this.routeItems();
     this.routeUsers();
     this.routeAuth();
@@ -82,7 +85,12 @@ export default class Routes {
       this.warehouseController.find.bind(this.warehouseController) as any
     );
   }
-
+  public routeClassifications() {
+    // Classifications
+    this.Router.route("/classifications/:recordtype").get(
+      this.classificationController.find.bind(this.classificationController) as any
+    );
+  }
   public routeTransactions() {
     // Transactions
     this.Router.route("/transactions/:recordtype").get(
@@ -110,10 +118,10 @@ export default class Routes {
       this.Auth.authenticate.bind(this.Auth) as any,
       this.itemController.find.bind(this.itemController) as any
     );
-    this.Router.route("/items/:recordtype").post(
+    this.Router.route("/items/:recordtype/new/create").post(
       this.itemController.add.bind(this.itemController) as any
     );
-    this.Router.route("/items/:recordtype/:id")
+    this.Router.route("/items/:recordtype/:id/:mode")
       .get(this.itemController.get.bind(this.itemController))
       .put(this.itemController.update.bind(this.itemController))
       .delete(this.itemController.delete.bind(this.itemController));

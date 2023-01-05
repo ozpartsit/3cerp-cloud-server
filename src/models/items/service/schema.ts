@@ -6,7 +6,7 @@ const options = { discriminatorKey: "type", collection: "items" };
 export interface IService extends IItem {}
 export interface IServiceModel extends Model<IService>, IExtendedModel {}
 
-const schema = new Schema<IItem>({}, options);
+const schema = new Schema<IService>({}, options);
 
 const Service: IServiceModel = model<IService, IServiceModel>(
   "Service",

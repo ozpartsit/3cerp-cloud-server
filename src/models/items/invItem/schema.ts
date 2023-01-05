@@ -6,103 +6,103 @@ import { IEntity } from "../../entities/schema";
 import Currencies from "../../../constants/currencies";
 const options = { discriminatorKey: "type", collection: "items" };
 
-interface IWarehouses {
-  warehouse: IWarehouse["_id"];
-  quantityOnHand?: number;
-  quantityAvailable?: number;
-}
-interface ILocations {
-  warehouse: IWarehouse["_id"];
-  quantityOnHand?: number;
-  quantityAvailable?: number;
-  location: string;
-  preferred: boolean;
-}
-interface IVendors {
-  entity: IEntity["_id"];
-  currency: string;
-  price: number;
-  moq: number;
-  mpn?: string;
-  preferred: boolean;
-}
-const Warehouses = new Schema<IWarehouses>({
-  warehouse: {
-    type: Schema.Types.ObjectId,
-    ref: "Warehouse",
-    required: true,
-    autopopulate: { select: "name displayname type _id" }
-  },
-  quantityOnHand: { type: Number, default: 0 },
-  quantityAvailable: { type: Number, default: 0 }
-});
-const Locations = new Schema<ILocations>({
-  warehouse: {
-    type: Schema.Types.ObjectId,
-    ref: "Warehouse",
-    required: true,
-    autopopulate: { select: "name displayname type _id" }
-  },
-  quantityOnHand: { type: Number, default: 0 },
-  quantityAvailable: { type: Number, default: 0 },
-  location: { type: String, required: true, input: "text" },
-  preferred: { type: Boolean, required: true, input: "boolean" }
-});
-const Vendors = new Schema<IVendors>({
-  entity: {
-    type: Schema.Types.ObjectId,
-    ref: "Entity",
-    required: true,
-    autopopulate: { select: "name displayname type _id" }
-  },
-  price: { type: Number, default: 0, required: true, input: "currency" },
-  moq: { type: Number, default: 1, required: true, input: "integer" },
-  currency: {
-    type: String,
-    //get: (v: any) => Currencies.getName(v),
-    enum: Currencies,
-    required: true,
-    input: "select"
-  },
-  mpn: { type: String, input: "text" },
-  preferred: { type: Boolean, required: true, input: "boolean" }
-});
+// interface IWarehouses {
+//   warehouse: IWarehouse["_id"];
+//   quantityOnHand?: number;
+//   quantityAvailable?: number;
+// }
+// interface ILocations {
+//   warehouse: IWarehouse["_id"];
+//   quantityOnHand?: number;
+//   quantityAvailable?: number;
+//   location: string;
+//   preferred: boolean;
+// }
+// interface IVendors {
+//   entity: IEntity["_id"];
+//   currency: string;
+//   price: number;
+//   moq: number;
+//   mpn?: string;
+//   preferred: boolean;
+// }
+// const Warehouses = new Schema<IWarehouses>({
+//   warehouse: {
+//     type: Schema.Types.ObjectId,
+//     ref: "Warehouse",
+//     required: true,
+//     autopopulate: { select: "name displayname type _id" }
+//   },
+//   quantityOnHand: { type: Number, default: 0 },
+//   quantityAvailable: { type: Number, default: 0 }
+// });
+// const Locations = new Schema<ILocations>({
+//   warehouse: {
+//     type: Schema.Types.ObjectId,
+//     ref: "Warehouse",
+//     required: true,
+//     autopopulate: { select: "name displayname type _id" }
+//   },
+//   quantityOnHand: { type: Number, default: 0 },
+//   quantityAvailable: { type: Number, default: 0 },
+//   location: { type: String, required: true, input: "text" },
+//   preferred: { type: Boolean, required: true, input: "boolean" }
+// });
+// const Vendors = new Schema<IVendors>({
+//   entity: {
+//     type: Schema.Types.ObjectId,
+//     ref: "Entity",
+//     required: true,
+//     autopopulate: { select: "name displayname type _id" }
+//   },
+//   price: { type: Number, default: 0, required: true, input: "currency" },
+//   moq: { type: Number, default: 1, required: true, input: "integer" },
+//   currency: {
+//     type: String,
+//     //get: (v: any) => Currencies.getName(v),
+//     enum: Currencies,
+//     required: true,
+//     input: "select"
+//   },
+//   mpn: { type: String, input: "text" },
+//   preferred: { type: Boolean, required: true, input: "boolean" }
+// });
 export interface IInvItem extends IItem {
-  vendors?: IVendors[];
-  warehouses?: IWarehouses[];
-  locations?: ILocations[];
+  //vendors?: IVendors[];
+  //warehouses?: IWarehouses[];
+  //locations?: ILocations[];
 }
 export interface IInvItemModel extends Model<IInvItem>, IExtendedModel {}
 
 const schema = new Schema<IInvItem>(
   {
-    vendors: {
-      type: [Vendors],
-      validate: [
-        {
-          validator: (lines: any[]) => lines.length < 50,
-          msg: "Must have maximum 50 vendors"
-        }
-      ]
-    },
-    warehouses: {
-      type: [Warehouses],
-      validate: [
-        {
-          validator: (lines: any[]) => lines.length < 10,
-          msg: "Must have maximum 10 warehouses"
-        }
-      ]
-    },
-    locations: {
-      type: [Locations],
-      validate: [
-        {
-          validator: (lines: any[]) => lines.length < 10,
-          msg: "Must have maximum 10 locations"
-        }
-      ]
-    }
+    // vendors: {
+    //   type: [Vendors],
+    //   validate: [
+    //     {
+    //       validator: (lines: any[]) => lines.length < 50,
+    //       msg: "Must have maximum 50 vendors"
+    //     }
+    //   ]
+    // },
+    // warehouses: {
+    //   type: [Warehouses],
+    //   validate: [
+    //     {
+    //       validator: (lines: any[]) => lines.length < 10,
+    //       msg: "Must have maximum 10 warehouses"
+    //     }
+    //   ]
+    // },
+    // locations: {
+    //   type: [Locations],
+    //   validate: [
+    //     {
+    //       validator: (lines: any[]) => lines.length < 10,
+    //       msg: "Must have maximum 10 locations"
+    //     }
+    //   ]
+    // }
   },
   options
 );

@@ -2,39 +2,28 @@ import { Schema, Model, model } from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import ItemTypes from "../../constants/item.types";
-import Currencies from "../../constants/currencies";
-
+import { schema as PriceGroup, IPriceGroup } from "../classifications/pricegroup/schema";
+import Price, { IPrice } from "./price.schema";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface IItem extends IExtendedDocument {
   _id: Schema.Types.ObjectId;
   name: string;
   type: string;
   description?: string;
-  prices?: IPrices[];
+  prices: IPrice[];
+  priceGroup: IPriceGroup;
   getPrice(): any;
 }
-interface IItemModel extends Model<IItem>, IExtendedModel {}
-interface IPrices {
-  currency: string;
-  price: number;
-  moq: number;
-}
+interface IItemModel extends Model<IItem>, IExtendedModel { }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
-const Prices = new Schema<IPrices>({
-  price: { type: Number, default: 0, required: true, input: "currency" },
-  moq: { type: Number, default: 1, required: true, input: "integer" },
-  currency: {
-    type: String,
-    //get: (v: any) => Currencies.getName(v),
-    enum: Currencies,
-    required: true,
-    input: "select"
-  }
-});
-
-const options = { discriminatorKey: "type", collection: "items" };
+const options = {
+  discriminatorKey: "type",
+  collection: "items",
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+};
 const schema = new Schema<IItem>(
   {
     name: { type: String, required: true, input: "text" },
@@ -42,22 +31,24 @@ const schema = new Schema<IItem>(
     type: {
       type: String,
       required: true,
-      //get: (v: any) => ItemTypes.getName(v),
       enum: ItemTypes,
       input: "select"
     },
-    prices: {
-      type: [Prices],
-      validate: [
-        {
-          validator: (lines: any[]) => lines.length < 10,
-          msg: "Must have maximum 100 prices"
-        }
-      ]
+    priceGroup: {
+      type: PriceGroup,
+      required: false,
     }
   },
   options
 );
+schema.virtual("prices", {
+  ref: "Price",
+  localField: "_id",
+  foreignField: "item",
+  justOne: false,
+  autopopulate: true,
+  model: Price
+});
 
 schema.method("getPrice", async function (line: any) {
   console.log("getPrice", line.type);

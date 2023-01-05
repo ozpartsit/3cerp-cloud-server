@@ -6,7 +6,8 @@ import i18n from "../config/i18n";
 import { getCountries } from "../constants/countries";
 import { getStates } from "../constants/states";
 import { getCurrencies } from "../constants/currencies";
-const constants = { countries: getCountries, states: getStates, currencies: getCurrencies };
+import { getPriceBasis } from "../constants/price.basis";
+const constants = { countries: getCountries, states: getStates, currencies: getCurrencies, pricebasis: getPriceBasis };
 export default class controller {
     public async get(req: Request, res: Response, next: NextFunction) {
 

@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import { IEntity } from "./schema";
-import { schema as PriceLevel, IPriceLevel } from "../pricelevel.model";
+import { schema as PriceLevel, IPriceLevel } from "../classifications/pricelevel/schema";
 export interface IGroupLevel {
     _id: Schema.Types.ObjectId;
     entity: IEntity["_id"];
