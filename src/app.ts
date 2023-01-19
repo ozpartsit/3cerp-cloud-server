@@ -8,6 +8,7 @@ import DB from "./config/database";
 import i18n from "./config/i18n";
 import RoutesCore from "./routes/core";
 import RoutesMaintenance from "./routes/maintenance";
+import RoutesPublic from "./routes/public";
 import EmitEvents from "./services/emitEvents";
 import { errorHandler } from "./middleware/error-handler";
 import storage from "./middleware/storage";
@@ -30,6 +31,7 @@ export class App3CERP {
   public db: DB = new DB();
   public routesCore: RoutesCore = new RoutesCore();
   public routesMaintenance: RoutesMaintenance = new RoutesMaintenance();
+  public routesPublic: RoutesPublic = new RoutesPublic();
   public emitEvents: EmitEvents = new EmitEvents();
   public storage = new storage();
 
@@ -50,13 +52,17 @@ export class App3CERP {
     this.app.use(express.urlencoded({ extended: false }));
     //this.app.use(helmet());
     // serving static files
+   
     this.app.use(express.static("public"));
+    this.app.use('/hosting', express.static("hosting"));
+
     this.app.use(require("express-status-monitor")());
     this.app.use(i18n.init);
   }
   private mountRoutes(): void {
     this.routesCore.start(this.app);
     this.routesMaintenance.start(this.app, this);
+    this.routesPublic.start(this.app);
     this.emitEvents.start(this.app);
     this.app.use(errorHandler);
   }

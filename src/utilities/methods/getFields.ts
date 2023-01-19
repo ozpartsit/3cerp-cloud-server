@@ -27,9 +27,9 @@ export default async function getFields(schema: Schema, type: string) {
       ["Embedded", "Array"].includes(schematype.instance)
     ) {
       if (["Embedded", "Array"].includes(schematype.instance)) {
-        this.getFields(schematype.schema, type).forEach((field) =>
-          fields.push({ path: pathname, ...field })
-        );
+        // this.getFields(schematype.schema, type).forEach((field) =>
+        //   fields.push({ path: pathname, ...field })
+        // );
       } else {
         fields.push({
           name: pathname,

@@ -88,8 +88,8 @@ export default class controller {
         let { recordtype, id } = req.params;
         const model = this.setModel(recordtype);
         try {
-            let { list, subrecord, field, value } = req.body;
-            let document = await model.updateDocument(id, list, subrecord, field, value);
+            let { list, subrecord, field, value, save } = req.body;
+            let document = await model.updateDocument(id, list, subrecord, field, value, save);
             res.json(document);
         } catch (error) {
             return next(error);

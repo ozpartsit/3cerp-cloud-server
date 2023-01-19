@@ -45,12 +45,18 @@ export async function saveDocument(this: any, id: string) {
   return id;
 }
 
-export async function updateDocument(this: any, id: string, list: string, subrecord: string, field: string, value: any) {
+export async function updateDocument(this: any, id: string, list: string, subrecord: string, field: string, value: any, save: Boolean) {
   let document = cache.getCache(id);
+  if (!document) document = await this.getDocument(id, "edit");
   await document.setValue(list, subrecord, field, value);
   let msg = await document.recalcRecord();
-  await document.autoPopulate();
-  return { document, msg };
+  if (save) {
+    document = await this.saveDocument(id);
+    return { document, msg };
+  } else {
+    await document.autoPopulate();
+    return { document, msg };
+  }
 }
 
 export async function deleteDocument(this: any, id: string) {

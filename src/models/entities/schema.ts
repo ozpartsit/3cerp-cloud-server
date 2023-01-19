@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import Contact, { IContact } from "./contact.schema";
 import Address, { IAddress } from "./address.schema";
 import Balance, { IBalance } from "./balance.schema";
@@ -23,6 +23,7 @@ export interface IEntity {
   salesRep: Schema.Types.ObjectId;
   currency?: string;
   taxNumber: string;
+  tax: number;
   billingName?: string;
   billingAddressee?: string;
   billingAddress?: string;
@@ -155,6 +156,10 @@ const schema = new Schema<IEntity>(
       type: String
     },
     taxNumber: { type: String },
+    tax: {
+      type: Number,
+      default: 0,
+    },
   },
   options
 );

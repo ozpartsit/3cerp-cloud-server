@@ -25,6 +25,7 @@ export interface ITransaction extends IExtendedDocument {
   lines: ILine[];
   amount: number;
   grossAmount: number;
+  tax: number;
   taxAmount: number;
   taxNumber: string;
   referenceNumber: string;
@@ -91,6 +92,10 @@ const TransactionSchema = {
   taxAmount: { type: Number, default: 0, input: "currency", total: "lines" },
   grossAmount: { type: Number, default: 0, input: "currency", total: "lines" },
   weight: { type: Number, default: 0, input: "number" },
+  tax: {
+    type: Number,
+    default: 0,
+  },
   exchangeRate: {
     type: Number,
     required: true,

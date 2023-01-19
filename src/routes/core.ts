@@ -40,10 +40,10 @@ export default class Routes {
     this.routeCustom();
     //app.use(subdomain("hosting", this.Router2));
     app.use("/hosting", this.Router2);
-    app.use("/core", this.Router);
-    app.use("/files", this.RouterFiles);
+    app.use("/api/core", this.Router);
+    app.use("/storage/files", this.RouterFiles);
     //Custom
-    app.use("/custom", this.RouterCustom);
+    app.use("/api/custom", this.RouterCustom);
   }
 
   public routeCustom() {
