@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import { App3CERP } from "../app";
 import path from "path";
-import { execSync, spawn } from "child_process";
+import { execSync, exec } from "child_process";
 
 export default class Routes {
   public Router: express.Router = express.Router();
@@ -11,6 +11,26 @@ export default class Routes {
     this.stop(App3CERP);
     this.restart(App3CERP);
     app.use("/maintenance", this.Router);
+    //try {
+      //var packagePath = path.resolve();
+      //execSync("devil dns add mojadomena.pl", { stdio: "inherit", cwd: packagePath });
+
+      exec("ls -la", (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+    });
+
+    // } catch (error) {
+    //   console.log(error)
+    // }
+
   }
 
   public stop(App3CERP: App3CERP) {

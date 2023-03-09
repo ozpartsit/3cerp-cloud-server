@@ -7,10 +7,12 @@ export default class Routes {
     public start(app: express.Application): void {
         console.log("Start Public Routing");
         let publicePath = path.resolve("public");
-        this.Router.route("*").get((req: Request, res: Response) => {
-            res.sendFile(path.resolve(publicePath, 'index.html'));
+
+        this.Router.route("/*").get((req: Request, res: Response) => {
+            console.log("client.html")
+            res.sendFile(path.resolve(publicePath, 'client.html'));
         })
-        app.use("/", this.Router);
+        app.use("/*", this.Router);
     }
 
 }

@@ -22,11 +22,13 @@ export default class Auth {
         jwt.verify(token, this.tokenSecret, (err, value) => {
           if (err)
             res.status(500).json({ message: "failed to authenticate token" });
+          else
+            next();
         });
       } catch (err) {
         res.status(400).json({ message: "Invalid token" });
       }
-      next();
+      
     } else {
       res.status(401).json({ message: "Access denied. No token provided" });
     }

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import subdomain from "express-subdomain";
+//import subdomain from "express-subdomain";
 import Auth from "../middleware/auth";
 import express, { Request, Response, NextFunction } from "express";
 import WarehouseController from "../controllers/warehouses";
@@ -38,8 +38,9 @@ export default class Routes {
     this.routeFiles();
     this.routeHosting();
     this.routeCustom();
-    //app.use(subdomain("hosting", this.Router2));
-    app.use("/hosting", this.Router2);
+
+    app.use(subdomain("*", this.Router2));
+    //app.use("/hosting", this.Router2);
     app.use("/api/core", this.Router);
     app.use("/storage/files", this.RouterFiles);
     //Custom
@@ -57,7 +58,7 @@ export default class Routes {
         // if (items.length) {
         //   let tmp = await db.collection('transactions.lines').findOne();
         //   if (tmp) {
-            
+
         //     for (let item of items) {
         //       console.log(item.name);
         //       await db.collection('items').updateOne({ name: item.name }, { $set: { type: 'InvItem' } })
@@ -164,8 +165,53 @@ export default class Routes {
   }
   public routeHosting() {
     // Hosting
-    this.Router2.route("/:page/:view?").get(
+    this.Router2.route("/:view?/:param?").get(
+      this.hostingController.get as any
+    );
+    this.Router2.route("*").get(
       this.hostingController.get as any
     );
   }
+}
+
+
+function subdomain(subdomain: string, fn: any) {
+  if (!subdomain || typeof subdomain !== "string") {
+    throw new Error("The first parameter must be a string representing the subdomain");
+  }
+
+  //check fn handles three params..
+  if (!fn || typeof fn !== "function" || fn.length < 3) {
+    throw new Error("The second parameter must be a function that handles fn(req, res, next) params.");
+  }
+  return function (req: any, res: any, next: NextFunction) {
+    req._subdomainLevel = req._subdomainLevel || 0;
+
+    var subdomainSplit = subdomain.split('.');
+    var len = subdomainSplit.length;
+    var match = true;
+
+    //url - v2.api.example.dom
+    //subdomains == ['api', 'v2']
+    //subdomainSplit = ['v2', 'api']
+    for (var i = 0; i < len; i++) {
+      var expected = subdomainSplit[len - (i + 1)];
+      var actual = req.subdomains[i + req._subdomainLevel];
+      if (actual === "www") actual = false;
+      if (expected === '*') { continue; }
+
+      if (actual !== expected) {
+        match = false;
+        break;
+      }
+    }
+    if (actual && match) {
+      req._subdomainLevel++;//enables chaining
+      return fn(req, res, next);
+    } else {
+      if (actual) res.send("ok")
+      else next();
+    }
+
+  };
 }

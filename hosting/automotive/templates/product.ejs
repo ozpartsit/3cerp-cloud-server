@@ -1,0 +1,503 @@
+            <!--Page Banner-->
+            <div class="page-banner categories-page-banner text-center">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12">
+                            <h2 class="text-uppercase page-title">Product Detail Page</h2>
+                            <!--Breadcrums-->
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb justify-content-center mb-0">
+                                    <li class="breadcrumb-item"><a href="/index">Home</a> <span><i class="cps cp-caret-right"></i></span></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Product Detail Page</li>
+                                </ol>
+                            </nav>
+                            <!--End Breadcrums-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--End Page Banner-->
+            
+            <!--Product Details-->
+            <div class="section">
+                <div class="container">
+                    <div class="product-single">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                                <div class="product-details-img product-horizontal-style mb-3">
+                                    <div class="product-zoom">
+                                        <div class="zoompro-wrap product-zoom-right pl-20">
+                                            <div class="zoompro-span">
+                                                <img id="zoompro" class="zoompro prlightbox" src="/hosting/automotive/assets/images/products/700x700.jpg" data-zoom-image="/hosting/automotive/assets/images/products/700x700.jpg" alt="" />
+                                            </div>
+                                            <div class="product-labels"><span class="lbl new rounded">New</span></div>
+                                            <div class="product-buttons">
+                                                <a href="/#" class="btn prlightbox rounded" title="Zoom">
+                                                    <i class="cps cp-expand"></i>
+                                                    <span class="tooltip-label">Zoom Image</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="product-thumb product-horizontal-thumb">
+                                        <div id="gallery" class="product-thumb-style1">
+                                            <a class="active" data-image="/hosting/automotive/assets/images/products/700x700.jpg" data-zoom-image="/hosting/automotive/assets/images/products/700x700.jpg" data-slick-index="-4" aria-hidden="true" tabindex="-1">
+                                                <img class="blur-up lazyload" data-src="/hosting/automotive/assets/images/products/700x700.jpg" src="/hosting/automotive/assets/images/products/700x700.jpg" alt="" />
+                                            </a>
+                                            <a data-image="/hosting/automotive/assets/images/products/700x700.jpg" data-zoom-image="/hosting/automotive/assets/images/products/700x700.jpg" data-slick-index="-3" aria-hidden="true" tabindex="-1">
+                                                <img class="blur-up lazyload" data-src="/hosting/automotive/assets/images/products/700x700.jpg" src="/hosting/automotive/assets/images/products/700x700.jpg" alt="" />
+                                            </a>
+                                            <a data-image="/hosting/automotive/assets/images/products/700x700.jpg" data-zoom-image="/hosting/automotive/assets/images/products/700x700.jpg" data-slick-index="-2" aria-hidden="true" tabindex="-1">
+                                                <img class="blur-up lazyload" data-src="/hosting/automotive/assets/images/products/700x700.jpg" src="/hosting/automotive/assets/images/products/700x700.jpg" alt="" />
+                                            </a>
+                                            <a data-image="/hosting/automotive/assets/images/products/700x700.jpg" data-zoom-image="/hosting/automotive/assets/images/products/700x700.jpg" data-slick-index="-1" aria-hidden="true" tabindex="-1">
+                                                <img class="blur-up lazyload" data-src="/hosting/automotive/assets/images/products/700x700.jpg" src="/hosting/automotive/assets/images/products/700x700.jpg" alt="" />
+                                            </a>
+                                            <a data-image="/hosting/automotive/assets/images/products/700x700.jpg" data-zoom-image="/hosting/automotive/assets/images/products/700x700.jpg" data-slick-index="0" aria-hidden="true" tabindex="-1">
+                                                <img class="blur-up lazyload" data-src="/hosting/automotive/assets/images/products/700x700.jpg" src="/hosting/automotive/assets/images/products/700x700.jpg" alt="" />
+                                            </a>
+                                            <a data-image="/hosting/automotive/assets/images/products/700x700.jpg" data-zoom-image="/hosting/automotive/assets/images/products/700x700.jpg" data-slick-index="1" aria-hidden="true" tabindex="-1">
+                                                <img class="blur-up lazyload" data-src="/hosting/automotive/assets/images/products/700x700.jpg" src="/hosting/automotive/assets/images/products/700x700.jpg" alt="" />
+                                            </a>
+                                            <a data-image="/hosting/automotive/assets/images/products/700x700.jpg" data-zoom-image="/hosting/automotive/assets/images/products/700x700.jpg" data-slick-index="2" aria-hidden="true" tabindex="-1">
+                                                <img class="blur-up lazyload" data-src="/hosting/automotive/assets/images/products/700x700.jpg" src="/hosting/automotive/assets/images/products/700x700.jpg" alt="" />
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="lightboximages">
+                                        <a href="//hosting/automotive/assets/images/products/700x700.jpg" data-size="700x700"></a>
+                                        <a href="//hosting/automotive/assets/images/products/700x700.jpg" data-size="700x700"></a>
+                                        <a href="//hosting/automotive/assets/images/products/700x700.jpg" data-size="700x700"></a>
+                                        <a href="//hosting/automotive/assets/images/products/700x700.jpg" data-size="700x700"></a>
+                                        <a href="//hosting/automotive/assets/images/products/700x700.jpg" data-size="700x700"></a>
+                                        <a href="//hosting/automotive/assets/images/products/700x700.jpg" data-size="700x700"></a>
+                                        <a href="//hosting/automotive/assets/images/products/700x700.jpg" data-size="700x700"></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                                <div class="product-single-detail">
+                                <h1 class="product-title text-uppercase"><%= data.item.name %></h1>
+                                <div class="d-flex justify-content-between">
+                                    <div class="product-review mb-2">
+                                        <i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star-half-alt"></i>
+                                         14 Reviews <span class="sep">|</span> <a href="/#">Write Your Review</a>
+                                    </div>
+                                    <div class="sku mb-1"><b>SKU:</b> <%= data.item.name %></div>
+                                </div>
+                                
+                                <div class="stock mb-1"><b><span class="inStock text-uppercase"><i class="cp cp-check-circle"></i> In Stock</span></b></div>
+                                <div class="brands mb-1"><b>Brand:</b> Valeo</div>
+                                <div class="price-box">
+                                    <span class="visually-hidden">Regular price</span>
+                                    <span class="old-price">$220.00</span>
+                                    <span class="sale-price">$147.00</span>
+                                </div>
+                                
+                                <div class="sort-description">
+                                    <h4 class="title">Sort Description</h4>
+                                    <p><%= data.item.description %> </p>
+                                    <hr>
+                                    <b>Specifications</b>
+                                    <table>
+                                        <tr>
+                                            <td>Season:</td>
+                                            <td>Summer</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tire Type:</td>
+                                            <td>Performance</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tire Size:</td>
+                                            <td>225 / 50 R17</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Speed Rating:</td>
+                                            <td>W = 168 mph</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Load Index:</td>
+                                            <td>98 = 1653 lbs/tire</td>
+                                        </tr>
+                                    </table>
+                                    <b>Note:</b>
+                                    <p>The actual Tread Pattern for your specific tire may vary slightly from the displayed images based on the size and/or width of the actual tire ordered.</p>
+                                </div>
+                                    
+                                <!-- Product Form -->
+                                <form method="post" action="#" id="product_form" class="product-form">
+                                    <!-- Product Action -->
+                                    <div class="product-action w-100 clearfix d-flex align-items-center">
+                                        <div class="d-flex w-100">
+                                            <div class="product-form-quantity">
+                                                <div class="qtyField">
+                                                    <a class="qtyBtn minus" href="javascript:void(0);"><i class="cps cp-minus"></i></a>
+                                                    <input type="text" name="quantity" value="1" class="product-form__input qty">
+                                                    <a class="qtyBtn plus" href="javascript:void(0);"><i class="cps cp-plus"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="product-form-submit flex-1">
+                                                <button type="submit" class="btn rounded w-100 add-to-cart-btn"><i class="cp cp-shopping-cart"></i> <span>Add to cart</span></button>
+                                                <button type="submit" class="btn rounded d-none" disabled="disabled">Sold out</button>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex btn-icons">
+                                            <a class="btn-link" href="wishlist"><i class="cp cp-lg cp-heart"></i></a>
+                                            <a class="btn-link" href="compare-product"><i class="cp cp-exchange-alt"></i></a>
+                                        </div>
+                                    </div>
+                                    <!-- End Product Action -->
+                                    </form><!-- End Product Form -->
+                                
+                                <!--Social Share-->
+                                <div class="social-sharing d-flex mb-3 mt-3 clearfix">
+                                    <span class="sharing-lbl me-2 text-uppercase">Share:</span>
+                                    <a href="/#;" target="_blank"><i class="cpb cp-facebook-f"></i></a>
+                                    <a href="/#;" target="_blank"><i class="cpb cp-twitter"></i></a>
+                                    <a href="/#;" target="_blank"><i class="cpb cp-instagram"></i></a>
+                                    <a href="/#;" target="_blank"><i class="cpb cp-google-plus"></i></a>
+                                    <a href="/#;" target="_blank"><i class="cpb cp-linkedin-in"></i></a>
+                                    <a href="/#;" target="_blank"><i class="cps cp-envelope"></i></a>
+                                </div>
+                                <!--End Social Share-->
+                                <!--Guranteed Checkout-->
+                                <div class="guaranteed-safe-checkout">
+                                    <h4>Guaranteed Safe Checkout</h4>
+                                    <img class="fade-in lazyload" src="/hosting/automotive/assets/images/garauntee-img.png" data-src="/hosting/automotive/assets/images/garauntee-img.png" alt="Guaranteed Safe Checkout">
+                                </div>
+                                <!--End Guranteed Checkout-->
+                            </div>
+                            </div>
+                        </div>
+                        <!--Products Tabs-->
+                        <div class="row mt-5">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+                                <div class="tabs-listing mt-2">
+                                    <ul class="product-tabs list-unstyled d-flex-wrap m-0 d-none d-md-flex justify-content-center">
+                                        <li rel="description" class="active"><a class="tablink">Description</a></li>
+                                        <li rel="reviews"><a class="tablink">Reviews (8)</a></li>
+                                        <li rel="shipping-return"><a class="tablink">Shipping &amp; Return</a></li>
+                                        <li rel="addtional-tabs"><a class="tablink">Addtional Tabs</a></li>
+                                    </ul>
+                                    <div class="tab-container">
+                                        <!--Description-->
+                                        <h3 class="tabs-ac-style acor-ttl d-md-none active" rel="description">Description</h3>
+                                        <div id="description" class="tab-content">
+                                            <div class="product-description">
+                                                <div class="row">
+                                                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-4 mb-md-0">
+                                                        <p>Nam pellentesque rhoncus maximus. Pellentesque vestibulum turpis eu leo maximus fermentum. Suspendisse suscipit enim at orci sollicitudin, vitae facilisis ligula ornare. Donec facilisis sodales massa, quis porttitor felis euismod suscipit.</p>
+                                                        <h4 class="pt-2 text-uppercase">Suspendisse eu quam</h4>
+                                                        <p>Nam pellentesque rhoncus maximus. Pellentesque vestibulum turpis eu leo maximus fermentum. Suspendisse suscipit enim at orci sollicitudin, vitae facilisis ligula ornare. Donec facilisis sodales massa, quis porttitor felis euismod suscipit. Fusce et tincidunt eros.</p>
+                                                        <ul class="list-items">
+                                                            <li>Donec placerat ipsum sed aliquam elementum.</li>
+                                                            <li>Sed congue felis non cursus fringilla.</li>
+                                                            <li>Sed sagittis nibh ullamcorper semper placerat.</li>
+                                                        </ul>
+                                                        <h4 class="pt-2 text-uppercase">Nulla ac lacus sit amet libero ornare</h4>
+                                                        <p>In egestas pharetra tortor eget condimentum. Proin at dui vel diam iaculis imperdiet mattis nec mi. Ut in lorem vel tortor aliquet mollis non et augue. Nunc purus lacus, convallis sed posuere vel, interdum nec mauris.</p>
+                                                        <h4 class="pt-2 text-uppercase">Vestibulum tincidunt est eget</h4>
+                                                        <p>Quisque magna massa, sodales ut velit ac, vestibulum accumsan sapien. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec gravida tellus nec laoreet lobortis.</p>
+                                                    </div>                                                        
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--End Description-->
+                                        <!--Review-->
+                                        <h3 class="tabs-ac-style acor-ttl d-md-none" rel="reviews">Review (5)</h3>
+                                        <div id="reviews" class="tab-content">
+                                            <div class="row justify-content-center">
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mt-2 px-4 mb-3">
+                                                    <h4 class="text-uppercase mb-3">Customer Reviews</h4>
+                                                    <div class="review-inner">
+                                                        <div class="review-list row">
+                                                            <div class="col-3 col-sm-2 col-md-2 col-lg-2 text-center">
+                                                                <img class="blur-up lazyload rounded-pill" data-src="/hosting/automotive/assets/images/photo1.jpg" src="/hosting/automotive/assets/images/photo1.jpg" alt="Photo" />
+                                                            </div>
+                                                            <div class="col-9 col-sm-10 col-md-10 col-lg-10">
+                                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                                    <div class="detail">
+                                                                        <p class="m-0"><b>Henri Will</b></p>
+                                                                        <small>17 July 2020, 6:05 PM</small>
+                                                                    </div>
+                                                                    <div class="product-review">
+                                                                        <i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cpr cp-star"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                                                            </div>
+                                                        </div>
+                                                        <hr>
+                                                        <div class="review-list row">
+                                                            <div class="col-3 col-sm-2 col-md-2 col-lg-2 text-center">
+                                                                <img class="blur-up lazyload rounded-pill" data-src="/hosting/automotive/assets/images/photo1.jpg" src="/hosting/automotive/assets/images/photo1.jpg" alt="Photo" />
+                                                            </div>
+                                                            <div class="col-9 col-sm-10 col-md-10 col-lg-10">
+                                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                                    <div class="detail">
+                                                                        <p class="m-0"><b>David Willy</b></p>
+                                                                        <small>20 August 2020, 6:05 PM</small>
+                                                                    </div>
+                                                                    <div class="product-review">
+                                                                        <i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <p>The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the make a type specimen book.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mt-2 px-4 mb-3">
+                                                    <h4 class="text-uppercase mb-3">Write A Review</h4>
+                                                    <form action="#" method="post">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                                                <label class="margin-15px-bottom" for="basic-name">Your name <span class="required">*</span></label>
+                                                                <input id="basic-name" class="bg-white mb-2" type="text" name="name" placeholder="Enter your name">
+                                                            </div>
+                                                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                                                <label class="margin-15px-bottom">Your email address <span class="required">*</span></label>                                    
+                                                                <input class="bg-white mb-2" type="text" name="email" placeholder="Enter your email">
+                                                            </div>
+                                                            <div class="col-md-12 col-sm-12 col-xs-12 margin-30px-bottom">
+                                                                <label class="margin-15px-bottom">Your rating <span class="required">*</span></label>                                    
+                                                                <span class="text-orange text-extra-small d-block product-review mb-2">
+                                                                        <i class="cpr cp-star"></i><i class="cpr cp-star"></i><i class="cpr cp-star"></i><i class="cpr cp-star"></i><i class="cpr cp-star"></i></span>
+                                                            </div>
+                                                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                                                <div class="margin-15px-bottom">Your comment</div>
+                                                                <textarea class="bg-white mb-3" rows="4" name="comment" placeholder="Enter your comment"></textarea>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <input class="btn btn-lg rounded-3" type="button" name="submit" value="Submit Review">
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--End Review-->
+                                        
+                                        <!--Shipping & Returns-->
+                                        <h3 class="tabs-ac-style acor-ttl d-md-none" rel="shipping-return">Shipping &amp; Return</h3>
+                                        <div id="shipping-return" class="tab-content">
+                                            <h4 class="pt-2 text-uppercase">Delivery</h4>
+                                            <ul class="list-items">
+                                                <li>Dispatch: Within 24 Hours</li>
+                                                <li>Free shipping across all products on a minimum purchase of $50.</li>
+                                                <li>International delivery time - 7-10 business days</li>
+                                                <li>Cash on delivery might be available</li>
+                                                <li>Easy 30 days returns and exchanges</li>
+                                            </ul>
+                                            <h4 class="pt-2 text-uppercase">Returns</h4>
+                                            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
+                                            <h4 class="pt-2 text-uppercase">Shipping</h4>
+                                            <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage.</p>
+                                        </div>
+                                        <!--End Shipping & Returns-->
+
+                                        <!--Additional Tabs-->
+                                        <h3 class="tabs-ac-style acor-ttl d-md-none" rel="addtional-tabs">Addtional Tabs</h3>
+                                        <div id="addtional-tabs" class="tab-content" style="display: block;">
+                                            <p>You can set different tabs for each products.</p>
+                                            <ul class="list-items">
+                                                <li>Comodous in tempor ullamcorper miaculis.</li>
+                                                <li>Pellentesque vitae neque mollis urna mattis laoreet.</li>
+                                                <li>Divamus sit amet purus justo.</li>
+                                                <li>Proin molestie egestas orci ac suscipit risus posuere loremous.</li>
+                                            </ul>
+                                        </div>
+                                        <!--End Additional Tabs-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--End Products Tabs-->
+                    </div>
+                </div>
+            </div>
+            <!--End Product Details-->
+            <!--Related products-->
+            <section class="section product-slider">
+                <div class="container">
+                    <div class="row">
+                        <div class="section-title col-12 text-left">
+                            <h2 class="title text-uppercase">Related products</h2>
+                        </div>
+                    </div>
+                    <div class="productSlider grid-products products-grid">
+                        <!--Product Item-->
+                        <div class="item">
+                            <!--Product Image-->
+                            <div class="product-image">
+                                <a href="/#" class="rounded-3 product-thumb">
+                                    <!--Image-->
+                                    <img class="primary blur-up lazyload rounded-3" data-src="/hosting/automotive/assets/images/products/250x250.jpg" src="/hosting/automotive/assets/images/products/250x250.jpg" alt="Air Filter" title="Air Filter" />
+                                    <!--End Image-->
+                                    <!--Hover Image-->
+                                    <img class="hover blur-up lazyload rounded-3" data-src="/hosting/automotive/assets/images/products/250x250.jpg" src="/hosting/automotive/assets/images/products/250x250.jpg" alt="Air Filter" title="Air Filter" />
+                                    <!--End Hover Image-->
+                                </a>
+                                <!--Button Action-->
+                                <div class="button-hover">
+                                    <a href="/wishlist" class="btn btn-wishlist" title="Wishlist"><i class="cpr cp-heart"></i></a>
+                                    <a class="btn pro-addtocart-popup rounded btn-cart btn-primary" href="/shopping-cart" title="Add To Cart"><i class="cps cp-shopping-cart"></i></a>
+                                </div>
+                                <!--End Button Action-->
+                            </div>
+                            <!--End Product Image-->
+                            <!--Product Detail-->
+                            <div class="product-details d-flex">
+                            <div class="product-details-in">
+                                <div class="h3"><a href="/#">Air Filter</a></div>
+                                <div class="price-box"><span class="price">$189.00</span></div>
+                            </div>
+                            <div class="product-review">
+                                <i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cpr cp-star"></i><i class="cpr cp-star"></i>
+                            </div>
+                        </div>
+                            <!--End Product Detail-->
+                        </div>
+                        <!--End Product Item-->
+                        
+                        <!--Product Item-->
+                        <div class="item">
+                            <!--Product Image-->
+                            <div class="product-image">
+                                <a href="/#" class="rounded-3 product-thumb">
+                                    <!--Image-->
+                                    <img class="blur-up lazyload rounded-3" data-src="/hosting/automotive/assets/images/products/250x250.jpg" src="/hosting/automotive/assets/images/products/250x250.jpg" alt="Front Wheel Hub For Fiat Punto Diesel " title="Front Wheel Hub For Fiat Punto Diesel " />
+                                    <!--End Image-->
+                                </a>
+                                <!--Product Label-->
+                                <div class="product-labels"><span class="lbl new rounded">New</span></div>
+                                <!--End Product Label-->
+                                <!--Button Action-->
+                                <div class="button-hover">
+                                    <a href="/wishlist" class="btn btn-wishlist" title="Wishlist"><i class="cpr cp-heart"></i></a>
+                                    <a class="btn pro-addtocart-popup rounded btn-cart btn-primary" href="/shopping-cart" title="Add To Cart"><i class="cps cp-shopping-cart"></i></a>
+                                </div>
+                                <!--End Button Action-->
+                            </div>
+                            <!--End Product Image-->
+                            <!--Product Detail-->
+                            <div class="product-details d-flex">
+                            <div class="product-details-in">
+                                <div class="h3"><a href="/#">Front Wheel Hub For Fiat Punto Diesel</a></div>
+                                <div class="price-box"><span class="price">$19.00</span></div>
+                            </div>
+                            <div class="product-review">
+                                <i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cpr cp-star"></i><i class="cpr cp-star"></i>
+                            </div>
+                        </div>
+                            <!--End Product Detail-->
+                        </div>
+                        <!--End Product Item-->
+                        
+                        
+                        <!--Product Item-->
+                        <div class="item">
+                            <!--Product Image-->
+                            <div class="product-image">
+                                <a href="/#" class="rounded-3 product-thumb">
+                                    <!--Image-->
+                                    <img class="primary blur-up lazyload rounded-3" data-src="/hosting/automotive/assets/images/products/250x250.jpg" src="/hosting/automotive/assets/images/products/250x250.jpg" alt="Radio Transmitter Adapter" title="Radio Transmitter Adapter" />
+                                    <!--End Image-->
+                                    <!--Hover Image-->
+                                    <img class="hover blur-up lazyload rounded-3" data-src="/hosting/automotive/assets/images/products/250x250.jpg" src="/hosting/automotive/assets/images/products/250x250.jpg" alt="Radio Transmitter Adapter" title="Radio Transmitter Adapter" />
+                                    <!--End Hover Image-->
+                                </a>
+                                <!--Button Action-->
+                                <div class="button-hover">
+                                    <a href="/wishlist" class="btn btn-wishlist" title="Wishlist"><i class="cpr cp-heart"></i></a>
+                                    <a class="btn pro-addtocart-popup rounded btn-cart btn-primary" href="/shopping-cart" title="Add To Cart"><i class="cps cp-shopping-cart"></i></a>
+                                </div>
+                                <!--End Button Action-->
+                            </div>
+                            <!--End Product Image-->
+                            <!--Product Detail-->
+                            <div class="product-details d-flex">
+                            <div class="product-details-in">
+                                <div class="h3"><a href="/#">Radio Transmitter Adapter</a></div>
+                                <div class="price-box"><span class="price">$19.00</span></div>
+                            </div>
+                            <div class="product-review">
+                                <i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i>
+                            </div>
+                        </div>
+                            <!--End Product Detail-->
+                        </div>
+                        <!--End Product Item-->
+                                    
+                        <!--Product Item-->
+                        <div class="item">
+                            <!--Product Image-->
+                            <div class="product-image">
+                                <a href="/#" class="rounded-3 product-thumb">
+                                    <!--Image-->
+                                    <img class="primary blur-up lazyload rounded-3" data-src="/hosting/automotive/assets/images/products/250x250.jpg" src="/hosting/automotive/assets/images/products/250x250.jpg" alt="Hankook DynaPro AT-m RF10" title="Hankook DynaPro AT-m RF10" />
+                                    <!--End Image-->
+                                    <!--Hover Image-->
+                                    <img class="hover blur-up lazyload rounded-3" data-src="/hosting/automotive/assets/images/products/250x250.jpg" src="/hosting/automotive/assets/images/products/250x250.jpg" alt="Hankook DynaPro AT-m RF10" title="Hankook DynaPro AT-m RF10" />
+                                    <!--End Hover Image-->
+                                </a>
+                                <!--Button Action-->
+                                <div class="button-hover">
+                                    <a href="/wishlist" class="btn btn-wishlist" title="Wishlist"><i class="cpr cp-heart"></i></a>
+                                    <a class="btn pro-addtocart-popup rounded btn-cart btn-primary" href="/shopping-cart" title="Add To Cart"><i class="cps cp-shopping-cart"></i></a>
+                                </div>
+                                <!--End Button Action-->
+                            </div>
+                            <!--End Product Image-->
+                            <!--Product Detail-->
+                            <div class="product-details d-flex">
+                                <div class="product-details-in">
+                                    <div class="h3"><a href="/#">Hankook DynaPro AT-m RF10</a></div>
+                                    <div class="price-box"><span class="price">$450.00</span></div>
+                                </div>
+                                <div class="product-review">
+                                    <i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star-half-alt"></i>
+                                </div>
+                            </div>
+                            <!--End Product Detail-->
+                        </div>
+                        <!--End Product Item-->
+                        <!--Product Item-->
+                        <div class="item">
+                            <!--Product Image-->
+                            <div class="product-image">
+                                <a href="/#" class="rounded-3 product-thumb">
+                                    <!--Image-->
+                                    <img class="blur-up lazyload rounded-3" data-src="/hosting/automotive/assets/images/products/250x250.jpg" src="/hosting/automotive/assets/images/products/250x250.jpg" alt="ACDelco 335 Professional" title="ACDelco 335 Professional" />
+                                    <!--End Image-->
+                                </a>
+                                <!--Product Label-->
+                                <div class="product-labels"><span class="lbl on-sale rounded">-10%</span></div>
+                                <!--End Product Label-->
+                                <!--Button Action-->
+                                <div class="button-hover">
+                                    <a href="/wishlist" class="btn btn-wishlist" title="Wishlist"><i class="cpr cp-heart"></i></a>
+                                    <a class="btn pro-addtocart-popup rounded btn-cart btn-primary" href="/shopping-cart" title="Add To Cart"><i class="cps cp-shopping-cart"></i></a>
+                                </div>
+                                <!--End Button Action-->
+                            </div>
+                            <!--End Product Image-->
+                            <!--Product Detail-->
+                            <div class="product-details d-flex">
+                            <div class="product-details-in">
+                                <div class="h3"><a href="/#">ACDelco 335 Professional</a></div>
+                                <div class="price-box"><span class="price">$189.00</span></div>
+                            </div>
+                            <div class="product-review">
+                                <i class="cps cp-star"></i><i class="cpr cp-star"></i><i class="cpr cp-star"></i><i class="cpr cp-star"></i><i class="cpr cp-star"></i>
+                            </div>
+                        </div>
+                            <!--End Product Detail-->
+                        </div>
+                        <!--End Product Item-->
+                    </div>
+                </div>
+            </section>
+            <!--End Related products-->
+            

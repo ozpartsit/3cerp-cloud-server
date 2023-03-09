@@ -74,7 +74,8 @@ class App3CERP {
         this.app.use(express_1.default.urlencoded({ extended: false }));
         //this.app.use(helmet());
         // serving static files
-        this.app.use(express_1.default.static("public"));
+        this.app.use("/public", express_1.default.static("public"));
+        this.app.use('/hosting', express_1.default.static("hosting"));
         this.app.use(__webpack_require__(3222)());
         this.app.use(i18n_1.default.init);
     }
@@ -779,25 +780,77 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const fs_1 = __importDefault(__webpack_require__(7147));
 const ejs_1 = __importDefault(__webpack_require__(9632));
 const path_1 = __importDefault(__webpack_require__(1017));
 const i18n_1 = __importDefault(__webpack_require__(6734));
+const model_1 = __importDefault(__webpack_require__(7849));
 class controller {
     get(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            var views = path_1.default.resolve(__dirname, "../../pages", req.params.page);
+            i18n_1.default.setLocale(req.locale);
+            console.log('tu tez', req.subdomains, req.params.view);
+            let hostingPath = path_1.default.resolve("hosting");
+            var views = path_1.default.resolve(hostingPath, req.subdomains[0]);
             var filepath = path_1.default.join(views, "index" + ".ejs");
-            console.log(req.subdomains);
+            let data = { company: "testss", searchResult: [], item: {} };
+            if (req.params.view) {
+                let viewpath = path_1.default.join(views, "templates", req.params.view + ".ejs");
+                if (fs_1.default.existsSync(viewpath)) {
+                    if (["search", "products"].includes(req.params.view)) {
+                        let query = {};
+                        if (req.query.keyword) {
+                            query['name'] = { $regex: `.*${req.query.keyword}.*` };
+                        }
+                        ;
+                        let filters = (req.query.filters || "").toString();
+                        if (filters) {
+                            query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+                        }
+                        let options = { sort: {}, limit: 0 };
+                        let sort = (req.query.sort || "").toString();
+                        if (sort) {
+                            options.sort = sort.split(",").reduce((o, f) => {
+                                // -date = desc sort per date field
+                                if (f[0] == "-") {
+                                    f = f.substring(1);
+                                    o[f] = -1;
+                                }
+                                else
+                                    o[f] = 1;
+                                return o;
+                            }, {});
+                        }
+                        options.limit = parseInt((req.query.limit || 9).toString());
+                        //console.log(options)
+                        let result = yield model_1.default.findDocuments(query, options);
+                        for (let line of result) {
+                            yield line.autoPopulate(req);
+                        }
+                        data.searchResult = result;
+                    }
+                    if (["item", "product"].includes(req.params.view)) {
+                        let result = yield model_1.default.getDocument('60df047fec2924769a00834d', 'view');
+                        data.item = result;
+                    }
+                }
+                else {
+                    req.params.view = "404";
+                }
+            }
             // i18n
             i18n_1.default.configure({
                 directory: path_1.default.join(views, "/locales")
             });
             try {
-                let result1 = { company: "testss" };
-                ejs_1.default.renderFile(filepath, { data: result1, view: req.params.view }, (err, result) => {
-                    console.log(err);
-                    res.writeHead(200, { "Content-Type": "text/html;charset=utf-8" });
-                    res.end(result);
+                console.log(filepath, req.params.view);
+                ejs_1.default.renderFile(filepath, { data: data, view: req.params.view }, (err, result) => {
+                    console.log(err, !!result);
+                    //res.writeHead(200, { "Content-Type": "text/html;charset=utf-8" });
+                    res.setHeader('content-type', 'text/html');
+                    res.writeHead(200, 'Ok');
+                    res.write(result);
+                    res.end();
                 });
             }
             catch (error) {
@@ -941,12 +994,13 @@ class Auth {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err)
                         res.status(500).json({ message: "failed to authenticate token" });
+                    else
+                        next();
                 });
             }
             catch (err) {
                 res.status(400).json({ message: "Invalid token" });
             }
-            next();
         }
         else {
             res.status(401).json({ message: "Access denied. No token provided" });
@@ -2763,6 +2817,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+//import subdomain from "express-subdomain";
 const auth_1 = __importDefault(__webpack_require__(9422));
 const express_1 = __importDefault(__webpack_require__(6860));
 const warehouses_1 = __importDefault(__webpack_require__(6606));
@@ -2801,8 +2856,8 @@ class Routes {
         this.routeFiles();
         this.routeHosting();
         this.routeCustom();
-        //app.use(subdomain("hosting", this.Router2));
-        app.use("/api/hosting", this.Router2);
+        app.use(subdomain("*", this.Router2));
+        //app.use("/hosting", this.Router2);
         app.use("/api/core", this.Router);
         app.use("/storage/files", this.RouterFiles);
         //Custom
@@ -2884,10 +2939,52 @@ class Routes {
     }
     routeHosting() {
         // Hosting
-        this.Router2.route("/:page/:view?").get(this.hostingController.get);
+        this.Router2.route("/:view?/:param?").get(this.hostingController.get);
+        this.Router2.route("*").get(this.hostingController.get);
     }
 }
 exports["default"] = Routes;
+function subdomain(subdomain, fn) {
+    if (!subdomain || typeof subdomain !== "string") {
+        throw new Error("The first parameter must be a string representing the subdomain");
+    }
+    //check fn handles three params..
+    if (!fn || typeof fn !== "function" || fn.length < 3) {
+        throw new Error("The second parameter must be a function that handles fn(req, res, next) params.");
+    }
+    return function (req, res, next) {
+        req._subdomainLevel = req._subdomainLevel || 0;
+        var subdomainSplit = subdomain.split('.');
+        var len = subdomainSplit.length;
+        var match = true;
+        //url - v2.api.example.dom
+        //subdomains == ['api', 'v2']
+        //subdomainSplit = ['v2', 'api']
+        for (var i = 0; i < len; i++) {
+            var expected = subdomainSplit[len - (i + 1)];
+            var actual = req.subdomains[i + req._subdomainLevel];
+            if (actual === "www")
+                actual = false;
+            if (expected === '*') {
+                continue;
+            }
+            if (actual !== expected) {
+                match = false;
+                break;
+            }
+        }
+        if (actual && match) {
+            req._subdomainLevel++; //enables chaining
+            return fn(req, res, next);
+        }
+        else {
+            if (actual)
+                res.send("ok");
+            else
+                next();
+        }
+    };
+}
 
 
 /***/ }),
@@ -2912,6 +3009,23 @@ class Routes {
         this.stop(App3CERP);
         this.restart(App3CERP);
         app.use("/maintenance", this.Router);
+        //try {
+        //var packagePath = path.resolve();
+        //execSync("devil dns add mojadomena.pl", { stdio: "inherit", cwd: packagePath });
+        (0, child_process_1.exec)("ls -la", (error, stdout, stderr) => {
+            if (error) {
+                console.log(`error: ${error.message}`);
+                return;
+            }
+            if (stderr) {
+                console.log(`stderr: ${stderr}`);
+                return;
+            }
+            console.log(`stdout: ${stdout}`);
+        });
+        // } catch (error) {
+        //   console.log(error)
+        // }
     }
     stop(App3CERP) {
         this.Router.route("/stop").get(() => {
@@ -2954,10 +3068,11 @@ class Routes {
     start(app) {
         console.log("Start Public Routing");
         let publicePath = path_1.default.resolve("public");
-        this.Router.route("*").get((req, res) => {
-            res.sendFile(path_1.default.resolve(publicePath, 'index.html'));
+        this.Router.route("/*").get((req, res) => {
+            console.log("client.html");
+            res.sendFile(path_1.default.resolve(publicePath, 'client.html'));
         });
-        app.use("/", this.Router);
+        app.use("/*", this.Router);
     }
 }
 exports["default"] = Routes;

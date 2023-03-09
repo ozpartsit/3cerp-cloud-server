@@ -53,9 +53,8 @@ export class App3CERP {
     //this.app.use(helmet());
     // serving static files
    
-    this.app.use(express.static("public"));
+    this.app.use("/public",express.static("public"));
     this.app.use('/hosting', express.static("hosting"));
-
     this.app.use(require("express-status-monitor")());
     this.app.use(i18n.init);
   }
