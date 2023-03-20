@@ -12,6 +12,7 @@ import RoutesPublic from "./routes/public";
 import EmitEvents from "./services/emitEvents";
 import { errorHandler } from "./middleware/error-handler";
 import storage from "./middleware/storage";
+import hosting from "./middleware/hosting";
 import Cache from "./middleware/cache";
 import path from "path";
 
@@ -34,6 +35,7 @@ export class App3CERP {
   public routesPublic: RoutesPublic = new RoutesPublic();
   public emitEvents: EmitEvents = new EmitEvents();
   public storage = new storage();
+  public hosting = new hosting();
 
   constructor() {
     process.title = "3CERP";
@@ -44,6 +46,7 @@ export class App3CERP {
     this.dbConnect();
     this.mountRoutes();
     this.storage.init();
+    this.hosting.init();
   }
   private config(): void {
     this.app.use(compression()); // compress all responses

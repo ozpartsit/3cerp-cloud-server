@@ -791,7 +791,7 @@ class controller {
             i18n_1.default.setLocale(req.locale);
             console.log('tu tez', req.subdomains, req.params.view);
             let hostingPath = path_1.default.resolve("hosting");
-            var views = path_1.default.resolve(hostingPath, req.subdomains[0]);
+            var views = path_1.default.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
             var filepath = path_1.default.join(views, "index" + ".ejs");
             let data = { company: "testss", searchResult: [], item: {} };
             if (req.params.view) {
@@ -2953,7 +2953,17 @@ function subdomain(subdomain, fn) {
         throw new Error("The second parameter must be a function that handles fn(req, res, next) params.");
     }
     return function (req, res, next) {
-        req._subdomainLevel = req._subdomainLevel || 0;
+        console.log(req.hostname);
+        let subdomains = req.subdomains;
+        let subdomainLevel = req._subdomainLevel || 0;
+        // domain pointer redirect to hosting
+        if (req.hostname === "3c-erp.eu") {
+            console.log("subdomains1", subdomains);
+            subdomains.push("automotive");
+            req.subdomains.push("automotive");
+            req.body.pointer = "automotive";
+            console.log("subdomains1", subdomains, req.subdomains);
+        }
         var subdomainSplit = subdomain.split('.');
         var len = subdomainSplit.length;
         var match = true;
@@ -2962,7 +2972,7 @@ function subdomain(subdomain, fn) {
         //subdomainSplit = ['v2', 'api']
         for (var i = 0; i < len; i++) {
             var expected = subdomainSplit[len - (i + 1)];
-            var actual = req.subdomains[i + req._subdomainLevel];
+            var actual = subdomains[i + subdomainLevel];
             if (actual === "www")
                 actual = false;
             if (expected === '*') {
@@ -2974,7 +2984,7 @@ function subdomain(subdomain, fn) {
             }
         }
         if (actual && match) {
-            req._subdomainLevel++; //enables chaining
+            subdomainLevel++; //enables chaining
             return fn(req, res, next);
         }
         else {
@@ -3009,23 +3019,29 @@ class Routes {
         this.stop(App3CERP);
         this.restart(App3CERP);
         app.use("/maintenance", this.Router);
-        //try {
-        //var packagePath = path.resolve();
-        //execSync("devil dns add mojadomena.pl", { stdio: "inherit", cwd: packagePath });
-        (0, child_process_1.exec)("ls -la", (error, stdout, stderr) => {
-            if (error) {
-                console.log(`error: ${error.message}`);
-                return;
-            }
-            if (stderr) {
-                console.log(`stderr: ${stderr}`);
-                return;
-            }
-            console.log(`stdout: ${stdout}`);
-        });
-        // } catch (error) {
-        //   console.log(error)
-        // }
+        // Dodawanie domen
+        // exec("devil dns add 3c-erp.eu", (error, stdout, stderr) => {
+        //   if (error) {
+        //     console.log(`error: ${error.message}`);
+        //     return;
+        //   }
+        //   if (stderr) {
+        //     console.log(`stderr: ${stderr}`);
+        //     return;
+        //   }
+        //   console.log(`stdout: ${stdout}`);
+        // })
+        // exec("", (error, stdout, stderr) => {
+        //   if (error) {
+        //     console.log(`error: ${error.message}`);
+        //     return;
+        //   }
+        //   if (stderr) {
+        //     console.log(`stderr: ${stderr}`);
+        //     return;
+        //   }
+        //   console.log(`stdout: ${stdout}`);
+        // })
     }
     stop(App3CERP) {
         this.Router.route("/stop").get(() => {
@@ -3034,15 +3050,18 @@ class Routes {
         });
     }
     restart(App3CERP) {
-        this.Router.route("/restart").get(() => {
-            console.log("restart");
-            var packagePath = path_1.default.resolve();
-            console.log(packagePath);
-            App3CERP.stopServer();
-            // Restart process ...
-            setTimeout(() => {
-                (0, child_process_1.execSync)("npm run start", { stdio: "inherit", cwd: packagePath });
-            }, 5000);
+        this.Router.route("/restart/:domain").get((req) => {
+            console.log("restart", req.params.domain);
+            if (req.params.domain) {
+                var packagePath = path_1.default.resolve();
+                console.log(packagePath);
+                App3CERP.stopServer();
+                // Restart process ...
+                setTimeout(() => {
+                    //execSync("npm run start", { stdio: "inherit", cwd: packagePath });
+                    (0, child_process_1.execSync)(`devil www restart ${req.params.domain}`, { stdio: "inherit", cwd: packagePath });
+                }, 5000);
+            }
         });
     }
 }

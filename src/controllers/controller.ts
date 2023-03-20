@@ -48,7 +48,6 @@ export default class controller {
                     return o;
                 }, {});
             }
-
             options.limit = parseInt((req.query.limit || 0).toString());
             let result = await model.findDocuments(query, options);
             for (let line of result) {

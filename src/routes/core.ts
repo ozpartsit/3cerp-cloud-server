@@ -185,6 +185,12 @@ function subdomain(subdomain: string, fn: any) {
     throw new Error("The second parameter must be a function that handles fn(req, res, next) params.");
   }
   return function (req: any, res: any, next: NextFunction) {
+
+    // domain pointer redirect to hosting
+    if (req.hostname === "3c-erp.eu") {
+      req.body.pointer = "automotive";
+    }
+
     req._subdomainLevel = req._subdomainLevel || 0;
 
     var subdomainSplit = subdomain.split('.');

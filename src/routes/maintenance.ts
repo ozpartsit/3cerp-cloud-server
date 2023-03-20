@@ -11,25 +11,33 @@ export default class Routes {
     this.stop(App3CERP);
     this.restart(App3CERP);
     app.use("/maintenance", this.Router);
-    //try {
-      //var packagePath = path.resolve();
-      //execSync("devil dns add mojadomena.pl", { stdio: "inherit", cwd: packagePath });
 
-      exec("ls -la", (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-    });
+    // exec("devil dns add 3c-erp.eu", (error, stdout, stderr) => {
+    //   if (error) {
+    //     console.log(`error: ${error.message}`);
+    //     return;
+    //   }
+    //   if (stderr) {
+    //     console.log(`stderr: ${stderr}`);
+    //     return;
+    //   }
+    //   console.log(`stdout: ${stdout}`);
 
-    // } catch (error) {
-    //   console.log(error)
-    // }
+    // })
+    // exec("devil www add 3c-erp.eu pointer 3cerp.cloud", (error, stdout, stderr) => {
+    //   if (error) {
+    //     console.log(`error: ${error.message}`);
+    //     return;
+    //   }
+    //   if (stderr) {
+    //     console.log(`stderr: ${stderr}`);
+    //     return;
+    //   }
+    //   console.log(`stdout: ${stdout}`);
+
+    // })
+    //devil ssl www add 128.204.218.180 le le website.3cerp.cloud
+
 
   }
 
@@ -40,15 +48,18 @@ export default class Routes {
     });
   }
   public restart(App3CERP: App3CERP) {
-    this.Router.route("/restart").get(() => {
-      console.log("restart");
-      var packagePath = path.resolve();
-      console.log(packagePath);
-      App3CERP.stopServer();
-      // Restart process ...
-      setTimeout(() => {
-        execSync("npm run start", { stdio: "inherit", cwd: packagePath });
-      }, 5000);
+    this.Router.route("/restart/:domain").get((req) => {
+      console.log("restart", req.params.domain);
+      if (req.params.domain) {
+        var packagePath = path.resolve();
+        console.log(packagePath);
+        App3CERP.stopServer();
+        // Restart process ...
+        setTimeout(() => {
+          //execSync("npm run start", { stdio: "inherit", cwd: packagePath });
+          execSync(`devil www restart ${req.params.domain}`, { stdio: "inherit", cwd: packagePath });
+        }, 5000);
+      }
     });
   }
 }
