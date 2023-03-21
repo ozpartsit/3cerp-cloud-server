@@ -46,7 +46,7 @@ export class App3CERP {
     this.dbConnect();
     this.mountRoutes();
     this.storage.init();
-    this.hosting.init();
+    //this.hosting.init();
   }
   private config(): void {
     this.app.use(compression()); // compress all responses

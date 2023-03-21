@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
 //import subdomain from "express-subdomain";
 import Auth from "../middleware/auth";
+import Hosting from "../middleware/hosting";
 import express, { Request, Response, NextFunction } from "express";
 import WarehouseController from "../controllers/warehouses";
 import ClassificationController from "../controllers/classifications";
 import EntityController from "../controllers/entities";
 import TransactionController from "../controllers/transactions";
 import ItemController from "../controllers/items";
+import WebsiteController from "../controllers/websites";
 import ConstantController from "../controllers/constants";
 import FilesController from "../controllers/files";
 import HostingController from "../controllers/hosting";
+import shop, { IShop } from "../models/shop.model";
 
 export default class Routes {
   public Router: express.Router = express.Router();
@@ -17,10 +20,12 @@ export default class Routes {
   public RouterFiles: express.Router = express.Router();
   public RouterCustom: express.Router = express.Router();
   public Auth: Auth = new Auth();
+  public Hosting: Hosting = new Hosting();
   public entityController: EntityController = new EntityController();
   public classificationController: ClassificationController = new ClassificationController();
   public warehouseController: WarehouseController = new WarehouseController();
   public transactionController: TransactionController = new TransactionController();
+  public websiteController: WebsiteController = new WebsiteController();
   public itemController: ItemController = new ItemController();
   public constantController: ConstantController = new ConstantController();
   public filesController: FilesController = new FilesController();
@@ -34,6 +39,7 @@ export default class Routes {
     this.routeClassifications();
     this.routeItems();
     this.routeUsers();
+    this.routeWebsites();
     this.routeAuth();
     this.routeFiles();
     this.routeHosting();
@@ -144,6 +150,23 @@ export default class Routes {
       .post(this.entityController.save.bind(this.entityController) as any)
       .delete(this.entityController.delete.bind(this.entityController) as any);
   }
+  public routeWebsites() {
+    // Websites
+    this.Router.route("/websites/:recordtype").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.websiteController.find.bind(this.websiteController) as any
+    );
+
+    this.Router.route("/websites/:recordtype/new/create").post(
+      this.websiteController.add.bind(this.websiteController) as any
+    );
+
+    this.Router.route("/websites/:recordtype/:id/:mode")
+      .get(this.websiteController.get.bind(this.websiteController) as any)
+      .put(this.Hosting.mapShops.bind(this.Hosting) as any, this.websiteController.update.bind(this.websiteController) as any)
+      .post(this.Hosting.mapShops.bind(this.Hosting) as any, this.websiteController.save.bind(this.websiteController) as any)
+      .delete(this.Hosting.mapShops.bind(this.Hosting) as any, this.websiteController.delete.bind(this.websiteController) as any);
+  }
   public routeAuth() {
     // Auth
     this.Router.route("/login").post(this.Auth.login.bind(this.Auth) as any);
@@ -184,11 +207,13 @@ function subdomain(subdomain: string, fn: any) {
   if (!fn || typeof fn !== "function" || fn.length < 3) {
     throw new Error("The second parameter must be a function that handles fn(req, res, next) params.");
   }
-  return function (req: any, res: any, next: NextFunction) {
+  return async function (req: any, res: any, next: NextFunction) {
 
     // domain pointer redirect to hosting
-    if (req.hostname === "3c-erp.eu") {
-      req.body.pointer = "automotive";
+
+    let website = await shop.findOne({ domain: req.hostname });
+    if (website) {
+      req.body.pointer = website.subdomain;
     }
 
     req._subdomainLevel = req._subdomainLevel || 0;
@@ -211,7 +236,8 @@ function subdomain(subdomain: string, fn: any) {
         break;
       }
     }
-    if (actual && match) {
+    if ((actual || req.body.pointer) && match) {
+
       req._subdomainLevel++;//enables chaining
       return fn(req, res, next);
     } else {

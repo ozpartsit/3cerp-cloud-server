@@ -288,8 +288,7 @@
                 <div class="block clearfix block-tags p-0 border-0">
                     <a href="#">
                         <img class="blur-up rounded lazyload" src="/assets/images/sidebar-banner.png"
-                            data-src="/assets/images/sidebar-banner.png" alt="image" width="450"
-                            height="460">
+                            data-src="/assets/images/sidebar-banner.png" alt="image" width="450" height="460">
                     </a>
                 </div>
                 <!--End Banner-->
@@ -314,8 +313,9 @@
                                         class="btn rounded btn-filter d-block d-lg-none me-2 me-sm-3"><span
                                             class="hidden">Filter</span></button>
                                     <div class="filters-toolbar__item">
-                                        <span class="filters-toolbar__product-count d-none d-sm-block">Showing: <%= data.searchResult.length %>
-                                            products</span>
+                                        <span class="filters-toolbar__product-count d-none d-sm-block">Showing: <%=
+                                                data.docs.length %>
+                                                products</span>
                                     </div>
                                 </div>
                             </li>
@@ -350,13 +350,13 @@
                 <!--Product Grid-->
                 <div class="products-grid">
                     <div class="row">
-                        <% for(var i=0; i < data.searchResult.length; i++) { %>
+                        <% for(var i=0; i < data.docs.length; i++) { %>
                             <div class="col-6 col-sm-6 col-md-4 col-lg-4">
                                 <!--Product Item-->
                                 <div class="item">
                                     <!--Product Image-->
                                     <div class="product-image">
-                                        <a href="/product/<%= data.searchResult[i].name %>" class="rounded-3 product-thumb">
+                                        <a href="/product/<%= data.docs[i].name %>" class="rounded-3 product-thumb">
                                             <!--Image-->
                                             <img class="primary blur-up lazyload rounded-3"
                                                 data-src="/assets/images/products/250x250.jpg"
@@ -388,10 +388,10 @@
                                     <div class="product-details d-flex">
                                         <div class="product-details-in">
                                             <div class="h3"><a href="#">
-                                                    <%= data.searchResult[i].name %>
+                                                    <%= data.docs[i].name %>
                                                 </a></div>
                                             <div class="price-box"><span class="price">
-                                                    <%= data.searchResult[i].price %>
+                                                    <%= data.docs[i].price %>
                                                 </span></div>
                                         </div>
                                         <div class="product-review">
@@ -415,13 +415,25 @@
                         <div class="pagination">
                             <div class="container">
                                 <ul class="d-flex align-items-center justify-content-center">
-                                    <li class="prev arrow"><a href="#"><i class="cps cp-arrow-left"></i></a></li>
-                                    <li class="active"><a href="#">1</a></li>
-                                    <li><a href="#">2</a></li>
-                                    <li><a href="#">3</a></li>
-                                    <li><a href="#">...</a></li>
-                                    <li><a href="#">5</a></li>
-                                    <li class="next arrow"><a href="#"><i class="cps cp-arrow-right"></i></a></li>
+                                    <% if (data.page && data.page>1) { %><li class="prev arrow"><a
+                                                href="<%= data.url %><%= data.page-1 %>"><i
+                                                    class="cps cp-arrow-left"></i></a></li>
+                                        <% } %>
+                                            <% for(var i=1; i <=data.totalPages; i++) { %>
+                                                <% if ( i> data.page-5 && i < data.page+5) { %>
+                                                        <li class="<%= i==data.page?'active':'' %>"><a
+                                                                href="<%= data.url %><%= i %>">
+                                                                <%= i %>
+                                                            </a></li>
+                                                        <% } %>
+                                                            <% } %>
+
+                                                                <% if ( data.page < data.totalPages) { %>
+                                                                    <li class="next arrow"><a
+                                                                            href="<%= data.url %><%= data.page+1 %>"><i
+                                                                                class="cps cp-arrow-right"></i></a>
+                                                                    </li>
+                                                                    <% } %>
                                 </ul>
                             </div>
                         </div>
@@ -436,19 +448,23 @@
 <!--End Categories Content-->
 <script>
     const queryString = window.location.search;
+    const url = new URL(window.location.href);
     const urlParams = new URLSearchParams(queryString);
 
     // Show By
     const shobyselect = document.getElementById('ShowBy');
     shobyselect.addEventListener('change', function (e) {
-        window.location = window.location.href.split('?')[0] + "?limit=" + this.value
+        url.searchParams.set('limit', this.value);
+        window.location = url;
     });
-    shobyselect.value = urlParams.get('limit') || "9";
+    shobyselect.value = url.searchParams.get('limit') || "9";
 
     // Sort By
     const sortbyselect = document.getElementById('SortBy');
     sortbyselect.addEventListener('change', function (e) {
-        window.location = window.location.href.split('?')[0] + "?sort=" + this.value
+        url.searchParams.set('sort', this.value);
+        window.location = url;
+
     });
-    sortbyselect.value = urlParams.get('sort') || "name";
+    sortbyselect.value = url.searchParams.get('sort') || "name";
 </script>

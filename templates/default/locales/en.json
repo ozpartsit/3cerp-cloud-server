@@ -1,3 +1,12 @@
 {
-	"PL": "PL"
+	"PL": "PL",
+	"warehouse": "warehouse",
+	"PLN": "PLN",
+	"pendingapproval": "pendingapproval",
+	"open": "open",
+	"webshop": "webshop",
+	"default": "default",
+	"online": "online",
+	"test": "test",
+	"offline": "offline"
 }

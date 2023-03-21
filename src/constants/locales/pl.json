@@ -26,5 +26,10 @@
 	"GB_WLS": "GB_WLS",
 	"EUR": "EUR",
 	"KitIten": "KitIten",
-	"open": "open"
+	"open": "open",
+	"webshop": "webshop",
+	"default": "default",
+	"online": "online",
+	"test": "test",
+	"offline": "offline"
 }

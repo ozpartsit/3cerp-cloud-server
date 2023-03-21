@@ -71,8 +71,8 @@ export async function deleteDocument(this: any, id: string) {
 
 export async function findDocuments(this: any, query: Object, options: any) {
 
-  let { limit, select, sort } = options;
-  let result = await this.find(query).sort(sort).limit(limit).select(select);
+  let { limit, select, sort, skip } = options;
+  let result = await this.find(query).sort(sort).skip(skip).limit(limit).select(select);
   return result;
 }
 

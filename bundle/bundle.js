@@ -42,6 +42,7 @@ const public_1 = __importDefault(__webpack_require__(93));
 const emitEvents_1 = __importDefault(__webpack_require__(1321));
 const error_handler_1 = __webpack_require__(9868);
 const storage_1 = __importDefault(__webpack_require__(4091));
+const hosting_1 = __importDefault(__webpack_require__(3851));
 const cache_1 = __importDefault(__webpack_require__(9732));
 const path_1 = __importDefault(__webpack_require__(1017));
 // Custom ENVIRONMENT Veriables
@@ -59,6 +60,7 @@ class App3CERP {
         this.routesPublic = new public_1.default();
         this.emitEvents = new emitEvents_1.default();
         this.storage = new storage_1.default();
+        this.hosting = new hosting_1.default();
         process.title = "3CERP";
         console.log("NODE_ENV", "production");
         console.log("NODE_PORT", process.env.PORT);
@@ -66,6 +68,7 @@ class App3CERP {
         this.dbConnect();
         this.mountRoutes();
         this.storage.init();
+        //this.hosting.init();
     }
     config() {
         this.app.use((0, compression_1.default)()); // compress all responses
@@ -785,77 +788,108 @@ const ejs_1 = __importDefault(__webpack_require__(9632));
 const path_1 = __importDefault(__webpack_require__(1017));
 const i18n_1 = __importDefault(__webpack_require__(6734));
 const model_1 = __importDefault(__webpack_require__(7849));
+const shop_model_1 = __importDefault(__webpack_require__(1725));
 class controller {
     get(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             i18n_1.default.setLocale(req.locale);
-            console.log('tu tez', req.subdomains, req.params.view);
+            //console.log(req.url)
+            console.log(req.body.pointer, req.subdomains[0]);
             let hostingPath = path_1.default.resolve("hosting");
-            var views = path_1.default.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
-            var filepath = path_1.default.join(views, "index" + ".ejs");
-            let data = { company: "testss", searchResult: [], item: {} };
-            if (req.params.view) {
-                let viewpath = path_1.default.join(views, "templates", req.params.view + ".ejs");
-                if (fs_1.default.existsSync(viewpath)) {
-                    if (["search", "products"].includes(req.params.view)) {
-                        let query = {};
-                        if (req.query.keyword) {
-                            query['name'] = { $regex: `.*${req.query.keyword}.*` };
-                        }
-                        ;
-                        let filters = (req.query.filters || "").toString();
-                        if (filters) {
-                            query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
-                        }
-                        let options = { sort: {}, limit: 0 };
-                        let sort = (req.query.sort || "").toString();
-                        if (sort) {
-                            options.sort = sort.split(",").reduce((o, f) => {
-                                // -date = desc sort per date field
-                                if (f[0] == "-") {
-                                    f = f.substring(1);
-                                    o[f] = -1;
-                                }
-                                else
-                                    o[f] = 1;
-                                return o;
-                            }, {});
-                        }
-                        options.limit = parseInt((req.query.limit || 9).toString());
-                        //console.log(options)
-                        let result = yield model_1.default.findDocuments(query, options);
-                        for (let line of result) {
-                            yield line.autoPopulate(req);
-                        }
-                        data.searchResult = result;
-                    }
-                    if (["item", "product"].includes(req.params.view)) {
-                        let result = yield model_1.default.getDocument('60df047fec2924769a00834d', 'view');
-                        data.item = result;
-                    }
-                }
-                else {
-                    req.params.view = "404";
-                }
+            let views = path_1.default.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
+            // check if exists shop - to do (customize template)
+            let shop = yield shop_model_1.default.findOne({ subdomain: req.body.pointer || req.subdomains[0] });
+            if (shop)
+                views = path_1.default.resolve("templates", shop.template);
+            // Static files/assets
+            let tmp = req.url.toString().split("/");
+            let filePath = path_1.default.resolve(hostingPath, req.body.pointer || req.subdomains[0], ...tmp);
+            // if does not exist on main dir check templates folder
+            if (shop && !fs_1.default.existsSync(filePath))
+                filePath = path_1.default.resolve("templates", shop.template, ...tmp);
+            if (fs_1.default.existsSync(filePath) && !fs_1.default.lstatSync(filePath).isDirectory()) {
+                //console.log('testasdsas',filePath)
+                res.sendFile(filePath);
             }
-            // i18n
-            i18n_1.default.configure({
-                directory: path_1.default.join(views, "/locales")
-            });
-            try {
-                console.log(filepath, req.params.view);
-                ejs_1.default.renderFile(filepath, { data: data, view: req.params.view }, (err, result) => {
-                    console.log(err, !!result);
-                    //res.writeHead(200, { "Content-Type": "text/html;charset=utf-8" });
-                    res.setHeader('content-type', 'text/html');
-                    res.writeHead(200, 'Ok');
-                    res.write(result);
-                    res.end();
+            else {
+                let filepath = path_1.default.join(views, "index" + ".ejs");
+                let data;
+                // if view params exists
+                if (req.params.view) {
+                    let viewpath = path_1.default.join(views, "pages", req.params.view + ".ejs");
+                    if (fs_1.default.existsSync(viewpath)) {
+                        data = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1 };
+                        if (["search", "products"].includes(req.params.view)) {
+                            let query = {};
+                            if (req.query.keyword) {
+                                query['name'] = { $regex: `.*${req.query.keyword}.*` };
+                            }
+                            ;
+                            let filters = (req.query.filters || "").toString();
+                            if (filters) {
+                                query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+                            }
+                            let options = { sort: {}, limit: 0, skip: 0 };
+                            let sort = (req.query.sort || "").toString();
+                            if (sort) {
+                                options.sort = sort.split(",").reduce((o, f) => {
+                                    // -date = desc sort per date field
+                                    if (f[0] == "-") {
+                                        f = f.substring(1);
+                                        o[f] = -1;
+                                    }
+                                    else
+                                        o[f] = 1;
+                                    return o;
+                                }, {});
+                            }
+                            options.limit = parseInt((req.query.limit || 9).toString());
+                            options.skip = parseInt((req.query.page || 0 * options.limit).toString());
+                            console.log(options);
+                            let result = yield model_1.default.findDocuments(query, options);
+                            let total = yield model_1.default.count(query);
+                            for (let line of result) {
+                                yield line.autoPopulate(req);
+                            }
+                            // Pagination url halper
+                            var q = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
+                            q.searchParams.delete('page');
+                            q.searchParams.set('page', '');
+                            data.url = q.pathname + "?" + q.searchParams.toString();
+                            // search queries
+                            data.docs = result;
+                            data.totalDocs = total;
+                            data.limit = options.limit;
+                            data.page = options.skip;
+                            data.totalPages = total / options.limit;
+                        }
+                        if (["item", "product"].includes(req.params.view)) {
+                            let result = yield model_1.default.getDocument('60df047fec2924769a00834d', 'view');
+                            data.item = result;
+                        }
+                    }
+                    else {
+                        // set 404 page
+                        req.params.view = "404";
+                    }
+                }
+                // i18n
+                i18n_1.default.configure({
+                    directory: path_1.default.join(views, "/locales")
                 });
-            }
-            catch (error) {
-                console.log(error);
-                return next(error);
+                try {
+                    ejs_1.default.renderFile(filepath, { data: data, view: req.params.view }, (err, result) => {
+                        console.log(err, !!result);
+                        res.setHeader('content-type', 'text/html');
+                        res.writeHead(200, 'Ok');
+                        res.write(result);
+                        res.end();
+                    });
+                }
+                catch (error) {
+                    console.log(error);
+                    return next(error);
+                }
             }
         });
     }
@@ -959,6 +993,26 @@ class WarehouseController extends controller_1.default {
     }
 }
 exports["default"] = WarehouseController;
+
+
+/***/ }),
+
+/***/ 718:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const shop_model_1 = __importDefault(__webpack_require__(1725));
+const controller_1 = __importDefault(__webpack_require__(450));
+class WebsiteController extends controller_1.default {
+    constructor() {
+        super({ model: shop_model_1.default, submodels: {} });
+    }
+}
+exports["default"] = WebsiteController;
 
 
 /***/ }),
@@ -1119,6 +1173,122 @@ const errorHandler = (error, req, res, next) => {
     // });
 };
 exports.errorHandler = errorHandler;
+
+
+/***/ }),
+
+/***/ 3851:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//requiring path and fs modules
+const path_1 = __importDefault(__webpack_require__(1017));
+const fs_1 = __importDefault(__webpack_require__(7147));
+const child_process_1 = __webpack_require__(2081);
+const shop_model_1 = __importDefault(__webpack_require__(1725));
+class HostingStructure {
+    constructor() {
+        //resolve hosting path of directory
+        this.hostingPath = path_1.default.resolve("hosting");
+        if (!fs_1.default.existsSync(this.hostingPath))
+            fs_1.default.mkdirSync(this.hostingPath);
+    }
+    init() {
+        console.log("Init Hosting", this.hostingPath);
+        //this.mapShops();
+    }
+    mapShops(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('mapShops');
+            let shops = yield shop_model_1.default.find();
+            for (let site of shops) {
+                let sitePath = path_1.default.resolve("hosting", site.subdomain);
+                let siteTemplatesPath = path_1.default.resolve("hosting", site.subdomain, "templates");
+                //let siteTemplatePath = path.resolve("hosting", site.subdomain, "templates", site.template);
+                if (!fs_1.default.existsSync(sitePath))
+                    fs_1.default.mkdirSync(sitePath);
+                if (!fs_1.default.existsSync(siteTemplatesPath))
+                    fs_1.default.mkdirSync(siteTemplatesPath);
+                // if (!fs.existsSync(siteTemplatePath)) {
+                //     fs.mkdirSync(siteTemplatePath);
+                //     // copy template source if was modified
+                //     //fs.cp()
+                // }
+                try {
+                    // add custom domain
+                    if (site.domain)
+                        (0, child_process_1.exec)(`devil dns add ${site.domain}`, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log(`error: ${error.message}`);
+                                return;
+                            }
+                            if (stderr) {
+                                console.log(`stderr: ${stderr}`);
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                        });
+                    // add pointer
+                    if (site.domain)
+                        (0, child_process_1.exec)(`devil www add ${site.domain} pointer 3cerp.cloud`, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log(`error: ${error.message}`);
+                                return;
+                            }
+                            if (stderr) {
+                                console.log(`stderr: ${stderr}`);
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                        });
+                    //add SSL
+                    if (site.subdomain)
+                        (0, child_process_1.exec)(`devil ssl www add 128.204.218.180 le le ${site.subdomain}.3cerp.cloud`, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log(`error: ${error.message}`);
+                                return;
+                            }
+                            if (stderr) {
+                                console.log(`stderr: ${stderr}`);
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                        });
+                    if (site.domain)
+                        (0, child_process_1.exec)(`devil ssl www add 128.204.218.180 le le ${site.domain}`, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log(`error: ${error.message}`);
+                                return;
+                            }
+                            if (stderr) {
+                                console.log(`stderr: ${stderr}`);
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                        });
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+            next();
+        });
+    }
+}
+exports["default"] = HostingStructure;
 
 
 /***/ }),
@@ -2267,6 +2437,77 @@ exports["default"] = Role;
 
 /***/ }),
 
+/***/ 1725:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.schema = void 0;
+const mongoose_1 = __webpack_require__(1185);
+exports.schema = new mongoose_1.Schema({
+    name: {
+        type: String,
+        required: true,
+        min: [3, "Must be at least 3 characters long, got {VALUE}"]
+    },
+    subdomain: {
+        type: String,
+        required: true,
+        min: [3, "Must be at least 3 characters long, got {VALUE}"]
+    },
+    type: {
+        type: String,
+        required: true,
+        enum: ["webshop"],
+        default: "webshop"
+    },
+    template: {
+        type: String,
+        required: true,
+        default: "default"
+    },
+    status: {
+        type: String,
+        required: true,
+        enum: ["online", "offline"],
+        default: "offline"
+    },
+    domain: {
+        type: String,
+    }
+}, {
+    collection: "websites",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+exports.schema.virtual('url').get(function () {
+    return `https://${this.subdomain}.3cerp.cloud`;
+});
+exports.schema.index({ name: 1 });
+const Shop = (0, mongoose_1.model)("Shop", exports.schema);
+exports["default"] = Shop;
+
+
+/***/ }),
+
+/***/ 1674:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(5740));
+const options = { discriminatorKey: "type", collection: "transactions" };
+const schema = new mongoose_1.Schema({}, options);
+const InventoryAdjustment = schema_1.default.discriminator("InventoryAdjustment", schema);
+exports["default"] = InventoryAdjustment;
+
+
+/***/ }),
+
 /***/ 145:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
@@ -2295,6 +2536,24 @@ const options = { discriminatorKey: "type", collection: "transactions" };
 const schema = new mongoose_1.Schema({}, options);
 const ItemFulfillment = schema_1.default.discriminator("ItemFulfillment", schema);
 exports["default"] = ItemFulfillment;
+
+
+/***/ }),
+
+/***/ 7506:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(5740));
+const options = { discriminatorKey: "type", collection: "transactions" };
+const schema = new mongoose_1.Schema({}, options);
+const ItemReceipt = schema_1.default.discriminator("ItemReceipt", schema);
+exports["default"] = ItemReceipt;
 
 
 /***/ }),
@@ -2467,12 +2726,36 @@ const schema_1 = __importDefault(__webpack_require__(5740));
 const schema_2 = __importDefault(__webpack_require__(8982));
 const schema_3 = __importDefault(__webpack_require__(145));
 const schema_4 = __importDefault(__webpack_require__(7799));
+const schema_5 = __importDefault(__webpack_require__(7506));
+const schema_6 = __importDefault(__webpack_require__(1674));
+const schema_7 = __importDefault(__webpack_require__(6472));
 exports["default"] = schema_1.default;
 exports.TransactionTypes = {
     salesorder: schema_2.default,
     invoice: schema_3.default,
-    itemfulfillment: schema_4.default
+    itemfulfillment: schema_4.default,
+    itemreceipt: schema_5.default,
+    inventoryadjustment: schema_6.default,
+    purchaseorder: schema_7.default
 };
+
+
+/***/ }),
+
+/***/ 6472:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(5740));
+const options = { discriminatorKey: "type", collection: "transactions" };
+const schema = new mongoose_1.Schema({}, options);
+const PurchaseOrder = schema_1.default.discriminator("PurchaseOrder", schema);
+exports["default"] = PurchaseOrder;
 
 
 /***/ }),
@@ -2819,15 +3102,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 //import subdomain from "express-subdomain";
 const auth_1 = __importDefault(__webpack_require__(9422));
+const hosting_1 = __importDefault(__webpack_require__(3851));
 const express_1 = __importDefault(__webpack_require__(6860));
 const warehouses_1 = __importDefault(__webpack_require__(6606));
 const classifications_1 = __importDefault(__webpack_require__(3096));
 const entities_1 = __importDefault(__webpack_require__(5067));
 const transactions_1 = __importDefault(__webpack_require__(2069));
 const items_1 = __importDefault(__webpack_require__(1199));
+const websites_1 = __importDefault(__webpack_require__(718));
 const constants_1 = __importDefault(__webpack_require__(2110));
 const files_1 = __importDefault(__webpack_require__(4758));
-const hosting_1 = __importDefault(__webpack_require__(2101));
+const hosting_2 = __importDefault(__webpack_require__(2101));
+const shop_model_1 = __importDefault(__webpack_require__(1725));
 class Routes {
     constructor() {
         this.Router = express_1.default.Router();
@@ -2835,14 +3121,16 @@ class Routes {
         this.RouterFiles = express_1.default.Router();
         this.RouterCustom = express_1.default.Router();
         this.Auth = new auth_1.default();
+        this.Hosting = new hosting_1.default();
         this.entityController = new entities_1.default();
         this.classificationController = new classifications_1.default();
         this.warehouseController = new warehouses_1.default();
         this.transactionController = new transactions_1.default();
+        this.websiteController = new websites_1.default();
         this.itemController = new items_1.default();
         this.constantController = new constants_1.default();
         this.filesController = new files_1.default();
-        this.hostingController = new hosting_1.default();
+        this.hostingController = new hosting_2.default();
     }
     start(app) {
         console.log("Start Routing");
@@ -2852,6 +3140,7 @@ class Routes {
         this.routeClassifications();
         this.routeItems();
         this.routeUsers();
+        this.routeWebsites();
         this.routeAuth();
         this.routeFiles();
         this.routeHosting();
@@ -2927,6 +3216,16 @@ class Routes {
             .post(this.entityController.save.bind(this.entityController))
             .delete(this.entityController.delete.bind(this.entityController));
     }
+    routeWebsites() {
+        // Websites
+        this.Router.route("/websites/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.websiteController.find.bind(this.websiteController));
+        this.Router.route("/websites/:recordtype/new/create").post(this.websiteController.add.bind(this.websiteController));
+        this.Router.route("/websites/:recordtype/:id/:mode")
+            .get(this.websiteController.get.bind(this.websiteController))
+            .put(this.Hosting.mapShops.bind(this.Hosting), this.websiteController.update.bind(this.websiteController))
+            .post(this.Hosting.mapShops.bind(this.Hosting), this.websiteController.save.bind(this.websiteController))
+            .delete(this.Hosting.mapShops.bind(this.Hosting), this.websiteController.delete.bind(this.websiteController));
+    }
     routeAuth() {
         // Auth
         this.Router.route("/login").post(this.Auth.login.bind(this.Auth));
@@ -2953,46 +3252,43 @@ function subdomain(subdomain, fn) {
         throw new Error("The second parameter must be a function that handles fn(req, res, next) params.");
     }
     return function (req, res, next) {
-        console.log(req.hostname);
-        let subdomains = req.subdomains;
-        let subdomainLevel = req._subdomainLevel || 0;
-        // domain pointer redirect to hosting
-        if (req.hostname === "3c-erp.eu") {
-            console.log("subdomains1", subdomains);
-            subdomains.push("automotive");
-            req.subdomains.push("automotive");
-            req.body.pointer = "automotive";
-            console.log("subdomains1", subdomains, req.subdomains);
-        }
-        var subdomainSplit = subdomain.split('.');
-        var len = subdomainSplit.length;
-        var match = true;
-        //url - v2.api.example.dom
-        //subdomains == ['api', 'v2']
-        //subdomainSplit = ['v2', 'api']
-        for (var i = 0; i < len; i++) {
-            var expected = subdomainSplit[len - (i + 1)];
-            var actual = subdomains[i + subdomainLevel];
-            if (actual === "www")
-                actual = false;
-            if (expected === '*') {
-                continue;
+        return __awaiter(this, void 0, void 0, function* () {
+            // domain pointer redirect to hosting
+            let website = yield shop_model_1.default.findOne({ domain: req.hostname });
+            if (website) {
+                req.body.pointer = website.subdomain;
             }
-            if (actual !== expected) {
-                match = false;
-                break;
+            req._subdomainLevel = req._subdomainLevel || 0;
+            var subdomainSplit = subdomain.split('.');
+            var len = subdomainSplit.length;
+            var match = true;
+            //url - v2.api.example.dom
+            //subdomains == ['api', 'v2']
+            //subdomainSplit = ['v2', 'api']
+            for (var i = 0; i < len; i++) {
+                var expected = subdomainSplit[len - (i + 1)];
+                var actual = req.subdomains[i + req._subdomainLevel];
+                if (actual === "www")
+                    actual = false;
+                if (expected === '*') {
+                    continue;
+                }
+                if (actual !== expected) {
+                    match = false;
+                    break;
+                }
             }
-        }
-        if (actual && match) {
-            subdomainLevel++; //enables chaining
-            return fn(req, res, next);
-        }
-        else {
-            if (actual)
-                res.send("ok");
-            else
-                next();
-        }
+            if ((actual || req.body.pointer) && match) {
+                req._subdomainLevel++; //enables chaining
+                return fn(req, res, next);
+            }
+            else {
+                if (actual)
+                    res.send("ok");
+                else
+                    next();
+            }
+        });
     };
 }
 
@@ -3019,7 +3315,6 @@ class Routes {
         this.stop(App3CERP);
         this.restart(App3CERP);
         app.use("/maintenance", this.Router);
-        // Dodawanie domen
         // exec("devil dns add 3c-erp.eu", (error, stdout, stderr) => {
         //   if (error) {
         //     console.log(`error: ${error.message}`);
@@ -3031,7 +3326,7 @@ class Routes {
         //   }
         //   console.log(`stdout: ${stdout}`);
         // })
-        // exec("", (error, stdout, stderr) => {
+        // exec("devil www add 3c-erp.eu pointer 3cerp.cloud", (error, stdout, stderr) => {
         //   if (error) {
         //     console.log(`error: ${error.message}`);
         //     return;
@@ -3042,6 +3337,7 @@ class Routes {
         //   }
         //   console.log(`stdout: ${stdout}`);
         // })
+        //devil ssl www add 128.204.218.180 le le website.3cerp.cloud
     }
     stop(App3CERP) {
         this.Router.route("/stop").get(() => {
@@ -3650,8 +3946,8 @@ function deleteDocument(id) {
 exports.deleteDocument = deleteDocument;
 function findDocuments(query, options) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { limit, select, sort } = options;
-        let result = yield this.find(query).sort(sort).limit(limit).select(select);
+        let { limit, select, sort, skip } = options;
+        let result = yield this.find(query).sort(sort).skip(skip).limit(limit).select(select);
         return result;
     });
 }

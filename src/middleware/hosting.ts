@@ -1,10 +1,9 @@
 //requiring path and fs modules
 import path from "path";
 import fs from "fs";
-import mime from "mime-types";
+import { execSync, exec } from "child_process";
 import shop, { IShop } from "../models/shop.model";
-import { getFileSize } from "../utilities/usefull";
-
+import express from "express";
 export default class HostingStructure {
     //resolve hosting path of directory
     public hostingPath: string = path.resolve("hosting");
@@ -14,25 +13,11 @@ export default class HostingStructure {
     }
     public init() {
         console.log("Init Hosting", this.hostingPath);
-        this.mapShops(this.hostingPath);
+        //this.mapShops();
     }
-    public makeDir(path: string) {
-        if (!fs.existsSync(path)) {
-            fs.mkdirSync(path);
-        }
-    }
-    public delDir(path: string) {
-        try {
-            fs.rmdirSync(path, { recursive: true });
-            console.log(`${path} is deleted!`);
-        } catch (err) {
-            console.error(`Error while deleting ${path}.`);
-        }
-    }
-    private async mapShops(
-        dirPath: string,
-    ) {
 
+    public async mapShops(req: express.Request, res: Response, next: express.NextFunction) {
+        console.log('mapShops')
         let shops = await shop.find();
         for (let site of shops) {
             let sitePath = path.resolve("hosting", site.subdomain);
@@ -45,6 +30,63 @@ export default class HostingStructure {
             //     // copy template source if was modified
             //     //fs.cp()
             // }
+            try {
+                // add custom domain
+                if(site.domain)
+                exec(`devil dns add ${site.domain}`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
+                // add pointer
+                if(site.domain)
+                exec(`devil www add ${site.domain} pointer 3cerp.cloud`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
+                //add SSL
+                if(site.subdomain)
+                exec(`devil ssl www add 128.204.218.180 le le ${site.subdomain}.3cerp.cloud`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
+                if(site.domain)
+                exec(`devil ssl www add 128.204.218.180 le le ${site.domain}`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
+            } catch (error) {
+                console.log(error)
+            }
+
         }
+        next();
     }
 }
