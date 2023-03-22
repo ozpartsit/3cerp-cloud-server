@@ -8,6 +8,7 @@ import ClassificationController from "../controllers/classifications";
 import EntityController from "../controllers/entities";
 import TransactionController from "../controllers/transactions";
 import ItemController from "../controllers/items";
+import ActivityController from "../controllers/activities";
 import WebsiteController from "../controllers/websites";
 import ConstantController from "../controllers/constants";
 import FilesController from "../controllers/files";
@@ -27,6 +28,7 @@ export default class Routes {
   public transactionController: TransactionController = new TransactionController();
   public websiteController: WebsiteController = new WebsiteController();
   public itemController: ItemController = new ItemController();
+  public activityController: ActivityController = new ActivityController();
   public constantController: ConstantController = new ConstantController();
   public filesController: FilesController = new FilesController();
   public hostingController: HostingController = new HostingController();
@@ -38,6 +40,7 @@ export default class Routes {
     this.routeWarehouses();
     this.routeClassifications();
     this.routeItems();
+    this.routeActivities();
     this.routeUsers();
     this.routeWebsites();
     this.routeAuth();
@@ -132,6 +135,25 @@ export default class Routes {
       .get(this.itemController.get.bind(this.itemController))
       .put(this.itemController.update.bind(this.itemController))
       .delete(this.itemController.delete.bind(this.itemController));
+  }
+  public routeActivities() {
+    //Activities
+    this.Router.route("/activities/").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.activityController.find.bind(this.activityController) as any
+    );
+    this.Router.route("/activities/:recordtype").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.activityController.find.bind(this.activityController) as any
+    );
+    this.Router.route("/activities/:recordtype/new/create").post(
+      this.activityController.add.bind(this.activityController) as any
+    );
+    this.Router.route("/activities/:recordtype/:id/:mode")
+      .get(this.activityController.get.bind(this.activityController))
+      .put(this.activityController.update.bind(this.activityController))
+      .post(this.activityController.save.bind(this.activityController) as any)
+      .delete(this.activityController.delete.bind(this.activityController));
   }
   public routeUsers() {
     // Users

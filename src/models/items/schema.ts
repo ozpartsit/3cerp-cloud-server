@@ -16,6 +16,8 @@ export interface IItem extends IExtendedDocument {
   coo: string;
   weight: number;
   barcode: string;
+  status: string;
+  manufacturer: string;
   getPrice(): any;
 }
 interface IItemModel extends Model<IItem>, IExtendedModel { }
@@ -52,6 +54,12 @@ const schema = new Schema<IItem>(
     weight: {
       type: Number,
     },
+    status: {
+      type: String,
+    },
+    manufacturer: {
+      type: String,
+    }
   },
   options
 );

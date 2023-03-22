@@ -12,7 +12,7 @@ export default class controller {
 
     public async add(req: Request, res: Response, next: NextFunction) {
         // init Model and create new Document
-
+        
         const model = this.setModel(req.params.recordtype);
         try {
             let document = await model.addDocument(req.body);
@@ -61,7 +61,9 @@ export default class controller {
 
     public async get(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
+        
         const model = this.setModel(recordtype);
+        console.log(req.params.recordtype,model)
         try {
             let document = await model.getDocument(id, mode);
             if (!document) res.status(404).json({

@@ -24,7 +24,8 @@ export default function methods(schema: any, options: any) {
   }
 
   schema.virtual('resource').get(function (this: any) {
-    return this.schema.options.collection;
+    let resources = this.schema.options.collection.split(".")
+    return resources[0];
   });
   schema.methods.setValue = setValue;
   schema.methods.changeLogs = changeLogs;

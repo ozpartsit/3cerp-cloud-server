@@ -1922,6 +1922,9 @@ const schema = new mongoose_1.Schema({
         type: Number,
         default: 0,
     },
+    status: {
+        type: String
+    },
 }, options);
 schema.virtual("addresses", {
     ref: "Address",
@@ -2345,6 +2348,12 @@ const schema = new mongoose_1.Schema({
     weight: {
         type: Number,
     },
+    status: {
+        type: String,
+    },
+    manufacturer: {
+        type: String,
+    }
 }, options);
 schema.virtual("prices", {
     ref: "Price",

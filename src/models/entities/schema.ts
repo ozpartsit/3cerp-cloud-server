@@ -50,6 +50,9 @@ export interface IEntity {
   balances?: IBalance[];
   addresses?: IAddress[];
   groupLevels?: IGroupLevel[];
+
+  status: string;
+
   validatePassword(password: string): boolean;
   hashPassword(): any;
 }
@@ -159,6 +162,9 @@ const schema = new Schema<IEntity>(
     tax: {
       type: Number,
       default: 0,
+    },
+    status: {
+      type: String
     },
   },
   options
