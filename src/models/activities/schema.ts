@@ -29,7 +29,6 @@ const schema = new Schema<IActivity>(
         type: {
             type: String,
             required: true,
-            input: "select"
         },
         status: {
             type: String,

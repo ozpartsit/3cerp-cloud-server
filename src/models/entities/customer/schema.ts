@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import { IEntity } from "../schema";
-
+//import SalesOrder from "../../activities/calendar/schema";
 export interface ICustomer extends IEntity {
   // billingAddress: IAddress;
   // shippingAddress: IAddress;
@@ -23,4 +23,14 @@ const schema = new Schema<ICustomer>(
   },
   options
 );
+
+// schema.virtual("salesOrders", {
+//   ref: "Calendar",
+//   localField: "name",
+//   foreignField: "name",
+//   justOne: false,
+//   autopopulate: true,
+//   model: SalesOrder
+// });
+
 export default schema;

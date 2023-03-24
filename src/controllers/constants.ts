@@ -7,7 +7,8 @@ import { getCountries } from "../constants/countries";
 import { getStates } from "../constants/states";
 import { getCurrencies } from "../constants/currencies";
 import { getPriceBasis } from "../constants/price.basis";
-const constants = { countries: getCountries, states: getStates, currencies: getCurrencies, pricebasis: getPriceBasis };
+import { getStatus } from "../constants/transaction.status";
+const constants = { countries: getCountries, states: getStates, currencies: getCurrencies, pricebasis: getPriceBasis, status: getStatus };
 export default class controller {
     public async get(req: Request, res: Response, next: NextFunction) {
 
@@ -17,7 +18,9 @@ export default class controller {
         });
 
         try {
-            const values = await constants[req.params.recordtype](req.query);
+            let values = [];
+            if (constants[req.params.recordtype])
+                values = await constants[req.params.recordtype](req.query);
             let result = values.map(value => {
                 return { _id: value, name: res.__(value) }
             })
