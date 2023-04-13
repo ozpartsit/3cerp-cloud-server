@@ -71,5 +71,6 @@ schema.static("addFile", async function (files: any, path: string) {
     doc.save();
   }
 });
+
 const File: IFileModel = model<IFile, IFileModel>("File", schema);
 export default File;

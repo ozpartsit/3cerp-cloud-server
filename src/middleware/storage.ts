@@ -10,10 +10,12 @@ export default class StorageStructure {
   public storagePath: string = path.resolve("storage");
   public importPath: string = path.resolve("storage", "import");
   public exportPath: string = path.resolve("storage", "export");
+  public uploadsPath: string = path.resolve("storage", "uploads");
   constructor() {
     if (!fs.existsSync(this.storagePath)) fs.mkdirSync(this.storagePath);
     if (!fs.existsSync(this.importPath)) fs.mkdirSync(this.importPath);
     if (!fs.existsSync(this.exportPath)) fs.mkdirSync(this.exportPath);
+    if (!fs.existsSync(this.uploadsPath)) fs.mkdirSync(this.uploadsPath);
   }
   public init() {
     console.log("Init Storage", this.storagePath);
@@ -51,7 +53,8 @@ export default class StorageStructure {
           doc.type = "directory";
           this.mapFiles(path.join(dirPath, file), doc);
         } else {
-          doc.size = getFileSize(doc.urlcomponent);
+         
+          doc.size = getFileSize(path.join(dirPath, file));
           dirSize += doc.size;
         }
 

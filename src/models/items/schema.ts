@@ -13,6 +13,7 @@ export interface IItem extends IExtendedDocument {
   description?: string;
   prices: IPrice[];
   priceGroup: IPriceGroup;
+  images: Schema.Types.ObjectId[];
   coo: string;
   weight: number;
   barcode: string;
@@ -43,6 +44,11 @@ const schema = new Schema<IItem>(
     priceGroup: {
       type: PriceGroup,
       required: false,
+    },
+    images: {
+      type: [Schema.Types.ObjectId],
+      ref: "File",
+      autopopulate: true,
     },
     coo: {
       type: String,

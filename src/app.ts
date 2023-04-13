@@ -1,4 +1,5 @@
 import express from "express";
+import fileUpload from "express-fileupload";
 import http from "http";
 import * as dotenv from "dotenv";
 import cors from "cors";
@@ -53,10 +54,14 @@ export class App3CERP {
     this.app.use(cors());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
+    // enable files upload
+    this.app.use(fileUpload({
+      createParentPath: true
+    }));
     //this.app.use(helmet());
     // serving static files
-   
-    this.app.use("/public",express.static("public"));
+
+    this.app.use("/public", express.static("public"));
     this.app.use('/hosting', express.static("hosting"));
     this.app.use(require("express-status-monitor")());
     this.app.use(i18n.init);

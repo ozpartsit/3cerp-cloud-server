@@ -27,6 +27,7 @@ export default async function setValue(
       changeLogs[list] = SubDocument.getChanges();
     } else {
       this[field] = value;
+      console.log(this[field])
       await this.populate(field, "name displayname type _id");
       changeLogs = this.getChanges();
     }

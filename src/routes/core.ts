@@ -51,7 +51,7 @@ export default class Routes {
     app.use(subdomain("*", this.Router2));
     //app.use("/hosting", this.Router2);
     app.use("/api/core", this.Router);
-    app.use("/storage/files", this.RouterFiles);
+    //app.use("/api/core/storage", this.RouterFiles);
     //Custom
     app.use("/api/custom", this.RouterCustom);
   }
@@ -134,6 +134,7 @@ export default class Routes {
     this.Router.route("/items/:recordtype/:id/:mode")
       .get(this.itemController.get.bind(this.itemController))
       .put(this.itemController.update.bind(this.itemController))
+      .post(this.itemController.save.bind(this.itemController) as any)
       .delete(this.itemController.delete.bind(this.itemController));
   }
   public routeActivities() {
@@ -199,13 +200,12 @@ export default class Routes {
   }
   public routeFiles() {
     // Files
-    this.RouterFiles.route("/:path*?").get(
-      this.Auth.authenticate as any,
-      this.filesController.get as any
+    this.Router.route("/files/:path*?").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.filesController.find.bind(this.filesController) as any
     );
-    this.RouterFiles.route("/upload").post(
-      this.Auth.authenticate as any,
-      this.filesController.add as any
+    this.Router.route("/files/upload/:path*?").post(
+      this.filesController.upload.bind(this.filesController) as any
     );
   }
   public routeHosting() {

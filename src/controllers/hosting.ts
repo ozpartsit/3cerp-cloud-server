@@ -61,7 +61,6 @@ export default class controller {
             }
             options.limit = parseInt((req.query.limit || 9).toString());
             options.skip = parseInt((req.query.page || 0 * options.limit).toString());
-            console.log(options)
             let result = await Item.findDocuments(query, options);
             let total = await Item.count(query)
             for (let line of result) {

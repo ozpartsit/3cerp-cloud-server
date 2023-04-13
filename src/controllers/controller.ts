@@ -12,7 +12,7 @@ export default class controller {
 
     public async add(req: Request, res: Response, next: NextFunction) {
         // init Model and create new Document
-        
+
         const model = this.setModel(req.params.recordtype);
         try {
             let document = await model.addDocument(req.body);
@@ -26,12 +26,11 @@ export default class controller {
         const model = this.setModel(req.params.recordtype);
         try {
             let query = {};
-            let options = { select: { name: 1, type: 1, collection: 1, link: 1 }, sort: {}, limit: 50 };
+            let options = { select: { name: 1, type: 1, collection: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
             let filters = (req.query.filters || "").toString();
             if (filters) {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
             }
-
             let select = (req.query.select || "").toString();
             if (select) {
                 options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, collection: 1, link: 1 });
@@ -48,12 +47,28 @@ export default class controller {
                     return o;
                 }, {});
             }
-            options.limit = parseInt((req.query.limit || 0).toString());
+            let search = (req.query.search || "").toString();
+            if (search) {
+                query['name'] = { $regex: `,*${req.query.search}.*` }
+            }
+
+            console.log(query)
+            options.limit = parseInt((req.query.limit || 50).toString());
+            options.skip = parseInt((req.query.skip || 0).toString());
             let result = await model.findDocuments(query, options);
+            let total = await model.count(query)
             for (let line of result) {
                 await line.autoPopulate(req);
             }
-            res.json(result);
+            const data = {
+                docs: result,
+                totalDocs: total,
+                limit: options.limit,
+                page: options.skip,
+                totalPages: total / options.limit
+            }
+
+            res.json(data);
         } catch (error) {
             return next(error);
         }
@@ -61,9 +76,9 @@ export default class controller {
 
     public async get(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
-        
+
         const model = this.setModel(recordtype);
-        console.log(req.params.recordtype,model)
+        console.log(req.params.recordtype, model)
         try {
             let document = await model.getDocument(id, mode);
             if (!document) res.status(404).json({
