@@ -200,13 +200,14 @@ export default class Routes {
   }
   public routeFiles() {
     // Files
+    this.Router.route("/files/upload/:path*?").post(
+      this.filesController.upload.bind(this.filesController) as any
+    );
     this.Router.route("/files/:path*?").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.filesController.find.bind(this.filesController) as any
     );
-    this.Router.route("/files/upload/:path*?").post(
-      this.filesController.upload.bind(this.filesController) as any
-    );
+
   }
   public routeHosting() {
     // Hosting

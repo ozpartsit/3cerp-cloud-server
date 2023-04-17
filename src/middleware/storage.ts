@@ -1,9 +1,7 @@
 //requiring path and fs modules
 import path from "path";
 import fs from "fs";
-import mime from "mime-types";
-import File, { IFile } from "../models/file.model";
-import { getFileSize } from "../utilities/usefull";
+import Storage, { IStorage } from "../models/storages/schema";
 
 export default class StorageStructure {
   //resolve storage path of directory
@@ -37,33 +35,25 @@ export default class StorageStructure {
   private mapFiles(
     dirPath: string,
     //parentPath: string = "root",
-    parent: IFile | null
+    parent: IStorage | null
   ) {
     fs.readdir(dirPath, (err, files) => {
-      let dirSize = 0;
       files.forEach((file: string) => {
-        let doc: IFile = {
+        let folder = parent ? parent.path : encodeURI("storage");
+        let doc: IStorage = {
           name: file,
-          type: mime.lookup(file).toString(),
-          path: dirPath,
-          urlcomponent: encodeURI(`${dirPath}/${file}`)
+          type: 'File',
+          path: path.join(folder, encodeURI(file)),
+          urlcomponent: path.join(folder, encodeURI(file)),
         };
 
         if (fs.lstatSync(path.join(dirPath, file)).isDirectory()) {
-          doc.type = "directory";
+          doc.type = "Folder";
           this.mapFiles(path.join(dirPath, file), doc);
-        } else {
-         
-          doc.size = getFileSize(path.join(dirPath, file));
-          dirSize += doc.size;
         }
-
-        File.updateOrInsert(doc);
+        Storage.updateOrInsert(doc);
       });
-      if (parent) {
-        parent.size = dirSize;
-        File.updateOrInsert(parent);
-      }
+
     });
   }
 }

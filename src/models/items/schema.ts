@@ -47,7 +47,7 @@ const schema = new Schema<IItem>(
     },
     images: {
       type: [Schema.Types.ObjectId],
-      ref: "File",
+      ref: "Storage",
       autopopulate: true,
     },
     coo: {

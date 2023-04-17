@@ -11,6 +11,7 @@ import RoutesCore from "./routes/core";
 import RoutesMaintenance from "./routes/maintenance";
 import RoutesPublic from "./routes/public";
 import EmitEvents from "./services/emitEvents";
+import Email from "./services/email";
 import { errorHandler } from "./middleware/error-handler";
 import storage from "./middleware/storage";
 import hosting from "./middleware/hosting";
@@ -24,7 +25,7 @@ let env = dotenv.config({
 });
 
 export const cache = new Cache();
-
+export const email: Email = new Email();
 export class App3CERP {
   public server?: http.Server;
   public app: express.Application = express();
@@ -35,6 +36,7 @@ export class App3CERP {
   public routesMaintenance: RoutesMaintenance = new RoutesMaintenance();
   public routesPublic: RoutesPublic = new RoutesPublic();
   public emitEvents: EmitEvents = new EmitEvents();
+
   public storage = new storage();
   public hosting = new hosting();
 
@@ -60,9 +62,10 @@ export class App3CERP {
     }));
     //this.app.use(helmet());
     // serving static files
-
+    this.app.use('/storage', express.static("storage")); // Storage files
     this.app.use("/public", express.static("public"));
     this.app.use('/hosting', express.static("hosting"));
+
     this.app.use(require("express-status-monitor")());
     this.app.use(i18n.init);
   }

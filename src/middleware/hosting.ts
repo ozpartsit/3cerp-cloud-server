@@ -31,6 +31,22 @@ export default class HostingStructure {
             //     //fs.cp()
             // }
             try {
+                // Test email alias
+                let adres_docelowy = 'notification@3cerp.cloud';
+                let adres_zrodlowy = 'alias@ozparts.pl';
+                exec(`devil mail alias add ${adres_docelowy} ${adres_zrodlowy}`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
+
+
                 // add custom domain
                 if(site.domain)
                 exec(`devil dns add ${site.domain}`, (error, stdout, stderr) => {

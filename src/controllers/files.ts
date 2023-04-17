@@ -1,11 +1,12 @@
-import File, { IFile } from "../models/file.model";
+import Storage, { StorageTypes } from "../models/storages/model";
+import File, { IFile } from "../models/storages/file/schema";
 import controller from "./controller";
-import mime from "mime-types";
-import { getFileSize } from "../utilities/usefull";
+import path from "path";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 export default class FileController extends controller {
+  public storagePath: string = path.resolve("storage");
   constructor() {
-    super({ model: File, submodels: {} });
+    super({ model: Storage, submodels: StorageTypes });
   }
   public async upload(req: Request, res: Response, next: NextFunction) {
     // todo
@@ -16,26 +17,28 @@ export default class FileController extends controller {
           message: 'No file uploaded'
         });
       } else {
-        let files = Array.isArray(req.files) ? req.files : [req.files];
 
+        let files: any[] = Array.isArray(req.files.files) ? req.files.files : [req.files];
+
+        let uploaded: IFile[] = [];
         for (let file of files) {
-          file = file.files;
-          let dirPath = "/storage/uploads";
-          file.mv(`.${dirPath}/${file.name}`);
+          let dirPath = "uploads";
+          file.mv(path.join(this.storagePath, dirPath, file.name));
 
-          let doc: IFile = {
+          let doc = new File({
             name: file.name,
-            type: mime.lookup(file.name).toString(),
-            path: dirPath,
-            urlcomponent: encodeURI(`${dirPath}/${file.name}`)
-          };
-          File.updateOrInsert(doc);
-          //send response
-          res.send({
-            status: true,
-            message: 'File is uploaded',
+            type: "File",
+            path: path.join("storage", encodeURI(dirPath), encodeURI(file.name)),
+            urlcomponent: path.join("storage", encodeURI(dirPath), encodeURI(file.name)),
           });
+
+          //Storage.updateOrInsert(doc)
+          let newFile = await doc.save();
+          uploaded.push(newFile)
+          //send response
+
         }
+        res.send(uploaded);
       }
     } catch (err) {
       res.status(500).send(err);

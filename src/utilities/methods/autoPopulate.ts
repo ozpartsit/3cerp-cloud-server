@@ -8,7 +8,7 @@ export default async function autoPopulate(this: any, req: any) {
     if (schemaType.options.ref && schemaType.options.autopopulate) {
       paths.push({
         field: pathname,
-        select: schemaType.options.autopopulate.select || "name displayname type _id resource"
+        select: schemaType.options.autopopulate.select || "name displayname type _id resource path "
       });
     }
     //i18n Translation - test - to use only for export report
