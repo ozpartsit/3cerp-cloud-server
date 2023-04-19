@@ -8,7 +8,6 @@ export interface IActivity extends IExtendedDocument {
     name: string;
     type: string;
     description?: string;
-
     status: string;
 
 }
@@ -32,6 +31,7 @@ const schema = new Schema<IActivity>(
         },
         status: {
             type: String,
+            default: "open"
         },
 
     },

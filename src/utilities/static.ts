@@ -1,5 +1,6 @@
 import { Schema, Model, Document } from "mongoose";
 import { cache, email } from "../app";
+import pdf from "./pdf/pdf"
 //loadDocument
 export async function loadDocument(this: any, id: string) {
   let doc = await this.findOne({ _id: id });
@@ -42,7 +43,8 @@ export async function saveDocument(this: any, id: string) {
   let document = cache.getCache(id);
   await document.save();
   cache.delCache(id);
-  email.send({}, {}, 'ts');
+  //email.send({}, {}, 'ts');
+  pdf();
   return id;
 }
 

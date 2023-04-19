@@ -12,7 +12,7 @@ export interface IItem extends IExtendedDocument {
   type: string;
   description?: string;
   prices: IPrice[];
-  priceGroup: IPriceGroup;
+  priceGroup: Schema.Types.ObjectId;
   images: Schema.Types.ObjectId[];
   coo: string;
   weight: number;
@@ -42,7 +42,9 @@ const schema = new Schema<IItem>(
       input: "select"
     },
     priceGroup: {
-      type: PriceGroup,
+      type: Schema.Types.ObjectId,
+      ref: "Classification",
+      autopopulate: true,
       required: false,
     },
     images: {

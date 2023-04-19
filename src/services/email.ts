@@ -23,7 +23,7 @@ export default class Email {
       }
     });
     this.email = {
-      from: 'test@dbabrakes.eu',
+      from: 'test@ozparts.pl',
       to: 'it@ozparts.eu',
       subject: 'test',
       html: 'test'

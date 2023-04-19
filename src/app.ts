@@ -14,7 +14,6 @@ import EmitEvents from "./services/emitEvents";
 import Email from "./services/email";
 import { errorHandler } from "./middleware/error-handler";
 import storage from "./middleware/storage";
-import hosting from "./middleware/hosting";
 import Cache from "./middleware/cache";
 import path from "path";
 
@@ -38,7 +37,6 @@ export class App3CERP {
   public emitEvents: EmitEvents = new EmitEvents();
 
   public storage = new storage();
-  public hosting = new hosting();
 
   constructor() {
     process.title = "3CERP";

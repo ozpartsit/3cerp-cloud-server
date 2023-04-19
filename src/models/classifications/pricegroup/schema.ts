@@ -1,5 +1,5 @@
 import { Schema, Model, model } from "mongoose";
-import { IClassification } from "../schema";
+import Classification, { IClassification } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 const options = { discriminatorKey: "type", collection: "classifications" };
 
@@ -20,7 +20,7 @@ export const schema = new Schema<IPriceGroup>(
 );
 schema.index({ name: 1 });
 
-const PriceGroup: IPriceGroupModel = model<IPriceGroup, IPriceGroupModel>(
+const PriceGroup: IPriceGroupModel = Classification.discriminator<IPriceGroup, IPriceGroupModel>(
     "PriceGroup",
     schema
 );

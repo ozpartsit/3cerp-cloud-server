@@ -4,7 +4,7 @@ export default class controller {
     constructor(models: any) {
         this.models = models;
     }
-    private setModel(recordtype: string) {
+    public setModel(recordtype: string) {
         if (this.models)
             return this.models.submodels[recordtype] || this.models.model;
         else throw 'błąd';

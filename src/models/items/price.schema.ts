@@ -28,7 +28,9 @@ const schema = new Schema<IPrice>({
         required: true,
     },
     priceLevel: {
-        type: PriceLevel,
+        type: Schema.Types.ObjectId,
+        ref: "Classification",
+        autopopulate: true,
         required: false,
     }
 

@@ -1,6 +1,7 @@
 import { Schema, Model, model } from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
+import printPDF from "../../utilities/pdf/pdf";
 import { IEntity } from "../entities/schema";
 //import Address from "../entities/customer/address.schema";
 import { IWarehouse } from "../warehouse.model";
@@ -52,6 +53,7 @@ export interface ITransaction extends IExtendedDocument {
   shippingEmail?: string;
   recalc(): any;
   autoName(): any;
+  pdf(): any;
 }
 interface ITransactionModel extends Model<ITransaction>, IExtendedModel { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -202,6 +204,9 @@ schema.virtual("lines", {
   autopopulate: true,
   model: Line,
   copyFields: ["entity"]
+});
+schema.method("pdf", async function () {
+  return await printPDF();
 });
 schema.method("autoName", async function () {
   // set new transaction name (prefix+number+sufix)

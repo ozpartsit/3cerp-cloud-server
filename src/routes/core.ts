@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 //import subdomain from "express-subdomain";
 import Auth from "../middleware/auth";
-import Hosting from "../middleware/hosting";
 import express, { Request, Response, NextFunction } from "express";
 import WarehouseController from "../controllers/warehouses";
 import ClassificationController from "../controllers/classifications";
@@ -13,6 +12,7 @@ import WebsiteController from "../controllers/websites";
 import ConstantController from "../controllers/constants";
 import FilesController from "../controllers/files";
 import HostingController from "../controllers/hosting";
+import EmailController from "../controllers/emails";
 import shop, { IShop } from "../models/shop.model";
 
 export default class Routes {
@@ -21,7 +21,6 @@ export default class Routes {
   public RouterFiles: express.Router = express.Router();
   public RouterCustom: express.Router = express.Router();
   public Auth: Auth = new Auth();
-  public Hosting: Hosting = new Hosting();
   public entityController: EntityController = new EntityController();
   public classificationController: ClassificationController = new ClassificationController();
   public warehouseController: WarehouseController = new WarehouseController();
@@ -32,6 +31,7 @@ export default class Routes {
   public constantController: ConstantController = new ConstantController();
   public filesController: FilesController = new FilesController();
   public hostingController: HostingController = new HostingController();
+  public emailController: EmailController = new EmailController();
 
   public start(app: express.Application): void {
     console.log("Start Routing");
@@ -47,7 +47,7 @@ export default class Routes {
     this.routeFiles();
     this.routeHosting();
     this.routeCustom();
-
+    this.routeEmails();
     app.use(subdomain("*", this.Router2));
     //app.use("/hosting", this.Router2);
     app.use("/api/core", this.Router);
@@ -100,6 +100,15 @@ export default class Routes {
     this.Router.route("/classifications/:recordtype").get(
       this.classificationController.find.bind(this.classificationController) as any
     );
+    this.Router.route("/classifications/:recordtype/new/create").post(
+      this.classificationController.add.bind(this.classificationController) as any
+    );
+
+    this.Router.route("/classifications/:recordtype/:id/:mode")
+      .get(this.classificationController.get.bind(this.classificationController) as any)
+      .put(this.classificationController.update.bind(this.classificationController) as any)
+      .post(this.classificationController.save.bind(this.classificationController) as any)
+      .delete(this.classificationController.delete.bind(this.classificationController) as any);
   }
   public routeTransactions() {
     // Transactions
@@ -111,7 +120,9 @@ export default class Routes {
     this.Router.route("/transactions/:recordtype/new/create").post(
       this.transactionController.add.bind(this.transactionController) as any
     );
-
+    this.Router.route("/transactions/:recordtype/:id/pdf").get(
+      this.transactionController.pdf.bind(this.transactionController) as any
+    );
     this.Router.route("/transactions/:recordtype/:id/:mode")
       .get(this.transactionController.get.bind(this.transactionController) as any)
       .put(this.transactionController.update.bind(this.transactionController) as any)
@@ -186,9 +197,26 @@ export default class Routes {
 
     this.Router.route("/websites/:recordtype/:id/:mode")
       .get(this.websiteController.get.bind(this.websiteController) as any)
-      .put(this.Hosting.mapShops.bind(this.Hosting) as any, this.websiteController.update.bind(this.websiteController) as any)
-      .post(this.Hosting.mapShops.bind(this.Hosting) as any, this.websiteController.save.bind(this.websiteController) as any)
-      .delete(this.Hosting.mapShops.bind(this.Hosting) as any, this.websiteController.delete.bind(this.websiteController) as any);
+      .put(this.websiteController.update.bind(this.websiteController) as any)
+      .post(this.websiteController.save.bind(this.websiteController) as any)
+      .delete(this.websiteController.delete.bind(this.websiteController) as any);
+  }
+  public routeEmails() {
+    // Emails
+    this.Router.route("/emails/:recordtype").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.emailController.find.bind(this.emailController) as any
+    );
+
+    this.Router.route("/emails/:recordtype/new/create").post(
+      this.emailController.add.bind(this.emailController) as any
+    );
+
+    this.Router.route("/emails/:recordtype/:id/:mode")
+      .get(this.emailController.get.bind(this.emailController) as any)
+      .put(this.emailController.update.bind(this.emailController) as any)
+      .post(this.emailController.save.bind(this.emailController) as any)
+      .delete(this.emailController.delete.bind(this.emailController) as any);
   }
   public routeAuth() {
     // Auth

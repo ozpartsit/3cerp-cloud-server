@@ -6,13 +6,20 @@ export interface IClassification extends IExtendedDocument {
     _id: Schema.Types.ObjectId;
     type: string;
     name: string;
-
+    description: string;
 }
 interface IClassificationModel extends Model<IClassification>, IExtendedModel { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const ClassificationSchema = {
-    name: { type: String, },
+    name: { type: String },
+    description: { type: String },
+    type: {
+        type: String,
+        required: true,
+        enum: ["PriceLevel"],
+        default: "PriceLevel"
+    },
 }
 const options = {
     discriminatorKey: "type",
