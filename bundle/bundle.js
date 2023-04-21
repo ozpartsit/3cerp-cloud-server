@@ -29,8 +29,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.App3CERP = exports.cache = void 0;
+exports.App3CERP = exports.email = exports.cache = void 0;
 const express_1 = __importDefault(__webpack_require__(6860));
+const express_fileupload_1 = __importDefault(__webpack_require__(6674));
 const dotenv = __importStar(__webpack_require__(5142));
 const cors_1 = __importDefault(__webpack_require__(3582));
 const compression_1 = __importDefault(__webpack_require__(7455));
@@ -40,9 +41,9 @@ const core_1 = __importDefault(__webpack_require__(6585));
 const maintenance_1 = __importDefault(__webpack_require__(6802));
 const public_1 = __importDefault(__webpack_require__(93));
 const emitEvents_1 = __importDefault(__webpack_require__(1321));
+const email_1 = __importDefault(__webpack_require__(3097));
 const error_handler_1 = __webpack_require__(9868);
 const storage_1 = __importDefault(__webpack_require__(4091));
-const hosting_1 = __importDefault(__webpack_require__(3851));
 const cache_1 = __importDefault(__webpack_require__(9732));
 const path_1 = __importDefault(__webpack_require__(1017));
 // Custom ENVIRONMENT Veriables
@@ -50,6 +51,7 @@ let env = dotenv.config({
     path: path_1.default.resolve(`.env.${"production"}`)
 });
 exports.cache = new cache_1.default();
+exports.email = new email_1.default();
 class App3CERP {
     constructor() {
         this.app = (0, express_1.default)();
@@ -60,7 +62,6 @@ class App3CERP {
         this.routesPublic = new public_1.default();
         this.emitEvents = new emitEvents_1.default();
         this.storage = new storage_1.default();
-        this.hosting = new hosting_1.default();
         process.title = "3CERP";
         console.log("NODE_ENV", "production");
         console.log("NODE_PORT", process.env.PORT);
@@ -75,8 +76,13 @@ class App3CERP {
         this.app.use((0, cors_1.default)());
         this.app.use(express_1.default.json());
         this.app.use(express_1.default.urlencoded({ extended: false }));
+        // enable files upload
+        this.app.use((0, express_fileupload_1.default)({
+            createParentPath: true
+        }));
         //this.app.use(helmet());
         // serving static files
+        this.app.use('/storage', express_1.default.static("storage")); // Storage files
         this.app.use("/public", express_1.default.static("public"));
         this.app.use('/hosting', express_1.default.static("hosting"));
         this.app.use(__webpack_require__(3222)());
@@ -292,7 +298,7 @@ exports["default"] = ["InvItem", "KitItem", "Service", "ShippingItem"];
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPriceBasis = void 0;
-const priceBasis = ["BasePrice", "PurchasePrice"];
+const priceBasis = ["BasePrice", "PurchasePrice", "CustomPrice"];
 exports["default"] = priceBasis;
 function getPriceBasis(query) { return priceBasis; }
 exports.getPriceBasis = getPriceBasis;
@@ -382,7 +388,11 @@ exports["default"] = ["Items", "ShippingItem", "KitComponent"];
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports["default"] = ["pendingapproval", "open"];
+exports.getStatus = void 0;
+const status = ["pendingapproval", "open"];
+exports["default"] = status;
+function getStatus(query) { return status; }
+exports.getStatus = getStatus;
 
 
 /***/ }),
@@ -413,6 +423,45 @@ exports["default"] = ["pendingapproval", "open"];
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 // export default new TranTypes();
 exports["default"] = ["SalesOrder", "Invoice"];
+
+
+/***/ }),
+
+/***/ 5282:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const model_1 = __importStar(__webpack_require__(625));
+const controller_1 = __importDefault(__webpack_require__(450));
+class IActivityController extends controller_1.default {
+    constructor() {
+        super({ model: model_1.default, submodels: model_1.ActivityTypes });
+    }
+}
+exports["default"] = IActivityController;
 
 
 /***/ }),
@@ -479,7 +528,8 @@ const countries_1 = __webpack_require__(5593);
 const states_1 = __webpack_require__(4448);
 const currencies_1 = __webpack_require__(7131);
 const price_basis_1 = __webpack_require__(6118);
-const constants = { countries: countries_1.getCountries, states: states_1.getStates, currencies: currencies_1.getCurrencies, pricebasis: price_basis_1.getPriceBasis };
+const transaction_status_1 = __webpack_require__(5969);
+const constants = { countries: countries_1.getCountries, states: states_1.getStates, currencies: currencies_1.getCurrencies, pricebasis: price_basis_1.getPriceBasis, status: transaction_status_1.getStatus };
 class controller {
     get(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -488,7 +538,9 @@ class controller {
                 directory: path_1.default.resolve(__dirname, "../constants/locales")
             });
             try {
-                const values = yield constants[req.params.recordtype](req.query);
+                let values = [];
+                if (constants[req.params.recordtype])
+                    values = yield constants[req.params.recordtype](req.query);
                 let result = values.map(value => {
                     return { _id: value, name: res.__(value) };
                 });
@@ -549,7 +601,7 @@ class controller {
             const model = this.setModel(req.params.recordtype);
             try {
                 let query = {};
-                let options = { select: { name: 1, type: 1, collection: 1, link: 1 }, sort: {}, limit: 50 };
+                let options = { select: { name: 1, type: 1, collection: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
                 let filters = (req.query.filters || "").toString();
                 if (filters) {
                     query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
@@ -571,12 +623,26 @@ class controller {
                         return o;
                     }, {});
                 }
-                options.limit = parseInt((req.query.limit || 0).toString());
+                let search = (req.query.search || "").toString();
+                if (search) {
+                    query['name'] = { $regex: `,*${req.query.search}.*` };
+                }
+                console.log(query);
+                options.limit = parseInt((req.query.limit || 50).toString());
+                options.skip = parseInt((req.query.skip || 0).toString());
                 let result = yield model.findDocuments(query, options);
+                let total = yield model.count(query);
                 for (let line of result) {
                     yield line.autoPopulate(req);
                 }
-                res.json(result);
+                const data = {
+                    docs: result,
+                    totalDocs: total,
+                    limit: options.limit,
+                    page: options.skip,
+                    totalPages: total / options.limit
+                };
+                res.json(data);
             }
             catch (error) {
                 return next(error);
@@ -587,6 +653,7 @@ class controller {
         return __awaiter(this, void 0, void 0, function* () {
             let { recordtype, id, mode } = req.params;
             const model = this.setModel(recordtype);
+            console.log(req.params.recordtype, model);
             try {
                 let document = yield model.getDocument(id, mode);
                 if (!document)
@@ -645,6 +712,72 @@ exports["default"] = controller;
 
 /***/ }),
 
+/***/ 4267:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const email_model_1 = __importDefault(__webpack_require__(8499));
+const controller_1 = __importDefault(__webpack_require__(450));
+const child_process_1 = __webpack_require__(2081);
+class EmailController extends controller_1.default {
+    constructor() {
+        super({ model: email_model_1.default, submodels: {} });
+    }
+    save(req, res, next) {
+        const _super = Object.create(null, {
+            save: { get: () => super.save }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            _super.save.call(this, req, res, next);
+            this.syncEmails();
+        });
+    }
+    syncEmails() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('mapEmails');
+            let emails = yield email_model_1.default.find();
+            for (let email of emails) {
+                try {
+                    // Test email alias
+                    let adres_docelowy = 'notification@3cerp.cloud';
+                    let adres_zrodlowy = email.name;
+                    (0, child_process_1.exec)(`devil mail alias add ${adres_zrodlowy} ${adres_docelowy}`, (error, stdout, stderr) => {
+                        if (error) {
+                            console.log(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log(`stderr: ${stderr}`);
+                            return;
+                        }
+                        console.log(`stdout: ${stdout}`);
+                    });
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+        });
+    }
+}
+exports["default"] = EmailController;
+
+
+/***/ }),
+
 /***/ 5067:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -688,6 +821,25 @@ exports["default"] = EntityController;
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -701,67 +853,53 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const file_model_1 = __importDefault(__webpack_require__(3630));
-class controller {
-    add(req, res, next) {
-        let Model = file_model_1.default;
-        let doc = new Model(req.body);
-        doc.save((err, result) => {
-            if (err) {
-                next(err);
-            }
-            res.json(result);
-        });
+const model_1 = __importStar(__webpack_require__(248));
+const schema_1 = __importDefault(__webpack_require__(7662));
+const controller_1 = __importDefault(__webpack_require__(450));
+const path_1 = __importDefault(__webpack_require__(1017));
+class FileController extends controller_1.default {
+    constructor() {
+        super({ model: model_1.default, submodels: model_1.StorageTypes });
+        this.storagePath = path_1.default.resolve("storage");
     }
-    find(req, res, next) {
-        file_model_1.default.find({})
-            .limit(50)
-            // .skip(parseInt(req.query.skip as string))
-            // .select(req.query.select)
-            // .sort(req.query.sort)
-            .exec((err, result) => {
-            if (err) {
-                next(err);
-            }
-            res.json(result);
-        });
-    }
-    get(req, res, next) {
+    upload(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            const path = encodeURI(`/${req.params.path}${req.params["0"]}`);
-            let file = yield file_model_1.default.findOne({
-                urlcomponent: path
-            });
-            if (file) {
-                res
-                    .status(200)
-                    .header("Content-Type", file.type)
-                    .sendFile(file.urlcomponent);
-                //.sendFile(file.path, { root: "./storage/" });
+            // todo
+            try {
+                if (!req.files) {
+                    res.send({
+                        status: false,
+                        message: 'No file uploaded'
+                    });
+                }
+                else {
+                    let files = Array.isArray(req.files.files) ? req.files.files : [req.files];
+                    console.log(files);
+                    let uploaded = [];
+                    for (let file of files) {
+                        let dirPath = "uploads";
+                        file.mv(path_1.default.join(this.storagePath, dirPath, file.name));
+                        let doc = new schema_1.default({
+                            name: file.name,
+                            type: "File",
+                            path: path_1.default.join("storage", encodeURI(dirPath), encodeURI(file.name)),
+                            urlcomponent: path_1.default.join("storage", encodeURI(dirPath), encodeURI(file.name)),
+                        });
+                        //Storage.updateOrInsert(doc)
+                        let newFile = yield doc.save();
+                        uploaded.push(newFile);
+                        //send response
+                    }
+                    res.send(uploaded);
+                }
             }
-            else {
-                res.status(400).send();
+            catch (err) {
+                res.status(500).send(err);
             }
-        });
-    }
-    update(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const path = encodeURI(req.params["0"]);
-            let doc = yield file_model_1.default.loadDocument(req.params.id);
-            doc.rename(path);
-        });
-    }
-    delete(req, res, next) {
-        const path = encodeURI(`/${req.params.path}${req.params["0"]}`);
-        file_model_1.default.deleteFile(path).then((err) => {
-            if (err) {
-                next(err);
-            }
-            res.json({ message: "Successfully deleted contact!" });
         });
     }
 }
-exports["default"] = controller;
+exports["default"] = FileController;
 
 
 /***/ }),
@@ -845,7 +983,6 @@ class controller {
                             }
                             options.limit = parseInt((req.query.limit || 9).toString());
                             options.skip = parseInt((req.query.page || 0 * options.limit).toString());
-                            console.log(options);
                             let result = yield model_1.default.findDocuments(query, options);
                             let total = yield model_1.default.count(query);
                             for (let line of result) {
@@ -961,6 +1098,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -970,6 +1116,16 @@ const controller_1 = __importDefault(__webpack_require__(450));
 class TransactionController extends controller_1.default {
     constructor() {
         super({ model: model_1.default, submodels: model_1.TransactionTypes });
+    }
+    pdf(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype, id } = req.params;
+            const model = this.setModel(recordtype);
+            let document = yield model.getDocument(id, 'view');
+            let pdf = yield document.pdf();
+            res.contentType('application/pdf;charset=UTF-8');
+            res.send(pdf);
+        });
     }
 }
 exports["default"] = TransactionController;
@@ -1001,15 +1157,112 @@ exports["default"] = WarehouseController;
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const shop_model_1 = __importDefault(__webpack_require__(1725));
 const controller_1 = __importDefault(__webpack_require__(450));
+const child_process_1 = __webpack_require__(2081);
+const path_1 = __importDefault(__webpack_require__(1017));
+const fs_1 = __importDefault(__webpack_require__(7147));
 class WebsiteController extends controller_1.default {
     constructor() {
         super({ model: shop_model_1.default, submodels: {} });
+    }
+    save(req, res, next) {
+        const _super = Object.create(null, {
+            save: { get: () => super.save }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            _super.save.call(this, req, res, next);
+            this.syncSites();
+        });
+    }
+    syncSites() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('mapShops');
+            let shops = yield shop_model_1.default.find();
+            for (let site of shops) {
+                let sitePath = path_1.default.resolve("hosting", site.subdomain);
+                let siteTemplatesPath = path_1.default.resolve("hosting", site.subdomain, "templates");
+                //let siteTemplatePath = path.resolve("hosting", site.subdomain, "templates", site.template);
+                if (!fs_1.default.existsSync(sitePath))
+                    fs_1.default.mkdirSync(sitePath);
+                if (!fs_1.default.existsSync(siteTemplatesPath))
+                    fs_1.default.mkdirSync(siteTemplatesPath);
+                // if (!fs.existsSync(siteTemplatePath)) {
+                //     fs.mkdirSync(siteTemplatePath);
+                //     // copy template source if was modified
+                //     //fs.cp()
+                // }
+                try {
+                    // add custom domain
+                    if (site.domain)
+                        (0, child_process_1.exec)(`devil dns add ${site.domain}`, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log(`error: ${error.message}`);
+                                return;
+                            }
+                            if (stderr) {
+                                console.log(`stderr: ${stderr}`);
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                        });
+                    // add pointer
+                    if (site.domain)
+                        (0, child_process_1.exec)(`devil www add ${site.domain} pointer 3cerp.cloud`, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log(`error: ${error.message}`);
+                                return;
+                            }
+                            if (stderr) {
+                                console.log(`stderr: ${stderr}`);
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                        });
+                    //add SSL
+                    if (site.subdomain)
+                        (0, child_process_1.exec)(`devil ssl www add 128.204.218.180 le le ${site.subdomain}.3cerp.cloud`, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log(`error: ${error.message}`);
+                                return;
+                            }
+                            if (stderr) {
+                                console.log(`stderr: ${stderr}`);
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                        });
+                    if (site.domain)
+                        (0, child_process_1.exec)(`devil ssl www add 128.204.218.180 le le ${site.domain}`, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log(`error: ${error.message}`);
+                                return;
+                            }
+                            if (stderr) {
+                                console.log(`stderr: ${stderr}`);
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                        });
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+        });
     }
 }
 exports["default"] = WebsiteController;
@@ -1177,122 +1430,6 @@ exports.errorHandler = errorHandler;
 
 /***/ }),
 
-/***/ 3851:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-//requiring path and fs modules
-const path_1 = __importDefault(__webpack_require__(1017));
-const fs_1 = __importDefault(__webpack_require__(7147));
-const child_process_1 = __webpack_require__(2081);
-const shop_model_1 = __importDefault(__webpack_require__(1725));
-class HostingStructure {
-    constructor() {
-        //resolve hosting path of directory
-        this.hostingPath = path_1.default.resolve("hosting");
-        if (!fs_1.default.existsSync(this.hostingPath))
-            fs_1.default.mkdirSync(this.hostingPath);
-    }
-    init() {
-        console.log("Init Hosting", this.hostingPath);
-        //this.mapShops();
-    }
-    mapShops(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log('mapShops');
-            let shops = yield shop_model_1.default.find();
-            for (let site of shops) {
-                let sitePath = path_1.default.resolve("hosting", site.subdomain);
-                let siteTemplatesPath = path_1.default.resolve("hosting", site.subdomain, "templates");
-                //let siteTemplatePath = path.resolve("hosting", site.subdomain, "templates", site.template);
-                if (!fs_1.default.existsSync(sitePath))
-                    fs_1.default.mkdirSync(sitePath);
-                if (!fs_1.default.existsSync(siteTemplatesPath))
-                    fs_1.default.mkdirSync(siteTemplatesPath);
-                // if (!fs.existsSync(siteTemplatePath)) {
-                //     fs.mkdirSync(siteTemplatePath);
-                //     // copy template source if was modified
-                //     //fs.cp()
-                // }
-                try {
-                    // add custom domain
-                    if (site.domain)
-                        (0, child_process_1.exec)(`devil dns add ${site.domain}`, (error, stdout, stderr) => {
-                            if (error) {
-                                console.log(`error: ${error.message}`);
-                                return;
-                            }
-                            if (stderr) {
-                                console.log(`stderr: ${stderr}`);
-                                return;
-                            }
-                            console.log(`stdout: ${stdout}`);
-                        });
-                    // add pointer
-                    if (site.domain)
-                        (0, child_process_1.exec)(`devil www add ${site.domain} pointer 3cerp.cloud`, (error, stdout, stderr) => {
-                            if (error) {
-                                console.log(`error: ${error.message}`);
-                                return;
-                            }
-                            if (stderr) {
-                                console.log(`stderr: ${stderr}`);
-                                return;
-                            }
-                            console.log(`stdout: ${stdout}`);
-                        });
-                    //add SSL
-                    if (site.subdomain)
-                        (0, child_process_1.exec)(`devil ssl www add 128.204.218.180 le le ${site.subdomain}.3cerp.cloud`, (error, stdout, stderr) => {
-                            if (error) {
-                                console.log(`error: ${error.message}`);
-                                return;
-                            }
-                            if (stderr) {
-                                console.log(`stderr: ${stderr}`);
-                                return;
-                            }
-                            console.log(`stdout: ${stdout}`);
-                        });
-                    if (site.domain)
-                        (0, child_process_1.exec)(`devil ssl www add 128.204.218.180 le le ${site.domain}`, (error, stdout, stderr) => {
-                            if (error) {
-                                console.log(`error: ${error.message}`);
-                                return;
-                            }
-                            if (stderr) {
-                                console.log(`stderr: ${stderr}`);
-                                return;
-                            }
-                            console.log(`stdout: ${stdout}`);
-                        });
-                }
-                catch (error) {
-                    console.log(error);
-                }
-            }
-            next();
-        });
-    }
-}
-exports["default"] = HostingStructure;
-
-
-/***/ }),
-
 /***/ 4091:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -1304,21 +1441,22 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 //requiring path and fs modules
 const path_1 = __importDefault(__webpack_require__(1017));
 const fs_1 = __importDefault(__webpack_require__(7147));
-const mime_types_1 = __importDefault(__webpack_require__(9514));
-const file_model_1 = __importDefault(__webpack_require__(3630));
-const usefull_1 = __webpack_require__(6491);
+const schema_1 = __importDefault(__webpack_require__(9106));
 class StorageStructure {
     constructor() {
         //resolve storage path of directory
         this.storagePath = path_1.default.resolve("storage");
         this.importPath = path_1.default.resolve("storage", "import");
         this.exportPath = path_1.default.resolve("storage", "export");
+        this.uploadsPath = path_1.default.resolve("storage", "uploads");
         if (!fs_1.default.existsSync(this.storagePath))
             fs_1.default.mkdirSync(this.storagePath);
         if (!fs_1.default.existsSync(this.importPath))
             fs_1.default.mkdirSync(this.importPath);
         if (!fs_1.default.existsSync(this.exportPath))
             fs_1.default.mkdirSync(this.exportPath);
+        if (!fs_1.default.existsSync(this.uploadsPath))
+            fs_1.default.mkdirSync(this.uploadsPath);
     }
     init() {
         console.log("Init Storage", this.storagePath);
@@ -1342,32 +1480,282 @@ class StorageStructure {
     //parentPath: string = "root",
     parent) {
         fs_1.default.readdir(dirPath, (err, files) => {
-            let dirSize = 0;
             files.forEach((file) => {
+                let folder = parent ? parent.path : encodeURI("storage");
                 let doc = {
                     name: file,
-                    type: mime_types_1.default.lookup(file).toString(),
-                    path: dirPath,
-                    urlcomponent: encodeURI(`${dirPath}/${file}`)
+                    type: 'File',
+                    path: path_1.default.join(folder, encodeURI(file)),
+                    urlcomponent: path_1.default.join(folder, encodeURI(file)),
                 };
                 if (fs_1.default.lstatSync(path_1.default.join(dirPath, file)).isDirectory()) {
-                    doc.type = "directory";
+                    doc.type = "Folder";
                     this.mapFiles(path_1.default.join(dirPath, file), doc);
                 }
-                else {
-                    doc.size = (0, usefull_1.getFileSize)(doc.urlcomponent);
-                    dirSize += doc.size;
-                }
-                file_model_1.default.updateOrInsert(doc);
+                schema_1.default.updateOrInsert(doc);
             });
-            if (parent) {
-                parent.size = dirSize;
-                file_model_1.default.updateOrInsert(parent);
-            }
         });
     }
 }
 exports["default"] = StorageStructure;
+
+
+/***/ }),
+
+/***/ 5287:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const options = {
+    discriminatorKey: "activity",
+    collection: "activities.tasks_events",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+};
+const schema = new mongoose_1.Schema({
+    activity: { type: mongoose_1.Schema.Types.ObjectId },
+    name: {
+        type: String,
+        required: true,
+    },
+    type: {
+        type: String,
+        default: 'Event',
+        required: true,
+    },
+    description: {
+        type: String,
+        default: ""
+    },
+    date: { type: Date, input: "date", required: true },
+    endDate: { type: Date, input: "date" },
+}, options);
+const Event = (0, mongoose_1.model)("Event", schema);
+exports["default"] = Event;
+
+
+/***/ }),
+
+/***/ 6809:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(1190));
+const event_schema_1 = __importDefault(__webpack_require__(5287));
+const options = { discriminatorKey: "type", collection: "activities" };
+const schema = new mongoose_1.Schema({}, options);
+schema.virtual("events", {
+    ref: "Event",
+    localField: "_id",
+    foreignField: "activity",
+    justOne: false,
+    autopopulate: true,
+    model: event_schema_1.default
+});
+const Calendar = schema_1.default.discriminator("Calendar", schema);
+exports["default"] = Calendar;
+
+
+/***/ }),
+
+/***/ 625:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ActivityTypes = void 0;
+const schema_1 = __importDefault(__webpack_require__(1190));
+const schema_2 = __importDefault(__webpack_require__(6809));
+const event_schema_1 = __importDefault(__webpack_require__(5287));
+const schema_3 = __importDefault(__webpack_require__(3674));
+const task_schema_1 = __importDefault(__webpack_require__(5837));
+exports["default"] = schema_1.default;
+exports.ActivityTypes = {
+    calendar: schema_2.default,
+    project: schema_3.default,
+    event: event_schema_1.default,
+    task: task_schema_1.default,
+};
+
+
+/***/ }),
+
+/***/ 4639:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const options = {
+    discriminatorKey: "type",
+    collection: "activities.classification",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+};
+const schema = new mongoose_1.Schema({
+    activity: { type: mongoose_1.Schema.Types.ObjectId },
+    name: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        default: ""
+    },
+    color: {
+        type: String,
+        default: "#e1e1e1"
+    },
+}, options);
+const Group = (0, mongoose_1.model)("Group", schema);
+exports["default"] = Group;
+
+
+/***/ }),
+
+/***/ 3674:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(1190));
+const task_schema_1 = __importDefault(__webpack_require__(5837));
+const group_schema_1 = __importDefault(__webpack_require__(4639));
+const tag_schema_1 = __importDefault(__webpack_require__(4900));
+const options = { discriminatorKey: "type", collection: "activities" };
+const schema = new mongoose_1.Schema({}, options);
+schema.virtual("tasks", {
+    ref: "Task",
+    localField: "_id",
+    foreignField: "activity",
+    justOne: false,
+    autopopulate: true,
+    model: task_schema_1.default
+});
+schema.virtual("groups", {
+    ref: "Group",
+    localField: "_id",
+    foreignField: "activity",
+    justOne: false,
+    autopopulate: true,
+    model: group_schema_1.default
+});
+schema.virtual("tags", {
+    ref: "Tag",
+    localField: "_id",
+    foreignField: "activity",
+    justOne: false,
+    autopopulate: true,
+    model: tag_schema_1.default
+});
+const Project = schema_1.default.discriminator("Project", schema);
+exports["default"] = Project;
+
+
+/***/ }),
+
+/***/ 4900:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const group_schema_1 = __importDefault(__webpack_require__(4639));
+const options = {
+    discriminatorKey: "type",
+    collection: "activities.classification",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+};
+const schema = new mongoose_1.Schema({}, options);
+const Tag = group_schema_1.default.discriminator("Tag", schema);
+exports["default"] = Tag;
+
+
+/***/ }),
+
+/***/ 5837:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const options = {
+    discriminatorKey: "activity",
+    collection: "activities.tasks_events",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+};
+const schema = new mongoose_1.Schema({
+    activity: { type: mongoose_1.Schema.Types.ObjectId },
+    name: {
+        type: String,
+        required: true,
+    },
+    type: {
+        type: String,
+        default: 'Task',
+        required: true,
+    },
+    description: {
+        type: String,
+        default: ""
+    },
+    date: { type: Date, input: "date" },
+    endDate: { type: Date, input: "date" },
+    group: { type: mongoose_1.Schema.Types.ObjectId },
+    tags: { type: [] }
+}, options);
+const Task = (0, mongoose_1.model)("Task", schema);
+exports["default"] = Task;
+
+
+/***/ }),
+
+/***/ 1190:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+// Schemas ////////////////////////////////////////////////////////////////////////////////
+const options = {
+    discriminatorKey: "type",
+    collection: "activities",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+};
+const schema = new mongoose_1.Schema({
+    name: { type: String, required: true, input: "text" },
+    description: { type: String, input: "text", default: "" },
+    type: {
+        type: String,
+        required: true,
+    },
+    status: {
+        type: String,
+        default: "open"
+    },
+}, options);
+const Activity = (0, mongoose_1.model)("Activity", schema);
+exports["default"] = Activity;
 
 
 /***/ }),
@@ -1394,12 +1782,16 @@ exports.ClassificationTypes = {
 /***/ }),
 
 /***/ 7446:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.schema = void 0;
 const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(6617));
 const options = { discriminatorKey: "type", collection: "classifications" };
 exports.schema = new mongoose_1.Schema({
     name: {
@@ -1408,31 +1800,25 @@ exports.schema = new mongoose_1.Schema({
     }
 }, options);
 exports.schema.index({ name: 1 });
-const PriceGroup = (0, mongoose_1.model)("PriceGroup", exports.schema);
+const PriceGroup = schema_1.default.discriminator("PriceGroup", exports.schema);
 exports["default"] = PriceGroup;
 
 
 /***/ }),
 
 /***/ 3124:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.schema = void 0;
 const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(6617));
 const options = { discriminatorKey: "type", collection: "classifications" };
 exports.schema = new mongoose_1.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    type: {
-        type: String,
-        required: true,
-        enum: ["PriceLevel"],
-        default: "PriceLevel"
-    },
     base: {
         type: String,
         required: true,
@@ -1445,7 +1831,7 @@ exports.schema = new mongoose_1.Schema({
     }
 }, options);
 exports.schema.index({ name: 1 });
-const PriceLevel = (0, mongoose_1.model)("PriceLevel", exports.schema);
+const PriceLevel = schema_1.default.discriminator("PriceLevel", exports.schema);
 exports["default"] = PriceLevel;
 
 
@@ -1459,7 +1845,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 const ClassificationSchema = {
-    name: { type: String, },
+    name: { type: String },
+    description: { type: String },
+    type: {
+        type: String,
+        required: true,
+        enum: ["PriceLevel"],
+        default: "PriceLevel"
+    },
 };
 const options = {
     discriminatorKey: "type",
@@ -1470,6 +1863,39 @@ const options = {
 const schema = new mongoose_1.Schema(ClassificationSchema, options);
 const Classification = (0, mongoose_1.model)("Classification", schema);
 exports["default"] = Classification;
+
+
+/***/ }),
+
+/***/ 8499:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.schema = void 0;
+const mongoose_1 = __webpack_require__(1185);
+exports.schema = new mongoose_1.Schema({
+    name: {
+        type: String,
+        required: true,
+        min: [3, "Must be at least 3 characters long, got {VALUE}"]
+    },
+    type: {
+        type: String,
+        required: true,
+        default: "email"
+    },
+    description: {
+        type: String,
+    },
+}, {
+    collection: "emails",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+exports.schema.index({ name: 1 });
+const Email = (0, mongoose_1.model)("Email", exports.schema);
+exports["default"] = Email;
 
 
 /***/ }),
@@ -1710,6 +2136,14 @@ const schema = new mongoose_1.Schema({
 //     `${v.addressee}\n${v.address}, ${v.address2}\n${v.zip} ${v.city}\n${v.country}`
 // }
 }, options);
+// schema.virtual("salesOrders", {
+//   ref: "Calendar",
+//   localField: "name",
+//   foreignField: "name",
+//   justOne: false,
+//   autopopulate: true,
+//   model: SalesOrder
+// });
 exports["default"] = schema;
 
 
@@ -1725,13 +2159,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
 const schema_1 = __importDefault(__webpack_require__(7044));
-const file_model_1 = __webpack_require__(3630);
+//import Storage, { IStorage } from "../../storages/schema";
 const role_model_1 = __webpack_require__(6016);
 const warehouse_model_1 = __webpack_require__(2419);
 const options = { discriminatorKey: "type", collection: "entities" };
 const schema = new mongoose_1.Schema({
     jobTitle: { type: String, input: "text" },
-    avatar: { type: file_model_1.schema, input: "file" },
+    //avatar: { type: Storage, input: "file" },
     warehouse: { type: warehouse_model_1.schema, input: "select" },
     company: { type: schema_1.default, input: "select" },
     role: { type: role_model_1.schema, input: "select" }
@@ -1998,91 +2432,6 @@ exports["default"] = schema;
 
 /***/ }),
 
-/***/ 3630:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
-const mongoose_1 = __webpack_require__(1185);
-const fs_1 = __importDefault(__webpack_require__(7147));
-const mime_types_1 = __importDefault(__webpack_require__(9514));
-exports.schema = new mongoose_1.Schema({
-    name: { type: String, required: true, input: "text" },
-    type: { type: String, required: false, input: "text" },
-    path: { type: String, required: true, input: "text" },
-    url: { type: String, input: "text" },
-    urlcomponent: { type: String, input: "text" },
-    size: { type: Number, input: "text" }
-});
-exports.schema.statics.updateOrInsert = function (doc) {
-    return this.updateOne({ name: doc.name, path: doc.path }, doc, { upsert: true }, (err, result) => {
-        if (err)
-            throw err;
-        return result;
-    });
-};
-exports.schema.method("rename", function (path) {
-    return __awaiter(this, void 0, void 0, function* () {
-        this.path = path;
-        let doc = this;
-        fs_1.default.rename(this.path, path, function (err) {
-            let name = path.split("/").pop();
-            if (err)
-                throw err;
-            doc.name = name;
-            doc.save();
-            console.log("Successfully renamed - AKA moved!");
-        });
-    });
-});
-exports.schema.static("deleteFile", function (path) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let model = this;
-        fs_1.default.unlink(path, function (err) {
-            if (err)
-                throw err;
-            model.deleteOne({ path: path });
-            console.log("Successfully removed!");
-        });
-    });
-});
-exports.schema.static("addFile", function (files, path) {
-    return __awaiter(this, void 0, void 0, function* () {
-        for (let file of files) {
-            let name = file.name;
-            file.mv(`${path}/${name}`, function (err) {
-                if (err)
-                    throw err;
-            });
-            let doc = new this({
-                name: name,
-                type: mime_types_1.default.lookup(name).toString(),
-                path: path,
-                urlcomponent: encodeURI(`${path}/${name}`)
-            });
-            doc.save();
-        }
-    });
-});
-const File = (0, mongoose_1.model)("File", exports.schema);
-exports["default"] = File;
-
-
-/***/ }),
-
 /***/ 10:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -2270,7 +2619,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __webpack_require__(3124);
 const currencies_1 = __importDefault(__webpack_require__(7131));
 const options = { discriminatorKey: "type", foreignField: "item", collection: "items.price" };
 const schema = new mongoose_1.Schema({
@@ -2286,7 +2634,9 @@ const schema = new mongoose_1.Schema({
         required: true,
     },
     priceLevel: {
-        type: schema_1.schema,
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Classification",
+        autopopulate: true,
         required: false,
     }
 }, options);
@@ -2315,7 +2665,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
 const item_types_1 = __importDefault(__webpack_require__(3082));
-const schema_1 = __webpack_require__(7446);
 const price_schema_1 = __importDefault(__webpack_require__(4365));
 const countries_1 = __importDefault(__webpack_require__(5593));
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -2335,8 +2684,15 @@ const schema = new mongoose_1.Schema({
         input: "select"
     },
     priceGroup: {
-        type: schema_1.schema,
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Classification",
+        autopopulate: true,
         required: false,
+    },
+    images: {
+        type: [mongoose_1.Schema.Types.ObjectId],
+        ref: "Storage",
+        autopopulate: true,
     },
     coo: {
         type: String,
@@ -2495,6 +2851,156 @@ exports.schema.virtual('url').get(function () {
 exports.schema.index({ name: 1 });
 const Shop = (0, mongoose_1.model)("Shop", exports.schema);
 exports["default"] = Shop;
+
+
+/***/ }),
+
+/***/ 7662:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(9106));
+const mime_types_1 = __importDefault(__webpack_require__(9514));
+const options = { discriminatorKey: "type", collection: "storages", };
+const schema = new mongoose_1.Schema({
+    //size: { type: Number, set: (v: any) => getFileSize(this.path) },
+    mime: { type: String, set: (v) => mime_types_1.default.lookup(v).toString() },
+}, options);
+const File = schema_1.default.discriminator("File", schema);
+exports["default"] = File;
+
+
+/***/ }),
+
+/***/ 7559:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(9106));
+const options = { discriminatorKey: "type", collection: "storages" };
+const schema = new mongoose_1.Schema({}, options);
+const Folder = schema_1.default.discriminator("Folder", schema);
+exports["default"] = Folder;
+
+
+/***/ }),
+
+/***/ 248:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StorageTypes = void 0;
+const schema_1 = __importDefault(__webpack_require__(9106));
+const schema_2 = __importDefault(__webpack_require__(7559));
+const schema_3 = __importDefault(__webpack_require__(7662));
+exports["default"] = schema_1.default;
+exports.StorageTypes = {
+    folder: schema_2.default,
+    file: schema_3.default
+};
+
+
+/***/ }),
+
+/***/ 9106:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.schema = void 0;
+const mongoose_1 = __webpack_require__(1185);
+const fs_1 = __importDefault(__webpack_require__(7147));
+const mime_types_1 = __importDefault(__webpack_require__(9514));
+const options = {
+    collection: "storages",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+};
+exports.schema = new mongoose_1.Schema({
+    name: { type: String, required: true, },
+    type: { type: String, required: true },
+    path: { type: String, required: true, },
+    url: { type: String, },
+    urlcomponent: { type: String, },
+}, options);
+exports.schema.statics.updateOrInsert = function (doc) {
+    return this.updateOne({ name: doc.name, path: doc.path }, doc, { upsert: true }, (err, result) => {
+        if (err)
+            throw err;
+        return result;
+    });
+};
+exports.schema.method("rename", function (path) {
+    return __awaiter(this, void 0, void 0, function* () {
+        this.path = path;
+        let doc = this;
+        fs_1.default.rename(this.path, path, function (err) {
+            let name = path.split("/").pop();
+            if (err)
+                throw err;
+            doc.name = name;
+            doc.save();
+            console.log("Successfully renamed - AKA moved!");
+        });
+    });
+});
+exports.schema.static("deleteFile", function (path) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let model = this;
+        fs_1.default.unlink(path, function (err) {
+            if (err)
+                throw err;
+            model.deleteOne({ path: path });
+            console.log("Successfully removed!");
+        });
+    });
+});
+exports.schema.static("addFile", function (files, path) {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (let file of files) {
+            let name = file.name;
+            file.mv(path, function (err) {
+                if (err)
+                    throw err;
+            });
+            let doc = new this({
+                name: name,
+                type: mime_types_1.default.lookup(name).toString(),
+                path: path,
+                urlcomponent: encodeURI(`${path}/${name}`)
+            });
+            doc.save();
+        }
+    });
+});
+const Storage = (0, mongoose_1.model)("Storage", exports.schema);
+exports["default"] = Storage;
 
 
 /***/ }),
@@ -2862,6 +3368,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
+const pdf_1 = __importDefault(__webpack_require__(180));
 const line_schema_1 = __importDefault(__webpack_require__(2801));
 const currencies_1 = __importDefault(__webpack_require__(7131));
 const countries_1 = __importDefault(__webpack_require__(5593));
@@ -3015,6 +3522,11 @@ schema.virtual("lines", {
     model: line_schema_1.default,
     copyFields: ["entity"]
 });
+schema.method("pdf", function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield (0, pdf_1.default)();
+    });
+});
 schema.method("autoName", function () {
     return __awaiter(this, void 0, void 0, function* () {
         // set new transaction name (prefix+number+sufix)
@@ -3111,17 +3623,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 //import subdomain from "express-subdomain";
 const auth_1 = __importDefault(__webpack_require__(9422));
-const hosting_1 = __importDefault(__webpack_require__(3851));
 const express_1 = __importDefault(__webpack_require__(6860));
 const warehouses_1 = __importDefault(__webpack_require__(6606));
 const classifications_1 = __importDefault(__webpack_require__(3096));
 const entities_1 = __importDefault(__webpack_require__(5067));
 const transactions_1 = __importDefault(__webpack_require__(2069));
 const items_1 = __importDefault(__webpack_require__(1199));
+const activities_1 = __importDefault(__webpack_require__(5282));
 const websites_1 = __importDefault(__webpack_require__(718));
 const constants_1 = __importDefault(__webpack_require__(2110));
 const files_1 = __importDefault(__webpack_require__(4758));
-const hosting_2 = __importDefault(__webpack_require__(2101));
+const hosting_1 = __importDefault(__webpack_require__(2101));
+const emails_1 = __importDefault(__webpack_require__(4267));
 const shop_model_1 = __importDefault(__webpack_require__(1725));
 class Routes {
     constructor() {
@@ -3130,16 +3643,17 @@ class Routes {
         this.RouterFiles = express_1.default.Router();
         this.RouterCustom = express_1.default.Router();
         this.Auth = new auth_1.default();
-        this.Hosting = new hosting_1.default();
         this.entityController = new entities_1.default();
         this.classificationController = new classifications_1.default();
         this.warehouseController = new warehouses_1.default();
         this.transactionController = new transactions_1.default();
         this.websiteController = new websites_1.default();
         this.itemController = new items_1.default();
+        this.activityController = new activities_1.default();
         this.constantController = new constants_1.default();
         this.filesController = new files_1.default();
-        this.hostingController = new hosting_2.default();
+        this.hostingController = new hosting_1.default();
+        this.emailController = new emails_1.default();
     }
     start(app) {
         console.log("Start Routing");
@@ -3148,16 +3662,18 @@ class Routes {
         this.routeWarehouses();
         this.routeClassifications();
         this.routeItems();
+        this.routeActivities();
         this.routeUsers();
         this.routeWebsites();
         this.routeAuth();
         this.routeFiles();
         this.routeHosting();
         this.routeCustom();
+        this.routeEmails();
         app.use(subdomain("*", this.Router2));
         //app.use("/hosting", this.Router2);
         app.use("/api/core", this.Router);
-        app.use("/storage/files", this.RouterFiles);
+        //app.use("/api/core/storage", this.RouterFiles);
         //Custom
         app.use("/api/custom", this.RouterCustom);
     }
@@ -3194,11 +3710,18 @@ class Routes {
     routeClassifications() {
         // Classifications
         this.Router.route("/classifications/:recordtype").get(this.classificationController.find.bind(this.classificationController));
+        this.Router.route("/classifications/:recordtype/new/create").post(this.classificationController.add.bind(this.classificationController));
+        this.Router.route("/classifications/:recordtype/:id/:mode")
+            .get(this.classificationController.get.bind(this.classificationController))
+            .put(this.classificationController.update.bind(this.classificationController))
+            .post(this.classificationController.save.bind(this.classificationController))
+            .delete(this.classificationController.delete.bind(this.classificationController));
     }
     routeTransactions() {
         // Transactions
         this.Router.route("/transactions/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.transactionController.find.bind(this.transactionController));
         this.Router.route("/transactions/:recordtype/new/create").post(this.transactionController.add.bind(this.transactionController));
+        this.Router.route("/transactions/:recordtype/:id/pdf").get(this.transactionController.pdf.bind(this.transactionController));
         this.Router.route("/transactions/:recordtype/:id/:mode")
             .get(this.transactionController.get.bind(this.transactionController))
             .put(this.transactionController.update.bind(this.transactionController))
@@ -3213,7 +3736,19 @@ class Routes {
         this.Router.route("/items/:recordtype/:id/:mode")
             .get(this.itemController.get.bind(this.itemController))
             .put(this.itemController.update.bind(this.itemController))
+            .post(this.itemController.save.bind(this.itemController))
             .delete(this.itemController.delete.bind(this.itemController));
+    }
+    routeActivities() {
+        //Activities
+        this.Router.route("/activities/").get(this.Auth.authenticate.bind(this.Auth), this.activityController.find.bind(this.activityController));
+        this.Router.route("/activities/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.activityController.find.bind(this.activityController));
+        this.Router.route("/activities/:recordtype/new/create").post(this.activityController.add.bind(this.activityController));
+        this.Router.route("/activities/:recordtype/:id/:mode")
+            .get(this.activityController.get.bind(this.activityController))
+            .put(this.activityController.update.bind(this.activityController))
+            .post(this.activityController.save.bind(this.activityController))
+            .delete(this.activityController.delete.bind(this.activityController));
     }
     routeUsers() {
         // Users
@@ -3231,9 +3766,19 @@ class Routes {
         this.Router.route("/websites/:recordtype/new/create").post(this.websiteController.add.bind(this.websiteController));
         this.Router.route("/websites/:recordtype/:id/:mode")
             .get(this.websiteController.get.bind(this.websiteController))
-            .put(this.Hosting.mapShops.bind(this.Hosting), this.websiteController.update.bind(this.websiteController))
-            .post(this.Hosting.mapShops.bind(this.Hosting), this.websiteController.save.bind(this.websiteController))
-            .delete(this.Hosting.mapShops.bind(this.Hosting), this.websiteController.delete.bind(this.websiteController));
+            .put(this.websiteController.update.bind(this.websiteController))
+            .post(this.websiteController.save.bind(this.websiteController))
+            .delete(this.websiteController.delete.bind(this.websiteController));
+    }
+    routeEmails() {
+        // Emails
+        this.Router.route("/emails/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.emailController.find.bind(this.emailController));
+        this.Router.route("/emails/:recordtype/new/create").post(this.emailController.add.bind(this.emailController));
+        this.Router.route("/emails/:recordtype/:id/:mode")
+            .get(this.emailController.get.bind(this.emailController))
+            .put(this.emailController.update.bind(this.emailController))
+            .post(this.emailController.save.bind(this.emailController))
+            .delete(this.emailController.delete.bind(this.emailController));
     }
     routeAuth() {
         // Auth
@@ -3242,8 +3787,8 @@ class Routes {
     }
     routeFiles() {
         // Files
-        this.RouterFiles.route("/:path*?").get(this.Auth.authenticate, this.filesController.get);
-        this.RouterFiles.route("/upload").post(this.Auth.authenticate, this.filesController.add);
+        this.Router.route("/files/upload/:path*?").post(this.filesController.upload.bind(this.filesController));
+        this.Router.route("/files/:path*?").get(this.Auth.authenticate.bind(this.Auth), this.filesController.find.bind(this.filesController));
     }
     routeHosting() {
         // Hosting
@@ -3404,6 +3949,53 @@ exports["default"] = Routes;
 
 /***/ }),
 
+/***/ 3097:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const nodemailer_1 = __importDefault(__webpack_require__(5184));
+class Email {
+    constructor() {
+        this.host = "mail0.small.pl";
+        this.port = 465;
+        this.secure = true;
+        this.user = "notification@3cerp.cloud";
+        this.pass = "Test1!";
+        this.transporter = nodemailer_1.default.createTransport({
+            pool: true,
+            host: this.host,
+            port: this.port,
+            secure: this.secure,
+            auth: {
+                user: this.user,
+                pass: this.pass
+            }
+        });
+        this.email = {
+            from: 'test@ozparts.pl',
+            to: 'it@ozparts.eu',
+            subject: 'test',
+            html: 'test'
+        };
+    }
+    send(message = {}, data = {}, template) {
+        this.transporter.sendMail(this.email, (error, info) => {
+            if (error) {
+                return console.log(error);
+            }
+            console.log('Message sent: %s', info.messageId);
+        });
+    }
+}
+exports["default"] = Email;
+
+
+/***/ }),
+
 /***/ 1321:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -3496,7 +4088,8 @@ function methods(schema, options) {
         });
     }
     schema.virtual('resource').get(function () {
-        return this.schema.options.collection;
+        let resources = this.schema.options.collection.split(".");
+        return resources[0];
     });
     schema.methods.setValue = setValue_1.default;
     schema.methods.changeLogs = changeLogs_1.default;
@@ -3564,7 +4157,7 @@ function autoPopulate(req) {
             if (schemaType.options.ref && schemaType.options.autopopulate) {
                 paths.push({
                     field: pathname,
-                    select: schemaType.options.autopopulate.select || "name displayname type _id resource"
+                    select: schemaType.options.autopopulate.select || "name displayname type _id resource path "
                 });
             }
             //i18n Translation - test - to use only for export report
@@ -3693,6 +4286,7 @@ function setValue(list, subrecord, field, value) {
             }
             else {
                 this[field] = value;
+                console.log(this[field]);
                 yield this.populate(field, "name displayname type _id");
                 changeLogs = this.getChanges();
             }
@@ -3853,6 +4447,165 @@ exports["default"] = virtualPopulate;
 
 /***/ }),
 
+/***/ 180:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const pdfjs_1 = __importDefault(__webpack_require__(6684));
+const fs_1 = __importDefault(__webpack_require__(7147));
+const path_1 = __importDefault(__webpack_require__(1017));
+const fontsPath = path_1.default.resolve(__dirname);
+let OpenSans = new pdfjs_1.default.Font(fs_1.default.readFileSync(fontsPath + "/fonts/OpenSans-Regular.ttf"));
+// let OpenSansBold = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/OpenSans-Bold.ttf"));
+// let code128 = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/code128.ttf"));
+// let code39 = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/code39.ttf"));
+// const fonts:any = {
+//   default: OpenSans,
+//   bold: OpenSansBold,
+//   code128: code128,
+//   code39: code39
+// }
+function render() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cum id fugiunt, re eadem quae Peripatetici, verba. Tenesne igitur, inquam, Hieronymus Rhodius quid dicat esse summum bonum, quo putet omnia referri oportere? Quia nec honesto quic quam honestius nec turpi turpius.';
+        const doc = new pdfjs_1.default.Document({ font: fonts.Helvetica });
+        const header = doc
+            .header()
+            .table({ widths: [null, null], paddingBottom: 1 * pdfjs_1.default.cm })
+            .row();
+        const src = fs_1.default.readFileSync(__dirname + '/logo.jpg');
+        const logo = new pdfjs_1.default.Image(src);
+        //headerLogo.cell().image(logo, { height: 1.5 * pdf.cm });
+        header.cell().image(logo, { height: 2 * pdfjs_1.default.cm });
+        header
+            .cell()
+            .text({ textAlign: 'right' })
+            .add('A Portable Document Format (PDF) generation library targeting both the server- and client-side.')
+            .add('https://github.com/rkusa/pdfjs', {
+            link: 'https://github.com/rkusa/pdfjs',
+            underline: true,
+            color: 0x569cd6,
+        });
+        doc.footer().pageNumber(function (curr, total) {
+            return curr + ' / ' + total;
+        }, { textAlign: 'center' });
+        const cell = doc.cell({ paddingBottom: 0.5 * pdfjs_1.default.cm });
+        cell.text('Features:', { fontSize: 16, font: fonts.HelveticaBold });
+        cell
+            .text({ fontSize: 14, lineHeight: 1.35 })
+            .add('-')
+            .add('different', { color: 0xf8dc3f })
+            .add('font', { font: fonts.TimesRoman })
+            .add('styling', { underline: true })
+            .add('options', { fontSize: 9 });
+        cell.text('- Images (JPEGs, other PDFs)');
+        cell.text('- Tables (fixed layout, header row)');
+        cell.text('- AFM fonts and');
+        cell.text('- OTF font embedding (as CID fonts, i.e., support for fonts with large character sets)', {
+            font: fonts.HelveticaBold,
+        });
+        cell.text('- Add existing PDFs (merge them or add them as page templates)');
+        doc
+            .cell({ paddingBottom: 0.5 * pdfjs_1.default.cm })
+            .text()
+            .add('For more information visit the')
+            .add('Documentation', {
+            link: 'https://github.com/rkusa/pdfjs/tree/master/docs',
+            underline: true,
+            color: 0x569cd6,
+        });
+        const table = doc.table({
+            widths: [1.5 * pdfjs_1.default.cm, 1.5 * pdfjs_1.default.cm, null, 2 * pdfjs_1.default.cm, 2.5 * pdfjs_1.default.cm],
+            borderHorizontalWidths: function (i) {
+                return i < 2 ? 1 : 0.1;
+            },
+            padding: 5,
+        });
+        const tr = table.header({
+            font: fonts.HelveticaBold
+        });
+        tr.cell('#');
+        tr.cell('Unit');
+        tr.cell('Subject');
+        tr.cell('Price', { textAlign: 'right' });
+        tr.cell('Total', { textAlign: 'right' });
+        function addRow(qty, name, desc, price) {
+            const tr = table.row();
+            tr.cell(qty.toString());
+            tr.cell('pc.');
+            const article = tr.cell().text();
+            article
+                .add(name, { font: fonts.HelveticaBold })
+                .br()
+                .add(desc, { fontSize: 11, textAlign: 'justify' });
+            tr.cell(price.toFixed(2) + ' €', { textAlign: 'right' });
+            tr.cell((price * qty).toFixed(2) + ' €', { textAlign: 'right' });
+        }
+        addRow(2, 'Article A', lorem, 500);
+        addRow(1, 'Article B', lorem, 250);
+        addRow(2, 'Article C', lorem, 330);
+        addRow(3, 'Article D', lorem, 1220);
+        addRow(2, 'Article E', lorem, 120);
+        addRow(5, 'Article F', lorem, 50);
+        const buf = yield doc.asBuffer();
+        return buf;
+        //   const blob = new Blob([buf], { type: 'application/pdf' });
+        //   const url = URL.createObjectURL(blob);
+    });
+}
+exports["default"] = render;
+const Courier_Bold_1 = __importDefault(__webpack_require__(5647));
+const Courier_BoldOblique_1 = __importDefault(__webpack_require__(226));
+const Courier_Oblique_1 = __importDefault(__webpack_require__(5953));
+const Courier_1 = __importDefault(__webpack_require__(9054));
+const Helvetica_Bold_1 = __importDefault(__webpack_require__(44));
+const Helvetica_BoldOblique_1 = __importDefault(__webpack_require__(1459));
+const Helvetica_Oblique_1 = __importDefault(__webpack_require__(4865));
+const Helvetica_1 = __importDefault(__webpack_require__(7485));
+const Symbol_1 = __importDefault(__webpack_require__(2437));
+const Times_Bold_1 = __importDefault(__webpack_require__(3628));
+const Times_BoldItalic_1 = __importDefault(__webpack_require__(7169));
+const Times_Italic_1 = __importDefault(__webpack_require__(7651));
+const Times_Roman_1 = __importDefault(__webpack_require__(7356));
+const ZapfDingbats_1 = __importDefault(__webpack_require__(4764));
+//import OpenSans from 'pdfjs/font/OpenSans';
+const fonts = {
+    CourierBold: Courier_Bold_1.default,
+    CourierBoldOblique: Courier_BoldOblique_1.default,
+    CourierOblique: Courier_Oblique_1.default,
+    Courier: Courier_1.default,
+    HelveticaBold: Helvetica_Bold_1.default,
+    HelveticaBoldOblique: Helvetica_BoldOblique_1.default,
+    HelveticaOblique: Helvetica_Oblique_1.default,
+    Helvetica: Helvetica_1.default,
+    Symbol: Symbol_1.default,
+    TimesBold: Times_Bold_1.default,
+    TimesBoldItalic: Times_BoldItalic_1.default,
+    TimesItalic: Times_Italic_1.default,
+    TimesRoman: Times_Roman_1.default,
+    ZapfDingbats: ZapfDingbats_1.default,
+    //OpenSans,
+};
+render().catch((err) => {
+    throw err;
+});
+
+
+/***/ }),
+
 /***/ 5833:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -3866,9 +4619,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findDocuments = exports.deleteDocument = exports.updateDocument = exports.saveDocument = exports.getDocument = exports.addDocument = exports.loadDocument = void 0;
 const app_1 = __webpack_require__(3165);
+const pdf_1 = __importDefault(__webpack_require__(180));
 //loadDocument
 function loadDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -3920,6 +4677,8 @@ function saveDocument(id) {
         let document = app_1.cache.getCache(id);
         yield document.save();
         app_1.cache.delCache(id);
+        //email.send({}, {}, 'ts');
+        (0, pdf_1.default)();
         return id;
     });
 }
@@ -4056,6 +4815,13 @@ module.exports = require("express");
 
 /***/ }),
 
+/***/ 6674:
+/***/ ((module) => {
+
+module.exports = require("express-fileupload");
+
+/***/ }),
+
 /***/ 3222:
 /***/ ((module) => {
 
@@ -4095,6 +4861,118 @@ module.exports = require("mongoose");
 /***/ ((module) => {
 
 module.exports = require("mongoose-paginate-v2");
+
+/***/ }),
+
+/***/ 5184:
+/***/ ((module) => {
+
+module.exports = require("nodemailer");
+
+/***/ }),
+
+/***/ 6684:
+/***/ ((module) => {
+
+module.exports = require("pdfjs");
+
+/***/ }),
+
+/***/ 9054:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Courier");
+
+/***/ }),
+
+/***/ 5647:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Courier-Bold");
+
+/***/ }),
+
+/***/ 226:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Courier-BoldOblique");
+
+/***/ }),
+
+/***/ 5953:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Courier-Oblique");
+
+/***/ }),
+
+/***/ 7485:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Helvetica");
+
+/***/ }),
+
+/***/ 44:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Helvetica-Bold");
+
+/***/ }),
+
+/***/ 1459:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Helvetica-BoldOblique");
+
+/***/ }),
+
+/***/ 4865:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Helvetica-Oblique");
+
+/***/ }),
+
+/***/ 2437:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Symbol");
+
+/***/ }),
+
+/***/ 3628:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Times-Bold");
+
+/***/ }),
+
+/***/ 7169:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Times-BoldItalic");
+
+/***/ }),
+
+/***/ 7651:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Times-Italic");
+
+/***/ }),
+
+/***/ 7356:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/Times-Roman");
+
+/***/ }),
+
+/***/ 4764:
+/***/ ((module) => {
+
+module.exports = require("pdfjs/font/ZapfDingbats");
 
 /***/ }),
 

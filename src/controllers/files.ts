@@ -17,8 +17,8 @@ export default class FileController extends controller {
           message: 'No file uploaded'
         });
       } else {
-
-        let files: any[] = Array.isArray(req.files.files) ? req.files.files : [req.files];
+     
+        let files: any[] = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
 
         let uploaded: IFile[] = [];
         for (let file of files) {

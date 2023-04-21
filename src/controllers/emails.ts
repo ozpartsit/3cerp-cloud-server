@@ -21,7 +21,7 @@ export default class EmailController extends controller {
                 // Test email alias
                 let adres_docelowy = 'notification@3cerp.cloud';
                 let adres_zrodlowy = email.name;
-                exec(`devil mail alias add ${adres_docelowy} ${adres_zrodlowy}`, (error, stdout, stderr) => {
+                exec(`devil mail alias add ${adres_zrodlowy} ${adres_docelowy}`, (error, stdout, stderr) => {
                     if (error) {
                         console.log(`error: ${error.message}`);
                         return;

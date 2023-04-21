@@ -10,6 +10,7 @@ export interface IEvent extends IExtendedDocument {
     date: Date;
     endDate: Date;
     type: string;
+    color: string;
 }
 
 export interface IEventModel extends Model<IEvent>, IExtendedModel { }
@@ -38,7 +39,10 @@ const schema = new Schema<IEvent>(
         },
         date: { type: Date, input: "date", required: true },
         endDate: { type: Date, input: "date" },
-
+        color: {
+            type: String,
+            default: "#e1e1e1"
+        },
     },
     options
 );
