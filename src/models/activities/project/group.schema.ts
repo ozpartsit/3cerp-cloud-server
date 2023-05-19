@@ -1,14 +1,11 @@
 import { Schema, Model, model } from "mongoose";
 import { IActivity } from "../schema";
+import TaskStatus, { ITaskStatus } from "./class.schema";
 import { IExtendedDocument } from "../../../utilities/methods";
 import { IExtendedModel } from "../../../utilities/static";
 
-export interface IGroup extends IExtendedDocument {
-    _id: Schema.Types.ObjectId;
-    activity: IActivity["_id"];
-    description: string;
-    name: string;
-    color: string;
+export interface IGroup extends ITaskStatus {
+
 }
 
 export interface IGroupModel extends Model<IGroup>, IExtendedModel { }
@@ -21,22 +18,10 @@ const options = {
 };
 const schema = new Schema<IGroup>(
     {
-        activity: { type: Schema.Types.ObjectId },
-        name: {
-            type: String,
-            required: true,
-        },
-        description: {
-            type: String,
-            default: ""
-        },
-        color: {
-            type: String,
-            default: "#e1e1e1"
-        },
+
     },
     options
 );
 
-const Group: IGroupModel = model<IGroup, IGroupModel>("Group", schema);
+const Group: IGroupModel = TaskStatus.discriminator<IGroup, IGroupModel>("Group", schema);
 export default Group;

@@ -46,6 +46,7 @@ const error_handler_1 = __webpack_require__(9868);
 const storage_1 = __importDefault(__webpack_require__(4091));
 const cache_1 = __importDefault(__webpack_require__(9732));
 const path_1 = __importDefault(__webpack_require__(1017));
+const os_1 = __importDefault(__webpack_require__(2037));
 // Custom ENVIRONMENT Veriables
 let env = dotenv.config({
     path: path_1.default.resolve(`.env.${"production"}`)
@@ -65,6 +66,7 @@ class App3CERP {
         process.title = "3CERP";
         console.log("NODE_ENV", "production");
         console.log("NODE_PORT", process.env.PORT);
+        console.log("CPUs", os_1.default.cpus().length);
         this.config();
         this.dbConnect();
         this.mountRoutes();
@@ -873,8 +875,7 @@ class FileController extends controller_1.default {
                     });
                 }
                 else {
-                    let files = Array.isArray(req.files.files) ? req.files.files : [req.files];
-                    console.log(files);
+                    let files = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
                     let uploaded = [];
                     for (let file of files) {
                         let dirPath = "uploads";
@@ -1531,6 +1532,10 @@ const schema = new mongoose_1.Schema({
     },
     date: { type: Date, input: "date", required: true },
     endDate: { type: Date, input: "date" },
+    color: {
+        type: String,
+        default: "#e1e1e1"
+    },
 }, options);
 const Event = (0, mongoose_1.model)("Event", schema);
 exports["default"] = Event;
@@ -4987,6 +4992,13 @@ module.exports = require("child_process");
 /***/ ((module) => {
 
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 2037:
+/***/ ((module) => {
+
+module.exports = require("os");
 
 /***/ }),
 

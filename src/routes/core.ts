@@ -13,6 +13,8 @@ import ConstantController from "../controllers/constants";
 import FilesController from "../controllers/files";
 import HostingController from "../controllers/hosting";
 import EmailController from "../controllers/emails";
+import SettingController from "../controllers/settings";
+import ReportController from "../controllers/reports";
 import shop, { IShop } from "../models/shop.model";
 
 export default class Routes {
@@ -32,6 +34,8 @@ export default class Routes {
   public filesController: FilesController = new FilesController();
   public hostingController: HostingController = new HostingController();
   public emailController: EmailController = new EmailController();
+  public settingController: SettingController = new SettingController();
+  public reportController: ReportController = new ReportController();
 
   public start(app: express.Application): void {
     console.log("Start Routing");
@@ -48,6 +52,8 @@ export default class Routes {
     this.routeHosting();
     this.routeCustom();
     this.routeEmails();
+    this.routeSettings();
+    this.routeReports();
     app.use(subdomain("*", this.Router2));
     //app.use("/hosting", this.Router2);
     app.use("/api/core", this.Router);
@@ -169,6 +175,11 @@ export default class Routes {
   }
   public routeUsers() {
     // Users
+    // this.Router.route("/entities/:recordtype/:id/options").get(
+    //   this.Auth.authenticate.bind(this.Auth) as any,
+    //   this.entityController.options.bind(this.entityController) as any
+    // );
+
     this.Router.route("/entities/:recordtype").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.entityController.find.bind(this.entityController) as any
@@ -217,6 +228,51 @@ export default class Routes {
       .put(this.emailController.update.bind(this.emailController) as any)
       .post(this.emailController.save.bind(this.emailController) as any)
       .delete(this.emailController.delete.bind(this.emailController) as any);
+  }
+  public routeSettings() {
+    // Settings
+
+    this.Router.route("/settings/:recordtype").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.settingController.find.bind(this.settingController) as any
+    );
+
+    this.Router.route("/settings/:recordtype/new/create").post(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.settingController.add.bind(this.settingController) as any
+    );
+
+    // this.Router.route("/settings/:recordtype/new/create").post(
+    //   this.settingController.add.bind(this.settingController) as any
+    // );
+
+    this.Router.route("/settings/:recordtype/:id/:mode?")
+      .put(this.settingController.update.bind(this.settingController) as any)
+    // .get(this.settingController.get.bind(this.settingController) as any)
+
+    //   .post(this.settingController.save.bind(this.settingController) as any)
+    //   .delete(this.settingController.delete.bind(this.settingController) as any);
+  }
+  public routeReports() {
+    // Reports
+    this.Router.route("/reports/:recordtype").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.reportController.find.bind(this.reportController) as any
+    );
+
+    this.Router.route("/reports/:recordtype/new/create").post(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.reportController.add.bind(this.reportController) as any
+    );
+
+    this.Router.route("/reports/:recordtype/:id/results")
+      .get(this.reportController.results.bind(this.reportController) as any)
+
+    this.Router.route("/reports/:recordtype/:id/:mode?")
+      .put(this.reportController.update.bind(this.reportController) as any)
+      .get(this.reportController.get.bind(this.reportController) as any)
+      .post(this.reportController.save.bind(this.reportController) as any)
+      .delete(this.reportController.delete.bind(this.reportController) as any);
   }
   public routeAuth() {
     // Auth

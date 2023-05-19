@@ -16,6 +16,12 @@ export default class Database {
     this.server = process.env.DB_SERVER || "";
   }
   public connect() {
+    const db2 = mongoose.createConnection(`mongodb://mo1069_backup:Test1!@${this.server}/mo1069_backup`,
+      {
+        // useNewUrlParser: true,
+        // useUnifiedTopology: true,
+        autoIndex: true // false for production
+      });
     mongoose
       .connect(
         `mongodb://${this.database}:${this.password}@${this.server}/${this.database}`,
@@ -31,5 +37,9 @@ export default class Database {
       .catch((err: any) => {
         console.error("Database connection error");
       });
+
+    //mongoose.set('debug', true);
+
   }
+
 }

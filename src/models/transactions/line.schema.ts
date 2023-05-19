@@ -65,7 +65,8 @@ const schema = new Schema<ILine>(
     },
     description: {
       type: String,
-      set: (v: any) => v.toLowerCase()
+      set: (v: any) => v.toLowerCase(),
+      input: "text"
     },
     price: {
       type: Number,

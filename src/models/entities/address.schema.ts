@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import axios from "axios";
-import Countries from "../../constants/countries";
+//import Countries from "../../constants/countries";
 import { IEntity } from "./schema";
 export interface IAddress {
   _id: Schema.Types.ObjectId;
@@ -33,16 +33,15 @@ const schema = new Schema<IAddress>(
     zip: { type: String, required: true, input: "text" },
     country: {
       type: String,
-      //get: (v: any) => Countries.getName(v),
-      enum: Countries,
       required: true,
-      input: "select"
+      resource: "constatnts",
+      constant: "countries"
     },
     phone: { type: String, input: "text" },
     geoCodeHint: {
       type: String,
       get: (v: any) =>
-        `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}`,
+        v ? `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}` : '',
       input: "text"
     },
     latitude: { type: String, input: "text" },

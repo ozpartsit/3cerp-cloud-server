@@ -13,7 +13,8 @@ export interface ITask extends IExtendedDocument {
     endDate: Date;
     group: IGroup["_id"];
     type: string;
-    tags: ITag[]
+    tags: Schema.Types.ObjectId[]
+    index: number;
 }
 
 export interface ITaskModel extends Model<ITask>, IExtendedModel { }
@@ -26,6 +27,9 @@ const options = {
 };
 const schema = new Schema<ITask>(
     {
+        index: {
+            type: Number
+        },
         activity: { type: Schema.Types.ObjectId },
         name: {
             type: String,
@@ -40,10 +44,14 @@ const schema = new Schema<ITask>(
             type: String,
             default: ""
         },
-        date: { type: Date, input: "date" },
-        endDate: { type: Date, input: "date" },
+        date: { type: Date },
+        endDate: { type: Date },
         group: { type: Schema.Types.ObjectId },
-        tags: { type: [] }
+        tags: {
+            type: [Schema.Types.ObjectId],
+            ref: "Tag",
+            autopopulate: { select: "name displayname color" },
+        }
     },
     options
 );

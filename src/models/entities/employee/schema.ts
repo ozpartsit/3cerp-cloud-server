@@ -3,12 +3,10 @@ import { IEntity } from "../schema";
 import Company, { ICompany } from "../company/schema";
 //import Storage, { IStorage } from "../../storages/schema";
 import { schema as Role, IRole } from "../../role.model";
-import { schema as Warehouse, IWarehouse } from "../../warehouse.model";
 export interface IEmployee extends IEntity {
   company: ICompany;
   jobTitle?: string;
   //avatar?: IStorage;
-  warehouse?: IWarehouse;
   role: IRole;
 }
 
@@ -17,7 +15,6 @@ const schema = new Schema<IEmployee>(
   {
     jobTitle: { type: String, input: "text" },
     //avatar: { type: Storage, input: "file" },
-    warehouse: { type: Warehouse, input: "select" },
     company: { type: Company, input: "select" },
     role: { type: Role, input: "select" }
   },

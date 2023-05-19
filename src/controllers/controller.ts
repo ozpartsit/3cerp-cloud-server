@@ -1,13 +1,25 @@
 import { Request, Response, NextFunction } from "express";
+import mongoose, { models } from "mongoose";
 export default class controller {
     private models: any = {};
     constructor(models: any) {
         this.models = models;
     }
-    public setModel(recordtype: string) {
-        if (this.models)
-            return this.models.submodels[recordtype] || this.models.model;
-        else throw 'błąd';
+    public setModel(recordtype: string, db?: string) {
+        if (this.models) {
+            let Model = (this.models.submodels[recordtype] || this.models.model);
+            Model.getFields();
+            // Create or assign models from dedicate BD - to do
+            if (db) {
+                const connection = mongoose.connections.find(conn => conn.name === db);
+                if (connection) {
+                    if (!connection.models[Model.modelName]) Model = connection.model(Model.modelName, Model.schema) //- działa
+                    else Model = connection.models[Model.modelName];
+                }
+            }
+
+            return Model;
+        } else throw 'błąd';
     }
 
     public async add(req: Request, res: Response, next: NextFunction) {
@@ -15,6 +27,7 @@ export default class controller {
 
         const model = this.setModel(req.params.recordtype);
         try {
+            //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
             let document = await model.addDocument(req.body);
             res.json(document);
         } catch (error) {
@@ -24,17 +37,21 @@ export default class controller {
 
     public async find(req: Request, res: Response, next: NextFunction) {
         const model = this.setModel(req.params.recordtype);
+
         try {
-            let query = {};
+            let query: any = {};
+
             let options = { select: { name: 1, type: 1, collection: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
             let filters = (req.query.filters || "").toString();
             if (filters) {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
             }
+            //query.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
             let select = (req.query.select || "").toString();
             if (select) {
                 options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, collection: 1, link: 1 });
             }
+            // Sort
             let sort = (req.query.sort || "").toString();
             if (sort) {
                 options.sort = sort.split(",").reduce((o, f) => {
@@ -42,24 +59,39 @@ export default class controller {
                     if (f[0] == "-") {
                         f = f.substring(1);
                         o[f] = 1;
-                    } else
+                    } else {
                         o[f] = 1;
+                    }
                     return o;
                 }, {});
             }
+            // search by keyword
             let search = (req.query.search || "").toString();
             if (search) {
                 query['name'] = { $regex: `,*${req.query.search}.*` }
             }
 
-            console.log(query)
             options.limit = parseInt((req.query.limit || 50).toString());
             options.skip = parseInt((req.query.skip || 0).toString());
+
             let result = await model.findDocuments(query, options);
             let total = await model.count(query)
-            for (let line of result) {
-                await line.autoPopulate(req);
+            for (let index in result) {
+                result[index] = await result[index].autoPopulate(req);
+             
             }
+            //to do - test przypisania do source.field
+
+            // result = result.map(line => {
+            //     let row = {};
+            //     for (const [key, value] of Object.entries(options.select)) {
+            //         console.log(key, value,line[key])
+            //         row[key] = line[key];
+            //     }
+            //     return row;
+            // })
+            // console.log(result)
+
             const data = {
                 docs: result,
                 totalDocs: total,
@@ -67,7 +99,7 @@ export default class controller {
                 page: options.skip,
                 totalPages: total / options.limit
             }
-
+           
             res.json(data);
         } catch (error) {
             return next(error);
@@ -76,9 +108,8 @@ export default class controller {
 
     public async get(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
-
         const model = this.setModel(recordtype);
-        console.log(req.params.recordtype, model)
+
         try {
             let document = await model.getDocument(id, mode);
             if (!document) res.status(404).json({
@@ -104,8 +135,18 @@ export default class controller {
         let { recordtype, id } = req.params;
         const model = this.setModel(recordtype);
         try {
-            let { list, subrecord, field, value, save } = req.body;
-            let document = await model.updateDocument(id, list, subrecord, field, value, save);
+            // let document = null;
+            // if (Array.isArray(req.body)) { // to do - może upateDocument zmienić by przyjomwał cały obiek body?
+            //     for (let update of req.body) {
+            //         let { list, subrecord, field, value, save } = update;
+            //         document = await model.updateDocument(id, update);
+            //     }
+            // } else {
+            //     let { list, subrecord, field, value, save } = req.body;
+            //     document = await model.updateDocument(id, list, subrecord, field, value, save);
+            // }
+            let update = req.body;
+            let document = await model.updateDocument(id, update, req.body.save);
             res.json(document);
         } catch (error) {
             return next(error);
@@ -115,11 +156,27 @@ export default class controller {
     public delete(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         const model = this.setModel(recordtype);
-        try {
+        try {// to do - do poprawy
             let document = model.deleteDocument(id)
             res.json(document);
         } catch (error) {
             return next(error);
         }
     }
+
+    // public async options(req: Request, res: Response, next: NextFunction) {
+    //     let { recordtype, id, mode } = req.params;
+    //     const model = this.setModel(recordtype);
+    //     try {
+    //         let document = await model.getDocument(id, mode);
+    //         if (!document) res.status(404).json({
+    //             message: 'Document not found'
+    //         })
+    //         else{
+
+    //         }
+    //     } catch (error) {
+    //         return next(error);
+    //     }
+    // }
 }

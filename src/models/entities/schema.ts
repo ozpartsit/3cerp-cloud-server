@@ -5,7 +5,7 @@ import Address, { IAddress } from "./address.schema";
 import Balance, { IBalance } from "./balance.schema";
 import GroupLevel, { IGroupLevel } from "./grouplevel.schema";
 import Currencies from "../../constants/currencies";
-import Countries from "../../constants/countries";
+//import Countries from "../../constants/countries";
 
 const contactModel = model("Contact", Contact);
 const balanceModel = model("Balance", Balance);
@@ -21,6 +21,7 @@ export interface IEntity {
   password?: string;
 
   salesRep: Schema.Types.ObjectId;
+  warehouse: Schema.Types.ObjectId;
   currency?: string;
   taxNumber: string;
   tax: number;
@@ -88,6 +89,13 @@ const schema = new Schema<IEntity>(
       type: Schema.Types.ObjectId,
       ref: "Entity",
       autopopulate: true,
+      input: "select"
+    },
+    warehouse: {
+      type: Schema.Types.ObjectId,
+      ref: "Warehouse",
+      autopopulate: true,
+      input: "select"
     },
     currency: {
       type: String,
@@ -95,76 +103,103 @@ const schema = new Schema<IEntity>(
       //get: (v: any) => Currencies.getName(v),
       enum: Currencies,
       default: "PLN",
+      input: "select",
+      resource: 'constants',
+      constant: 'currencies'
     },
     billingName: {
-      type: String
+      type: String,
+      input: "text"
     },
     billingAddressee: {
-      type: String
+      type: String,
+      input: "text"
     },
     billingAddress: {
-      type: String
+      type: String,
+      input: "text"
     },
     billingAddress2: {
-      type: String
+      type: String,
+      input: "text"
     },
     billingZip: {
-      type: String
+      type: String,
+      input: "text"
     },
     billingCity: {
-      type: String
+      type: String,
+      input: "text"
     },
     billingState: {
       type: String,
+      input: "select"
     },
     billingCountry: {
       type: String,
-      enum: Countries,
+      input: "select",
+      resource: 'constants',
+      constant: 'countries'
     },
     billingPhone: {
-      type: String
+      type: String,
+      input: "text"
     },
     billingEmail: {
-      type: String
+      type: String,
+      input: "text"
     },
     shippingName: {
-      type: String
+      type: String,
+      input: "text"
     },
     shippingAddressee: {
-      type: String
+      type: String,
+      input: "text"
     },
     shippingAddress: {
-      type: String
+      type: String,
+      input: "text"
     },
     shippingAddress2: {
-      type: String
+      type: String,
+      input: "text"
     },
     shippingZip: {
-      type: String
+      type: String,
+      input: "text"
     },
     shippingCity: {
-      type: String
+      type: String,
+      input: "text"
     },
     shippingState: {
       type: String,
+      input: "select"
     },
     shippingCountry: {
       type: String,
-      enum: Countries,
+      input: "select",
+      resource: 'constants',
+      constant: 'countries'
     },
     shippingPhone: {
-      type: String
+      type: String,
+      input: "text"
     },
     shippingEmail: {
-      type: String
+      type: String,
+      input: "text"
     },
-    taxNumber: { type: String },
+    taxNumber: { type: String, input: "text" },
     tax: {
       type: Number,
       default: 0,
+      input: "select"
     },
     status: {
-      type: String
+      type: String,
+      input: "select"
     },
   },
   options

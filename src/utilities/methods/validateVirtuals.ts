@@ -6,6 +6,11 @@ export default async function validateVirtuals(this: any, save: boolean) {
   for (let list of virtuals) {
     if (list.options.ref && !list.options.justOne) {
       if (this[list.path] && this[list.path].length) {
+        // sort items before for loop
+        if (list.options.options) {
+          if (list.options.options.sort)
+            this[list.path].sort((a: any, b: any) => a.index - b.index)
+        }
         for (const [index, value] of this[list.path].entries()) {
           let line = value;
           // set index - useful to sort
@@ -20,7 +25,7 @@ export default async function validateVirtuals(this: any, save: boolean) {
           (list.options.copyFields || []).forEach((field: string) => {
             line[field] = this[field] ? this[field]._id : this[field];
           });
-          console.log("save", save);
+          //console.log("save", save);
           // Validate or validate and save
           try {
             if (save) {

@@ -1,9 +1,9 @@
 import { Schema, Model, model } from "mongoose";
-import Group, { IGroup } from "./group.schema";
+import TaskStatus, { ITaskStatus } from "./class.schema";
 import { IExtendedDocument } from "../../../utilities/methods";
 import { IExtendedModel } from "../../../utilities/static";
 
-export interface ITag extends IGroup { }
+export interface ITag extends ITaskStatus { }
 
 export interface ITagModel extends Model<ITag>, IExtendedModel { }
 
@@ -15,5 +15,5 @@ const options = {
 };
 const schema = new Schema<ITag>({}, options);
 
-const Tag: ITagModel = Group.discriminator<ITag, ITagModel>("Tag", schema);
+const Tag: ITagModel = TaskStatus.discriminator<ITag, ITagModel>("Tag", schema);
 export default Tag;

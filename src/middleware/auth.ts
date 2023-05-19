@@ -28,7 +28,7 @@ export default class Auth {
       } catch (err) {
         res.status(400).json({ message: "Invalid token" });
       }
-      
+
     } else {
       res.status(401).json({ message: "Access denied. No token provided" });
     }
@@ -49,7 +49,7 @@ export default class Auth {
       if (user) {
         const valide = await user.validatePassword(req.body.password);
         if (valide) {
-          const token = jwt.sign({ user: user._id }, this.tokenSecret, {
+          const token = jwt.sign({ user: user._id, account: "test" }, this.tokenSecret, {
             expiresIn: "24h"
           });
           let userLoged = {

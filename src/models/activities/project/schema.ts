@@ -20,7 +20,8 @@ schema.virtual("tasks", {
     foreignField: "activity",
     justOne: false,
     autopopulate: true,
-    model: Task
+    model: Task,
+    options: { sort: { index: 1 } },
 });
 schema.virtual("groups", {
     ref: "Group",
@@ -28,7 +29,8 @@ schema.virtual("groups", {
     foreignField: "activity",
     justOne: false,
     autopopulate: true,
-    model: Group
+    model: Group,
+    options: { sort: { index: 1 } },
 });
 schema.virtual("tags", {
     ref: "Tag",

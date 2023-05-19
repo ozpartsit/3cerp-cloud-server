@@ -8,7 +8,7 @@ import { IWarehouse } from "../warehouse.model";
 import Line, { ILine } from "./line.schema";
 
 import Currencies from "../../constants/currencies";
-import Countries from "../../constants/countries";
+//import Countries from "../../constants/countries";
 import TranTypes from "../../constants/transaction.types";
 import TranStatus from "../../constants/transaction.status";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
@@ -97,6 +97,7 @@ const TransactionSchema = {
   tax: {
     type: Number,
     default: 0,
+    input: "select"
   },
   exchangeRate: {
     type: Number,
@@ -111,68 +112,92 @@ const TransactionSchema = {
     //get: (v: any) => Currencies.getName(v),
     enum: Currencies,
     default: "PLN",
+    input: "select",
+    resource: 'constants',
+    constant: 'currencies'
   },
   billingName: {
-    type: String
+    type: String,
+    input: "text"
   },
   billingAddressee: {
-    type: String
+    type: String,
+    input: "text"
   },
   billingAddress: {
-    type: String
+    type: String,
+    input: "text"
   },
   billingAddress2: {
-    type: String
+    type: String,
+    input: "text"
   },
   billingZip: {
-    type: String
+    type: String,
+    input: "text"
   },
   billingCity: {
-    type: String
+    type: String,
+    input: "text"
   },
   billingState: {
     type: String,
+    input: "text"
   },
   billingCountry: {
     type: String,
-    enum: Countries,
+    input: "select",
+    resource: 'constants',
+    constant: 'countries'
   },
   billingPhone: {
-    type: String
+    type: String,
+    input: "text"
   },
   billingEmail: {
-    type: String
+    type: String,
+    input: "text"
   },
   shippingName: {
-    type: String
+    type: String,
+    input: "text"
   },
   shippingAddressee: {
-    type: String
+    type: String,
+    input: "text"
   },
   shippingAddress: {
-    type: String
+    type: String,
+    input: "text"
   },
   shippingAddress2: {
-    type: String
+    type: String,
+    input: "text"
   },
   shippingZip: {
     type: String
   },
   shippingCity: {
-    type: String
+    type: String,
+    input: "text"
   },
   shippingState: {
     type: String,
+    input: "select"
   },
   shippingCountry: {
     type: String,
-    enum: Countries,
+    input: "select",
+    resource: 'constants',
+    constant: 'countries'
   },
   shippingPhone: {
-    type: String
+    type: String,
+    input: "text"
   },
   shippingEmail: {
-    type: String
+    type: String,
+    input: "text"
   },
   type: {
     type: String,
@@ -184,10 +209,11 @@ const TransactionSchema = {
     type: String,
     default: "pendingapproval",
     i18n: true,
-    enum: TranStatus
+    enum: TranStatus,
+    input: "select"
   },
-  taxNumber: { type: String },
-  referenceNumber: { type: String },
+  taxNumber: { type: String, input: "text" },
+  referenceNumber: { type: String, input: "text" },
 };
 const options = {
   discriminatorKey: "type",

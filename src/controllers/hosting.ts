@@ -64,7 +64,7 @@ export default class controller {
             let result = await Item.findDocuments(query, options);
             let total = await Item.count(query)
             for (let line of result) {
-              await line.autoPopulate(req);
+              line = await line.autoPopulate(req);
             }
 
             // Pagination url halper

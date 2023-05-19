@@ -26,6 +26,8 @@ const schema = new Schema<IPrice>({
         type: String,
         enum: Currencies,
         required: true,
+        resource: 'constants',
+        constant: 'currencies'
     },
     priceLevel: {
         type: Schema.Types.ObjectId,

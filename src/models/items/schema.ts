@@ -4,7 +4,7 @@ import { IExtendedModel } from "../../utilities/static";
 import ItemTypes from "../../constants/item.types";
 import { schema as PriceGroup, IPriceGroup } from "../classifications/pricegroup/schema";
 import Price, { IPrice } from "./price.schema";
-import Countries from "../../constants/countries";
+//import Countries from "../../constants/countries";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface IItem extends IExtendedDocument {
   _id: Schema.Types.ObjectId;
@@ -54,7 +54,6 @@ const schema = new Schema<IItem>(
     },
     coo: {
       type: String,
-      enum: Countries,
     },
     barcode: {
       type: String,

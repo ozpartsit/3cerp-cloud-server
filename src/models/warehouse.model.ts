@@ -1,10 +1,15 @@
-import { Schema, model } from "mongoose";
+import { Schema, Model, model } from "mongoose";
+import { IExtendedDocument } from "../utilities/methods";
+import { IExtendedModel } from "../utilities/static";
 //import { Warehouse as warehouseClass } from "../shared/recordtype";
-export interface IWarehouse {
+export interface IWarehouse extends IExtendedDocument {
   _id: Schema.Types.ObjectId;
   name: string;
   type: string;
 }
+
+interface IWarehouseModel extends Model<IWarehouse>, IExtendedModel { }
+
 export const schema = new Schema<IWarehouse>(
   {
     name: {
@@ -19,10 +24,15 @@ export const schema = new Schema<IWarehouse>(
       default: "warehouse"
     }
   },
-  { collection: "warehouses" }
+  {
+    collection: "warehouses",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
 schema.index({ name: 1 });
-const Warehouse = model("Warehouse", schema);
+
+const Warehouse: IWarehouseModel = model<IWarehouse, IWarehouseModel>("Warehouse", schema);
 Warehouse.init().then(function (Event) {
   console.log('Warehouse Builded');
 })
