@@ -40,7 +40,7 @@ export default function getFields(this: any, parent: string) {
           required: schematype.isRequired,
           ref: schematype.options.ref,
           resource: schematype.options.resource,
-          constatnt: schematype.options.constatnt,
+          constant: schematype.options.constant,
           type: schematype.options.input,
           fields: []
         }

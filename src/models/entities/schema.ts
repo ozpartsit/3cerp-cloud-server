@@ -101,7 +101,7 @@ const schema = new Schema<IEntity>(
       type: String,
       required: true,
       //get: (v: any) => Currencies.getName(v),
-      enum: Currencies,
+      //enum: Currencies,
       default: "PLN",
       input: "select",
       resource: 'constants',

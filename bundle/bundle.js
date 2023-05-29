@@ -46,7 +46,6 @@ const error_handler_1 = __webpack_require__(9868);
 const storage_1 = __importDefault(__webpack_require__(4091));
 const cache_1 = __importDefault(__webpack_require__(9732));
 const path_1 = __importDefault(__webpack_require__(1017));
-const os_1 = __importDefault(__webpack_require__(2037));
 // Custom ENVIRONMENT Veriables
 let env = dotenv.config({
     path: path_1.default.resolve(`.env.${"production"}`)
@@ -66,7 +65,6 @@ class App3CERP {
         process.title = "3CERP";
         console.log("NODE_ENV", "production");
         console.log("NODE_PORT", process.env.PORT);
-        console.log("CPUs", os_1.default.cpus().length);
         this.config();
         this.dbConnect();
         this.mountRoutes();
@@ -146,6 +144,11 @@ class Database {
         this.server = process.env.DB_SERVER || "";
     }
     connect() {
+        const db2 = mongoose_1.default.createConnection(`mongodb://mo1069_backup:Test1!@${this.server}/mo1069_backup`, {
+            // useNewUrlParser: true,
+            // useUnifiedTopology: true,
+            autoIndex: true // false for production
+        });
         mongoose_1.default
             .connect(`mongodb://${this.database}:${this.password}@${this.server}/${this.database}`, {
             // useNewUrlParser: true,
@@ -158,6 +161,7 @@ class Database {
             .catch((err) => {
             console.error("Database connection error");
         });
+        //mongoose.set('debug', true);
     }
 }
 exports["default"] = Database;
@@ -561,7 +565,7 @@ exports["default"] = controller;
 /***/ }),
 
 /***/ 450:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -573,15 +577,32 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __importDefault(__webpack_require__(1185));
 class controller {
     constructor(models) {
         this.models = {};
         this.models = models;
     }
-    setModel(recordtype) {
-        if (this.models)
-            return this.models.submodels[recordtype] || this.models.model;
+    setModel(recordtype, db) {
+        if (this.models) {
+            let Model = (this.models.submodels[recordtype] || this.models.model);
+            Model.getFields();
+            // Create or assign models from dedicate BD - to do
+            if (db) {
+                const connection = mongoose_1.default.connections.find(conn => conn.name === db);
+                if (connection) {
+                    if (!connection.models[Model.modelName])
+                        Model = connection.model(Model.modelName, Model.schema); //- działa
+                    else
+                        Model = connection.models[Model.modelName];
+                }
+            }
+            return Model;
+        }
         else
             throw 'błąd';
     }
@@ -590,6 +611,7 @@ class controller {
             // init Model and create new Document
             const model = this.setModel(req.params.recordtype);
             try {
+                //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
                 let document = yield model.addDocument(req.body);
                 res.json(document);
             }
@@ -608,10 +630,12 @@ class controller {
                 if (filters) {
                     query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
                 }
+                //query.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
                 let select = (req.query.select || "").toString();
                 if (select) {
                     options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, collection: 1, link: 1 });
                 }
+                // Sort
                 let sort = (req.query.sort || "").toString();
                 if (sort) {
                     options.sort = sort.split(",").reduce((o, f) => {
@@ -620,23 +644,34 @@ class controller {
                             f = f.substring(1);
                             o[f] = 1;
                         }
-                        else
+                        else {
                             o[f] = 1;
+                        }
                         return o;
                     }, {});
                 }
+                // search by keyword
                 let search = (req.query.search || "").toString();
                 if (search) {
                     query['name'] = { $regex: `,*${req.query.search}.*` };
                 }
-                console.log(query);
                 options.limit = parseInt((req.query.limit || 50).toString());
                 options.skip = parseInt((req.query.skip || 0).toString());
                 let result = yield model.findDocuments(query, options);
                 let total = yield model.count(query);
-                for (let line of result) {
-                    yield line.autoPopulate(req);
+                for (let index in result) {
+                    result[index] = yield result[index].autoPopulate(req);
                 }
+                //to do - test przypisania do source.field
+                // result = result.map(line => {
+                //     let row = {};
+                //     for (const [key, value] of Object.entries(options.select)) {
+                //         console.log(key, value,line[key])
+                //         row[key] = line[key];
+                //     }
+                //     return row;
+                // })
+                // console.log(result)
                 const data = {
                     docs: result,
                     totalDocs: total,
@@ -655,7 +690,6 @@ class controller {
         return __awaiter(this, void 0, void 0, function* () {
             let { recordtype, id, mode } = req.params;
             const model = this.setModel(recordtype);
-            console.log(req.params.recordtype, model);
             try {
                 let document = yield model.getDocument(id, mode);
                 if (!document)
@@ -688,8 +722,18 @@ class controller {
             let { recordtype, id } = req.params;
             const model = this.setModel(recordtype);
             try {
-                let { list, subrecord, field, value, save } = req.body;
-                let document = yield model.updateDocument(id, list, subrecord, field, value, save);
+                // let document = null;
+                // if (Array.isArray(req.body)) { // to do - może upateDocument zmienić by przyjomwał cały obiek body?
+                //     for (let update of req.body) {
+                //         let { list, subrecord, field, value, save } = update;
+                //         document = await model.updateDocument(id, update);
+                //     }
+                // } else {
+                //     let { list, subrecord, field, value, save } = req.body;
+                //     document = await model.updateDocument(id, list, subrecord, field, value, save);
+                // }
+                let update = req.body;
+                let document = yield model.updateDocument(id, update, req.body.save);
                 res.json(document);
             }
             catch (error) {
@@ -700,7 +744,7 @@ class controller {
     delete(req, res, next) {
         let { recordtype, id } = req.params;
         const model = this.setModel(recordtype);
-        try {
+        try { // to do - do poprawy
             let document = model.deleteDocument(id);
             res.json(document);
         }
@@ -987,7 +1031,7 @@ class controller {
                             let result = yield model_1.default.findDocuments(query, options);
                             let total = yield model_1.default.count(query);
                             for (let line of result) {
-                                yield line.autoPopulate(req);
+                                line = yield line.autoPopulate(req);
                             }
                             // Pagination url halper
                             var q = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
@@ -1072,6 +1116,137 @@ class ItemController extends controller_1.default {
     }
 }
 exports["default"] = ItemController;
+
+
+/***/ }),
+
+/***/ 3002:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const model_1 = __importDefault(__webpack_require__(8947));
+const controller_1 = __importDefault(__webpack_require__(450));
+class ReportController extends controller_1.default {
+    constructor() {
+        super({ model: model_1.default, submodels: {} });
+    }
+    results(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype, id } = req.params;
+            const model = this.setModel(recordtype);
+            let document = yield model.loadDocument(id);
+            if (!document)
+                res.status(404).json({
+                    message: 'Report not found'
+                });
+            else {
+                let results = yield document.getResults();
+                res.json(results);
+            }
+        });
+    }
+}
+exports["default"] = ReportController;
+
+
+/***/ }),
+
+/***/ 4604:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const table_model_1 = __importDefault(__webpack_require__(8556));
+const dashboard_model_1 = __importDefault(__webpack_require__(984));
+class SettingController {
+    constructor() {
+        this.models = {
+            table: table_model_1.default,
+            dashboard: dashboard_model_1.default
+        };
+    }
+    add(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const model = this.models[req.params.recordtype];
+            try {
+                let document = new model(req.body);
+                document.save();
+                res.json(document);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    update(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const model = this.models[req.params.recordtype];
+            try {
+                //let document = new model(req.body);
+                // to do - update
+                let document = yield model.findOne({ _id: req.params.id });
+                if (document) {
+                    console.log(req.body);
+                    document = yield document.updateOne(req.body);
+                }
+                res.json(document);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    find(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const model = this.models[req.params.recordtype];
+            try {
+                // to to - zwraca tablice a powinno jeden element
+                let query = req.query;
+                let table = query.table;
+                let defaultSetting = defaultSettings[table];
+                let document = yield model.find(query);
+                if (document.length)
+                    res.json(document);
+                else
+                    res.json([defaultSetting]);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+}
+exports["default"] = SettingController;
+// to do - przenieść do odzielnego pliku
+const defaultSettings = {
+    "salesorder.pendingapproval": { headers: ["name", "date", "entity", "amount"] },
+    "salesorder.open": { headers: ["name", "date", "entity", "amount"] }
+};
 
 
 /***/ }),
@@ -1322,7 +1497,7 @@ class Auth {
             if (user) {
                 const valide = yield user.validatePassword(req.body.password);
                 if (valide) {
-                    const token = jsonwebtoken_1.default.sign({ user: user._id }, this.tokenSecret, {
+                    const token = jsonwebtoken_1.default.sign({ user: user._id, account: "test" }, this.tokenSecret, {
                         expiresIn: "24h"
                     });
                     let userLoged = {
@@ -1595,7 +1770,7 @@ exports.ActivityTypes = {
 
 /***/ }),
 
-/***/ 4639:
+/***/ 2850:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1608,6 +1783,9 @@ const options = {
     toObject: { virtuals: true }
 };
 const schema = new mongoose_1.Schema({
+    index: {
+        type: Number
+    },
     activity: { type: mongoose_1.Schema.Types.ObjectId },
     name: {
         type: String,
@@ -1617,12 +1795,38 @@ const schema = new mongoose_1.Schema({
         type: String,
         default: ""
     },
+    type: {
+        type: String
+    },
     color: {
         type: String,
         default: "#e1e1e1"
     },
 }, options);
-const Group = (0, mongoose_1.model)("Group", schema);
+const TaskStatus = (0, mongoose_1.model)("TaskStatus", schema);
+exports["default"] = TaskStatus;
+
+
+/***/ }),
+
+/***/ 4639:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const class_schema_1 = __importDefault(__webpack_require__(2850));
+const options = {
+    discriminatorKey: "type",
+    collection: "activities.classification",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+};
+const schema = new mongoose_1.Schema({}, options);
+const Group = class_schema_1.default.discriminator("Group", schema);
 exports["default"] = Group;
 
 
@@ -1649,7 +1853,8 @@ schema.virtual("tasks", {
     foreignField: "activity",
     justOne: false,
     autopopulate: true,
-    model: task_schema_1.default
+    model: task_schema_1.default,
+    options: { sort: { index: 1 } },
 });
 schema.virtual("groups", {
     ref: "Group",
@@ -1657,7 +1862,8 @@ schema.virtual("groups", {
     foreignField: "activity",
     justOne: false,
     autopopulate: true,
-    model: group_schema_1.default
+    model: group_schema_1.default,
+    options: { sort: { index: 1 } },
 });
 schema.virtual("tags", {
     ref: "Tag",
@@ -1682,7 +1888,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
-const group_schema_1 = __importDefault(__webpack_require__(4639));
+const class_schema_1 = __importDefault(__webpack_require__(2850));
 const options = {
     discriminatorKey: "type",
     collection: "activities.classification",
@@ -1690,7 +1896,7 @@ const options = {
     toObject: { virtuals: true }
 };
 const schema = new mongoose_1.Schema({}, options);
-const Tag = group_schema_1.default.discriminator("Tag", schema);
+const Tag = class_schema_1.default.discriminator("Tag", schema);
 exports["default"] = Tag;
 
 
@@ -1709,6 +1915,9 @@ const options = {
     toObject: { virtuals: true }
 };
 const schema = new mongoose_1.Schema({
+    index: {
+        type: Number
+    },
     activity: { type: mongoose_1.Schema.Types.ObjectId },
     name: {
         type: String,
@@ -1723,10 +1932,14 @@ const schema = new mongoose_1.Schema({
         type: String,
         default: ""
     },
-    date: { type: Date, input: "date" },
-    endDate: { type: Date, input: "date" },
+    date: { type: Date },
+    endDate: { type: Date },
     group: { type: mongoose_1.Schema.Types.ObjectId },
-    tags: { type: [] }
+    tags: {
+        type: [mongoose_1.Schema.Types.ObjectId],
+        ref: "Tag",
+        autopopulate: { select: "name displayname color" },
+    }
 }, options);
 const Task = (0, mongoose_1.model)("Task", schema);
 exports["default"] = Task;
@@ -1924,7 +2137,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
 const axios_1 = __importDefault(__webpack_require__(2167));
-const countries_1 = __importDefault(__webpack_require__(5593));
 const options = {
     discriminatorKey: "entity",
     collection: "entities.addresses"
@@ -1939,15 +2151,14 @@ const schema = new mongoose_1.Schema({
     zip: { type: String, required: true, input: "text" },
     country: {
         type: String,
-        //get: (v: any) => Countries.getName(v),
-        enum: countries_1.default,
         required: true,
-        input: "select"
+        resource: "constatnts",
+        constant: "countries"
     },
     phone: { type: String, input: "text" },
     geoCodeHint: {
         type: String,
-        get: (v) => `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}`,
+        get: (v) => v ? `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}` : '',
         input: "text"
     },
     latitude: { type: String, input: "text" },
@@ -2166,12 +2377,10 @@ const mongoose_1 = __webpack_require__(1185);
 const schema_1 = __importDefault(__webpack_require__(7044));
 //import Storage, { IStorage } from "../../storages/schema";
 const role_model_1 = __webpack_require__(6016);
-const warehouse_model_1 = __webpack_require__(2419);
 const options = { discriminatorKey: "type", collection: "entities" };
 const schema = new mongoose_1.Schema({
     jobTitle: { type: String, input: "text" },
     //avatar: { type: Storage, input: "file" },
-    warehouse: { type: warehouse_model_1.schema, input: "select" },
     company: { type: schema_1.default, input: "select" },
     role: { type: role_model_1.schema, input: "select" }
 }, options);
@@ -2253,7 +2462,7 @@ const address_schema_1 = __importDefault(__webpack_require__(9711));
 const balance_schema_1 = __importDefault(__webpack_require__(3155));
 const grouplevel_schema_1 = __importDefault(__webpack_require__(4880));
 const currencies_1 = __importDefault(__webpack_require__(7131));
-const countries_1 = __importDefault(__webpack_require__(5593));
+//import Countries from "../../constants/countries";
 const contactModel = (0, mongoose_1.model)("Contact", contact_schema_1.default);
 const balanceModel = (0, mongoose_1.model)("Balance", balance_schema_1.default);
 const addressModel = (0, mongoose_1.model)("Address", address_schema_1.default);
@@ -2286,6 +2495,13 @@ const schema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Entity",
         autopopulate: true,
+        input: "select"
+    },
+    warehouse: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Warehouse",
+        autopopulate: true,
+        input: "select"
     },
     currency: {
         type: String,
@@ -2293,76 +2509,103 @@ const schema = new mongoose_1.Schema({
         //get: (v: any) => Currencies.getName(v),
         enum: currencies_1.default,
         default: "PLN",
+        input: "select",
+        resource: 'constants',
+        constant: 'currencies'
     },
     billingName: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingAddressee: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingAddress: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingAddress2: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingZip: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingCity: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingState: {
         type: String,
+        input: "select"
     },
     billingCountry: {
         type: String,
-        enum: countries_1.default,
+        input: "select",
+        resource: 'constants',
+        constant: 'countries'
     },
     billingPhone: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingEmail: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingName: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingAddressee: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingAddress: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingAddress2: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingZip: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingCity: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingState: {
         type: String,
+        input: "select"
     },
     shippingCountry: {
         type: String,
-        enum: countries_1.default,
+        input: "select",
+        resource: 'constants',
+        constant: 'countries'
     },
     shippingPhone: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingEmail: {
-        type: String
+        type: String,
+        input: "text"
     },
-    taxNumber: { type: String },
+    taxNumber: { type: String, input: "text" },
     tax: {
         type: Number,
         default: 0,
+        input: "select"
     },
     status: {
-        type: String
+        type: String,
+        input: "select"
     },
 }, options);
 schema.virtual("addresses", {
@@ -2637,6 +2880,8 @@ const schema = new mongoose_1.Schema({
         type: String,
         enum: currencies_1.default,
         required: true,
+        resource: 'constants',
+        constant: 'currencies'
     },
     priceLevel: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -2671,7 +2916,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
 const item_types_1 = __importDefault(__webpack_require__(3082));
 const price_schema_1 = __importDefault(__webpack_require__(4365));
-const countries_1 = __importDefault(__webpack_require__(5593));
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 const options = {
     discriminatorKey: "type",
@@ -2701,7 +2945,6 @@ const schema = new mongoose_1.Schema({
     },
     coo: {
         type: String,
-        enum: countries_1.default,
     },
     barcode: {
         type: String,
@@ -2749,6 +2992,199 @@ const options = { discriminatorKey: "type", collection: "items" };
 const schema = new mongoose_1.Schema({}, options);
 const Service = (0, mongoose_1.model)("Service", schema);
 exports["default"] = Service;
+
+
+/***/ }),
+
+/***/ 984:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.schema = void 0;
+const mongoose_1 = __webpack_require__(1185);
+exports.schema = new mongoose_1.Schema({
+    type: {
+        type: String,
+        required: true,
+        default: "dashboard"
+    },
+    dashboard: {
+        type: String,
+        required: true,
+    },
+    entity: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Entity"
+    },
+    widgets: {
+        type: []
+    }
+}, {
+    collection: "settings",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+exports.schema.index({ name: 1 });
+const Dashboard = (0, mongoose_1.model)("Dashboard", exports.schema);
+exports["default"] = Dashboard;
+
+
+/***/ }),
+
+/***/ 8556:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.schema = void 0;
+const mongoose_1 = __webpack_require__(1185);
+exports.schema = new mongoose_1.Schema({
+    type: {
+        type: String,
+        required: true,
+        default: "table"
+    },
+    table: {
+        type: String,
+        required: true,
+    },
+    entity: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Entity"
+    },
+    headers: {
+        type: [String]
+    }
+}, {
+    collection: "settings",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+exports.schema.index({ name: 1 });
+const Setting = (0, mongoose_1.model)("Setting", exports.schema);
+exports["default"] = Setting;
+
+
+/***/ }),
+
+/***/ 8947:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.schema = void 0;
+const mongoose_1 = __webpack_require__(1185);
+const i18n_1 = __importDefault(__webpack_require__(6734));
+exports.schema = new mongoose_1.Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+    },
+    type: {
+        type: String,
+        required: true,
+        default: "report"
+    },
+    columns: {
+        type: []
+    },
+    filters: {
+        type: []
+    }
+}, {
+    collection: "reports",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+//
+exports.schema.virtual('fields').get(function () {
+    let model = mongoose_1.models["Transaction"];
+    return model.getFields();
+});
+exports.schema.method("getResults", function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        let results = [];
+        let sort = { _id: 1 };
+        let select = { type: true };
+        let query = {};
+        let populated = {};
+        for (let column of this.columns) {
+            // to do - poprawić
+            let fields = column.field.split('.');
+            if (fields.length > 1) {
+                if (populated[fields[0]]) {
+                    populated[fields[0]].select[fields[1]] = 1;
+                    populated[fields[0]].populate.push({
+                        path: fields[1],
+                        select: 'name resource type'
+                    });
+                }
+                else {
+                    let fieldsSelect = { name: 1 };
+                    fieldsSelect[fields[1]] = 1;
+                    populated[fields[0]] = {
+                        path: fields[0],
+                        select: fieldsSelect,
+                        populate: [{
+                                path: fields[1],
+                                select: 'name resource type'
+                            }]
+                    };
+                }
+            }
+            else {
+                select[column.field] = true;
+            }
+        }
+        //console.log(populated, select)
+        //await this.find(query)
+        //.populate(populated)
+        //.sort(sort).skip(skip).limit(limit).select(select);
+        //console.log(populated)
+        let data = yield (0, mongoose_1.model)("Transaction").find(query)
+            .populate(Object.values(populated))
+            .sort(sort)
+            .select(select);
+        results = data.map((line) => {
+            let row = { _id: line._id, type: line.type, resource: line.resource };
+            this.columns.forEach(c => {
+                let fields = c.field.split('.');
+                let value = undefined;
+                fields.forEach((field, index) => {
+                    if (index) {
+                        value = value[field];
+                    }
+                    else
+                        value = line[field];
+                });
+                if (c.constant)
+                    value = { _id: value, name: i18n_1.default.__(value) };
+                row[c.field] = value;
+            });
+            return row;
+        });
+        return results;
+    });
+});
+exports.schema.index({ name: 1 });
+const Report = (0, mongoose_1.model)("Report", exports.schema);
+exports["default"] = Report;
 
 
 /***/ }),
@@ -3174,7 +3610,8 @@ const schema = new mongoose_1.Schema({
     },
     description: {
         type: String,
-        set: (v) => v.toLowerCase()
+        set: (v) => v.toLowerCase(),
+        input: "text"
     },
     price: {
         type: Number,
@@ -3376,7 +3813,7 @@ const mongoose_1 = __webpack_require__(1185);
 const pdf_1 = __importDefault(__webpack_require__(180));
 const line_schema_1 = __importDefault(__webpack_require__(2801));
 const currencies_1 = __importDefault(__webpack_require__(7131));
-const countries_1 = __importDefault(__webpack_require__(5593));
+//import Countries from "../../constants/countries";
 const transaction_types_1 = __importDefault(__webpack_require__(7003));
 const transaction_status_1 = __importDefault(__webpack_require__(5969));
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -3419,6 +3856,7 @@ const TransactionSchema = {
     tax: {
         type: Number,
         default: 0,
+        input: "select"
     },
     exchangeRate: {
         type: Number,
@@ -3433,68 +3871,92 @@ const TransactionSchema = {
         //get: (v: any) => Currencies.getName(v),
         enum: currencies_1.default,
         default: "PLN",
+        input: "select",
+        resource: 'constants',
+        constant: 'currencies'
     },
     billingName: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingAddressee: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingAddress: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingAddress2: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingZip: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingCity: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingState: {
         type: String,
+        input: "text"
     },
     billingCountry: {
         type: String,
-        enum: countries_1.default,
+        input: "select",
+        resource: 'constants',
+        constant: 'countries'
     },
     billingPhone: {
-        type: String
+        type: String,
+        input: "text"
     },
     billingEmail: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingName: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingAddressee: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingAddress: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingAddress2: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingZip: {
         type: String
     },
     shippingCity: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingState: {
         type: String,
+        input: "select"
     },
     shippingCountry: {
         type: String,
-        enum: countries_1.default,
+        input: "select",
+        resource: 'constants',
+        constant: 'countries'
     },
     shippingPhone: {
-        type: String
+        type: String,
+        input: "text"
     },
     shippingEmail: {
-        type: String
+        type: String,
+        input: "text"
     },
     type: {
         type: String,
@@ -3506,10 +3968,11 @@ const TransactionSchema = {
         type: String,
         default: "pendingapproval",
         i18n: true,
-        enum: transaction_status_1.default
+        enum: transaction_status_1.default,
+        input: "select"
     },
-    taxNumber: { type: String },
-    referenceNumber: { type: String },
+    taxNumber: { type: String, input: "text" },
+    referenceNumber: { type: String, input: "text" },
 };
 const options = {
     discriminatorKey: "type",
@@ -3598,7 +4061,11 @@ exports.schema = new mongoose_1.Schema({
         enum: ["warehouse"],
         default: "warehouse"
     }
-}, { collection: "warehouses" });
+}, {
+    collection: "warehouses",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
 exports.schema.index({ name: 1 });
 const Warehouse = (0, mongoose_1.model)("Warehouse", exports.schema);
 Warehouse.init().then(function (Event) {
@@ -3640,6 +4107,8 @@ const constants_1 = __importDefault(__webpack_require__(2110));
 const files_1 = __importDefault(__webpack_require__(4758));
 const hosting_1 = __importDefault(__webpack_require__(2101));
 const emails_1 = __importDefault(__webpack_require__(4267));
+const settings_1 = __importDefault(__webpack_require__(4604));
+const reports_1 = __importDefault(__webpack_require__(3002));
 const shop_model_1 = __importDefault(__webpack_require__(1725));
 class Routes {
     constructor() {
@@ -3659,6 +4128,8 @@ class Routes {
         this.filesController = new files_1.default();
         this.hostingController = new hosting_1.default();
         this.emailController = new emails_1.default();
+        this.settingController = new settings_1.default();
+        this.reportController = new reports_1.default();
     }
     start(app) {
         console.log("Start Routing");
@@ -3675,6 +4146,8 @@ class Routes {
         this.routeHosting();
         this.routeCustom();
         this.routeEmails();
+        this.routeSettings();
+        this.routeReports();
         app.use(subdomain("*", this.Router2));
         //app.use("/hosting", this.Router2);
         app.use("/api/core", this.Router);
@@ -3757,6 +4230,10 @@ class Routes {
     }
     routeUsers() {
         // Users
+        // this.Router.route("/entities/:recordtype/:id/options").get(
+        //   this.Auth.authenticate.bind(this.Auth) as any,
+        //   this.entityController.options.bind(this.entityController) as any
+        // );
         this.Router.route("/entities/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.entityController.find.bind(this.entityController));
         this.Router.route("/entities/:recordtype/new/create").post(this.entityController.add.bind(this.entityController));
         this.Router.route("/entities/:recordtype/:id/:mode")
@@ -3784,6 +4261,31 @@ class Routes {
             .put(this.emailController.update.bind(this.emailController))
             .post(this.emailController.save.bind(this.emailController))
             .delete(this.emailController.delete.bind(this.emailController));
+    }
+    routeSettings() {
+        // Settings
+        this.Router.route("/settings/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.settingController.find.bind(this.settingController));
+        this.Router.route("/settings/:recordtype/new/create").post(this.Auth.authenticate.bind(this.Auth), this.settingController.add.bind(this.settingController));
+        // this.Router.route("/settings/:recordtype/new/create").post(
+        //   this.settingController.add.bind(this.settingController) as any
+        // );
+        this.Router.route("/settings/:recordtype/:id/:mode?")
+            .put(this.settingController.update.bind(this.settingController));
+        // .get(this.settingController.get.bind(this.settingController) as any)
+        //   .post(this.settingController.save.bind(this.settingController) as any)
+        //   .delete(this.settingController.delete.bind(this.settingController) as any);
+    }
+    routeReports() {
+        // Reports
+        this.Router.route("/reports/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.reportController.find.bind(this.reportController));
+        this.Router.route("/reports/:recordtype/new/create").post(this.Auth.authenticate.bind(this.Auth), this.reportController.add.bind(this.reportController));
+        this.Router.route("/reports/:recordtype/:id/results")
+            .get(this.reportController.results.bind(this.reportController));
+        this.Router.route("/reports/:recordtype/:id/:mode?")
+            .put(this.reportController.update.bind(this.reportController))
+            .get(this.reportController.get.bind(this.reportController))
+            .post(this.reportController.save.bind(this.reportController))
+            .delete(this.reportController.delete.bind(this.reportController));
     }
     routeAuth() {
         // Auth
@@ -4092,6 +4594,7 @@ function methods(schema, options) {
                 next();
         });
     }
+    // add resource
     schema.virtual('resource').get(function () {
         let resources = this.schema.options.collection.split(".");
         return resources[0];
@@ -4107,6 +4610,24 @@ function methods(schema, options) {
     schema.pre("save", handlerSave);
     schema.pre("remove", handlerSave);
     //schema.pre("validate", handler);
+    // add Owner ID
+    // schema.add({
+    //   ownerAccount: {
+    //     type: String,//Schema.Types.ObjectId,
+    //     required: true,
+    //   },
+    // });
+    // owner restriction
+    //schema.pre('find', function (this:any) {
+    //mongoose.connection.useDb('mo1069_backup');
+    //console.log(mongoose.connection)
+    // const currentUser = "test";
+    // this.where({ ownerAccount: currentUser });
+    //console.log(next, req,test)
+    //let tmp = req();
+    //console.log( this)
+    //next();
+    //});
 }
 exports["default"] = methods;
 
@@ -4139,7 +4660,7 @@ exports["default"] = addToVirtuals;
 /***/ }),
 
 /***/ 5363:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -4151,11 +4672,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const i18n_1 = __importDefault(__webpack_require__(6734));
 function autoPopulate(req) {
     return __awaiter(this, void 0, void 0, function* () {
         let paths = [];
-        let doc = this;
         this.schema.eachPath(function process(pathname, schemaType) {
             if (pathname === "_id")
                 return;
@@ -4165,28 +4689,37 @@ function autoPopulate(req) {
                     select: schemaType.options.autopopulate.select || "name displayname type _id resource path "
                 });
             }
-            //i18n Translation - test - to use only for export report
-            if (schemaType.options.enum && req) {
-                doc[pathname] = req.__(doc[pathname]);
-            }
         });
-        // Virtuals
-        const virtuals = Object.values(this.schema.virtuals);
         let Promises = [];
-        for (let list of virtuals) {
-            if (list.options.ref && list.options.autopopulate) {
-                if (Array.isArray(this[list.path]))
-                    for (let item of this[list.path]) {
-                        Promises.push(item.autoPopulate());
-                    }
-            }
-        }
         for (let path of paths) {
             if (!this.populated(path.field))
                 Promises.push(yield this.populate(path.field, path.select));
             //console.log(path.field,this[path.field], this[path.field]._id)
         }
         yield Promise.all(Promises);
+        let doc = this.toObject();
+        // Virtuals
+        const virtuals = Object.values(this.schema.virtuals);
+        for (let list of virtuals) {
+            if (list.options.ref && list.options.autopopulate) {
+                if (Array.isArray(this[list.path])) {
+                    for (let index in doc[list.path]) {
+                        doc[list.path][index] = this[list.path][index].autoPopulate();
+                    }
+                    doc[list.path] = yield Promise.all(doc[list.path]);
+                }
+            }
+        }
+        this.schema.eachPath(function process(pathname, schemaType) {
+            //constats
+            if (schemaType.options.constant) {
+                //console.log(i18n.__(doc[pathname]))
+                doc[pathname] = { _id: doc[pathname], name: i18n_1.default.__(doc[pathname]) };
+                //console.log(doc[pathname])
+            }
+        });
+        //console.log(doc)
+        return doc;
     });
 }
 exports["default"] = autoPopulate;
@@ -4286,12 +4819,15 @@ function setValue(list, subrecord, field, value) {
                     else
                         console.log("The list does not exist");
                 }
+                // to do - dodać do virtual option parametr uniq/incrrepemt dla indexa (sort)
+                // if (field === "index") {
+                //   this[list].sort((a: any, b: any) => a.index - b.index)
+                // }
                 //await SubDocument.validate();
                 changeLogs[list] = SubDocument.getChanges();
             }
             else {
                 this[field] = value;
-                console.log(this[field]);
                 yield this.populate(field, "name displayname type _id");
                 changeLogs = this.getChanges();
             }
@@ -4362,6 +4898,11 @@ function validateVirtuals(save) {
         for (let list of virtuals) {
             if (list.options.ref && !list.options.justOne) {
                 if (this[list.path] && this[list.path].length) {
+                    // sort items before for loop
+                    if (list.options.options) {
+                        if (list.options.options.sort)
+                            this[list.path].sort((a, b) => a.index - b.index);
+                    }
                     for (const [index, value] of this[list.path].entries()) {
                         let line = value;
                         // set index - useful to sort
@@ -4377,7 +4918,7 @@ function validateVirtuals(save) {
                         (list.options.copyFields || []).forEach((field) => {
                             line[field] = this[field] ? this[field]._id : this[field];
                         });
-                        console.log("save", save);
+                        //console.log("save", save);
                         // Validate or validate and save
                         try {
                             if (save) {
@@ -4442,7 +4983,7 @@ function virtualPopulate() {
         const virtuals = Object.values(this.schema.virtuals);
         for (let list of virtuals) {
             if (list.options.ref && list.options.autopopulate) {
-                yield this.populate(list.path);
+                yield this.populate({ path: list.path, options: list.options.options });
             }
         }
     });
@@ -4630,6 +5171,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findDocuments = exports.deleteDocument = exports.updateDocument = exports.saveDocument = exports.getDocument = exports.addDocument = exports.loadDocument = void 0;
 const app_1 = __webpack_require__(3165);
+const getFields_1 = __importDefault(__webpack_require__(4140));
 const pdf_1 = __importDefault(__webpack_require__(180));
 //loadDocument
 function loadDocument(id) {
@@ -4652,7 +5194,7 @@ function addDocument(data) {
         let msg = yield document.validateSync();
         // insert document to cache
         app_1.cache.addCache(document);
-        yield document.autoPopulate();
+        document = yield document.autoPopulate();
         return { document, msg };
     });
 }
@@ -4666,12 +5208,12 @@ function getDocument(id, mode) {
                 app_1.cache.addCache(document);
             }
             if (document)
-                yield document.autoPopulate();
+                document = yield document.autoPopulate();
         }
         else {
             document = yield this.loadDocument(id);
             if (document)
-                yield document.autoPopulate();
+                document = yield document.autoPopulate();
         }
         return document;
     });
@@ -4688,19 +5230,23 @@ function saveDocument(id) {
     });
 }
 exports.saveDocument = saveDocument;
-function updateDocument(id, list, subrecord, field, value, save) {
+function updateDocument(id, updates, save) {
     return __awaiter(this, void 0, void 0, function* () {
         let document = app_1.cache.getCache(id);
         if (!document)
             document = yield this.getDocument(id, "edit");
-        yield document.setValue(list, subrecord, field, value);
+        if (!Array.isArray(updates))
+            updates = [updates]; // array
+        for (let update of updates) {
+            yield document.setValue(update.list, update.subrecord, update.field, update.value);
+        }
         let msg = yield document.recalcRecord();
         if (save) {
             document = yield this.saveDocument(id);
             return { document, msg };
         }
         else {
-            yield document.autoPopulate();
+            document = yield document.autoPopulate();
             return { document, msg };
         }
     });
@@ -4720,7 +5266,28 @@ exports.deleteDocument = deleteDocument;
 function findDocuments(query, options) {
     return __awaiter(this, void 0, void 0, function* () {
         let { limit, select, sort, skip } = options;
-        let result = yield this.find(query).sort(sort).skip(skip).limit(limit).select(select);
+        let populated = null;
+        // for (const [key, value] of Object.entries(select)) {
+        //   // to do - poprawić
+        //   let fields = key.split('.');
+        //   if (fields.length > 1) {
+        //     let fieldsSelect = { name: 1 };
+        //     fieldsSelect[fields[1]] = 1;
+        //     populated = {
+        //       path: fields[0],
+        //       select: fieldsSelect,
+        //       populate: {
+        //         path: fields[1],
+        //         select: 'name resource type'
+        //       }
+        //     }
+        //     delete select[key];
+        //   }
+        // }
+        //console.log(select)
+        let result = yield this.find(query)
+            .populate(populated)
+            .sort(sort).skip(skip).limit(limit).select(select);
         return result;
     });
 }
@@ -4733,8 +5300,70 @@ function staticsMethods(schema, options) {
     schema.statics.updateDocument = updateDocument;
     schema.statics.deleteDocument = deleteDocument;
     schema.statics.findDocuments = findDocuments;
+    schema.statics.getFields = getFields_1.default;
 }
 exports["default"] = staticsMethods;
+
+
+/***/ }),
+
+/***/ 4140:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+function getFields(parent) {
+    let fields = [];
+    let modelSchema = this.schema;
+    const virtuals = modelSchema.virtuals;
+    Object.entries(virtuals).forEach(([key, value]) => {
+        if (value && value.options.ref) {
+            // fields.push({
+            //   name: key,
+            //   ref: value.options.ref,
+            //   //instance: schematype.instance,
+            //   type: "subrecords"
+            // });
+        }
+    });
+    //modelSchema.eachPath(async (pathname: string, schematype: any) => {
+    for (const [pathname, schematype] of Object.entries(modelSchema.paths)) {
+        if (schematype.options.input ||
+            ["Embedded", "Array"].includes(schematype.instance)) {
+            if (["Embedded", "Array"].includes(schematype.instance)) {
+                console.log(pathname, schematype.schema);
+                // this.getFields(schematype.schema, type).forEach((field) =>
+                //   fields.push({ path: pathname, ...field })
+                // );
+            }
+            else {
+                let field = {
+                    field: parent ? `${parent}.${pathname}` : pathname,
+                    name: pathname,
+                    required: schematype.isRequired,
+                    ref: schematype.options.ref,
+                    resource: schematype.options.resource,
+                    constatnt: schematype.options.constatnt,
+                    type: schematype.options.input,
+                    fields: []
+                };
+                if (schematype.options.ref) {
+                    let refModel = mongoose_1.models[schematype.options.ref];
+                    field.resource = refModel.schema.options.collection;
+                    if (!parent)
+                        field.fields = refModel.getFields(pathname);
+                }
+                if (field.type != "subrecords")
+                    fields.push(field);
+            }
+        }
+    }
+    //});
+    //if (!parent) console.log(fields);
+    return fields;
+}
+exports["default"] = getFields;
 
 
 /***/ }),
@@ -4992,13 +5621,6 @@ module.exports = require("child_process");
 /***/ ((module) => {
 
 module.exports = require("fs");
-
-/***/ }),
-
-/***/ 2037:
-/***/ ((module) => {
-
-module.exports = require("os");
 
 /***/ }),
 

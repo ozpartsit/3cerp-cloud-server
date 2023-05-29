@@ -56,9 +56,9 @@ schema.method("getResults", async function () {
     let populated: any = {};
     for (let column of this.columns) {
         // to do - poprawić
+        let fieldsSelect = { name: 1, resource: 1, type: 1 };
         let fields = column.field.split('.');
         if (fields.length > 1) {
-
             if (populated[fields[0]]) {
                 populated[fields[0]].select[fields[1]] = 1;
                 populated[fields[0]].populate.push({
@@ -66,7 +66,6 @@ schema.method("getResults", async function () {
                     select: 'name resource type'
                 })
             } else {
-                let fieldsSelect = { name: 1 };
                 fieldsSelect[fields[1]] = 1;
                 populated[fields[0]] = {
                     path: fields[0],
@@ -77,8 +76,15 @@ schema.method("getResults", async function () {
                     }]
                 }
             }
-
         } else {
+            if (column.ref) {
+                if (!populated[fields[0]]) {
+                    populated[fields[0]] = {
+                        path: fields[0],
+                        select: fieldsSelect
+                    }
+                }
+            }
             select[column.field] = true
         }
     }
@@ -94,7 +100,7 @@ schema.method("getResults", async function () {
 
     results = data.map((line: any) => {
         let row = { _id: line._id, type: line.type, resource: line.resource };
-        this.columns.forEach(c => {
+        this.columns.forEach((c: any) => { // to do - zmienić any na typ
             let fields = c.field.split('.');
             let value: any = undefined;
             fields.forEach((field: string, index: number) => {
@@ -103,12 +109,15 @@ schema.method("getResults", async function () {
                 } else
                     value = line[field];
             })
-            if (c.constant) value = { _id: value, name: i18n.__(value) };
+            if (c.constant) { // parse constat value to object
+                value = { _id: value, name: i18n.__(value) };
+            }
             row[c.field] = value;
         })
         return row;
     })
-
+    
+    data = [];
     return results;
 });
 
