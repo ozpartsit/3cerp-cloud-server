@@ -19,8 +19,10 @@ export default class EmailController extends controller {
 
             try {
                 // Test email alias
+
                 let adres_docelowy = 'notification@3cerp.cloud';
                 let adres_zrodlowy = email.name;
+                let domain = adres_zrodlowy.split("@")[1];
                 exec(`devil mail alias add ${adres_zrodlowy} ${adres_docelowy}`, (error, stdout, stderr) => {
                     if (error) {
                         console.log(`error: ${error.message}`);
@@ -32,8 +34,57 @@ export default class EmailController extends controller {
                     }
                     console.log(`stdout: ${stdout}`);
                 })
+                exec(`devil mail list`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
+                exec(`devil mail list ${domain}`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
+                // DKIM
 
 
+                // Domena dodana
+                exec(`devil mail dkim dns ${domain}`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
+                // Domena zewnętrzna
+                exec(`devil mail dkim dns ${domain} --print`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                    // fill DKIM field
+                    Email.findByIdAndUpdate(email._id, { dkim: stdout })
+                })
 
             } catch (error) {
                 console.log(error)

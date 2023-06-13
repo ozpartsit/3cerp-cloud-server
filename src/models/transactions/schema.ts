@@ -229,7 +229,8 @@ schema.virtual("lines", {
   justOne: false,
   autopopulate: true,
   model: Line,
-  copyFields: ["entity"]
+  copyFields: ["entity"],
+  options: { sort: { index: 1 } },
 });
 schema.method("pdf", async function () {
   return await printPDF();
@@ -257,12 +258,11 @@ schema.method("autoName", async function () {
 });
 schema.method("findRelations", async function () {
   return model("Transaction").find({ type: this.type }, (err, transactions) => {
-    console.log(transactions);
   });
 });
 
 schema.pre("validate", async function (next) {
-  console.log("pre valide");
+  console.log("transaction pre valide");
   next();
 });
 schema.pre("save", async function (next) {

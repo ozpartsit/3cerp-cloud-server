@@ -1,5 +1,5 @@
 export default async function validateVirtuals(this: any, save: boolean) {
-  //console.log("validateVirtuals");
+  console.log("validateVirtuals");
   let errors: any = [];
 
   const virtuals: any[] = Object.values(this.schema.virtuals);
@@ -25,7 +25,6 @@ export default async function validateVirtuals(this: any, save: boolean) {
           (list.options.copyFields || []).forEach((field: string) => {
             line[field] = this[field] ? this[field]._id : this[field];
           });
-          //console.log("save", save);
           // Validate or validate and save
           try {
             if (save) {
@@ -35,24 +34,26 @@ export default async function validateVirtuals(this: any, save: boolean) {
               else await line.save();
             } else {
               // Catch errors from validate all virtual list
-              await line.validate();
+              //await line.validate();
             }
           } catch (err: any) {
-            //console.log(err)
             err._id = line._id;
             err.list = list.path;
             errors.push(err);
           }
           //await line.autoPopulate();
+
           this[list.path][index] = line;
+
         }
       } else {
         this[list.path] = [];
       }
     }
+    // run summary values from virtuals to main document
+    this.totalVirtuals();
   }
   if (errors.length > 0) {
-    console.log(errors.length)
     if (save)
       throw errors;
     else return errors;

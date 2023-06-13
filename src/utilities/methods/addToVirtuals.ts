@@ -4,6 +4,15 @@ export default async function addToVirtuals(
   newline: any,
   index: number
 ) {
-  newline = new this.schema.virtuals[virtual].options.model(newline);
+  let list = this.schema.virtuals[virtual];
+  newline = new list.options.model(newline);
+  newline.initLocal();
+  newline.index = index;
+  newline.parent = this;
+  // copy field value from parten document
+  (list.options.copyFields || []).forEach((field: string) => {
+    newline[field] = this[field] ? this[field]._id : this[field];
+  });
   this[virtual].splice(index, 0, newline);
+  await this.validateVirtuals()
 }

@@ -9,8 +9,7 @@ import Shop from "../models/shop.model";
 export default class controller {
   public async get(req: Request, res: Response, next: NextFunction) {
     i18n.setLocale(req.locale)
-    //console.log(req.url)
-    console.log(req.body.pointer, req.subdomains[0])
+
     let hostingPath = path.resolve("hosting");
     let views = path.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
     // check if exists shop - to do (customize template)
@@ -24,7 +23,7 @@ export default class controller {
     // if does not exist on main dir check templates folder
     if (shop && !fs.existsSync(filePath)) filePath = path.resolve("templates", shop.template, ...tmp);
     if (fs.existsSync(filePath) && !fs.lstatSync(filePath).isDirectory()) {
-      //console.log('testasdsas',filePath)
+
       res.sendFile(filePath);
     } else {
       let filepath = path.join(views, "index" + ".ejs");

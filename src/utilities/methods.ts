@@ -5,23 +5,51 @@ import autoPopulate from "./methods/autoPopulate";
 import validateVirtuals from "./methods/validateVirtuals";
 import totalVirtuals from "./methods/totalVirtuals";
 import addToVirtuals from "./methods/addToVirtuals";
-import mongoose,{ Schema } from "mongoose";
+import { cache, email } from "../app";
+import mongoose, { Schema } from "mongoose";
 export default function methods(schema: any, options: any) {
   // apply method to pre
-  async function handler(this: any, next: any) {
-    console.log("recalcRecord");
-    let msg = await this.validateVirtuals();
-    this.totalVirtuals();
-    this.changeLogs();
-    if (next) next();
-    return msg;
+  async function recalcDocument(this: any) {
+    console.log("default recalc Record");
+
   }
-  async function handlerSave(this: any, next: any) {
-    console.log("SaveRecord");
+  async function validateDocument(this: any) {
+    console.log("validateDocument");
+    let errors: any = [];
+    let err = this.validateSync();
+    if (err) errors.push(err)
+    let virtualmsg = await this.validateVirtuals();
+    if (virtualmsg && virtualmsg.length) errors.push(...virtualmsg)
+    return errors;
+  }
+  async function saveDocument(this: any) {
+    console.log("save document");
+    await this.recalcDocument();
     await this.validateVirtuals(true);
-    this.totalVirtuals();
+    let document = await this.save();
+    cache.delCache(document._id);
     this.changeLogs();
-    if (next) next();
+    return document;
+  }
+
+  //add locals
+  async function initLocal(this: any, next: any) {
+    this.$locals.oldValue = {};
+    this.$locals.triggers = [];
+  }
+
+  async function actions(this: any, next: any) {
+    console.log("post valide ")
+    for (let trigger of this.$locals.triggers) {
+      if (this.actions)
+        await this.actions(trigger);
+
+      // remove trigger
+      this.$locals.triggers.shift();
+
+      await this.validate()
+    }
+
   }
 
   // add resource
@@ -29,6 +57,7 @@ export default function methods(schema: any, options: any) {
     let resources = this.schema.options.collection.split(".")
     return resources[0];
   });
+
   schema.methods.setValue = setValue;
   schema.methods.changeLogs = changeLogs;
   schema.methods.virtualPopulate = virtualPopulate;
@@ -36,11 +65,15 @@ export default function methods(schema: any, options: any) {
   schema.methods.validateVirtuals = validateVirtuals;
   schema.methods.totalVirtuals = totalVirtuals;
   schema.methods.addToVirtuals = addToVirtuals;
-  schema.methods.recalcRecord = handler;
+  schema.methods.recalcDocument = recalcDocument;
+  schema.methods.saveDocument = saveDocument;
+  schema.methods.validateDocument = validateDocument;
+  schema.methods.initLocal = initLocal;
 
-  schema.pre("save", handlerSave);
-  schema.pre("remove", handlerSave);
-  //schema.pre("validate", handler);
+  // schema.pre("save", handlerSave);
+  // schema.pre("remove", handlerSave);
+  schema.pre("init", initLocal)
+  schema.post("validate", actions);
 
 
   // add Owner ID
@@ -52,14 +85,14 @@ export default function methods(schema: any, options: any) {
   // });
   // owner restriction
   //schema.pre('find', function (this:any) {
-    //mongoose.connection.useDb('mo1069_backup');
-    //console.log(mongoose.connection)
-    // const currentUser = "test";
-    // this.where({ ownerAccount: currentUser });
-    //console.log(next, req,test)
-    //let tmp = req();
-    //console.log( this)
-    //next();
+  //mongoose.connection.useDb('mo1069_backup');
+  //console.log(mongoose.connection)
+  // const currentUser = "test";
+  // this.where({ ownerAccount: currentUser });
+  //console.log(next, req,test)
+  //let tmp = req();
+  //console.log( this)
+  //next();
   //});
 
 }

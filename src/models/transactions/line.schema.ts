@@ -1,9 +1,9 @@
 import { Schema, model } from "mongoose";
 import { IItem } from "../items/schema";
 import { ITransaction } from "./schema";
-import actions from "./line.actions";
 import TranLineTypes from "../../constants/transaction.lines.types";
 import { roundToPrecision } from "../../utilities/usefull";
+import { setItem, setQuantity } from "./line.actions";
 import { Error } from "mongoose";
 export interface ILine {
   _id: Schema.Types.ObjectId;
@@ -26,6 +26,7 @@ export interface ILine {
   deleted: boolean;
   populate(field: string): any;
   depopulate(): any;
+  actions(trigger: any): any;
 }
 
 const options = {
@@ -98,14 +99,27 @@ schema.method("components", async function () {
   if (this.item && this.item.type === "KitItem") this.item.getComponents();
 });
 
+schema.method("actions", async function (trigger) {
+  console.log(`${trigger.type}_${trigger.field}`)
+  switch (`${trigger.type}_${trigger.field}`) {
+    case 'setValue_item':
+      await setItem(this);
+      break;
+    case 'setValue_quantity':
+      await setQuantity(this);
+      break;
+    default:
+      console.log(`Sorry, trigger dose nto exist ${trigger.type}_${trigger.field}.`);
+  }
+
+});
+
 schema.pre("validate", async function (next) {
-  console.log("pre valide line");
+  console.log("pre valide transaction line");
 
   //if (this.deleted) throw new Error.ValidationError();
-  let triggers: any[] = await this.changeLogs();
-  for (let trigger of triggers) {
-    if (actions[trigger.field]) await actions[trigger.field](this);
-  }
+
+
   // calc and set amount fields
   this.amount = roundToPrecision(this.quantity * this.price, 2);
   // tmp tax rate
@@ -115,7 +129,7 @@ schema.pre("validate", async function (next) {
 
   next();
 });
-schema.pre("save", async function (doc, next) { });
+
 
 schema.index({ transaction: 1 });
 

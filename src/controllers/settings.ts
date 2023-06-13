@@ -24,7 +24,6 @@ export default class SettingController {
             // to do - update
             let document = await model.findOne({ _id: req.params.id });
             if (document) {
-                console.log(req.body)
                 document = await document.updateOne(req.body);
             }
             res.json(document);

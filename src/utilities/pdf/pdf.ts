@@ -1,12 +1,14 @@
 import pdf from 'pdfjs';
 import fs from "fs";
 import path from "path";
+
+import logo from './logo';
+//fonts
+import OpenSans from './fonts/opensans';
+
 const fontsPath = path.resolve(__dirname);
 
- let OpenSans = new pdf.Font(fs.readFileSync(fontsPath + "/fonts/OpenSans-Regular.ttf"));
-// let OpenSansBold = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/OpenSans-Bold.ttf"));
-// let code128 = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/code128.ttf"));
-// let code39 = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/code39.ttf"));
+
 // const fonts:any = {
 //   default: OpenSans,
 //   bold: OpenSansBold,
@@ -25,9 +27,9 @@ export default async function render() {
     .table({ widths: [null, null], paddingBottom: 1 * pdf.cm })
     .row();
 
-    const src = fs.readFileSync(__dirname +'/logo.jpg');
-    const logo = new pdf.Image(src);
-    //headerLogo.cell().image(logo, { height: 1.5 * pdf.cm });
+  // const src = fs.readFileSync(__dirname + '/logo.jpg');
+  // const logo = new pdf.Image(src);
+  //headerLogo.cell().image(logo, { height: 1.5 * pdf.cm });
 
 
   header.cell().image(logo, { height: 2 * pdf.cm });
@@ -121,8 +123,8 @@ export default async function render() {
 
   const buf = await doc.asBuffer();
   return buf;
-//   const blob = new Blob([buf], { type: 'application/pdf' });
-//   const url = URL.createObjectURL(blob);
+  //   const blob = new Blob([buf], { type: 'application/pdf' });
+  //   const url = URL.createObjectURL(blob);
 
 }
 

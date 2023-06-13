@@ -146,7 +146,7 @@ export default class controller {
             //     document = await model.updateDocument(id, list, subrecord, field, value, save);
             // }
             let update = req.body;
-            let document = await model.updateDocument(id, update, req.body.save);
+            let document = await model.updateDocument(id, update);
             res.json(document);
         } catch (error) {
             return next(error);

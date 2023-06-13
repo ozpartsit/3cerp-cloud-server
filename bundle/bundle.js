@@ -134,8 +134,8 @@ const mongoose_paginate_v2_1 = __importDefault(__webpack_require__(8037));
 const static_1 = __importDefault(__webpack_require__(5833));
 const methods_1 = __importDefault(__webpack_require__(4934));
 mongoose_1.default.plugin(mongoose_paginate_v2_1.default);
-mongoose_1.default.plugin(static_1.default);
 mongoose_1.default.plugin(methods_1.default);
+mongoose_1.default.plugin(static_1.default);
 //import { password, server, database } from "./credentials";
 class Database {
     constructor() {
@@ -733,7 +733,7 @@ class controller {
                 //     document = await model.updateDocument(id, list, subrecord, field, value, save);
                 // }
                 let update = req.body;
-                let document = yield model.updateDocument(id, update, req.body.save);
+                let document = yield model.updateDocument(id, update);
                 res.json(document);
             }
             catch (error) {
@@ -800,7 +800,55 @@ class EmailController extends controller_1.default {
                     // Test email alias
                     let adres_docelowy = 'notification@3cerp.cloud';
                     let adres_zrodlowy = email.name;
+                    let domain = adres_zrodlowy.split("@")[1];
                     (0, child_process_1.exec)(`devil mail alias add ${adres_zrodlowy} ${adres_docelowy}`, (error, stdout, stderr) => {
+                        if (error) {
+                            console.log(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log(`stderr: ${stderr}`);
+                            return;
+                        }
+                        console.log(`stdout: ${stdout}`);
+                    });
+                    (0, child_process_1.exec)(`devil mail list`, (error, stdout, stderr) => {
+                        if (error) {
+                            console.log(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log(`stderr: ${stderr}`);
+                            return;
+                        }
+                        console.log(`stdout: ${stdout}`);
+                    });
+                    (0, child_process_1.exec)(`devil mail list ${domain}`, (error, stdout, stderr) => {
+                        if (error) {
+                            console.log(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log(`stderr: ${stderr}`);
+                            return;
+                        }
+                        console.log(`stdout: ${stdout}`);
+                    });
+                    // DKIM
+                    // Domena dodana
+                    (0, child_process_1.exec)(`devil mail dkim dns add ${domain}`, (error, stdout, stderr) => {
+                        if (error) {
+                            console.log(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log(`stderr: ${stderr}`);
+                            return;
+                        }
+                        console.log(`stdout: ${stdout}`);
+                    });
+                    // Domena zewnętrzna
+                    (0, child_process_1.exec)(`devil mail dkim dns add ${domain} --print`, (error, stdout, stderr) => {
                         if (error) {
                             console.log(`error: ${error.message}`);
                             return;
@@ -976,8 +1024,6 @@ class controller {
     get(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             i18n_1.default.setLocale(req.locale);
-            //console.log(req.url)
-            console.log(req.body.pointer, req.subdomains[0]);
             let hostingPath = path_1.default.resolve("hosting");
             let views = path_1.default.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
             // check if exists shop - to do (customize template)
@@ -991,7 +1037,6 @@ class controller {
             if (shop && !fs_1.default.existsSync(filePath))
                 filePath = path_1.default.resolve("templates", shop.template, ...tmp);
             if (fs_1.default.existsSync(filePath) && !fs_1.default.lstatSync(filePath).isDirectory()) {
-                //console.log('testasdsas',filePath)
                 res.sendFile(filePath);
             }
             else {
@@ -1211,7 +1256,6 @@ class SettingController {
                 // to do - update
                 let document = yield model.findOne({ _id: req.params.id });
                 if (document) {
-                    console.log(req.body);
                     document = yield document.updateOne(req.body);
                 }
                 res.json(document);
@@ -1569,7 +1613,7 @@ exports["default"] = DataCache;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.errorHandler = void 0;
 const errorHandler = (error, req, res, next) => {
-    console.log('ErrorHandlesr', error);
+    console.log('ErrorHandler', error);
     let errors = [];
     let status = 500;
     let message = "Error";
@@ -2106,6 +2150,9 @@ exports.schema = new mongoose_1.Schema({
     description: {
         type: String,
     },
+    dkim: {
+        type: String,
+    },
 }, {
     collection: "emails",
     toJSON: { virtuals: true },
@@ -2461,7 +2508,6 @@ const contact_schema_1 = __importDefault(__webpack_require__(2868));
 const address_schema_1 = __importDefault(__webpack_require__(9711));
 const balance_schema_1 = __importDefault(__webpack_require__(3155));
 const grouplevel_schema_1 = __importDefault(__webpack_require__(4880));
-const currencies_1 = __importDefault(__webpack_require__(7131));
 //import Countries from "../../constants/countries";
 const contactModel = (0, mongoose_1.model)("Contact", contact_schema_1.default);
 const balanceModel = (0, mongoose_1.model)("Balance", balance_schema_1.default);
@@ -2507,7 +2553,7 @@ const schema = new mongoose_1.Schema({
         type: String,
         required: true,
         //get: (v: any) => Currencies.getName(v),
-        enum: currencies_1.default,
+        //enum: Currencies,
         default: "PLN",
         input: "select",
         resource: 'constants',
@@ -2969,7 +3015,6 @@ schema.virtual("prices", {
 });
 schema.method("getPrice", function (line) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("getPrice", line.type);
         if (line.type === "Kit Component")
             return 0;
         else
@@ -3126,6 +3171,7 @@ exports.schema.method("getResults", function () {
         let populated = {};
         for (let column of this.columns) {
             // to do - poprawić
+            let fieldsSelect = { name: 1, resource: 1, type: 1 };
             let fields = column.field.split('.');
             if (fields.length > 1) {
                 if (populated[fields[0]]) {
@@ -3136,7 +3182,6 @@ exports.schema.method("getResults", function () {
                     });
                 }
                 else {
-                    let fieldsSelect = { name: 1 };
                     fieldsSelect[fields[1]] = 1;
                     populated[fields[0]] = {
                         path: fields[0],
@@ -3149,6 +3194,14 @@ exports.schema.method("getResults", function () {
                 }
             }
             else {
+                if (column.ref) {
+                    if (!populated[fields[0]]) {
+                        populated[fields[0]] = {
+                            path: fields[0],
+                            select: fieldsSelect
+                        };
+                    }
+                }
                 select[column.field] = true;
             }
         }
@@ -3163,7 +3216,7 @@ exports.schema.method("getResults", function () {
             .select(select);
         results = data.map((line) => {
             let row = { _id: line._id, type: line.type, resource: line.resource };
-            this.columns.forEach(c => {
+            this.columns.forEach((c) => {
                 let fields = c.field.split('.');
                 let value = undefined;
                 fields.forEach((field, index) => {
@@ -3173,12 +3226,14 @@ exports.schema.method("getResults", function () {
                     else
                         value = line[field];
                 });
-                if (c.constant)
+                if (c.constant) { // parse constat value to object
                     value = { _id: value, name: i18n_1.default.__(value) };
+                }
                 row[c.field] = value;
             });
             return row;
         });
+        data = [];
         return results;
     });
 });
@@ -3528,8 +3583,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const actions = {
-    item: (line) => __awaiter(void 0, void 0, void 0, function* () {
+exports.setQuantity = exports.setItem = void 0;
+function setItem(line) {
+    return __awaiter(this, void 0, void 0, function* () {
         if (line.item) {
             yield line.populate("item");
             //fill fields
@@ -3541,14 +3597,18 @@ const actions = {
             }
             line.depopulate("item");
         }
-    }),
-    quantity: (line) => __awaiter(void 0, void 0, void 0, function* () {
+    });
+}
+exports.setItem = setItem;
+function setQuantity(line) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log("setVaule_quantity");
         if (line.item && line.item.type === "KitItem") {
             yield line.item.syncComponents(line);
         }
-    })
-};
-exports["default"] = actions;
+    });
+}
+exports.setQuantity = setQuantity;
 
 
 /***/ }),
@@ -3571,9 +3631,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
-const line_actions_1 = __importDefault(__webpack_require__(7571));
 const transaction_lines_types_1 = __importDefault(__webpack_require__(998));
 const usefull_1 = __webpack_require__(6491);
+const line_actions_1 = __webpack_require__(7571);
 const options = {
     discriminatorKey: "parentType",
     collection: "transactions.lines",
@@ -3642,15 +3702,25 @@ schema.method("components", function () {
             this.item.getComponents();
     });
 });
+schema.method("actions", function (trigger) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log(`${trigger.type}_${trigger.field}`);
+        switch (`${trigger.type}_${trigger.field}`) {
+            case 'setValue_item':
+                yield (0, line_actions_1.setItem)(this);
+                break;
+            case 'setValue_quantity':
+                yield (0, line_actions_1.setQuantity)(this);
+                break;
+            default:
+                console.log(`Sorry, trigger dose nto exist ${trigger.type}_${trigger.field}.`);
+        }
+    });
+});
 schema.pre("validate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("pre valide line");
+        console.log("pre valide transaction line");
         //if (this.deleted) throw new Error.ValidationError();
-        let triggers = yield this.changeLogs();
-        for (let trigger of triggers) {
-            if (line_actions_1.default[trigger.field])
-                yield line_actions_1.default[trigger.field](this);
-        }
         // calc and set amount fields
         this.amount = (0, usefull_1.roundToPrecision)(this.quantity * this.price, 2);
         // tmp tax rate
@@ -3659,9 +3729,6 @@ schema.pre("validate", function (next) {
         this.grossAmount = (0, usefull_1.roundToPrecision)(this.amount + this.taxAmount, 2);
         next();
     });
-});
-schema.pre("save", function (doc, next) {
-    return __awaiter(this, void 0, void 0, function* () { });
 });
 schema.index({ transaction: 1 });
 const Line = (0, mongoose_1.model)("Line", schema);
@@ -3765,6 +3832,15 @@ exports["default"] = schema;
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -3785,6 +3861,12 @@ schema.virtual("lines", {
     autopopulate: true,
     model: lineModel,
     copyFields: ["entity"]
+});
+schema.pre("validate", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log("salesorder pre valide");
+        next();
+    });
 });
 const SalesOrder = schema_1.default.discriminator("SalesOrder", schema);
 exports["default"] = SalesOrder;
@@ -3988,7 +4070,8 @@ schema.virtual("lines", {
     justOne: false,
     autopopulate: true,
     model: line_schema_1.default,
-    copyFields: ["entity"]
+    copyFields: ["entity"],
+    options: { sort: { index: 1 } },
 });
 schema.method("pdf", function () {
     return __awaiter(this, void 0, void 0, function* () {
@@ -4021,13 +4104,12 @@ schema.method("autoName", function () {
 schema.method("findRelations", function () {
     return __awaiter(this, void 0, void 0, function* () {
         return (0, mongoose_1.model)("Transaction").find({ type: this.type }, (err, transactions) => {
-            console.log(transactions);
         });
     });
 });
 schema.pre("validate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("pre valide");
+        console.log("transaction pre valide");
         next();
     });
 });
@@ -4571,27 +4653,55 @@ const autoPopulate_1 = __importDefault(__webpack_require__(5363));
 const validateVirtuals_1 = __importDefault(__webpack_require__(4002));
 const totalVirtuals_1 = __importDefault(__webpack_require__(4649));
 const addToVirtuals_1 = __importDefault(__webpack_require__(2329));
+const app_1 = __webpack_require__(3165);
 function methods(schema, options) {
     // apply method to pre
-    function handler(next) {
+    function recalcDocument() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("recalcRecord");
-            let msg = yield this.validateVirtuals();
-            this.totalVirtuals();
-            this.changeLogs();
-            if (next)
-                next();
-            return msg;
+            console.log("default recalc Record");
         });
     }
-    function handlerSave(next) {
+    function validateDocument() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("SaveRecord");
+            console.log("validateDocument");
+            let errors = [];
+            let err = this.validateSync();
+            if (err)
+                errors.push(err);
+            let virtualmsg = yield this.validateVirtuals();
+            if (virtualmsg && virtualmsg.length)
+                errors.push(...virtualmsg);
+            return errors;
+        });
+    }
+    function saveDocument() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("save document");
+            yield this.recalcDocument();
             yield this.validateVirtuals(true);
-            this.totalVirtuals();
+            let document = yield this.save();
+            app_1.cache.delCache(document._id);
             this.changeLogs();
-            if (next)
-                next();
+            return document;
+        });
+    }
+    //add locals
+    function initLocal(next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.$locals.oldValue = {};
+            this.$locals.triggers = [];
+        });
+    }
+    function actions(next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("post valide ");
+            for (let trigger of this.$locals.triggers) {
+                if (this.actions)
+                    yield this.actions(trigger);
+                // remove trigger
+                this.$locals.triggers.shift();
+                yield this.validate();
+            }
         });
     }
     // add resource
@@ -4606,10 +4716,14 @@ function methods(schema, options) {
     schema.methods.validateVirtuals = validateVirtuals_1.default;
     schema.methods.totalVirtuals = totalVirtuals_1.default;
     schema.methods.addToVirtuals = addToVirtuals_1.default;
-    schema.methods.recalcRecord = handler;
-    schema.pre("save", handlerSave);
-    schema.pre("remove", handlerSave);
-    //schema.pre("validate", handler);
+    schema.methods.recalcDocument = recalcDocument;
+    schema.methods.saveDocument = saveDocument;
+    schema.methods.validateDocument = validateDocument;
+    schema.methods.initLocal = initLocal;
+    // schema.pre("save", handlerSave);
+    // schema.pre("remove", handlerSave);
+    schema.pre("init", initLocal);
+    schema.post("validate", actions);
     // add Owner ID
     // schema.add({
     //   ownerAccount: {
@@ -4650,8 +4764,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 function addToVirtuals(virtual, newline, index) {
     return __awaiter(this, void 0, void 0, function* () {
-        newline = new this.schema.virtuals[virtual].options.model(newline);
+        let list = this.schema.virtuals[virtual];
+        newline = new list.options.model(newline);
+        newline.initLocal();
+        newline.index = index;
+        newline.parent = this;
+        // copy field value from parten document
+        (list.options.copyFields || []).forEach((field) => {
+            newline[field] = this[field] ? this[field]._id : this[field];
+        });
         this[virtual].splice(index, 0, newline);
+        yield this.validateVirtuals();
     });
 }
 exports["default"] = addToVirtuals;
@@ -4746,34 +4869,57 @@ function changeLogs() {
         // init local array to hold modified paths
         let newModifiedPaths = [];
         this.$locals.modifiedPaths = this.$locals.modifiedPaths || {};
-        this.directModifiedPaths().forEach((path) => {
-            if (this.schema.path(path).options.ref) {
-                if ((this.$locals.modifiedPaths[path]
-                    ? (this.$locals.modifiedPaths[path]._id ||
-                        this.$locals.modifiedPaths[path]).toString()
-                    : null) !==
-                    (this[path] ? (this[path]._id || this[path]).toString() : null)) {
-                    newModifiedPaths.push({
-                        field: path,
-                        value: this[path] ? (this[path]._id || this[path]).toString() : null,
-                        oldValue: this.$locals.modifiedPaths[path]
-                            ? (this.$locals.modifiedPaths[path]._id ||
-                                this.$locals.modifiedPaths[path]).toString()
-                            : null
-                    });
-                }
+        // this.directModifiedPaths().forEach((path: string) => {
+        //   console.log(path)
+        //   if (this.schema.path(path).options.ref) {
+        //     if (
+        //       (this.$locals.modifiedPaths[path]
+        //         ? (
+        //           this.$locals.modifiedPaths[path]._id ||
+        //           this.$locals.modifiedPaths[path]
+        //         ).toString()
+        //         : null) !==
+        //       (this[path] ? (this[path]._id || this[path]).toString() : null)
+        //     ) {
+        //       newModifiedPaths.push({
+        //         field: path,
+        //         value: this[path] ? (this[path]._id || this[path]).toString() : null,
+        //         oldValue: this.$locals.modifiedPaths[path]
+        //           ? (
+        //             this.$locals.modifiedPaths[path]._id ||
+        //             this.$locals.modifiedPaths[path]
+        //           ).toString()
+        //           : null
+        //       });
+        //     }
+        //   } else {
+        //     if (this.$locals.modifiedPaths[path] !== this[path]) {
+        //       newModifiedPaths.push({
+        //         field: path,
+        //         value: this[path],
+        //         oldValue: this.$locals.modifiedPaths[path]
+        //       });
+        //     }
+        //   }
+        //   this.$locals.modifiedPaths[path] = this[path];
+        // });
+        //zmodyfikować by przed zapisaniem pobierało oryginalny obiekt i zapisywalo zmiany
+        if (this.isModified) {
+            let selects = this.directModifiedPaths();
+            //get original document if exists (only changed fields)
+            let originalDoc = yield this.constructor.findById(this.id, selects);
+            if (originalDoc) {
+                selects.forEach((field) => {
+                    this.depopulate();
+                    if ((this[field]).toString() !== (originalDoc[field]).toString()) {
+                        //let changeLog = new ChangeLog(this.id, this[field], originalDoc[field])
+                    }
+                    else {
+                        this.unmarkModified(field);
+                    }
+                });
             }
-            else {
-                if (this.$locals.modifiedPaths[path] !== this[path]) {
-                    newModifiedPaths.push({
-                        field: path,
-                        value: this[path],
-                        oldValue: this.$locals.modifiedPaths[path]
-                    });
-                }
-            }
-            this.$locals.modifiedPaths[path] = this[path];
-        });
+        }
         return newModifiedPaths;
     });
 }
@@ -4797,41 +4943,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
-function setValue(list, subrecord, field, value) {
+function setValue(field, value, list, subrecord) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log("setValue", field, list);
-            let changeLogs = this.getChanges();
+            let document;
             if (list) {
-                let SubDocument = this[list].find((element) => {
+                document = this[list].find((element) => {
                     return element._id.toString() === subrecord;
                 });
-                if (SubDocument) {
-                    SubDocument[field] = value;
-                }
-                else {
+                if (!document) {
                     let virtual = this.schema.virtuals[list];
-                    if (field) {
-                        SubDocument = new mongoose_1.models[virtual.options.ref]();
-                        SubDocument[field] = value;
-                        this[list].push(SubDocument);
-                    }
-                    else
-                        console.log("The list does not exist");
+                    document = yield new mongoose_1.models[virtual.options.ref]();
+                    document.initLocal();
+                    this[list].push(document);
+                    this.validateVirtuals();
                 }
-                // to do - dodać do virtual option parametr uniq/incrrepemt dla indexa (sort)
-                // if (field === "index") {
-                //   this[list].sort((a: any, b: any) => a.index - b.index)
-                // }
-                //await SubDocument.validate();
-                changeLogs[list] = SubDocument.getChanges();
             }
             else {
-                this[field] = value;
-                yield this.populate(field, "name displayname type _id");
-                changeLogs = this.getChanges();
+                document = this;
             }
-            yield this.validate();
+            document.$locals.oldValue[field] = document[field];
+            document.$locals.triggers.push({ type: "setValue", field: field, oldValue: document.$locals.oldValue[field] });
+            document[field] = value;
+            //populate new field value
+            yield document.populate(field, "name displayname type _id");
+            yield document.validate();
         }
         catch (err) {
             return err;
@@ -4892,7 +5028,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 function validateVirtuals(save) {
     return __awaiter(this, void 0, void 0, function* () {
-        //console.log("validateVirtuals");
+        console.log("validateVirtuals");
         let errors = [];
         const virtuals = Object.values(this.schema.virtuals);
         for (let list of virtuals) {
@@ -4918,7 +5054,6 @@ function validateVirtuals(save) {
                         (list.options.copyFields || []).forEach((field) => {
                             line[field] = this[field] ? this[field]._id : this[field];
                         });
-                        //console.log("save", save);
                         // Validate or validate and save
                         try {
                             if (save) {
@@ -4932,11 +5067,10 @@ function validateVirtuals(save) {
                             }
                             else {
                                 // Catch errors from validate all virtual list
-                                yield line.validate();
+                                //await line.validate();
                             }
                         }
                         catch (err) {
-                            //console.log(err)
                             err._id = line._id;
                             err.list = list.path;
                             errors.push(err);
@@ -4949,9 +5083,10 @@ function validateVirtuals(save) {
                     this[list.path] = [];
                 }
             }
+            // run summary values from virtuals to main document
+            this.totalVirtuals();
         }
         if (errors.length > 0) {
-            console.log(errors.length);
             if (save)
                 throw errors;
             else
@@ -4993,6 +5128,23 @@ exports["default"] = virtualPopulate;
 
 /***/ }),
 
+/***/ 1290:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const pdfjs_1 = __importDefault(__webpack_require__(6684));
+const logo = new pdfjs_1.default.Image(
+// await fetch('/logo.pdf').then((res) => res.arrayBuffer())
+Buffer.from('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d9zd6brzWJliWV7Z0K7gXa3lzPKi8re7V+y+VmFbcWAPaY9kj7QyqLK9Sq9qR9Wn6qTqgRqPmua96nu37Z3ax9vXv99tf9MBjQPFBz4eFBy8f8j3UGutQW3FYdzhrMPP66Lqur9nf19/RO1I8ZHPR4VHpcfCj3XVO9TXN6g3lDbCjZLGseNxx2/94PVDexOr6VAzo7n4BDghOfHix/gf754MPNl5in2q6Sf9n/a20FqKWqHW3NaJtqQ2aXtMe9/pgNOdHc4dLT+b/3z0jPaZmrPKZ0vPkc4VnJs5n3d+8kLGhfGLiReHOld0Prq05NKdrrCu3suBl69e8blyqdu9+/xVl6tnrjldO32dfb3thv2N1h67npZf7H5p6bXvbb3pcLP9luOtjr4Ffef6Xfsv3va6feWO/50bA4sG+u4uvnv/Xtw96X3e/dEHqQ9eP8x6OP1o/WPs46InCk8qnqo/rf3V+Ndmqb307KDXYM+ziGePhrhDL/+V+a9PwwXPqc8rRrRG6ketR8+M+YzderH0xfDLjJfT44W/Kf6295XRq59+d/u9Z2LJxPBr0euZP0reqL45+tb2bedk6OTTd2nvpqeK3qu+P/aB/aH7Y/THkensT/hPlZ+NP3d8CfzyeCZtZubf94Tz+wplbmRzdHJlYW0KZW5kb2JqCjkgMCBvYmoKMjYxMgplbmRvYmoKNyAwIG9iagpbIC9JQ0NCYXNlZCA4IDAgUiBdCmVuZG9iagozIDAgb2JqCjw8IC9UeXBlIC9QYWdlcyAvTWVkaWFCb3ggWzAgMCAxODQ2IDUwNV0gL0NvdW50IDEgL0tpZHMgWyAyIDAgUiBdID4+CmVuZG9iagoxMCAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMyAwIFIgPj4KZW5kb2JqCjExIDAgb2JqCihNYWMgT1MgWCAxMC4xMCBRdWFydHogUERGQ29udGV4dCkKZW5kb2JqCjEyIDAgb2JqCihEOjIwMTQwODA4MTgzMjEzWjAwJzAwJykKZW5kb2JqCjEgMCBvYmoKPDwgL1Byb2R1Y2VyIDExIDAgUiAvQ3JlYXRpb25EYXRlIDEyIDAgUiAvTW9kRGF0ZSAxMiAwIFIgPj4KZW5kb2JqCnhyZWYKMCAxMwowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDQzODcgMDAwMDAgbiAKMDAwMDAwMTIxOSAwMDAwMCBuIAowMDAwMDA0MTYwIDAwMDAwIG4gCjAwMDAwMDAwMjIgMDAwMDAgbiAKMDAwMDAwMTE5OSAwMDAwMCBuIAowMDAwMDAxMzI0IDAwMDAwIG4gCjAwMDAwMDQxMjUgMDAwMDAgbiAKMDAwMDAwMTM5MiAwMDAwMCBuIAowMDAwMDA0MTA1IDAwMDAwIG4gCjAwMDAwMDQyNDQgMDAwMDAgbiAKMDAwMDAwNDI5NCAwMDAwMCBuIAowMDAwMDA0MzQ1IDAwMDAwIG4gCnRyYWlsZXIKPDwgL1NpemUgMTMgL1Jvb3QgMTAgMCBSIC9JbmZvIDEgMCBSIC9JRCBbIDxlODU0N2M5ZmI4NDZlMjU4Yjk0MDgyYWQwNWFhYmZiMT4KPGU4NTQ3YzlmYjg0NmUyNThiOTQwODJhZDA1YWFiZmIxPiBdID4+CnN0YXJ0eHJlZgo0NDYyCiUlRU9GCg==', 'base64'));
+exports["default"] = logo;
+
+
+/***/ }),
+
 /***/ 180:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -5011,13 +5163,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const pdfjs_1 = __importDefault(__webpack_require__(6684));
-const fs_1 = __importDefault(__webpack_require__(7147));
 const path_1 = __importDefault(__webpack_require__(1017));
+const logo_1 = __importDefault(__webpack_require__(1290));
 const fontsPath = path_1.default.resolve(__dirname);
-let OpenSans = new pdfjs_1.default.Font(fs_1.default.readFileSync(fontsPath + "/fonts/OpenSans-Regular.ttf"));
-// let OpenSansBold = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/OpenSans-Bold.ttf"));
-// let code128 = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/code128.ttf"));
-// let code39 = new pdf.Font(fs.readFileSync(__dirname + "/../public/storage/code39.ttf"));
 // const fonts:any = {
 //   default: OpenSans,
 //   bold: OpenSansBold,
@@ -5032,10 +5180,10 @@ function render() {
             .header()
             .table({ widths: [null, null], paddingBottom: 1 * pdfjs_1.default.cm })
             .row();
-        const src = fs_1.default.readFileSync(__dirname + '/logo.jpg');
-        const logo = new pdfjs_1.default.Image(src);
+        // const src = fs.readFileSync(__dirname + '/logo.jpg');
+        // const logo = new pdf.Image(src);
         //headerLogo.cell().image(logo, { height: 1.5 * pdf.cm });
-        header.cell().image(logo, { height: 2 * pdfjs_1.default.cm });
+        header.cell().image(logo_1.default, { height: 2 * pdfjs_1.default.cm });
         header
             .cell()
             .text({ textAlign: 'right' })
@@ -5179,6 +5327,7 @@ function loadDocument(id) {
         let doc = yield this.findOne({ _id: id });
         if (doc) {
             yield doc.virtualPopulate();
+            yield doc.validateVirtuals();
             return doc;
         }
         else
@@ -5190,8 +5339,8 @@ exports.loadDocument = loadDocument;
 function addDocument(data) {
     return __awaiter(this, void 0, void 0, function* () {
         let document = new this(data);
-        yield document.recalcRecord();
-        let msg = yield document.validateSync();
+        yield document.recalcDocument();
+        let msg = yield document.validateDocument();
         // insert document to cache
         app_1.cache.addCache(document);
         document = yield document.autoPopulate();
@@ -5202,18 +5351,13 @@ exports.addDocument = addDocument;
 function getDocument(id, mode) {
     return __awaiter(this, void 0, void 0, function* () {
         let document = app_1.cache.getCache(id);
-        if (mode === "edit") {
-            if (!document) {
-                document = yield this.loadDocument(id);
-                app_1.cache.addCache(document);
-            }
-            if (document)
-                document = yield document.autoPopulate();
-        }
-        else {
+        if (!document) {
             document = yield this.loadDocument(id);
-            if (document)
-                document = yield document.autoPopulate();
+        }
+        if (document) {
+            if (mode === "edit")
+                app_1.cache.addCache(document);
+            document = yield document.autoPopulate();
         }
         return document;
     });
@@ -5222,30 +5366,38 @@ exports.getDocument = getDocument;
 function saveDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
         let document = app_1.cache.getCache(id);
-        yield document.save();
-        app_1.cache.delCache(id);
-        //email.send({}, {}, 'ts');
-        (0, pdf_1.default)();
-        return id;
+        if (document) {
+            yield document.saveDocument();
+            (0, pdf_1.default)();
+            return id;
+        }
+        else {
+            // to do - dodać error
+        }
     });
 }
 exports.saveDocument = saveDocument;
-function updateDocument(id, updates, save) {
+function updateDocument(id, updates) {
     return __awaiter(this, void 0, void 0, function* () {
         let document = app_1.cache.getCache(id);
-        if (!document)
-            document = yield this.getDocument(id, "edit");
+        let save = false;
+        if (!document) {
+            document = yield this.loadDocument(id);
+            save = true;
+        }
+        let msg = [];
         if (!Array.isArray(updates))
             updates = [updates]; // array
         for (let update of updates) {
-            yield document.setValue(update.list, update.subrecord, update.field, update.value);
+            msg = yield document.setValue(update.field, update.value, update.list, update.subrecord);
         }
-        let msg = yield document.recalcRecord();
         if (save) {
-            document = yield this.saveDocument(id);
+            document = yield document.saveDocument();
             return { document, msg };
         }
         else {
+            yield document.recalcDocument();
+            //let msg = await document.validateDocument();
             document = yield document.autoPopulate();
             return { document, msg };
         }
@@ -5254,11 +5406,16 @@ function updateDocument(id, updates, save) {
 exports.updateDocument = updateDocument;
 function deleteDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        let document = app_1.cache.getCache(id);
-        document.deleted = true;
-        yield document.recalcRecord();
-        app_1.cache.delCache(id);
-        document.remove();
+        let document = yield this.loadDocument(id);
+        if (document) {
+            document.deleted = true;
+            yield document.recalcDocument();
+            app_1.cache.delCache(id);
+            document.remove();
+        }
+        else {
+            // to do - dodać error
+        }
         return id;
     });
 }
@@ -5332,7 +5489,7 @@ function getFields(parent) {
         if (schematype.options.input ||
             ["Embedded", "Array"].includes(schematype.instance)) {
             if (["Embedded", "Array"].includes(schematype.instance)) {
-                console.log(pathname, schematype.schema);
+                //console.log(pathname, schematype.schema);
                 // this.getFields(schematype.schema, type).forEach((field) =>
                 //   fields.push({ path: pathname, ...field })
                 // );
@@ -5344,7 +5501,7 @@ function getFields(parent) {
                     required: schematype.isRequired,
                     ref: schematype.options.ref,
                     resource: schematype.options.resource,
-                    constatnt: schematype.options.constatnt,
+                    constant: schematype.options.constant,
                     type: schematype.options.input,
                     fields: []
                 };

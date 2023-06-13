@@ -1,45 +1,38 @@
 import { models } from "mongoose";
 export default async function setValue(
   this: any,
+  field: string,
+  value: any,
   list: string,
   subrecord: string,
-  field: string,
-  value: any
 ) {
   try {
-    console.log("setValue", field, list);
-    let changeLogs = this.getChanges();
+    let document: any;
     if (list) {
-
-      let SubDocument = this[list].find((element: any) => {
+      document = this[list].find((element: any) => {
         return element._id.toString() === subrecord;
       });
 
-      if (SubDocument) {
-        SubDocument[field] = value;
-      } else {
+      if (!document) {
         let virtual: any = this.schema.virtuals[list];
-        if (field) {
-          SubDocument = new models[virtual.options.ref]();
-
-          SubDocument[field] = value;
-          this[list].push(SubDocument);
-        } else console.log("The list does not exist");
+        document = await new models[virtual.options.ref]();
+        document.initLocal();
+        this[list].push(document);
+        this.validateVirtuals();
       }
-      // to do - dodać do virtual option parametr uniq/incrrepemt dla indexa (sort)
-      // if (field === "index") {
-      //   this[list].sort((a: any, b: any) => a.index - b.index)
-      // }
-      //await SubDocument.validate();
-      changeLogs[list] = SubDocument.getChanges();
     } else {
-      this[field] = value;
-      await this.populate(field, "name displayname type _id");
-      changeLogs = this.getChanges();
+      document = this;
     }
-    await this.validate();
+
+    document.$locals.oldValue[field] = document[field];
+    document.$locals.triggers.push({ type: "setValue", field: field, oldValue: document.$locals.oldValue[field] });
+    document[field] = value;
+
+    //populate new field value
+    await document.populate(field, "name displayname type _id");
+    await document.validate();
+
   } catch (err) {
     return err;
   }
-
 }

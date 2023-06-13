@@ -3,8 +3,9 @@ import mongoosePaginate from "mongoose-paginate-v2";
 import Static from "../utilities/static";
 import Methods from "../utilities/methods";
 mongoose.plugin(mongoosePaginate);
-mongoose.plugin(Static);
 mongoose.plugin(Methods);
+mongoose.plugin(Static);
+
 //import { password, server, database } from "./credentials";
 export default class Database {
   private database: string;

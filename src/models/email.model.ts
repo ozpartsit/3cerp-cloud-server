@@ -6,7 +6,7 @@ export interface IEmail extends IExtendedDocument {
     name: string;
     type: string;
     description: string;
-
+    dkim: string;
 }
 interface IEmailModel extends Model<IEmail>, IExtendedModel { }
 
@@ -23,6 +23,9 @@ export const schema = new Schema<IEmail>(
             default: "email"
         },
         description: {
+            type: String,
+        },
+        dkim: {
             type: String,
         },
     },

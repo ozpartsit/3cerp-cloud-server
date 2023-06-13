@@ -5,9 +5,10 @@ import pdf from "./pdf/pdf"
 //loadDocument
 export async function loadDocument(this: any, id: string) {
   let doc = await this.findOne({ _id: id });
-
   if (doc) {
     await doc.virtualPopulate();
+    await doc.validateVirtuals();
+
     return doc;
   } else return null;
 }
@@ -15,8 +16,8 @@ export async function loadDocument(this: any, id: string) {
 //API
 export async function addDocument(this: any, data: Object) {
   let document = new this(data);
-  await document.recalcRecord();
-  let msg = await document.validateSync();
+  await document.recalcDocument();
+  let msg = await document.validateDocument();
   // insert document to cache
   cache.addCache(document);
   document = await document.autoPopulate();
@@ -25,28 +26,26 @@ export async function addDocument(this: any, data: Object) {
 
 export async function getDocument(this: any, id: string, mode: string) {
   let document = cache.getCache(id);
-  if (mode === "edit") {
-    if (!document) {
-      document = await this.loadDocument(id);
-      cache.addCache(document);
-    }
-    if (document)
-      document = await document.autoPopulate();
-  } else {
+  if (!document) {
     document = await this.loadDocument(id);
-    if (document)
-      document = await document.autoPopulate();
+  }
+  if (document) {
+    if (mode === "edit") cache.addCache(document);
+    document = await document.autoPopulate();
   }
   return document;
 }
 
 export async function saveDocument(this: any, id: string) {
   let document = cache.getCache(id);
-  await document.save();
-  cache.delCache(id);
-  //email.send({}, {}, 'ts');
-  pdf();
-  return id;
+  if (document) {
+    await document.saveDocument();
+    pdf();
+    return id;
+  } else {
+    // to do - dodać error
+  }
+
 }
 
 interface updateBody {
@@ -57,29 +56,40 @@ interface updateBody {
 
 }
 
-export async function updateDocument(this: any, id: string, updates: updateBody | updateBody[], save: Boolean) {
+export async function updateDocument(this: any, id: string, updates: updateBody | updateBody[]) {
   let document = cache.getCache(id);
-  if (!document) document = await this.getDocument(id, "edit");
+  let save = false;
+  if (!document) {
+    document = await this.loadDocument(id);
+    save = true;
+  }
+  let msg = [];
   if (!Array.isArray(updates)) updates = [updates]; // array
   for (let update of updates) {
-    await document.setValue(update.list, update.subrecord, update.field, update.value);
+    msg = await document.setValue(update.field, update.value, update.list, update.subrecord);
   }
-  let msg = await document.recalcRecord();
+
   if (save) {
-    document = await this.saveDocument(id);
+    document = await document.saveDocument();
     return { document, msg };
   } else {
+    await document.recalcDocument();
+    //let msg = await document.validateDocument();
     document = await document.autoPopulate();
     return { document, msg };
   }
 }
 
 export async function deleteDocument(this: any, id: string) {
-  let document = cache.getCache(id);
-  document.deleted = true;
-  await document.recalcRecord();
-  cache.delCache(id);
-  document.remove();
+  let document = await this.loadDocument(id);
+  if (document) {
+    document.deleted = true;
+    await document.recalcDocument();
+    cache.delCache(id);
+    document.remove();
+  } else {
+    // to do - dodać error
+  }
 
   return id;
 }

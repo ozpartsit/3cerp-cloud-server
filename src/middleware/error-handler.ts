@@ -11,7 +11,7 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log('ErrorHandlesr', error);
+  console.log('ErrorHandler', error);
   let errors: ResponseError[] = [];
   let status = 500;
   let message = "Error";

@@ -80,7 +80,6 @@ schema.virtual("prices", {
 });
 
 schema.method("getPrice", async function (line: any) {
-  console.log("getPrice", line.type);
   if (line.type === "Kit Component") return 0;
   else return 1.99;
 });

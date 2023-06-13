@@ -27,6 +27,11 @@ schema.virtual("lines", {
   copyFields: ["entity"]
 });
 
+schema.pre("validate", async function (next) {
+  console.log("salesorder pre valide");
+  next();
+});
+
 const SalesOrder: ISalesOrderModel = Transaction.discriminator<
   ISalesOrder,
   ISalesOrderModel

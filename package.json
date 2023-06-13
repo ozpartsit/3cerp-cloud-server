@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p . && webpack",
     "start": "SET NODE_ENV=production&node dist/app.js",
-    "dev": "SET NODE_ENV=development&nodemon --exec & 'ts-node' src/app.ts"
+    "dev": "SET NODE_ENV=development&nodemon --exec & 'ts-node' src/app.ts",
+    "pm2": "SET NODE_ENV=development&pm2 start ecosystem.config.js"
   },
   "dependencies": {
     "@types/express": "4.17.13",

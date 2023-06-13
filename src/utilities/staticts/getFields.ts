@@ -29,7 +29,7 @@ export default function getFields(this: any, parent: string) {
       ["Embedded", "Array"].includes(schematype.instance)
     ) {
       if (["Embedded", "Array"].includes(schematype.instance)) {
-        console.log(pathname, schematype.schema);
+        //console.log(pathname, schematype.schema);
         // this.getFields(schematype.schema, type).forEach((field) =>
         //   fields.push({ path: pathname, ...field })
         // );
