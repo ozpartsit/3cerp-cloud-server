@@ -208,8 +208,9 @@ const TransactionSchema = {
   status: {
     type: String,
     default: "pendingapproval",
-    i18n: true,
-    enum: TranStatus,
+    resource: 'constants',
+    constant: 'currencies',
+    //enum: TranStatus,
     input: "select"
   },
   taxNumber: { type: String, input: "text" },

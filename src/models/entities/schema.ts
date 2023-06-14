@@ -19,7 +19,7 @@ export interface IEntity {
   type: string;
   email?: string;
   password?: string;
-
+  locale?: string;
   salesRep: Schema.Types.ObjectId;
   warehouse: Schema.Types.ObjectId;
   currency?: string;
@@ -84,7 +84,7 @@ const schema = new Schema<IEntity>(
       input: "select"
     },
     password: { type: String, input: "password" },
-
+    locale: { type: String, default: "en" },
     salesRep: {
       type: Schema.Types.ObjectId,
       ref: "Entity",

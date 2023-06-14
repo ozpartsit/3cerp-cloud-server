@@ -8,7 +8,7 @@ import Item, { ItemTypes } from "../models/items/model";
 import Shop from "../models/shop.model";
 export default class controller {
   public async get(req: Request, res: Response, next: NextFunction) {
-    i18n.setLocale(req.locale)
+    i18n.setLocale(req.locale);
 
     let hostingPath = path.resolve("hosting");
     let views = path.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
@@ -63,7 +63,7 @@ export default class controller {
             let result = await Item.findDocuments(query, options);
             let total = await Item.count(query)
             for (let line of result) {
-              line = await line.autoPopulate(req);
+              line = await line.autoPopulate(req.locale);
             }
 
             // Pagination url halper

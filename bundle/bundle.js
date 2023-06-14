@@ -85,7 +85,34 @@ class App3CERP {
         this.app.use('/storage', express_1.default.static("storage")); // Storage files
         this.app.use("/public", express_1.default.static("public"));
         this.app.use('/hosting', express_1.default.static("hosting"));
-        this.app.use(__webpack_require__(3222)());
+        this.app.use(__webpack_require__(3222)({
+            title: '3C Cloud Status',
+            theme: 'default.css',
+            path: '/status',
+            socketPath: '/socket.io',
+            spans: [{
+                    interval: 1,
+                    retention: 60 // Keep 60 datapoints in memory
+                }, {
+                    interval: 5,
+                    retention: 60
+                }, {
+                    interval: 15,
+                    retention: 60
+                }],
+            chartVisibility: {
+                cpu: true,
+                mem: true,
+                load: true,
+                eventLoop: true,
+                heap: true,
+                responseTime: true,
+                rps: true,
+                statusCodes: true
+            },
+            healthChecks: [],
+            ignoreStartsWith: '/admin'
+        }));
         this.app.use(i18n_1.default.init);
     }
     mountRoutes() {
@@ -836,7 +863,7 @@ class EmailController extends controller_1.default {
                     });
                     // DKIM
                     // Domena dodana
-                    (0, child_process_1.exec)(`devil mail dkim dns add ${domain}`, (error, stdout, stderr) => {
+                    (0, child_process_1.exec)(`devil mail dkim dns ${domain}`, (error, stdout, stderr) => {
                         if (error) {
                             console.log(`error: ${error.message}`);
                             return;
@@ -848,7 +875,8 @@ class EmailController extends controller_1.default {
                         console.log(`stdout: ${stdout}`);
                     });
                     // Domena zewnętrzna
-                    (0, child_process_1.exec)(`devil mail dkim dns add ${domain} --print`, (error, stdout, stderr) => {
+                    (0, child_process_1.exec)(`devil mail dkim dns ${domain} --print`, (error, stdout, stderr) => {
+                        console.log(email._id);
                         if (error) {
                             console.log(`error: ${error.message}`);
                             return;
@@ -858,6 +886,8 @@ class EmailController extends controller_1.default {
                             return;
                         }
                         console.log(`stdout: ${stdout}`);
+                        // fill DKIM field
+                        email_model_1.default.findByIdAndUpdate(email._id, { $set: { dkim: stdout } });
                     });
                 }
                 catch (error) {

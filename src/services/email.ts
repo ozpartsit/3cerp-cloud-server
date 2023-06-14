@@ -22,20 +22,24 @@ export default class Email {
         pass: this.pass
       }
     });
-    this.email = {
-      from: 'test@ozparts.pl',
-      to: 'it@ozparts.eu',
-      subject: 'test',
-      html: 'test'
-    }
+    // this.email = {
+    //   from: 'test@ozparts.eu',
+    //   to: 'it@ozparts.eu',
+    //   subject: 'test',
+    //   html: 'test'
+    // }
   }
 
-  public send(message: any = {}, data: any = {}, template: string) {
-    this.transporter.sendMail(this.email, (error: any, info: any) => {
-      if (error) {
-        return console.log(error);
-      }
-      console.log('Message sent: %s', info.messageId);
-    });
+  public async send(email: any = {}) {
+    return await this.transporter.sendMail(email)
+    //   , (error: any, info: any) => {
+    //   if (error) {
+    //     throw error;
+    //   } else {
+    //     console.log('Message sent: %s', info.messageId);
+    //     return info.messageId;
+    //   }
+
+    // });
   }
 }

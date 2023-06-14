@@ -223,6 +223,9 @@ export default class Routes {
       this.emailController.add.bind(this.emailController) as any
     );
 
+    this.Router.route("/emails/:recordtype/:id/send")
+      .post(this.emailController.send.bind(this.emailController) as any)
+
     this.Router.route("/emails/:recordtype/:id/:mode")
       .get(this.emailController.get.bind(this.emailController) as any)
       .put(this.emailController.update.bind(this.emailController) as any)

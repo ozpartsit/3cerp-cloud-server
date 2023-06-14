@@ -7,6 +7,7 @@ import helmet from "helmet";
 import compression from "compression";
 import DB from "./config/database";
 import i18n from "./config/i18n";
+import StatusMonitor from "./config/statusMonitor";
 import RoutesCore from "./routes/core";
 import RoutesMaintenance from "./routes/maintenance";
 import RoutesPublic from "./routes/public";
@@ -64,37 +65,7 @@ export class App3CERP {
     this.app.use("/public", express.static("public"));
     this.app.use('/hosting', express.static("hosting"));
 
-    this.app.use(require("express-status-monitor")(
-      {
-        title: '3C Cloud Status',  // Default title
-        theme: 'default.css',     // Default styles
-        path: '/status',
-        socketPath: '/socket.io', // In case you use a custom path
-
-        spans: [{
-          interval: 1,            // Every second
-          retention: 60           // Keep 60 datapoints in memory
-        }, {
-          interval: 5,            // Every 5 seconds
-          retention: 60
-        }, {
-          interval: 15,           // Every 15 seconds
-          retention: 60
-        }],
-        chartVisibility: {
-          cpu: true,
-          mem: true,
-          load: true,
-          eventLoop: true,
-          heap: true,
-          responseTime: true,
-          rps: true,
-          statusCodes: true
-        },
-        healthChecks: [],
-        ignoreStartsWith: '/admin'
-      }
-    ));
+    this.app.use(StatusMonitor);
     this.app.use(i18n.init);
   }
   private mountRoutes(): void {

@@ -41,7 +41,6 @@ export default async function validateVirtuals(this: any, save: boolean) {
             err.list = list.path;
             errors.push(err);
           }
-          //await line.autoPopulate();
 
           this[list.path][index] = line;
 

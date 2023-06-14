@@ -6,6 +6,8 @@ export interface IEmail extends IExtendedDocument {
     name: string;
     type: string;
     description: string;
+    domain: string;
+    entity: Schema.Types.ObjectId;
     dkim: string;
 }
 interface IEmailModel extends Model<IEmail>, IExtendedModel { }
@@ -24,6 +26,15 @@ export const schema = new Schema<IEmail>(
         },
         description: {
             type: String,
+        },
+        domain: {
+            type: String,
+        },
+        entity: {
+            type: Schema.Types.ObjectId,
+            ref: "Entity",
+            autopopulate: true,
+
         },
         dkim: {
             type: String,

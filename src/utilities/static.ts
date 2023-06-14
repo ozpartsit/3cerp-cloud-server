@@ -20,7 +20,6 @@ export async function addDocument(this: any, data: Object) {
   let msg = await document.validateDocument();
   // insert document to cache
   cache.addCache(document);
-  document = await document.autoPopulate();
   return { document, msg };
 }
 
@@ -31,7 +30,6 @@ export async function getDocument(this: any, id: string, mode: string) {
   }
   if (document) {
     if (mode === "edit") cache.addCache(document);
-    document = await document.autoPopulate();
   }
   return document;
 }
@@ -74,8 +72,6 @@ export async function updateDocument(this: any, id: string, updates: updateBody 
     return { document, msg };
   } else {
     await document.recalcDocument();
-    //let msg = await document.validateDocument();
-    document = await document.autoPopulate();
     return { document, msg };
   }
 }

@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose, { models } from "mongoose";
+import Email from "../services/email";
+import i18n from "../config/i18n";
 export default class controller {
     private models: any = {};
     constructor(models: any) {
@@ -28,8 +30,10 @@ export default class controller {
         const model = this.setModel(req.params.recordtype);
         try {
             //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-            let document = await model.addDocument(req.body);
-            res.json(document);
+            let { document, msg } = await model.addDocument(req.body);
+            //populate response document
+            document = await document.autoPopulate(req.locale);
+            res.json({ document, msg });
         } catch (error) {
             return next(error);
         }
@@ -77,8 +81,8 @@ export default class controller {
             let result = await model.findDocuments(query, options);
             let total = await model.count(query)
             for (let index in result) {
-                result[index] = await result[index].autoPopulate(req);
-             
+                result[index] = await result[index].autoPopulate(req.locale);
+
             }
             //to do - test przypisania do source.field
 
@@ -99,7 +103,7 @@ export default class controller {
                 page: options.skip,
                 totalPages: total / options.limit
             }
-           
+
             res.json(data);
         } catch (error) {
             return next(error);
@@ -109,14 +113,16 @@ export default class controller {
     public async get(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
         const model = this.setModel(recordtype);
-
         try {
             let document = await model.getDocument(id, mode);
             if (!document) res.status(404).json({
                 message: 'Document not found'
             })
-            else
+            else {
+                //populate response document
+                document = await document.autoPopulate(req.locale);
                 res.json(document);
+            }
         } catch (error) {
             return next(error);
         }
@@ -146,8 +152,10 @@ export default class controller {
             //     document = await model.updateDocument(id, list, subrecord, field, value, save);
             // }
             let update = req.body;
-            let document = await model.updateDocument(id, update);
-            res.json(document);
+            let { document, msg } = await model.updateDocument(id, update);
+            //populate response document
+            document = await document.autoPopulate(req.locale);
+            res.json({ document, msg });
         } catch (error) {
             return next(error);
         }
@@ -163,7 +171,18 @@ export default class controller {
             return next(error);
         }
     }
-
+    public async send(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, id } = req.params;
+        const model = this.setModel(recordtype);
+        let config = req.body;
+        try {
+            let email: Email = new Email();
+            let status = await email.send(config);
+            res.json(status);
+        } catch (error) {
+            return next(error);
+        }
+    }
     // public async options(req: Request, res: Response, next: NextFunction) {
     //     let { recordtype, id, mode } = req.params;
     //     const model = this.setModel(recordtype);

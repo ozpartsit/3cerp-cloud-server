@@ -54,7 +54,8 @@ export default class Auth {
           });
           let userLoged = {
             name: user.name,
-            date: new Date()
+            date: new Date(),
+            locale: user.locale
           };
           res.status(200).json({ user: userLoged, token });
         } else {

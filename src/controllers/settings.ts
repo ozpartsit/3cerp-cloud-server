@@ -11,6 +11,7 @@ export default class SettingController {
         const model = this.models[req.params.recordtype];
         try {
             let document = new model(req.body);
+            document.initLocal();
             document.save();
             res.json(document);
         } catch (error) {

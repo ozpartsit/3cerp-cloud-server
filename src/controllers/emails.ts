@@ -34,31 +34,19 @@ export default class EmailController extends controller {
                     }
                     console.log(`stdout: ${stdout}`);
                 })
-                exec(`devil mail list`, (error, stdout, stderr) => {
-                    if (error) {
-                        console.log(`error: ${error.message}`);
-                        return;
-                    }
-                    if (stderr) {
-                        console.log(`stderr: ${stderr}`);
-                        return;
-                    }
-                    console.log(`stdout: ${stdout}`);
-                })
-                exec(`devil mail list ${domain}`, (error, stdout, stderr) => {
-                    if (error) {
-                        console.log(`error: ${error.message}`);
-                        return;
-                    }
-                    if (stderr) {
-                        console.log(`stderr: ${stderr}`);
-                        return;
-                    }
-                    console.log(`stdout: ${stdout}`);
-                })
                 // DKIM
 
-
+                exec(`devil mail dkim sign ${domain}`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                })
                 // Domena dodana
                 exec(`devil mail dkim dns ${domain}`, (error, stdout, stderr) => {
                     if (error) {
@@ -73,6 +61,8 @@ export default class EmailController extends controller {
                 })
                 // Domena zewnętrzna
                 exec(`devil mail dkim dns ${domain} --print`, (error, stdout, stderr) => {
+                    // fill DKIM field
+                    Email.findByIdAndUpdate(email._id, { $set: { dkim: stdout } }).then(res => console.log(stdout))
                     if (error) {
                         console.log(`error: ${error.message}`);
                         return;
@@ -82,8 +72,8 @@ export default class EmailController extends controller {
                         return;
                     }
                     console.log(`stdout: ${stdout}`);
-                    // fill DKIM field
-                    Email.findByIdAndUpdate(email._id, { dkim: stdout })
+
+
                 })
 
             } catch (error) {
