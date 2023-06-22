@@ -19,6 +19,8 @@ export interface IItem extends IExtendedDocument {
   barcode: string;
   status: string;
   manufacturer: string;
+  firstSalesDate: Date;
+  lastSalesDate: Date;
   getPrice(): any;
 }
 interface IItemModel extends Model<IItem>, IExtendedModel { }
@@ -66,7 +68,9 @@ const schema = new Schema<IItem>(
     },
     manufacturer: {
       type: String,
-    }
+    },
+    firstSalesDate: { type: Date },
+    lastSalesDate: { type: Date },
   },
   options
 );

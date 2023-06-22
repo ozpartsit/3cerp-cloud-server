@@ -26,9 +26,10 @@ export default function methods(schema: any, options: any) {
     console.log("save document");
     await this.recalcDocument();
     await this.validateVirtuals(true);
+    await this.changeLogs();
     let document = await this.save();
     cache.delCache(document._id);
-    this.changeLogs();
+  
     return document;
   }
 
@@ -52,6 +53,7 @@ export default function methods(schema: any, options: any) {
 
   }
 
+  // to do - zmienić na wartość statyczną zamiast virtualną
   // add resource
   schema.virtual('resource').get(function (this: any) {
     let resources = this.schema.options.collection.split(".")

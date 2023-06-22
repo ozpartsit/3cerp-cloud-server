@@ -2,8 +2,8 @@ import { Schema, Model, model } from "mongoose";
 import { IActivity } from "../schema";
 import { IExtendedDocument } from "../../../utilities/methods";
 import { IExtendedModel } from "../../../utilities/static";
-import { IGroup } from "./group.schema";
-import { ITag } from "./tag.schema";
+import { ITaskGroup } from "./task.group.schema";
+import { ITaskTag } from "./task.tag.schema";
 export interface ITask extends IExtendedDocument {
     _id: Schema.Types.ObjectId;
     activity: IActivity["_id"];
@@ -11,7 +11,7 @@ export interface ITask extends IExtendedDocument {
     name: string;
     date: Date;
     endDate: Date;
-    group: IGroup["_id"];
+    group: ITaskGroup["_id"];
     type: string;
     tags: Schema.Types.ObjectId[]
     index: number;
@@ -49,7 +49,7 @@ const schema = new Schema<ITask>(
         group: { type: Schema.Types.ObjectId },
         tags: {
             type: [Schema.Types.ObjectId],
-            ref: "Tag",
+            ref: "TaskTag",
             autopopulate: { select: "name displayname color" },
         }
     },

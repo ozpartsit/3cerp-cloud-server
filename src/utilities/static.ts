@@ -16,6 +16,7 @@ export async function loadDocument(this: any, id: string) {
 //API
 export async function addDocument(this: any, data: Object) {
   let document = new this(data);
+  document.initLocal();
   await document.recalcDocument();
   let msg = await document.validateDocument();
   // insert document to cache

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose, { models } from "mongoose";
 import Email from "../services/email";
+import Changelog from "../models/changelog.model";
 import i18n from "../config/i18n";
 export default class controller {
     private models: any = {};
@@ -179,6 +180,30 @@ export default class controller {
             let email: Email = new Email();
             let status = await email.send(config);
             res.json(status);
+        } catch (error) {
+            return next(error);
+        }
+    }
+    public async logs(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, id } = req.params;
+        const model = this.setModel(recordtype);
+        try {
+            let query: any = { document: id };
+            let results = await Changelog.find(query)
+                .populate({ path: 'newValue', select: 'name' })
+                .populate({ path: 'oldValue', select: 'name' })
+                .exec();
+            // parse to plain result
+            let changelogs = results.map((line: any) => {
+                return {
+                    newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue,
+                    oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue,
+                    date: new Date(line.createdAt).toISOString().substr(0, 10),
+                    field: line.field,
+                    list: line.list
+                }
+            })
+            res.json(changelogs);
         } catch (error) {
             return next(error);
         }

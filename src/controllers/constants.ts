@@ -8,7 +8,8 @@ import { getStates } from "../constants/states";
 import { getCurrencies } from "../constants/currencies";
 import { getPriceBasis } from "../constants/price.basis";
 import { getStatus } from "../constants/transaction.status";
-const constants = { countries: getCountries, states: getStates, currencies: getCurrencies, pricebasis: getPriceBasis, status: getStatus };
+import { getCustomerStatus } from "../constants/customer.status";
+const constants = { countries: getCountries, states: getStates, currencies: getCurrencies, pricebasis: getPriceBasis, status: getStatus, customerstatus: getCustomerStatus };
 export default class controller {
     public async get(req: Request, res: Response, next: NextFunction) {
 

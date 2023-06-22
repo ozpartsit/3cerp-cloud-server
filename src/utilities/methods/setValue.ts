@@ -26,6 +26,7 @@ export default async function setValue(
 
     document.$locals.oldValue[field] = document[field];
     document.$locals.triggers.push({ type: "setValue", field: field, oldValue: document.$locals.oldValue[field] });
+    // to do - zmienić na metode setLocalTriggers()
     document[field] = value;
 
     //populate new field value

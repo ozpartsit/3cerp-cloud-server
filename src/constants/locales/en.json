@@ -4,5 +4,8 @@
 	"PLN": "PLN",
 	"pendingapproval": "Pending Approval",
 	"EUR": "EUR",
-	"open": "open"
+	"open": "Open",
+	"lead": "Lead",
+	"customer": "Customer",
+	"inactive": "Inactive"
 }

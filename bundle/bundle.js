@@ -37,6 +37,7 @@ const cors_1 = __importDefault(__webpack_require__(3582));
 const compression_1 = __importDefault(__webpack_require__(7455));
 const database_1 = __importDefault(__webpack_require__(991));
 const i18n_1 = __importDefault(__webpack_require__(6734));
+const statusMonitor_1 = __importDefault(__webpack_require__(4882));
 const core_1 = __importDefault(__webpack_require__(6585));
 const maintenance_1 = __importDefault(__webpack_require__(6802));
 const public_1 = __importDefault(__webpack_require__(93));
@@ -85,34 +86,7 @@ class App3CERP {
         this.app.use('/storage', express_1.default.static("storage")); // Storage files
         this.app.use("/public", express_1.default.static("public"));
         this.app.use('/hosting', express_1.default.static("hosting"));
-        this.app.use(__webpack_require__(3222)({
-            title: '3C Cloud Status',
-            theme: 'default.css',
-            path: '/status',
-            socketPath: '/socket.io',
-            spans: [{
-                    interval: 1,
-                    retention: 60 // Keep 60 datapoints in memory
-                }, {
-                    interval: 5,
-                    retention: 60
-                }, {
-                    interval: 15,
-                    retention: 60
-                }],
-            chartVisibility: {
-                cpu: true,
-                mem: true,
-                load: true,
-                eventLoop: true,
-                heap: true,
-                responseTime: true,
-                rps: true,
-                statusCodes: true
-            },
-            healthChecks: [],
-            ignoreStartsWith: '/admin'
-        }));
+        this.app.use(statusMonitor_1.default);
         this.app.use(i18n_1.default.init);
     }
     mountRoutes() {
@@ -213,6 +187,53 @@ i18n_1.default.configure({
     register: global
 });
 exports["default"] = i18n_1.default;
+
+
+/***/ }),
+
+/***/ 4882:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports["default"] = __webpack_require__(3222)({
+    title: '3C Cloud Status',
+    theme: 'default.css',
+    path: '/status',
+    socketPath: '/socket.io',
+    spans: [{
+            interval: 1,
+            retention: 60 // Keep 60 datapoints in memory
+        }, {
+            interval: 5,
+            retention: 60
+        }, {
+            interval: 15,
+            retention: 60
+        }],
+    chartVisibility: {
+        cpu: true,
+        mem: true,
+        load: true,
+        eventLoop: true,
+        heap: true,
+        responseTime: true,
+        rps: true,
+        statusCodes: true
+    },
+    healthChecks: [{
+            protocol: 'http',
+            host: 'localhost',
+            path: '/admin/health/ex1',
+            port: '3000'
+        }, {
+            protocol: 'http',
+            host: 'localhost',
+            path: '/admin/health/ex2',
+            port: '3000'
+        }],
+    ignoreStartsWith: '/admin'
+});
 
 
 /***/ }),
@@ -609,6 +630,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __importDefault(__webpack_require__(1185));
+const email_1 = __importDefault(__webpack_require__(3097));
 class controller {
     constructor(models) {
         this.models = {};
@@ -639,8 +661,10 @@ class controller {
             const model = this.setModel(req.params.recordtype);
             try {
                 //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-                let document = yield model.addDocument(req.body);
-                res.json(document);
+                let { document, msg } = yield model.addDocument(req.body);
+                //populate response document
+                document = yield document.autoPopulate(req.locale);
+                res.json({ document, msg });
             }
             catch (error) {
                 return next(error);
@@ -687,7 +711,7 @@ class controller {
                 let result = yield model.findDocuments(query, options);
                 let total = yield model.count(query);
                 for (let index in result) {
-                    result[index] = yield result[index].autoPopulate(req);
+                    result[index] = yield result[index].autoPopulate(req.locale);
                 }
                 //to do - test przypisania do source.field
                 // result = result.map(line => {
@@ -723,8 +747,11 @@ class controller {
                     res.status(404).json({
                         message: 'Document not found'
                     });
-                else
+                else {
+                    //populate response document
+                    document = yield document.autoPopulate(req.locale);
                     res.json(document);
+                }
             }
             catch (error) {
                 return next(error);
@@ -760,8 +787,10 @@ class controller {
                 //     document = await model.updateDocument(id, list, subrecord, field, value, save);
                 // }
                 let update = req.body;
-                let document = yield model.updateDocument(id, update);
-                res.json(document);
+                let { document, msg } = yield model.updateDocument(id, update);
+                //populate response document
+                document = yield document.autoPopulate(req.locale);
+                res.json({ document, msg });
             }
             catch (error) {
                 return next(error);
@@ -778,6 +807,21 @@ class controller {
         catch (error) {
             return next(error);
         }
+    }
+    send(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype, id } = req.params;
+            const model = this.setModel(recordtype);
+            let config = req.body;
+            try {
+                let email = new email_1.default();
+                let status = yield email.send(config);
+                res.json(status);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
     }
 }
 exports["default"] = controller;
@@ -839,29 +883,18 @@ class EmailController extends controller_1.default {
                         }
                         console.log(`stdout: ${stdout}`);
                     });
-                    (0, child_process_1.exec)(`devil mail list`, (error, stdout, stderr) => {
-                        if (error) {
-                            console.log(`error: ${error.message}`);
-                            return;
-                        }
-                        if (stderr) {
-                            console.log(`stderr: ${stderr}`);
-                            return;
-                        }
-                        console.log(`stdout: ${stdout}`);
-                    });
-                    (0, child_process_1.exec)(`devil mail list ${domain}`, (error, stdout, stderr) => {
-                        if (error) {
-                            console.log(`error: ${error.message}`);
-                            return;
-                        }
-                        if (stderr) {
-                            console.log(`stderr: ${stderr}`);
-                            return;
-                        }
-                        console.log(`stdout: ${stdout}`);
-                    });
                     // DKIM
+                    (0, child_process_1.exec)(`devil mail dkim sign ${domain}`, (error, stdout, stderr) => {
+                        if (error) {
+                            console.log(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.log(`stderr: ${stderr}`);
+                            return;
+                        }
+                        console.log(`stdout: ${stdout}`);
+                    });
                     // Domena dodana
                     (0, child_process_1.exec)(`devil mail dkim dns ${domain}`, (error, stdout, stderr) => {
                         if (error) {
@@ -876,7 +909,8 @@ class EmailController extends controller_1.default {
                     });
                     // Domena zewnętrzna
                     (0, child_process_1.exec)(`devil mail dkim dns ${domain} --print`, (error, stdout, stderr) => {
-                        console.log(email._id);
+                        // fill DKIM field
+                        email_model_1.default.findByIdAndUpdate(email._id, { $set: { dkim: stdout } }).then(res => console.log(stdout));
                         if (error) {
                             console.log(`error: ${error.message}`);
                             return;
@@ -886,8 +920,6 @@ class EmailController extends controller_1.default {
                             return;
                         }
                         console.log(`stdout: ${stdout}`);
-                        // fill DKIM field
-                        email_model_1.default.findByIdAndUpdate(email._id, { $set: { dkim: stdout } });
                     });
                 }
                 catch (error) {
@@ -1106,7 +1138,7 @@ class controller {
                             let result = yield model_1.default.findDocuments(query, options);
                             let total = yield model_1.default.count(query);
                             for (let line of result) {
-                                line = yield line.autoPopulate(req);
+                                line = yield line.autoPopulate(req.locale);
                             }
                             // Pagination url halper
                             var q = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
@@ -1270,6 +1302,7 @@ class SettingController {
             const model = this.models[req.params.recordtype];
             try {
                 let document = new model(req.body);
+                document.initLocal();
                 document.save();
                 res.json(document);
             }
@@ -1576,7 +1609,8 @@ class Auth {
                     });
                     let userLoged = {
                         name: user.name,
-                        date: new Date()
+                        date: new Date(),
+                        locale: user.locale
                     };
                     res.status(200).json({ user: userLoged, token });
                 }
@@ -2180,6 +2214,14 @@ exports.schema = new mongoose_1.Schema({
     description: {
         type: String,
     },
+    domain: {
+        type: String,
+    },
+    entity: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Entity",
+        autopopulate: true,
+    },
     dkim: {
         type: String,
     },
@@ -2567,6 +2609,7 @@ const schema = new mongoose_1.Schema({
         input: "select"
     },
     password: { type: String, input: "password" },
+    locale: { type: String, default: "en" },
     salesRep: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Entity",
@@ -3927,7 +3970,6 @@ const line_schema_1 = __importDefault(__webpack_require__(2801));
 const currencies_1 = __importDefault(__webpack_require__(7131));
 //import Countries from "../../constants/countries";
 const transaction_types_1 = __importDefault(__webpack_require__(7003));
-const transaction_status_1 = __importDefault(__webpack_require__(5969));
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 const TransactionSchema = {
     name: { type: String, input: "text", set: (v) => v.toLowerCase() },
@@ -4079,8 +4121,9 @@ const TransactionSchema = {
     status: {
         type: String,
         default: "pendingapproval",
-        i18n: true,
-        enum: transaction_status_1.default,
+        resource: 'constants',
+        constant: 'currencies',
+        //enum: TranStatus,
         input: "select"
     },
     taxNumber: { type: String, input: "text" },
@@ -4368,6 +4411,8 @@ class Routes {
         // Emails
         this.Router.route("/emails/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.emailController.find.bind(this.emailController));
         this.Router.route("/emails/:recordtype/new/create").post(this.emailController.add.bind(this.emailController));
+        this.Router.route("/emails/:recordtype/:id/send")
+            .post(this.emailController.send.bind(this.emailController));
         this.Router.route("/emails/:recordtype/:id/:mode")
             .get(this.emailController.get.bind(this.emailController))
             .put(this.emailController.update.bind(this.emailController))
@@ -4572,6 +4617,15 @@ exports["default"] = Routes;
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -4594,19 +4648,24 @@ class Email {
                 pass: this.pass
             }
         });
-        this.email = {
-            from: 'test@ozparts.pl',
-            to: 'it@ozparts.eu',
-            subject: 'test',
-            html: 'test'
-        };
+        // this.email = {
+        //   from: 'test@ozparts.eu',
+        //   to: 'it@ozparts.eu',
+        //   subject: 'test',
+        //   html: 'test'
+        // }
     }
-    send(message = {}, data = {}, template) {
-        this.transporter.sendMail(this.email, (error, info) => {
-            if (error) {
-                return console.log(error);
-            }
-            console.log('Message sent: %s', info.messageId);
+    send(email = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.transporter.sendMail(email);
+            //   , (error: any, info: any) => {
+            //   if (error) {
+            //     throw error;
+            //   } else {
+            //     console.log('Message sent: %s', info.messageId);
+            //     return info.messageId;
+            //   }
+            // });
         });
     }
 }
@@ -4830,7 +4889,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const i18n_1 = __importDefault(__webpack_require__(6734));
-function autoPopulate(req) {
+function autoPopulate(local) {
     return __awaiter(this, void 0, void 0, function* () {
         let paths = [];
         this.schema.eachPath(function process(pathname, schemaType) {
@@ -4867,7 +4926,7 @@ function autoPopulate(req) {
             //constats
             if (schemaType.options.constant) {
                 //console.log(i18n.__(doc[pathname]))
-                doc[pathname] = { _id: doc[pathname], name: i18n_1.default.__(doc[pathname]) };
+                doc[pathname] = { _id: doc[pathname], name: i18n_1.default.getCatalog(local || 'en')[doc[pathname]] };
                 //console.log(doc[pathname])
             }
         });
@@ -5105,7 +5164,6 @@ function validateVirtuals(save) {
                             err.list = list.path;
                             errors.push(err);
                         }
-                        //await line.autoPopulate();
                         this[list.path][index] = line;
                     }
                 }
@@ -5369,11 +5427,11 @@ exports.loadDocument = loadDocument;
 function addDocument(data) {
     return __awaiter(this, void 0, void 0, function* () {
         let document = new this(data);
+        document.initLocal();
         yield document.recalcDocument();
         let msg = yield document.validateDocument();
         // insert document to cache
         app_1.cache.addCache(document);
-        document = yield document.autoPopulate();
         return { document, msg };
     });
 }
@@ -5387,7 +5445,6 @@ function getDocument(id, mode) {
         if (document) {
             if (mode === "edit")
                 app_1.cache.addCache(document);
-            document = yield document.autoPopulate();
         }
         return document;
     });
@@ -5427,8 +5484,6 @@ function updateDocument(id, updates) {
         }
         else {
             yield document.recalcDocument();
-            //let msg = await document.validateDocument();
-            document = yield document.autoPopulate();
             return { document, msg };
         }
     });

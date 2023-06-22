@@ -2,12 +2,12 @@ import { Schema, Model, model } from "mongoose";
 import Activity, { IActivity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import Task, { ITask } from "./task.schema";
-import Group, { IGroup } from "./group.schema";
-import Tag, { ITag } from "./tag.schema";
+import TaskGroup, { ITaskGroup } from "./task.group.schema";
+import TaskTag, { ITaskTag } from "./task.tag.schema";
 export interface IProject extends IActivity {
     tasks: ITask[];
-    groups: IGroup[];
-    tags: ITag[];
+    groups: ITaskGroup[];
+    tags: ITaskTag[];
 }
 export interface IProjectModel extends Model<IProject>, IExtendedModel { }
 
@@ -24,21 +24,21 @@ schema.virtual("tasks", {
     options: { sort: { index: 1 } },
 });
 schema.virtual("groups", {
-    ref: "Group",
+    ref: "TaskGroup",
     localField: "_id",
     foreignField: "activity",
     justOne: false,
-    autopopulate: true,
-    model: Group,
+    autopopulate: { select: "name displayname color" },
+    model: TaskGroup,
     options: { sort: { index: 1 } },
 });
 schema.virtual("tags", {
-    ref: "Tag",
+    ref: "TaskTag",
     localField: "_id",
     foreignField: "activity",
     justOne: false,
-    autopopulate: true,
-    model: Tag
+    autopopulate: { select: "name displayname color" },
+    model: TaskTag
 });
 const Project: IProjectModel = Activity.discriminator<IProject, IProjectModel>(
     "Project",

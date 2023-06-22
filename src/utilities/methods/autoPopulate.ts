@@ -14,9 +14,8 @@ export default async function autoPopulate(this: any, local: string) {
   });
   let Promises: any[] = [];
   for (let path of paths) {
-    if (!this.populated(path.field))
+    if (this[path.field] && !this[path.field].type) // to do - poprawić
       Promises.push(await this.populate(path.field, path.select));
-    //console.log(path.field,this[path.field], this[path.field]._id)
   }
   await Promise.all(Promises);
 

@@ -30,6 +30,7 @@ export default async function validateVirtuals(this: any, save: boolean) {
             if (save) {
               // before save validate is automatic
               if (this.deleted) line.deleted = true;
+              await line.changeLogs(this.id, list.path);
               if (line.deleted) await line.remove();
               else await line.save();
             } else {

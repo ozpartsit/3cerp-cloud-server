@@ -71,11 +71,26 @@ export interface IInvItem extends IItem {
   //vendors?: IVendors[];
   //warehouses?: IWarehouses[];
   //locations?: ILocations[];
+
+  //statistics
+  firstReceiptDate?: Date;
+  lastReceiptDate?: Date;
+  firstOrderDate?: Date;
+  lastOrderDate?: Date;
+  firstPurchaseDate?: Date;
+  lastPurchaseDate?: Date;
 }
-export interface IInvItemModel extends Model<IInvItem>, IExtendedModel {}
+export interface IInvItemModel extends Model<IInvItem>, IExtendedModel { }
 
 const schema = new Schema<IInvItem>(
   {
+    //statistics
+    firstReceiptDate: { type: Date },
+    lastReceiptDate: { type: Date },
+    firstOrderDate: { type: Date },
+    lastOrderDate: { type: Date },
+    firstPurchaseDate: { type: Date },
+    lastPurchaseDate: { type: Date },
     // vendors: {
     //   type: [Vendors],
     //   validate: [

@@ -1,14 +1,14 @@
 import { Schema, Model, model } from "mongoose";
 import { IActivity } from "../schema";
-import TaskStatus, { ITaskStatus } from "./class.schema";
+import TaskStatus, { ITaskStatus } from "./task.status.schema";
 import { IExtendedDocument } from "../../../utilities/methods";
 import { IExtendedModel } from "../../../utilities/static";
 
-export interface IGroup extends ITaskStatus {
-
+export interface ITaskGroup extends ITaskStatus {
+    _id: Schema.Types.ObjectId;
 }
 
-export interface IGroupModel extends Model<IGroup>, IExtendedModel { }
+export interface ITaskGroupModel extends Model<ITaskGroup>, IExtendedModel { }
 
 const options = {
     discriminatorKey: "type",
@@ -16,12 +16,12 @@ const options = {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
-const schema = new Schema<IGroup>(
+const schema = new Schema<ITaskGroup>(
     {
 
     },
     options
 );
 
-const Group: IGroupModel = TaskStatus.discriminator<IGroup, IGroupModel>("Group", schema);
-export default Group;
+const TaskGroup: ITaskGroupModel = TaskStatus.discriminator<ITaskGroup, ITaskGroupModel>("TaskGroup", schema);
+export default TaskGroup;

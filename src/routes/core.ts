@@ -15,6 +15,7 @@ import HostingController from "../controllers/hosting";
 import EmailController from "../controllers/emails";
 import SettingController from "../controllers/settings";
 import ReportController from "../controllers/reports";
+import AccountingController from "../controllers/accounting";
 import shop, { IShop } from "../models/shop.model";
 
 export default class Routes {
@@ -36,6 +37,7 @@ export default class Routes {
   public emailController: EmailController = new EmailController();
   public settingController: SettingController = new SettingController();
   public reportController: ReportController = new ReportController();
+  public accountingController: AccountingController = new AccountingController();
 
   public start(app: express.Application): void {
     console.log("Start Routing");
@@ -54,6 +56,7 @@ export default class Routes {
     this.routeEmails();
     this.routeSettings();
     this.routeReports();
+    this.routeAccounting();
     app.use(subdomain("*", this.Router2));
     //app.use("/hosting", this.Router2);
     app.use("/api/core", this.Router);
@@ -129,6 +132,10 @@ export default class Routes {
     this.Router.route("/transactions/:recordtype/:id/pdf").get(
       this.transactionController.pdf.bind(this.transactionController) as any
     );
+
+    this.Router.route("/transactions/:recordtype/:id/logs")
+      .get(this.transactionController.logs.bind(this.transactionController) as any)
+
     this.Router.route("/transactions/:recordtype/:id/:mode")
       .get(this.transactionController.get.bind(this.transactionController) as any)
       .put(this.transactionController.update.bind(this.transactionController) as any)
@@ -148,6 +155,10 @@ export default class Routes {
     this.Router.route("/items/:recordtype/new/create").post(
       this.itemController.add.bind(this.itemController) as any
     );
+
+    this.Router.route("/items/:recordtype/:id/logs")
+      .get(this.itemController.logs.bind(this.itemController) as any)
+
     this.Router.route("/items/:recordtype/:id/:mode")
       .get(this.itemController.get.bind(this.itemController))
       .put(this.itemController.update.bind(this.itemController))
@@ -188,6 +199,8 @@ export default class Routes {
     this.Router.route("/entities/:recordtype/new/create").post(
       this.entityController.add.bind(this.entityController) as any
     );
+    this.Router.route("/entities/:recordtype/:id/logs")
+      .get(this.entityController.logs.bind(this.entityController) as any)
 
     this.Router.route("/entities/:recordtype/:id/:mode")
       .get(this.entityController.get.bind(this.entityController) as any)
@@ -304,6 +317,25 @@ export default class Routes {
     this.Router2.route("*").get(
       this.hostingController.get as any
     );
+  }
+  public routeAccounting() {
+    //Accounting
+    this.Router.route("/accounting/").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.accountingController.find.bind(this.accountingController) as any
+    );
+    this.Router.route("/accounting/:recordtype").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.accountingController.find.bind(this.accountingController) as any
+    );
+    this.Router.route("/accounting/:recordtype/new/create").post(
+      this.accountingController.add.bind(this.accountingController) as any
+    );
+    this.Router.route("/accounting/:recordtype/:id/:mode")
+      .get(this.accountingController.get.bind(this.accountingController))
+      .put(this.accountingController.update.bind(this.accountingController))
+      .post(this.accountingController.save.bind(this.accountingController) as any)
+      .delete(this.accountingController.delete.bind(this.accountingController));
   }
 }
 

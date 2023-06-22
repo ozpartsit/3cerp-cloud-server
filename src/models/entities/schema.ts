@@ -52,7 +52,7 @@ export interface IEntity {
   addresses?: IAddress[];
   groupLevels?: IGroupLevel[];
 
-  status: string;
+  
 
   validatePassword(password: string): boolean;
   hashPassword(): any;
@@ -196,11 +196,7 @@ const schema = new Schema<IEntity>(
       type: Number,
       default: 0,
       input: "select"
-    },
-    status: {
-      type: String,
-      input: "select"
-    },
+    }
   },
   options
 );

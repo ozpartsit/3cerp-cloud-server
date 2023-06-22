@@ -17,8 +17,6 @@ const ClassificationSchema = {
     type: {
         type: String,
         required: true,
-        enum: ["PriceLevel"],
-        default: "PriceLevel"
     },
 }
 const options = {
