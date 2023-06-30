@@ -17,9 +17,11 @@ export const schema = new Schema<IReport>(
         name: {
             type: String,
             required: true,
+            input: "text"
         },
         description: {
             type: String,
+            input: "text"
         },
         type: {
             type: String,
@@ -40,10 +42,10 @@ export const schema = new Schema<IReport>(
     }
 );
 //
-schema.virtual('fields').get(function (this: any) {
-    let model: any = models["Transaction"];
-    return model.getFields()
-});
+// schema.virtual('fields').get(function (this: any) {
+//     let model: any = models["Transaction"];
+//     return model.getFields()
+// });
 
 
 
@@ -116,7 +118,7 @@ schema.method("getResults", async function () {
         })
         return row;
     })
-    
+
     data = [];
     return results;
 });

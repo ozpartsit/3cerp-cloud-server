@@ -48,29 +48,36 @@ const schema = new Schema<IItem>(
       ref: "Classification",
       autopopulate: true,
       required: false,
+      input: "select"
     },
     images: {
       type: [Schema.Types.ObjectId],
       ref: "Storage",
       autopopulate: true,
+      input: "file"
     },
     coo: {
       type: String,
+      input: "select"
     },
     barcode: {
       type: String,
+      input: "text"
     },
     weight: {
       type: Number,
+      input: "number"
     },
     status: {
       type: String,
+      input: "text"
     },
     manufacturer: {
       type: String,
+      input: "text"
     },
-    firstSalesDate: { type: Date },
-    lastSalesDate: { type: Date },
+    firstSalesDate: { type: Date, input: "date" },
+    lastSalesDate: { type: Date, input: "date" },
   },
   options
 );

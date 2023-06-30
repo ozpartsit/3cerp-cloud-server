@@ -17,7 +17,8 @@ export const schema = new Schema<IEmail>(
         name: {
             type: String,
             required: true,
-            min: [3, "Must be at least 3 characters long, got {VALUE}"]
+            min: [3, "Must be at least 3 characters long, got {VALUE}"],
+            input: "text"
         },
         type: {
             type: String,
@@ -26,18 +27,22 @@ export const schema = new Schema<IEmail>(
         },
         description: {
             type: String,
+            input: "text"
         },
         domain: {
             type: String,
+            input: "text"
         },
         entity: {
             type: Schema.Types.ObjectId,
             ref: "Entity",
             autopopulate: true,
+            input: "select"
 
         },
         dkim: {
             type: String,
+            input: "text"
         },
     },
     {

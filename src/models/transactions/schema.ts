@@ -175,7 +175,8 @@ const TransactionSchema = {
     input: "text"
   },
   shippingZip: {
-    type: String
+    type: String,
+    input: "text"
   },
   shippingCity: {
     type: String,

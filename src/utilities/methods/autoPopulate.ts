@@ -40,14 +40,11 @@ export default async function autoPopulate(this: any, local: string) {
 
     //constats
     if (schemaType.options.constant) {
-      //console.log(i18n.__(doc[pathname]))
       doc[pathname] = { _id: doc[pathname], name: i18n.getCatalog(local || 'en')[doc[pathname]] };
-      //console.log(doc[pathname])
     }
 
 
   });
-  //console.log(doc)
   return doc;
 
 }

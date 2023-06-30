@@ -13,7 +13,8 @@ export const schema = new Schema<IPriceGroup>(
     {
         name: {
             type: String,
-            required: true
+            required: true,
+            input: "text"
         }
     },
     options

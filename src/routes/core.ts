@@ -42,18 +42,25 @@ export default class Routes {
   public start(app: express.Application): void {
     console.log("Start Routing");
     this.routeConstants();
-    this.routeTransactions();
+    // this.routeTransactions();
+    this.routeUniversal("transactions", this.transactionController)
     this.routeWarehouses();
-    this.routeClassifications();
-    this.routeItems();
-    this.routeActivities();
-    this.routeUsers();
-    this.routeWebsites();
+    //this.routeClassifications();
+    this.routeUniversal("classifications", this.classificationController)
+    //this.routeItems();
+    this.routeUniversal("items", this.itemController)
+    //this.routeActivities();
+    this.routeUniversal("activities", this.activityController)
+    //this.routeUsers();
+    this.routeUniversal("entities", this.entityController)
+    //this.routeWebsites();
+    this.routeUniversal("websites", this.websiteController)
     this.routeAuth();
     this.routeFiles();
     this.routeHosting();
     this.routeCustom();
-    this.routeEmails();
+    //this.routeEmails();
+    this.routeUniversal("emails", this.emailController)
     this.routeSettings();
     this.routeReports();
     this.routeAccounting();
@@ -90,6 +97,34 @@ export default class Routes {
     );
   }
 
+  public routeUniversal(collection: any, controller: any) {
+    this.Router.route(`/${collection}/:recordtype/fields`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      controller.fields.bind(controller) as any
+    );
+
+    this.Router.route(`/${collection}/:recordtype`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      controller.find.bind(controller) as any
+    );
+
+    this.Router.route(`/${collection}/:recordtype/new/create`).post(
+      controller.add.bind(controller) as any
+    );
+    if (controller.pdf)
+      this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(
+        controller.pdf.bind(controller) as any
+      );
+
+    this.Router.route(`/${collection}/:recordtype/:id/logs`)
+      .get(controller.logs.bind(controller) as any)
+
+    this.Router.route(`/${collection}/:recordtype/:id/:mode`)
+      .get(controller.get.bind(controller) as any)
+      .put(controller.update.bind(controller) as any)
+      .post(controller.save.bind(controller) as any)
+      .delete(controller.delete.bind(controller) as any);
+  }
 
   public routeConstants() {
     // Constants
@@ -106,6 +141,7 @@ export default class Routes {
   }
   public routeClassifications() {
     // Classifications
+
     this.Router.route("/classifications/:recordtype").get(
       this.classificationController.find.bind(this.classificationController) as any
     );
@@ -121,6 +157,11 @@ export default class Routes {
   }
   public routeTransactions() {
     // Transactions
+    this.Router.route("/transactions/:recordtype/fields").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.transactionController.fields.bind(this.transactionController) as any
+    );
+
     this.Router.route("/transactions/:recordtype").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.transactionController.find.bind(this.transactionController) as any
@@ -271,6 +312,11 @@ export default class Routes {
   }
   public routeReports() {
     // Reports
+    this.Router.route("/reports/:recordtype/fields").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.reportController.fields.bind(this.reportController) as any
+    );
+
     this.Router.route("/reports/:recordtype").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.reportController.find.bind(this.reportController) as any

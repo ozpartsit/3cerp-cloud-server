@@ -17,12 +17,14 @@ export const schema = new Schema<IShop>(
         name: {
             type: String,
             required: true,
-            min: [3, "Must be at least 3 characters long, got {VALUE}"]
+            min: [3, "Must be at least 3 characters long, got {VALUE}"],
+            input: "text"
         },
         subdomain: {
             type: String,
             required: true,
-            min: [3, "Must be at least 3 characters long, got {VALUE}"]
+            min: [3, "Must be at least 3 characters long, got {VALUE}"],
+            input: "text"
         },
         type: {
             type: String,
@@ -33,7 +35,8 @@ export const schema = new Schema<IShop>(
         template: {
             type: String,
             required: true,
-            default: "default"
+            default: "default",
+            input: "text"
         },
         status: {
             type: String,
@@ -43,6 +46,7 @@ export const schema = new Schema<IShop>(
         },
         domain: {
             type: String,
+            input: "text"
         }
     },
     {

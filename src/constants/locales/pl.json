@@ -7,5 +7,17 @@
 	"open": "Otwarte",
 	"lead": "Potencjalny klient",
 	"customer": "Klient",
-	"inactive": "Nieaktywny"
+	"inactive": "Nieaktywny",
+	"salesorder.name": "Dokument",
+	"salesorder.date": "Data",
+	"salesorder.entity": "Podmiot",
+	"salesorder.warehouse": "Magazyn",
+	"salesorder.status": "Status",
+	"invitem.name": "invitem.name",
+	"invitem.status": "invitem.status",
+	"email.name": "email.name",
+	"email.entity": "email.entity",
+	"report.name": "report.name",
+	"pricelevel.name": "pricelevel.name",
+	"pricegroup.name": "pricegroup.name"
 }

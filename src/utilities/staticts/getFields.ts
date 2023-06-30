@@ -1,7 +1,6 @@
 import { Schema, models } from "mongoose";
 export default function getFields(this: any, parent: string) {
   let fields: any[] = [];
-
   let modelSchema = this.schema;
   // this.schema.discriminators && this.schema.discriminators[type]
   //   ? this.schema.discriminators[type]

@@ -15,7 +15,8 @@ export const schema = new Schema<IWarehouse>(
     name: {
       type: String,
       required: true,
-      min: [2, "Must be at least 2 characters long, got {VALUE}"]
+      min: [2, "Must be at least 2 characters long, got {VALUE}"],
+      input: "text"
     },
     type: {
       type: String,

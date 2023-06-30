@@ -11,7 +11,7 @@ export default class controller {
     public setModel(recordtype: string, db?: string) {
         if (this.models) {
             let Model = (this.models.submodels[recordtype] || this.models.model);
-            Model.getFields();
+            //Model.getFields();
             // Create or assign models from dedicate BD - to do
             if (db) {
                 const connection = mongoose.connections.find(conn => conn.name === db);
@@ -52,7 +52,7 @@ export default class controller {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
             }
             //query.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-            let select = (req.query.select || "").toString();
+            let select = (req.query.select || req.query.fields || "").toString();
             if (select) {
                 options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, collection: 1, link: 1 });
             }
@@ -77,10 +77,14 @@ export default class controller {
             }
 
             options.limit = parseInt((req.query.limit || 50).toString());
-            options.skip = parseInt((req.query.skip || 0).toString());
+            options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
 
             let result = await model.findDocuments(query, options);
-            let total = await model.count(query)
+            let total = await model.count(query);
+            // get fields
+            let fields = model.getFields().filter((field: any) => options.select[field.field]).map(field => {
+                return { field: field.field, name: req.__(`${req.params.recordtype}.${field.field}`), type: field.type, resource: field.resource }
+            })
             for (let index in result) {
                 result[index] = await result[index].autoPopulate(req.locale);
 
@@ -98,6 +102,7 @@ export default class controller {
             // console.log(result)
 
             const data = {
+                fields: fields,
                 docs: result,
                 totalDocs: total,
                 limit: options.limit,
@@ -180,6 +185,16 @@ export default class controller {
             let email: Email = new Email();
             let status = await email.send(config);
             res.json(status);
+        } catch (error) {
+            return next(error);
+        }
+    }
+    public async fields(req: Request, res: Response, next: NextFunction) {
+        let { recordtype } = req.params;
+        const model = this.setModel(recordtype);
+        try {
+            let fields = await model.getFields()
+            res.json(fields);
         } catch (error) {
             return next(error);
         }
