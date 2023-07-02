@@ -59,8 +59,8 @@ interface ITransactionModel extends Model<ITransaction>, IExtendedModel { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const TransactionSchema = {
-  name: { type: String, input: "text", set: (v: any) => v.toLowerCase() },
-  date: { type: Date, input: "date", required: true, },
+  name: { type: String, input: "text", set: (v: any) => v.toLowerCase(), select: true },
+  date: { type: Date, input: "date", required: true, select: true },
   company: {
     type: Schema.Types.ObjectId,
     ref: "Company",
@@ -73,7 +73,8 @@ const TransactionSchema = {
     ref: "Entity",
     required: true,
     autopopulate: true,
-    input: "autocomplete"
+    input: "autocomplete",
+    select: true
   },
   warehouse: {
     type: Schema.Types.ObjectId,
@@ -90,14 +91,14 @@ const TransactionSchema = {
     input: "integer",
     total: "lines"
   },
-  amount: { type: Number, default: 0, input: "currency", total: "lines" },
-  taxAmount: { type: Number, default: 0, input: "currency", total: "lines" },
-  grossAmount: { type: Number, default: 0, input: "currency", total: "lines" },
+  amount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
+  taxAmount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
+  grossAmount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
   weight: { type: Number, default: 0, input: "number" },
   tax: {
     type: Number,
     default: 0,
-    input: "select"
+    input: "number"
   },
   exchangeRate: {
     type: Number,
@@ -114,7 +115,8 @@ const TransactionSchema = {
     default: "PLN",
     input: "select",
     resource: 'constants',
-    constant: 'currencies'
+    constant: 'currencies',
+    select: true
   },
   billingName: {
     type: String,
@@ -212,7 +214,8 @@ const TransactionSchema = {
     resource: 'constants',
     constant: 'currencies',
     //enum: TranStatus,
-    input: "select"
+    input: "select",
+    select: true
   },
   taxNumber: { type: String, input: "text" },
   referenceNumber: { type: String, input: "text" },

@@ -25,10 +25,10 @@ export async function addDocument(this: any, data: Object) {
 }
 
 export async function getDocument(this: any, id: string, mode: string) {
-  let document = cache.getCache(id);
-  if (!document) {
-    document = await this.loadDocument(id);
-  }
+  //let document = cache.getCache(id);
+  //if (!document) {
+    let document = await this.loadDocument(id);
+  //}
   if (document) {
     if (mode === "edit") cache.addCache(document);
   }

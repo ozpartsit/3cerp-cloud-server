@@ -21,16 +21,16 @@ export default class Auth {
       try {
         jwt.verify(token, this.tokenSecret, (err, value) => {
           if (err)
-            res.status(500).json({ message: "failed to authenticate token" });
+            res.status(500).json({ message: req.__('auth.failed_auth_token') });
           else
             next();
         });
       } catch (err) {
-        res.status(400).json({ message: "Invalid token" });
+        res.status(400).json({ message: req.__('auth.invalid_token') });
       }
 
     } else {
-      res.status(401).json({ message: "Access denied. No token provided" });
+      res.status(401).json({ message:  req.__("auth.no_token") });
     }
   }
   public accessGranted(
@@ -38,7 +38,7 @@ export default class Auth {
     res: Response,
     next: express.NextFunction
   ) {
-    res.status(200).json({ message: "Access granted" });
+    res.status(200).json({ message: req.__("auth.access_granted") });
   }
   public login(
     req: express.Request,
@@ -59,9 +59,9 @@ export default class Auth {
           };
           res.status(200).json({ user: userLoged, token });
         } else {
-          res.status(403).json({ message: "password do not match" });
+          res.status(403).json({ message: req.__("auth.wrong_password") });
         }
-      } else res.status(404).json({ message: "no user with that email found" });
+      } else res.status(404).json({ message: req.__("auth.user_not_exist") });
     });
   }
 }

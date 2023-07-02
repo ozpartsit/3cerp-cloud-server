@@ -46,7 +46,7 @@ export default class controller {
         try {
             let query: any = {};
 
-            let options = { select: { name: 1, type: 1, collection: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
+            let options = { select: { name: 1, type: 1, resource: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
             let filters = (req.query.filters || "").toString();
             if (filters) {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
@@ -54,7 +54,12 @@ export default class controller {
             //query.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
             let select = (req.query.select || req.query.fields || "").toString();
             if (select) {
-                options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, collection: 1, link: 1 });
+                options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, link: 1 });
+            } else {
+                // add default field to select
+                model.getFields(req.locale).forEach(field => {
+                    if (field.select) options.select[field.field] = 1;
+                })
             }
             // Sort
             let sort = (req.query.sort || "").toString();
@@ -76,13 +81,21 @@ export default class controller {
                 query['name'] = { $regex: `,*${req.query.search}.*` }
             }
 
+            // loop per query params
+            for (const [key, value] of Object.entries(req.query)) {
+                if (["filters", "select", "fields", "search", "sort", "page", "limit"].includes(key))
+                    query[key] = { $eq: value }
+                // add verify field exists
+            }
+
+
             options.limit = parseInt((req.query.limit || 50).toString());
             options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
 
             let result = await model.findDocuments(query, options);
             let total = await model.count(query);
             // get fields
-            let fields = model.getFields().filter((field: any) => options.select[field.field]).map(field => {
+            let fields = model.getFields(req.locale).filter((field: any) => options.select[field.field]).map(field => {
                 return { field: field.field, name: req.__(`${req.params.recordtype}.${field.field}`), type: field.type, resource: field.resource }
             })
             for (let index in result) {
@@ -107,7 +120,7 @@ export default class controller {
                 totalDocs: total,
                 limit: options.limit,
                 page: options.skip,
-                totalPages: total / options.limit
+                totalPages: Math.ceil(total / options.limit)
             }
 
             res.json(data);
@@ -122,7 +135,7 @@ export default class controller {
         try {
             let document = await model.getDocument(id, mode);
             if (!document) res.status(404).json({
-                message: 'Document not found'
+                message: req.__('doc_not_found')
             })
             else {
                 //populate response document
@@ -193,7 +206,7 @@ export default class controller {
         let { recordtype } = req.params;
         const model = this.setModel(recordtype);
         try {
-            let fields = await model.getFields()
+            let fields = await model.getFields(req.locale)
             res.json(fields);
         } catch (error) {
             return next(error);

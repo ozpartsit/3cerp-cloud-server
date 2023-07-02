@@ -1,5 +1,6 @@
 import { Schema, models } from "mongoose";
-export default function getFields(this: any, parent: string) {
+import i18n from "../../config/i18n";
+export default function getFields(this: any, local: string, parent: string) {
   let fields: any[] = [];
   let modelSchema = this.schema;
   // this.schema.discriminators && this.schema.discriminators[type]
@@ -33,20 +34,22 @@ export default function getFields(this: any, parent: string) {
         //   fields.push({ path: pathname, ...field })
         // );
       } else {
+        i18n.setLocale(local);
         let field = {
           field: parent ? `${parent}.${pathname}` : pathname,
-          name: pathname,
+          name: i18n.__(`${this.modelName.toLowerCase()}.${pathname}`),
           required: schematype.isRequired,
           ref: schematype.options.ref,
           resource: schematype.options.resource,
           constant: schematype.options.constant,
           type: schematype.options.input,
+          select: schematype.options.select,
           fields: []
         }
         if (schematype.options.ref) {
           let refModel: any = models[schematype.options.ref];
           field.resource = refModel.schema.options.collection;
-          if (!parent) field.fields = refModel.getFields(pathname);
+          if (!parent) field.fields = refModel.getFields(local, pathname);
         }
         if (field.type != "subrecords") fields.push(field);
       }
