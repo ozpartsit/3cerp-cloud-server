@@ -34,7 +34,8 @@ export default function getFields(this: any, local: string, parent: string) {
         //   fields.push({ path: pathname, ...field })
         // );
       } else {
-        i18n.setLocale(local);
+        i18n.setLocale(local || "en");
+     
         let field = {
           field: parent ? `${parent}.${pathname}` : pathname,
           name: i18n.__(`${this.modelName.toLowerCase()}.${pathname}`),
@@ -44,8 +45,11 @@ export default function getFields(this: any, local: string, parent: string) {
           constant: schematype.options.constant,
           type: schematype.options.input,
           select: schematype.options.select,
-          fields: []
+          fields: [],
+          selects: schematype.options.autopopulate ? schematype.options.autopopulate.select : "",
+
         }
+
         if (schematype.options.ref) {
           let refModel: any = models[schematype.options.ref];
           field.resource = refModel.schema.options.collection;

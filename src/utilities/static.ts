@@ -27,7 +27,7 @@ export async function addDocument(this: any, data: Object) {
 export async function getDocument(this: any, id: string, mode: string) {
   //let document = cache.getCache(id);
   //if (!document) {
-    let document = await this.loadDocument(id);
+  let document = await this.loadDocument(id);
   //}
   if (document) {
     if (mode === "edit") cache.addCache(document);
@@ -92,31 +92,48 @@ export async function deleteDocument(this: any, id: string) {
 }
 
 export async function findDocuments(this: any, query: Object, options: any) {
-
+  let docFields = this.getFields();
   let { limit, select, sort, skip } = options;
-  let populated: any = null;
-  // for (const [key, value] of Object.entries(select)) {
-  //   // to do - poprawić
-  //   let fields = key.split('.');
-  //   if (fields.length > 1) {
-  //     let fieldsSelect = { name: 1 };
-  //     fieldsSelect[fields[1]] = 1;
-  //     populated = {
-  //       path: fields[0],
-  //       select: fieldsSelect,
-  //       populate: {
-  //         path: fields[1],
-  //         select: 'name resource type'
-  //       }
-  //     }
-  //     delete select[key];
-  //   }
-  // }
-  //console.log(select)
+  let populated: any = {};
+  for (const [key, value] of Object.entries(select)) {
+    // to do - poprawić
+    let fieldsSelect = { name: 1, resource: 1, type: 1 };
+    let fields = key.split('.');
+    if (fields.length > 1) {
+      if (populated[fields[0]]) {
+        populated[fields[0]].select[fields[1]] = 1;
+        populated[fields[0]].populate.push({
+          path: fields[1],
+          select: 'name resource type'
+        })
+      } else {
+        fieldsSelect[fields[1]] = 1;
+        populated[fields[0]] = {
+          path: fields[0],
+          select: fieldsSelect,
+          populate: [{
+            path: fields[1],
+            select: 'name resource type'
+          }]
+        }
+      }
+      delete select[key];
+    } else {
+      let field = docFields.find((field: any) => field.field == fields[0]);
+      if (field && field.ref) {
+        if (!populated[fields[0]]) {
+          populated[fields[0]] = {
+            path: fields[0],
+            select: field.selects || fieldsSelect
+          }
+        }
+      }
+    }
+  }
 
 
   let result = await this.find(query)
-    .populate(populated)
+    .populate(Object.values(populated))
     .sort(sort).skip(skip).limit(limit).select(select);
 
   return result;

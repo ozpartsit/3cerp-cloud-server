@@ -107,5 +107,8 @@
 	"salesorder.shippingEmail": "salesorder.shippingEmail",
 	"salesorder.status": "salesorder.status",
 	"salesorder.taxNumber": "salesorder.taxNumber",
-	"salesorder.referenceNumber": "salesorder.referenceNumber"
+	"salesorder.referenceNumber": "salesorder.referenceNumber",
+	"auth.failed_auth_token": "auth.failed_auth_token",
+	"auth.access_granted": "auth.access_granted",
+	"selectfield.name": "selectfield.name"
 }

@@ -2,6 +2,7 @@ import setValue from "./methods/setValue";
 import changeLogs from "./methods/changeLogs";
 import virtualPopulate from "./methods/virtualPopulate";
 import autoPopulate from "./methods/autoPopulate";
+import constantTranslate from "./methods/constantTranslate";
 import validateVirtuals from "./methods/validateVirtuals";
 import totalVirtuals from "./methods/totalVirtuals";
 import addToVirtuals from "./methods/addToVirtuals";
@@ -39,6 +40,7 @@ export default function methods(schema: any, options: any) {
     this.$locals.triggers = [];
   }
 
+  //triggers loop
   async function actions(this: any, next: any) {
     console.log("post valide ")
     for (let trigger of this.$locals.triggers) {
@@ -64,6 +66,7 @@ export default function methods(schema: any, options: any) {
   schema.methods.changeLogs = changeLogs;
   schema.methods.virtualPopulate = virtualPopulate;
   schema.methods.autoPopulate = autoPopulate;
+  schema.methods.constantTranslate = constantTranslate;
   schema.methods.validateVirtuals = validateVirtuals;
   schema.methods.totalVirtuals = totalVirtuals;
   schema.methods.addToVirtuals = addToVirtuals;

@@ -1,7 +1,5 @@
-import i18n from "../../config/i18n";
 export default async function autoPopulate(this: any, local: string) {
   let paths: any[] = [];
-
 
   this.schema.eachPath(function process(pathname: string, schemaType: any) {
     if (pathname === "_id") return;
@@ -34,17 +32,6 @@ export default async function autoPopulate(this: any, local: string) {
     }
   }
 
-
-
-  this.schema.eachPath(function process(pathname: string, schemaType: any) {
-
-    //constats
-    if (schemaType.options.constant && doc[pathname]) {
-      doc[pathname] = { _id: doc[pathname], name: i18n.getCatalog(local || 'en')[doc[pathname]] };
-    }
-
-
-  });
   return doc;
 
 }

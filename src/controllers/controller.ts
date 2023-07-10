@@ -33,7 +33,8 @@ export default class controller {
             //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
             let { document, msg } = await model.addDocument(req.body);
             //populate response document
-            document = await document.autoPopulate(req.locale);
+            await document.autoPopulate();
+            document = document.constantTranslate(req.locale);
             res.json({ document, msg });
         } catch (error) {
             return next(error);
@@ -99,7 +100,7 @@ export default class controller {
                 return { field: field.field, name: req.__(`${req.params.recordtype}.${field.field}`), type: field.type, resource: field.resource }
             })
             for (let index in result) {
-                result[index] = await result[index].autoPopulate(req.locale);
+                result[index] = await result[index].constantTranslate(req.locale);
 
             }
             //to do - test przypisania do source.field
@@ -139,7 +140,8 @@ export default class controller {
             })
             else {
                 //populate response document
-                document = await document.autoPopulate(req.locale);
+                await document.autoPopulate();
+                document = document.constantTranslate(req.locale);
                 res.json(document);
             }
         } catch (error) {
@@ -173,7 +175,8 @@ export default class controller {
             let update = req.body;
             let { document, msg } = await model.updateDocument(id, update);
             //populate response document
-            document = await document.autoPopulate(req.locale);
+            await document.autoPopulate();
+            document = document.constantTranslate(req.locale);
             res.json({ document, msg });
         } catch (error) {
             return next(error);

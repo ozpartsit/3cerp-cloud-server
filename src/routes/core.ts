@@ -343,6 +343,10 @@ export default class Routes {
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.accessGranted.bind(this.Auth) as any
     );
+    this.Router.route("/user").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.getUser.bind(this.Auth) as any
+    );
   }
   public routeFiles() {
     // Files

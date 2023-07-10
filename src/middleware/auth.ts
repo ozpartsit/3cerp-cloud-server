@@ -30,7 +30,7 @@ export default class Auth {
       }
 
     } else {
-      res.status(401).json({ message:  req.__("auth.no_token") });
+      res.status(401).json({ message: req.__("auth.no_token") });
     }
   }
   public accessGranted(
@@ -63,5 +63,40 @@ export default class Auth {
         }
       } else res.status(404).json({ message: req.__("auth.user_not_exist") });
     });
+  }
+  public getUser(
+    req: express.Request,
+    res: Response,
+    next: express.NextFunction
+  ) {
+    const tokenParts = (req.headers.authorization || "").split(" ");
+    const token = tokenParts[1];
+    if (token) {
+      try {
+        jwt.verify(token, this.tokenSecret, (err, value) => {
+          if (err)
+            res.status(500).json({ message: req.__('auth.failed_auth_token') });
+          else {
+            if (value && value.user) {
+              Entity.findOne({ _id: value.user }).then(async (user) => {
+                if (user) {
+                  let userLoged = {
+                    name: user.name,
+                    date: new Date(),
+                    locale: user.locale
+                  };
+                  res.status(200).json({ user: userLoged, token });
+                }
+              })
+            }
+          }
+        });
+      } catch (err) {
+        res.status(400).json({ message: req.__('auth.invalid_token') });
+      }
+
+    } else {
+      res.status(401).json({ message: req.__("auth.no_token") });
+    }
   }
 }
