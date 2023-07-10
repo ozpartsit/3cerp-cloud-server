@@ -338,6 +338,7 @@ export default class Routes {
   }
   public routeAuth() {
     // Auth
+    // to do - do usunięcia
     this.Router.route("/login").post(this.Auth.login.bind(this.Auth) as any);
     this.Router.route("/auth").get(
       this.Auth.authenticate.bind(this.Auth) as any,
@@ -346,6 +347,19 @@ export default class Routes {
     this.Router.route("/user").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.getUser.bind(this.Auth) as any
+    );
+    //new auth
+    this.Router.route("/auth/login").post(this.Auth.login.bind(this.Auth) as any);
+    this.Router.route("/auth/refresh").post(
+      this.Auth.accessGranted.bind(this.Auth) as any
+    );
+    this.Router.route("/auth/user").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.getUser.bind(this.Auth) as any
+    );
+    this.Router.route("/auth/verify").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.accessGranted.bind(this.Auth) as any
     );
   }
   public routeFiles() {

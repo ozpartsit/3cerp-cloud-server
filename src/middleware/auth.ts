@@ -49,20 +49,36 @@ export default class Auth {
       if (user) {
         const valide = await user.validatePassword(req.body.password);
         if (valide) {
-          const token = jwt.sign({ user: user._id, account: "test" }, this.tokenSecret, {
-            expiresIn: "24h"
-          });
-          let userLoged = {
-            name: user.name,
-            date: new Date(),
-            locale: user.locale
-          };
-          res.status(200).json({ user: userLoged, token });
+          const tokens = createTokenPair(user._id, this.tokenSecret);
+          res.status(200).json(tokens);
         } else {
           res.status(403).json({ message: req.__("auth.wrong_password") });
         }
       } else res.status(404).json({ message: req.__("auth.user_not_exist") });
     });
+  }
+  public refreshToken(
+    req: express.Request,
+    res: Response,
+    next: express.NextFunction
+  ) {
+    if (req.body.refreshToken) {
+      try {
+        jwt.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
+          if (err)
+            res.status(500).json({ message: req.__('auth.failed_auth_token') });
+          else {
+            const tokens = createTokenPair(value.user, this.tokenSecret);
+            res.status(200).json(tokens);
+          }
+        });
+      } catch (err) {
+        res.status(400).json({ message: req.__('auth.invalid_token') });
+      }
+
+    } else {
+      res.status(401).json({ message: req.__("auth.no_token") });
+    }
   }
   public getUser(
     req: express.Request,
@@ -82,10 +98,11 @@ export default class Auth {
                 if (user) {
                   let userLoged = {
                     name: user.name,
-                    date: new Date(),
-                    locale: user.locale
+                    locale: user.locale,
+                    role: "TODO",
+
                   };
-                  res.status(200).json({ user: userLoged, token });
+                  res.status(200).json({ user: userLoged });
                 }
               })
             }
@@ -99,4 +116,14 @@ export default class Auth {
       res.status(401).json({ message: req.__("auth.no_token") });
     }
   }
+}
+
+function createTokenPair(user: string, tokenSecret: string) {
+  const token = jwt.sign({ user: user }, tokenSecret, {
+    expiresIn: "1h"
+  });
+  const refreshToken = jwt.sign({ user: user }, tokenSecret, {
+    expiresIn: "2h"
+  });
+  return { token, refreshToken }
 }

@@ -117,5 +117,6 @@
 	"salesorder.shippingPhone": "salesorder.shippingPhone",
 	"salesorder.shippingEmail": "salesorder.shippingEmail",
 	"salesorder.taxNumber": "salesorder.taxNumber",
-	"salesorder.referenceNumber": "salesorder.referenceNumber"
+	"salesorder.referenceNumber": "salesorder.referenceNumber",
+	"auth.no_token": "auth.no_token"
 }

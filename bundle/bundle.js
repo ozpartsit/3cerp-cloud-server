@@ -718,7 +718,8 @@ class controller {
                 //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
                 let { document, msg } = yield model.addDocument(req.body);
                 //populate response document
-                document = yield document.autoPopulate(req.locale);
+                yield document.autoPopulate();
+                document = document.constantTranslate(req.locale);
                 res.json({ document, msg });
             }
             catch (error) {
@@ -783,7 +784,7 @@ class controller {
                     return { field: field.field, name: req.__(`${req.params.recordtype}.${field.field}`), type: field.type, resource: field.resource };
                 });
                 for (let index in result) {
-                    result[index] = yield result[index].autoPopulate(req.locale);
+                    result[index] = yield result[index].constantTranslate(req.locale);
                 }
                 //to do - test przypisania do source.field
                 // result = result.map(line => {
@@ -822,7 +823,8 @@ class controller {
                     });
                 else {
                     //populate response document
-                    document = yield document.autoPopulate(req.locale);
+                    yield document.autoPopulate();
+                    document = document.constantTranslate(req.locale);
                     res.json(document);
                 }
             }
@@ -862,7 +864,8 @@ class controller {
                 let update = req.body;
                 let { document, msg } = yield model.updateDocument(id, update);
                 //populate response document
-                document = yield document.autoPopulate(req.locale);
+                yield document.autoPopulate();
+                document = document.constantTranslate(req.locale);
                 res.json({ document, msg });
             }
             catch (error) {
@@ -1251,7 +1254,7 @@ class controller {
                             let result = yield model_1.default.findDocuments(query, options);
                             let total = yield model_1.default.count(query);
                             for (let line of result) {
-                                line = yield line.autoPopulate(req.locale);
+                                line = yield line.constantTranslate(req.locale);
                             }
                             // Pagination url halper
                             var q = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
@@ -1734,6 +1737,38 @@ class Auth {
             else
                 res.status(404).json({ message: req.__("auth.user_not_exist") });
         }));
+    }
+    getUser(req, res, next) {
+        const tokenParts = (req.headers.authorization || "").split(" ");
+        const token = tokenParts[1];
+        if (token) {
+            try {
+                jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
+                    if (err)
+                        res.status(500).json({ message: req.__('auth.failed_auth_token') });
+                    else {
+                        if (value && value.user) {
+                            model_1.default.findOne({ _id: value.user }).then((user) => __awaiter(this, void 0, void 0, function* () {
+                                if (user) {
+                                    let userLoged = {
+                                        name: user.name,
+                                        date: new Date(),
+                                        locale: user.locale
+                                    };
+                                    res.status(200).json({ user: userLoged, token });
+                                }
+                            }));
+                        }
+                    }
+                });
+            }
+            catch (err) {
+                res.status(400).json({ message: req.__('auth.invalid_token') });
+            }
+        }
+        else {
+            res.status(401).json({ message: req.__("auth.no_token") });
+        }
     }
 }
 exports["default"] = Auth;
@@ -4825,6 +4860,7 @@ class Routes {
         // Auth
         this.Router.route("/login").post(this.Auth.login.bind(this.Auth));
         this.Router.route("/auth").get(this.Auth.authenticate.bind(this.Auth), this.Auth.accessGranted.bind(this.Auth));
+        this.Router.route("/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
     }
     routeFiles() {
         // Files
@@ -5127,6 +5163,7 @@ const setValue_1 = __importDefault(__webpack_require__(7296));
 const changeLogs_1 = __importDefault(__webpack_require__(2573));
 const virtualPopulate_1 = __importDefault(__webpack_require__(7650));
 const autoPopulate_1 = __importDefault(__webpack_require__(5363));
+const constantTranslate_1 = __importDefault(__webpack_require__(7442));
 const validateVirtuals_1 = __importDefault(__webpack_require__(4002));
 const totalVirtuals_1 = __importDefault(__webpack_require__(4649));
 const addToVirtuals_1 = __importDefault(__webpack_require__(2329));
@@ -5169,6 +5206,7 @@ function methods(schema, options) {
             this.$locals.triggers = [];
         });
     }
+    //triggers loop
     function actions(next) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("post valide ");
@@ -5191,6 +5229,7 @@ function methods(schema, options) {
     schema.methods.changeLogs = changeLogs_1.default;
     schema.methods.virtualPopulate = virtualPopulate_1.default;
     schema.methods.autoPopulate = autoPopulate_1.default;
+    schema.methods.constantTranslate = constantTranslate_1.default;
     schema.methods.validateVirtuals = validateVirtuals_1.default;
     schema.methods.totalVirtuals = totalVirtuals_1.default;
     schema.methods.addToVirtuals = addToVirtuals_1.default;
@@ -5261,7 +5300,7 @@ exports["default"] = addToVirtuals;
 /***/ }),
 
 /***/ 5363:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports) {
 
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -5273,11 +5312,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const i18n_1 = __importDefault(__webpack_require__(6734));
 function autoPopulate(local) {
     return __awaiter(this, void 0, void 0, function* () {
         let paths = [];
@@ -5310,12 +5345,6 @@ function autoPopulate(local) {
                 }
             }
         }
-        this.schema.eachPath(function process(pathname, schemaType) {
-            //constats
-            if (schemaType.options.constant && doc[pathname]) {
-                doc[pathname] = { _id: doc[pathname], name: i18n_1.default.getCatalog(local || 'en')[doc[pathname]] };
-            }
-        });
         return doc;
     });
 }
@@ -5374,6 +5403,43 @@ function changeLogs(document, list) {
     });
 }
 exports["default"] = changeLogs;
+
+
+/***/ }),
+
+/***/ 7442:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const i18n_1 = __importDefault(__webpack_require__(6734));
+function constantTranslate(local) {
+    let doc = this.toObject();
+    // Virtuals
+    const virtuals = Object.values(this.schema.virtuals);
+    for (let list of virtuals) {
+        if (list.options.ref && list.options.autopopulate) {
+            if (Array.isArray(this[list.path])) {
+                for (let index in doc[list.path]) {
+                    doc[list.path][index] = this[list.path][index].constantTranslate(local);
+                    console.log(doc[list.path][index]);
+                }
+            }
+        }
+    }
+    this.schema.eachPath(function process(pathname, schemaType) {
+        i18n_1.default.setLocale(local || "en");
+        //constats
+        if (schemaType.options.constant && doc[pathname]) {
+            doc[pathname] = { _id: doc[pathname], name: i18n_1.default.__(doc[pathname]) };
+        }
+    });
+    return doc;
+}
+exports["default"] = constantTranslate;
 
 
 /***/ }),
@@ -5870,28 +5936,48 @@ function deleteDocument(id) {
 exports.deleteDocument = deleteDocument;
 function findDocuments(query, options) {
     return __awaiter(this, void 0, void 0, function* () {
+        let docFields = this.getFields();
         let { limit, select, sort, skip } = options;
-        let populated = null;
-        // for (const [key, value] of Object.entries(select)) {
-        //   // to do - poprawić
-        //   let fields = key.split('.');
-        //   if (fields.length > 1) {
-        //     let fieldsSelect = { name: 1 };
-        //     fieldsSelect[fields[1]] = 1;
-        //     populated = {
-        //       path: fields[0],
-        //       select: fieldsSelect,
-        //       populate: {
-        //         path: fields[1],
-        //         select: 'name resource type'
-        //       }
-        //     }
-        //     delete select[key];
-        //   }
-        // }
-        //console.log(select)
+        let populated = {};
+        for (const [key, value] of Object.entries(select)) {
+            // to do - poprawić
+            let fieldsSelect = { name: 1, resource: 1, type: 1 };
+            let fields = key.split('.');
+            if (fields.length > 1) {
+                if (populated[fields[0]]) {
+                    populated[fields[0]].select[fields[1]] = 1;
+                    populated[fields[0]].populate.push({
+                        path: fields[1],
+                        select: 'name resource type'
+                    });
+                }
+                else {
+                    fieldsSelect[fields[1]] = 1;
+                    populated[fields[0]] = {
+                        path: fields[0],
+                        select: fieldsSelect,
+                        populate: [{
+                                path: fields[1],
+                                select: 'name resource type'
+                            }]
+                    };
+                }
+                delete select[key];
+            }
+            else {
+                let field = docFields.find((field) => field.field == fields[0]);
+                if (field && field.ref) {
+                    if (!populated[fields[0]]) {
+                        populated[fields[0]] = {
+                            path: fields[0],
+                            select: field.selects || fieldsSelect
+                        };
+                    }
+                }
+            }
+        }
         let result = yield this.find(query)
-            .populate(populated)
+            .populate(Object.values(populated))
             .sort(sort).skip(skip).limit(limit).select(select);
         return result;
     });
@@ -5947,7 +6033,7 @@ function getFields(local, parent) {
                 // );
             }
             else {
-                i18n_1.default.setLocale(local);
+                i18n_1.default.setLocale(local || "en");
                 let field = {
                     field: parent ? `${parent}.${pathname}` : pathname,
                     name: i18n_1.default.__(`${this.modelName.toLowerCase()}.${pathname}`),
@@ -5957,7 +6043,8 @@ function getFields(local, parent) {
                     constant: schematype.options.constant,
                     type: schematype.options.input,
                     select: schematype.options.select,
-                    fields: []
+                    fields: [],
+                    selects: schematype.options.autopopulate ? schematype.options.autopopulate.select : "",
                 };
                 if (schematype.options.ref) {
                     let refModel = mongoose_1.models[schematype.options.ref];
