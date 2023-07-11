@@ -1720,15 +1720,8 @@ class Auth {
             if (user) {
                 const valide = yield user.validatePassword(req.body.password);
                 if (valide) {
-                    const token = jsonwebtoken_1.default.sign({ user: user._id, account: "test" }, this.tokenSecret, {
-                        expiresIn: "24h"
-                    });
-                    let userLoged = {
-                        name: user.name,
-                        date: new Date(),
-                        locale: user.locale
-                    };
-                    res.status(200).json({ user: userLoged, token });
+                    const tokens = createTokenPair(user._id, this.tokenSecret);
+                    res.status(200).json(tokens);
                 }
                 else {
                     res.status(403).json({ message: req.__("auth.wrong_password") });
@@ -1737,6 +1730,26 @@ class Auth {
             else
                 res.status(404).json({ message: req.__("auth.user_not_exist") });
         }));
+    }
+    refreshToken(req, res, next) {
+        if (req.body.refreshToken) {
+            try {
+                jsonwebtoken_1.default.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
+                    if (err)
+                        res.status(500).json({ message: req.__('auth.failed_auth_token') });
+                    else {
+                        const tokens = createTokenPair(value.user, this.tokenSecret);
+                        res.status(200).json(tokens);
+                    }
+                });
+            }
+            catch (err) {
+                res.status(400).json({ message: req.__('auth.invalid_token') });
+            }
+        }
+        else {
+            res.status(401).json({ message: req.__("auth.no_token") });
+        }
     }
     getUser(req, res, next) {
         const tokenParts = (req.headers.authorization || "").split(" ");
@@ -1752,10 +1765,10 @@ class Auth {
                                 if (user) {
                                     let userLoged = {
                                         name: user.name,
-                                        date: new Date(),
-                                        locale: user.locale
+                                        locale: user.locale,
+                                        role: "TODO",
                                     };
-                                    res.status(200).json({ user: userLoged, token });
+                                    res.status(200).json({ user: userLoged });
                                 }
                             }));
                         }
@@ -1772,6 +1785,15 @@ class Auth {
     }
 }
 exports["default"] = Auth;
+function createTokenPair(user, tokenSecret) {
+    const token = jsonwebtoken_1.default.sign({ user: user }, tokenSecret, {
+        expiresIn: "1h"
+    });
+    const refreshToken = jsonwebtoken_1.default.sign({ user: user }, tokenSecret, {
+        expiresIn: "2h"
+    });
+    return { token, refreshToken };
+}
 
 
 /***/ }),
@@ -4858,9 +4880,15 @@ class Routes {
     }
     routeAuth() {
         // Auth
+        // to do - do usunięcia
         this.Router.route("/login").post(this.Auth.login.bind(this.Auth));
         this.Router.route("/auth").get(this.Auth.authenticate.bind(this.Auth), this.Auth.accessGranted.bind(this.Auth));
         this.Router.route("/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
+        //new auth
+        this.Router.route("/auth/login").post(this.Auth.login.bind(this.Auth));
+        this.Router.route("/auth/refresh").post(this.Auth.accessGranted.bind(this.Auth));
+        this.Router.route("/auth/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
+        this.Router.route("/auth/verify").get(this.Auth.authenticate.bind(this.Auth), this.Auth.accessGranted.bind(this.Auth));
     }
     routeFiles() {
         // Files

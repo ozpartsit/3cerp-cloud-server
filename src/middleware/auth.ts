@@ -125,5 +125,11 @@ function createTokenPair(user: string, tokenSecret: string) {
   const refreshToken = jwt.sign({ user: user }, tokenSecret, {
     expiresIn: "2h"
   });
-  return { token, refreshToken }
+  const expires = addHours(new Date(), 1);
+  return { token, expires, refreshToken }
+}
+
+function addHours(date: Date, hours: number) {
+  date.setTime(date.getTime() + hours * 60 * 60 * 1000);
+  return date;
 }

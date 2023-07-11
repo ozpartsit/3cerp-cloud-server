@@ -351,7 +351,7 @@ export default class Routes {
     //new auth
     this.Router.route("/auth/login").post(this.Auth.login.bind(this.Auth) as any);
     this.Router.route("/auth/refresh").post(
-      this.Auth.accessGranted.bind(this.Auth) as any
+      this.Auth.refreshToken.bind(this.Auth) as any
     );
     this.Router.route("/auth/user").get(
       this.Auth.authenticate.bind(this.Auth) as any,
