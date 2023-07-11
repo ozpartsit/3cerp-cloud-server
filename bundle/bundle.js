@@ -1792,7 +1792,12 @@ function createTokenPair(user, tokenSecret) {
     const refreshToken = jsonwebtoken_1.default.sign({ user: user }, tokenSecret, {
         expiresIn: "2h"
     });
-    return { token, refreshToken };
+    const expires = addHours(new Date(), 1);
+    return { token, expires, refreshToken };
+}
+function addHours(date, hours) {
+    date.setTime(date.getTime() + hours * 60 * 60 * 1000);
+    return date;
 }
 
 
@@ -4886,7 +4891,7 @@ class Routes {
         this.Router.route("/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
         //new auth
         this.Router.route("/auth/login").post(this.Auth.login.bind(this.Auth));
-        this.Router.route("/auth/refresh").post(this.Auth.accessGranted.bind(this.Auth));
+        this.Router.route("/auth/refresh").post(this.Auth.refreshToken.bind(this.Auth));
         this.Router.route("/auth/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
         this.Router.route("/auth/verify").get(this.Auth.authenticate.bind(this.Auth), this.Auth.accessGranted.bind(this.Auth));
     }
