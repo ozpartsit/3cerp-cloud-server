@@ -35,49 +35,49 @@ const options = {
 };
 const schema = new Schema<IItem>(
   {
-    name: { type: String, required: true, input: "text" },
-    description: { type: String, input: "text", default: "" },
+    name: { type: String, required: true, input: "TextField" },
+    description: { type: String, input: "TextField", default: "" },
     type: {
       type: String,
       required: true,
       enum: ItemTypes,
-      input: "select"
+      input: "SelectField"
     },
     priceGroup: {
       type: Schema.Types.ObjectId,
       ref: "Classification",
       autopopulate: true,
       required: false,
-      input: "select"
+      input: "SelectField"
     },
     images: {
       type: [Schema.Types.ObjectId],
       ref: "Storage",
       autopopulate: true,
-      input: "file"
+      input: "FileField"
     },
     coo: {
       type: String,
-      input: "select"
+      input: "SelectField"
     },
     barcode: {
       type: String,
-      input: "text"
+      input: "TextField"
     },
     weight: {
       type: Number,
-      input: "number"
+      input: "NumberField"
     },
     status: {
       type: String,
-      input: "text"
+
     },
     manufacturer: {
       type: String,
-      input: "text"
+      input: "TextField"
     },
-    firstSalesDate: { type: Date, input: "date" },
-    lastSalesDate: { type: Date, input: "date" },
+    firstSalesDate: { type: Date, input: "DateField" },
+    lastSalesDate: { type: Date, input: "DateField" },
   },
   options
 );

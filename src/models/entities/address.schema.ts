@@ -25,27 +25,27 @@ const options = {
 const schema = new Schema<IAddress>(
   {
     entity: { type: Schema.Types.ObjectId },
-    name: { type: String, input: "text" },
-    addressee: { type: String, input: "text" },
-    address: { type: String, required: true, input: "text" },
-    address2: { type: String, input: "text" },
-    city: { type: String, required: true, input: "text" },
-    zip: { type: String, required: true, input: "text" },
+    name: { type: String, input: "TextField" },
+    addressee: { type: String, input: "TextField" },
+    address: { type: String, required: true, input: "TextField" },
+    address2: { type: String, input: "TextField" },
+    city: { type: String, required: true, input: "TextField" },
+    zip: { type: String, required: true, input: "TextField" },
     country: {
       type: String,
       required: true,
       resource: "constatnts",
       constant: "countries"
     },
-    phone: { type: String, input: "text" },
+    phone: { type: String, input: "TextField" },
     geoCodeHint: {
       type: String,
       get: (v: any) =>
         v ? `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}` : '',
-      input: "text"
+      input: "TextField"
     },
-    latitude: { type: String, input: "text" },
-    longitude: { type: String, input: "text" }
+    latitude: { type: String, input: "TextField" },
+    longitude: { type: String, input: "TextField" }
   },
   options
 );

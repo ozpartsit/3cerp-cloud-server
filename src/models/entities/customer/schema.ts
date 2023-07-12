@@ -35,22 +35,26 @@ const schema = new Schema<ICustomer>(
       type: Schema.Types.ObjectId,
       ref: "Group",
       autopopulate: true,
+      input: "SelectField"
     },
     category: {
       type: Schema.Types.ObjectId,
       ref: "Category",
       autopopulate: true,
+      input: "SelectField"
     },
     //accounting
     terms: {
       type: Schema.Types.ObjectId,
       ref: "Terms",
       autopopulate: true,
+      input: "SelectField"
     },
     paymentMethod: {
       type: Schema.Types.ObjectId,
       ref: "PaymentMethod",
       autopopulate: true,
+      input: "SelectField"
     },
   },
   options

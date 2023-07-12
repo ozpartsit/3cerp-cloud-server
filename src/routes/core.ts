@@ -102,7 +102,10 @@ export default class Routes {
       this.Auth.authenticate.bind(this.Auth) as any,
       controller.fields.bind(controller) as any
     );
-
+    this.Router.route(`/${collection}/:recordtype/form`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      controller.form.bind(controller) as any
+    );
     this.Router.route(`/${collection}/:recordtype`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       controller.find.bind(controller) as any

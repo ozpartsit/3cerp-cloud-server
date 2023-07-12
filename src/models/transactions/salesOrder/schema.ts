@@ -7,13 +7,28 @@ const options = { discriminatorKey: "type", collection: "transactions" };
 
 export interface ISalesOrder extends ITransaction {
   shippingCost: number;
+  //accounting
+  terms?: Schema.Types.ObjectId;
+  paymentMethod?: Schema.Types.ObjectId;
   lines: ILineSalesOrder[];
 }
 export interface ISalesOrderModel extends Model<ISalesOrder>, IExtendedModel { }
 
 const schema = new Schema<ISalesOrder>(
   {
-    shippingCost: { type: Number, default: 0, input: "currency" },
+    shippingCost: { type: Number, default: 0, input: "CurrencyField" },
+    terms: {
+      type: Schema.Types.ObjectId,
+      ref: "Terms",
+      autopopulate: true,
+      input: "SelectField"
+    },
+    paymentMethod: {
+      type: Schema.Types.ObjectId,
+      ref: "PaymentMethod",
+      autopopulate: true,
+      input: "SelectField"
+    },
   },
   options
 );

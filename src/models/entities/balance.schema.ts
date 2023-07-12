@@ -22,7 +22,7 @@ const schema = new Schema<IBalance>(
       //get: (v: any) => Currencies.getName(v),
       enum: Currencies,
       required: true,
-      input: "select"
+      input: "SelectField"
     },
     balance: { type: Number, required: true, default: 0, input: "currency" }
   },

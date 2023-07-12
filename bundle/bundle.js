@@ -1792,7 +1792,7 @@ function createTokenPair(user, tokenSecret) {
     const refreshToken = jsonwebtoken_1.default.sign({ user: user }, tokenSecret, {
         expiresIn: "2h"
     });
-    const expires = addHours(new Date(), 1);
+    const expires = Math.floor(addHours(new Date(), 1).getTime() / 1000);
     return { token, expires, refreshToken };
 }
 function addHours(date, hours) {

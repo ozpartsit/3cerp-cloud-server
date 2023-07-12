@@ -52,7 +52,7 @@ export interface IEntity {
   addresses?: IAddress[];
   groupLevels?: IGroupLevel[];
 
-  
+
 
   validatePassword(password: string): boolean;
   hashPassword(): any;
@@ -115,10 +115,7 @@ const schema = new Schema<IEntity>(
       type: String,
       input: "text"
     },
-    billingAddress: {
-      type: String,
-      input: "text"
-    },
+    billingAddress: Address,
     billingAddress2: {
       type: String,
       input: "text"
@@ -157,10 +154,7 @@ const schema = new Schema<IEntity>(
       type: String,
       input: "text"
     },
-    shippingAddress: {
-      type: String,
-      input: "text"
-    },
+    shippingAddress: Address,
     shippingAddress2: {
       type: String,
       input: "text"
@@ -191,11 +185,11 @@ const schema = new Schema<IEntity>(
       type: String,
       input: "text"
     },
-    taxNumber: { type: String, input: "text" },
+    taxNumber: { type: String, input: "TextField" },
     tax: {
       type: Number,
       default: 0,
-      input: "select"
+      input: "PercentField"
     }
   },
   options

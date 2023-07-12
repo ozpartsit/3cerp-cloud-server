@@ -1,6 +1,7 @@
 import { Schema, Model, Document } from "mongoose";
 import { cache, email } from "../app";
 import getFields from "./staticts/getFields";
+import getForm from "./staticts/getForm";
 import pdf from "./pdf/pdf"
 //loadDocument
 export async function loadDocument(this: any, id: string) {
@@ -150,6 +151,7 @@ export default function staticsMethods(schema: any, options: any) {
   schema.statics.findDocuments = findDocuments;
 
   schema.statics.getFields = getFields;
+  schema.statics.getForm = getForm;
 }
 export interface IExtendedModel {
   loadDocument(id: string): any;
@@ -161,4 +163,5 @@ export interface IExtendedModel {
   findDocuments(query: Object, options: any): any;
 
   getFields(): any;
+  getForm(): any;
 }

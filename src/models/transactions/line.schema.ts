@@ -62,33 +62,33 @@ const schema = new Schema<ILine>(
       ref: "Item",
       required: true,
       autopopulate: { select: "name displayname type _id" },
-      input: "autocomplete"
+      input: "SelectField"
     },
     description: {
       type: String,
       set: (v: any) => v.toLowerCase(),
-      input: "text"
+      input: "TextField"
     },
     price: {
       type: Number,
       default: 0,
-      input: "currency",
+      input: "CurrencyField",
       set: (v: any) => roundToPrecision(v, 2)
     },
     quantity: {
       type: Number,
       default: 1,
-      input: "integer"
+      input: "IntField"
     },
     multiplyquantity: {
       type: Number,
       default: 1,
-      input: "integer"
+      input: "IntField"
     },
-    amount: { type: Number, default: 0, input: "currency" },
-    taxAmount: { type: Number, default: 0, input: "currency" },
-    grossAmount: { type: Number, default: 0, input: "currency" },
-    weight: { type: Number, default: 0, input: "number" },
+    amount: { type: Number, default: 0, input: "CurrencyField" },
+    taxAmount: { type: Number, default: 0, input: "CurrencyField" },
+    grossAmount: { type: Number, default: 0, input: "CurrencyField" },
+    weight: { type: Number, default: 0, input: "NumberField" },
     deleted: { type: Boolean, default: false }
   },
   options

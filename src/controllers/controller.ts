@@ -215,6 +215,39 @@ export default class controller {
             return next(error);
         }
     }
+    public async form(req: Request, res: Response, next: NextFunction) {
+        let { recordtype } = req.params;
+        const model = this.setModel(recordtype);
+        try {
+            let form = await model.getForm(req.locale);
+            if (form) {
+                let fields = await model.getFields(req.locale);
+                form.sections.forEach((section: any) => {
+                    if (section.table) {
+                        section.table = fields.find((f: any) => f.field == section.table) || null;
+                    }
+                    section.cols.forEach((col: any) => {
+
+                        if (col.rows) col.rows.forEach((row: any) => {
+                            if (row) row.forEach((field: any, index: any) => {
+                                row[index] = fields.find((f: any) => f.field == field) || null;
+                                if (row[index]) {
+                                    if (row[index].type != "EmbeddedField") delete row[index].fields;
+                                    delete row[index].selects;
+                                    delete row[index].ref;
+                                }
+                            })
+                        })
+                    })
+                })
+            }
+
+
+            res.json(form);
+        } catch (error) {
+            return next(error);
+        }
+    }
     public async logs(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         const model = this.setModel(recordtype);

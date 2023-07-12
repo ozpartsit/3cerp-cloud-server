@@ -3,7 +3,7 @@ import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import printPDF from "../../utilities/pdf/pdf";
 import { IEntity } from "../entities/schema";
-//import Address from "../entities/customer/address.schema";
+import Address from "../entities/address.schema";
 import { IWarehouse } from "../warehouse.model";
 import Line, { ILine } from "./line.schema";
 
@@ -30,27 +30,28 @@ export interface ITransaction extends IExtendedDocument {
   taxAmount: number;
   taxNumber: string;
   referenceNumber: string;
-  billingName?: string;
-  billingAddressee?: string;
-  billingAddress?: string;
-  billingAddress2?: string;
-  billingZip?: string;
-  billingCity: string;
-  billingState?: string;
-  billingCountry: string;
-  billingPhone?: string;
-  billingEmail?: string;
+  memo: string;
+  // billingName?: string;
+  // billingAddressee?: string;
+  //billingAddress?: Address;
+  // billingAddress2?: string;
+  // billingZip?: string;
+  // billingCity: string;
+  // billingState?: string;
+  // billingCountry: string;
+  // billingPhone?: string;
+  // billingEmail?: string;
 
-  shippingName?: string;
-  shippingAddressee?: string;
-  shippingAddress?: string;
-  shippingAddress2?: string;
-  shippingZip?: string;
-  shippingCity: string;
-  shippingState?: string;
-  shippingCountry: string;
-  shippingPhone?: string;
-  shippingEmail?: string;
+  // shippingName?: string;
+  // shippingAddressee?: string;
+  //shippingAddress?: Address;
+  // shippingAddress2?: string;
+  // shippingZip?: string;
+  // shippingCity: string;
+  // shippingState?: string;
+  // shippingCountry: string;
+  // shippingPhone?: string;
+  // shippingEmail?: string;
   recalc(): any;
   autoName(): any;
   pdf(): any;
@@ -66,14 +67,14 @@ const TransactionSchema = {
     ref: "Company",
     required: false,
     autopopulate: true,
-    input: "autocomplete"
+    input: "SelectField"
   },
   entity: {
     type: Schema.Types.ObjectId,
     ref: "Entity",
     required: true,
     autopopulate: true,
-    input: "autocomplete",
+    input: "SelectField",
     select: true
   },
   warehouse: {
@@ -81,30 +82,30 @@ const TransactionSchema = {
     ref: "Warehouse",
     required: true,
     autopopulate: true,
-    input: "autocomplete",
+    input: "SelectField",
     default: "635fcec4dcd8d612939f7b90"
   },
-  number: { type: Number, input: "number" },
+  number: { type: Number, input: "IntField" },
   quantity: {
     type: Number,
     default: 0,
-    input: "integer",
+    input: "IntField",
     total: "lines"
   },
-  amount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
-  taxAmount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
-  grossAmount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
-  weight: { type: Number, default: 0, input: "number" },
+  amount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
+  taxAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
+  grossAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
+  weight: { type: Number, default: 0, input: "NumberField" },
   tax: {
     type: Number,
     default: 0,
-    input: "number"
+    input: "PercentField"
   },
   exchangeRate: {
     type: Number,
     required: true,
     default: 1,
-    input: "number",
+    input: "NumberField",
     precision: 4
   },
   currency: {
@@ -113,23 +114,24 @@ const TransactionSchema = {
     //get: (v: any) => Currencies.getName(v),
     enum: Currencies,
     default: "PLN",
-    input: "select",
+    input: "SelectField",
     resource: 'constants',
     constant: 'currencies',
     select: true
   },
+  memo: {
+    type: String,
+    input: "TextareaField"
+  },
   billingName: {
     type: String,
-    input: "text"
+    input: "TextField"
   },
   billingAddressee: {
     type: String,
     input: "text"
   },
-  billingAddress: {
-    type: String,
-    input: "text"
-  },
+  billingAddress: Address,
   billingAddress2: {
     type: String,
     input: "text"
@@ -168,10 +170,7 @@ const TransactionSchema = {
     type: String,
     input: "text"
   },
-  shippingAddress: {
-    type: String,
-    input: "text"
-  },
+  shippingAddress: Address,
   shippingAddress2: {
     type: String,
     input: "text"
@@ -212,13 +211,13 @@ const TransactionSchema = {
     type: String,
     default: "pendingapproval",
     resource: 'constants',
-    constant: 'currencies',
+    constant: 'statuses',
     //enum: TranStatus,
-    input: "select",
+    //input: "select",
     select: true
   },
-  taxNumber: { type: String, input: "text" },
-  referenceNumber: { type: String, input: "text" },
+  taxNumber: { type: String, input: "TextField" },
+  referenceNumber: { type: String, input: "TextField" },
 };
 const options = {
   discriminatorKey: "type",

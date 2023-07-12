@@ -13,12 +13,18 @@ export default function getFields(this: any, local: string, parent: string) {
   const virtuals: Virtuals = modelSchema.virtuals;
   Object.entries(virtuals).forEach(([key, value]) => {
     if (value && value.options.ref) {
-      // fields.push({
-      //   name: key,
-      //   ref: value.options.ref,
-      //   //instance: schematype.instance,
-      //   type: "subrecords"
-      // });
+      let field: any = {
+        field: key,
+        name: i18n.__(`${this.modelName.toLowerCase()}.${key}`),
+        ref: value.options.ref,
+        //instance: schematype.instance,
+        fieldType: "Table"
+      };
+      if (value.options.ref) {
+        let refModel: any = models[value.options.ref];
+        if (!parent) field.fields = refModel.getFields(local, key);
+      }
+      fields.push(field)
     }
   });
   //modelSchema.eachPath(async (pathname: string, schematype: any) => {
@@ -29,25 +35,41 @@ export default function getFields(this: any, local: string, parent: string) {
       ["Embedded", "Array"].includes(schematype.instance)
     ) {
       if (["Embedded", "Array"].includes(schematype.instance)) {
-        //console.log(pathname, schematype.schema);
-        // this.getFields(schematype.schema, type).forEach((field) =>
-        //   fields.push({ path: pathname, ...field })
-        // );
+        //console.log('sd', pathname,JSON.stringify(schematype));
+        let field: any = {
+          field: parent ? `${parent}.${pathname}` : pathname,
+          name: i18n.__(`${this.modelName.toLowerCase()}.${pathname}`),
+          fieldType: `${schematype.instance}Field`,
+          fields: []
+        }
+        if (!parent) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
+
+          let subfield = {
+            field: `${pathname}.${key}`,
+            name: i18n.__(`${pathname}.${key}`),
+            required: value.required,
+            ref: value.ref,
+            resource: value.resource,
+            constant: value.constant,
+            fieldType: value.input
+          }
+          if (value.input)
+            field.fields.push(subfield)
+        }
+        fields.push(field);
       } else {
         i18n.setLocale(local || "en");
-     
-        let field = {
+
+        let field: any = {
           field: parent ? `${parent}.${pathname}` : pathname,
           name: i18n.__(`${this.modelName.toLowerCase()}.${pathname}`),
           required: schematype.isRequired,
           ref: schematype.options.ref,
           resource: schematype.options.resource,
           constant: schematype.options.constant,
-          type: schematype.options.input,
+          fieldType: schematype.options.input,
           select: schematype.options.select,
-          fields: [],
           selects: schematype.options.autopopulate ? schematype.options.autopopulate.select : "",
-
         }
 
         if (schematype.options.ref) {

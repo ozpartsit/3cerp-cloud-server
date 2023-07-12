@@ -19,12 +19,12 @@ const options = {
 const schema = new Schema<IContact>(
   {
     entity: { type: Schema.Types.ObjectId },
-    name: { type: String, input: "text" },
-    firstName: { type: String, input: "text" },
-    lastName: { type: String, input: "text" },
-    email: { type: String, input: "text" },
-    phone: { type: String, input: "text" },
-    jobTitle: { type: String, input: "text" }
+    name: { type: String, input: "TextField" },
+    firstName: { type: String, input: "TextField" },
+    lastName: { type: String, input: "TextField" },
+    email: { type: String, input: "TextField" },
+    phone: { type: String, input: "TextField" },
+    jobTitle: { type: String, input: "TextField" }
   },
   options
 );
