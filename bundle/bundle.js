@@ -1736,8 +1736,13 @@ class Auth {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err)
                         res.status(500).json({ message: req.__('auth.failed_auth_token') });
-                    else
+                    else {
+                        if (value) {
+                            req.headers.user = value.user;
+                            req.headers.role = value.role;
+                        }
                         next();
+                    }
                 });
             }
             catch (err) {
@@ -1748,6 +1753,15 @@ class Auth {
             res.status(401).json({ message: req.__("auth.no_token") });
         }
     }
+    authorization(level) {
+        return (req, res, next) => {
+            //to do - dodać weryfikacje 
+            if (level < 2 || true)
+                next();
+            else
+                {}
+        };
+    }
     accessGranted(req, res, next) {
         res.status(200).json({ message: req.__("auth.access_granted") });
     }
@@ -1756,7 +1770,7 @@ class Auth {
             if (user) {
                 const valide = yield user.validatePassword(req.body.password);
                 if (valide) {
-                    const tokens = createTokenPair(user._id, this.tokenSecret);
+                    const tokens = createTokenPair(user._id, "admin", this.tokenSecret);
                     res.status(200).json(tokens);
                 }
                 else {
@@ -1774,7 +1788,7 @@ class Auth {
                     if (err)
                         res.status(500).json({ message: req.__('auth.failed_auth_token') });
                     else {
-                        const tokens = createTokenPair(value.user, this.tokenSecret);
+                        const tokens = createTokenPair(value.user, "admin", this.tokenSecret);
                         res.status(200).json(tokens);
                     }
                 });
@@ -1802,7 +1816,12 @@ class Auth {
                                     let userLoged = {
                                         name: user.name,
                                         locale: user.locale,
-                                        role: "TODO",
+                                        role: { _id: "admin", name: "Admin" },
+                                        roles: [{ _id: "admin", name: "Admin" }, { _id: "ceo", name: "CEO" }],
+                                        permissions: [
+                                            { resource: "transactions", type: "salesorder", level: "full" },
+                                            { resource: "items", type: "invitem", level: "full" },
+                                        ],
                                     };
                                     res.status(200).json({ user: userLoged });
                                 }
@@ -1821,11 +1840,11 @@ class Auth {
     }
 }
 exports["default"] = Auth;
-function createTokenPair(user, tokenSecret) {
-    const token = jsonwebtoken_1.default.sign({ user: user }, tokenSecret, {
+function createTokenPair(user, role, tokenSecret) {
+    const token = jsonwebtoken_1.default.sign({ user: user, role: role }, tokenSecret, {
         expiresIn: "1h"
     });
-    const refreshToken = jsonwebtoken_1.default.sign({ user: user }, tokenSecret, {
+    const refreshToken = jsonwebtoken_1.default.sign({ user: user, role: role }, tokenSecret, {
         expiresIn: "2h"
     });
     const expires = Math.floor(addHours(new Date(), 1).getTime() / 1000);
@@ -4794,19 +4813,18 @@ class Routes {
         });
     }
     routeUniversal(collection, controller) {
-        this.Router.route(`/${collection}/:recordtype/fields`).get(this.Auth.authenticate.bind(this.Auth), controller.fields.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/form`).get(this.Auth.authenticate.bind(this.Auth), controller.form.bind(controller));
-        this.Router.route(`/${collection}/:recordtype`).get(this.Auth.authenticate.bind(this.Auth), controller.find.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/new/create`).post(controller.add.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/fields`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.fields.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/form`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.form.bind(controller));
+        this.Router.route(`/${collection}/:recordtype`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.find.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/new/create`).post(this.Auth.authorization.bind(this.Auth), controller.add.bind(controller));
         if (controller.pdf)
-            this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(controller.pdf.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/:id/logs`)
-            .get(controller.logs.bind(controller));
+            this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(this.Auth.authorization.bind(this.Auth), controller.pdf.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/:id/logs`).get(this.Auth.authorization.bind(this.Auth), controller.logs.bind(controller));
         this.Router.route(`/${collection}/:recordtype/:id/:mode`)
-            .get(controller.get.bind(controller))
-            .put(controller.update.bind(controller))
-            .post(controller.save.bind(controller))
-            .delete(controller.delete.bind(controller));
+            .get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.get.bind(controller))
+            .put(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.update.bind(controller))
+            .post(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.save.bind(controller))
+            .delete(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.delete.bind(controller));
     }
     routeConstants() {
         // Constants
