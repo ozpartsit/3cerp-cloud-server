@@ -100,33 +100,56 @@ export default class Routes {
   public routeUniversal(collection: any, controller: any) {
     this.Router.route(`/${collection}/:recordtype/fields`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(3).bind(this.Auth) as any,
       controller.fields.bind(controller) as any
     );
     this.Router.route(`/${collection}/:recordtype/form`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization.bind(this.Auth) as any,
       controller.form.bind(controller) as any
     );
     this.Router.route(`/${collection}/:recordtype`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization.bind(this.Auth) as any,
       controller.find.bind(controller) as any
     );
 
     this.Router.route(`/${collection}/:recordtype/new/create`).post(
+      this.Auth.authorization.bind(this.Auth) as any,
       controller.add.bind(controller) as any
     );
     if (controller.pdf)
       this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(
+        this.Auth.authorization.bind(this.Auth) as any,
         controller.pdf.bind(controller) as any
       );
 
-    this.Router.route(`/${collection}/:recordtype/:id/logs`)
-      .get(controller.logs.bind(controller) as any)
+    this.Router.route(`/${collection}/:recordtype/:id/logs`).get(
+      this.Auth.authorization.bind(this.Auth) as any,
+      controller.logs.bind(controller) as any
+    );
 
     this.Router.route(`/${collection}/:recordtype/:id/:mode`)
-      .get(controller.get.bind(controller) as any)
-      .put(controller.update.bind(controller) as any)
-      .post(controller.save.bind(controller) as any)
-      .delete(controller.delete.bind(controller) as any);
+      .get(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization.bind(this.Auth) as any,
+        controller.get.bind(controller) as any
+      )
+      .put(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization.bind(this.Auth) as any,
+        controller.update.bind(controller) as any
+      )
+      .post(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization.bind(this.Auth) as any,
+        controller.save.bind(controller) as any
+      )
+      .delete(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization.bind(this.Auth) as any,
+        controller.delete.bind(controller) as any
+      );
   }
 
   public routeConstants() {

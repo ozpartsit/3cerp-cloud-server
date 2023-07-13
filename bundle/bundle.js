@@ -912,6 +912,42 @@ class controller {
             }
         });
     }
+    form(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype } = req.params;
+            const model = this.setModel(recordtype);
+            try {
+                let form = yield model.getForm(req.locale);
+                if (form) {
+                    let fields = yield model.getFields(req.locale);
+                    form.sections.forEach((section) => {
+                        if (section.table) {
+                            section.table = fields.find((f) => f.field == section.table) || null;
+                        }
+                        section.cols.forEach((col) => {
+                            if (col.rows)
+                                col.rows.forEach((row) => {
+                                    if (row)
+                                        row.forEach((field, index) => {
+                                            row[index] = fields.find((f) => f.field == field) || null;
+                                            if (row[index]) {
+                                                if (row[index].type != "EmbeddedField")
+                                                    delete row[index].fields;
+                                                delete row[index].selects;
+                                                delete row[index].ref;
+                                            }
+                                        });
+                                });
+                        });
+                    });
+                }
+                res.json(form);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
     logs(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             let { recordtype, id } = req.params;
@@ -2623,26 +2659,26 @@ const options = {
 };
 const schema = new mongoose_1.Schema({
     entity: { type: mongoose_1.Schema.Types.ObjectId },
-    name: { type: String, input: "text" },
-    addressee: { type: String, input: "text" },
-    address: { type: String, required: true, input: "text" },
-    address2: { type: String, input: "text" },
-    city: { type: String, required: true, input: "text" },
-    zip: { type: String, required: true, input: "text" },
+    name: { type: String, input: "TextField" },
+    addressee: { type: String, input: "TextField" },
+    address: { type: String, required: true, input: "TextField" },
+    address2: { type: String, input: "TextField" },
+    city: { type: String, required: true, input: "TextField" },
+    zip: { type: String, required: true, input: "TextField" },
     country: {
         type: String,
         required: true,
         resource: "constatnts",
         constant: "countries"
     },
-    phone: { type: String, input: "text" },
+    phone: { type: String, input: "TextField" },
     geoCodeHint: {
         type: String,
         get: (v) => v ? `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}` : '',
-        input: "text"
+        input: "TextField"
     },
-    latitude: { type: String, input: "text" },
-    longitude: { type: String, input: "text" }
+    latitude: { type: String, input: "TextField" },
+    longitude: { type: String, input: "TextField" }
 }, options);
 schema.method("geoCode", function (geoCodeHint) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -2697,7 +2733,7 @@ const schema = new mongoose_1.Schema({
         //get: (v: any) => Currencies.getName(v),
         enum: currencies_1.default,
         required: true,
-        input: "select"
+        input: "SelectField"
     },
     balance: { type: Number, required: true, default: 0, input: "currency" }
 }, options);
@@ -2801,12 +2837,12 @@ const options = {
 };
 const schema = new mongoose_1.Schema({
     entity: { type: mongoose_1.Schema.Types.ObjectId },
-    name: { type: String, input: "text" },
-    firstName: { type: String, input: "text" },
-    lastName: { type: String, input: "text" },
-    email: { type: String, input: "text" },
-    phone: { type: String, input: "text" },
-    jobTitle: { type: String, input: "text" }
+    name: { type: String, input: "TextField" },
+    firstName: { type: String, input: "TextField" },
+    lastName: { type: String, input: "TextField" },
+    email: { type: String, input: "TextField" },
+    phone: { type: String, input: "TextField" },
+    jobTitle: { type: String, input: "TextField" }
 }, options);
 exports["default"] = schema;
 
@@ -2837,22 +2873,26 @@ const schema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Group",
         autopopulate: true,
+        input: "SelectField"
     },
     category: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Category",
         autopopulate: true,
+        input: "SelectField"
     },
     //accounting
     terms: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Terms",
         autopopulate: true,
+        input: "SelectField"
     },
     paymentMethod: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "PaymentMethod",
         autopopulate: true,
+        input: "SelectField"
     },
 }, options);
 // schema.virtual("salesOrders", {
@@ -3024,10 +3064,7 @@ const schema = new mongoose_1.Schema({
         type: String,
         input: "text"
     },
-    billingAddress: {
-        type: String,
-        input: "text"
-    },
+    billingAddress: address_schema_1.default,
     billingAddress2: {
         type: String,
         input: "text"
@@ -3066,10 +3103,7 @@ const schema = new mongoose_1.Schema({
         type: String,
         input: "text"
     },
-    shippingAddress: {
-        type: String,
-        input: "text"
-    },
+    shippingAddress: address_schema_1.default,
     shippingAddress2: {
         type: String,
         input: "text"
@@ -3100,11 +3134,11 @@ const schema = new mongoose_1.Schema({
         type: String,
         input: "text"
     },
-    taxNumber: { type: String, input: "text" },
+    taxNumber: { type: String, input: "TextField" },
     tax: {
         type: Number,
         default: 0,
-        input: "select"
+        input: "PercentField"
     }
 }, options);
 schema.virtual("addresses", {
@@ -3430,49 +3464,48 @@ const options = {
     toObject: { virtuals: true }
 };
 const schema = new mongoose_1.Schema({
-    name: { type: String, required: true, input: "text" },
-    description: { type: String, input: "text", default: "" },
+    name: { type: String, required: true, input: "TextField" },
+    description: { type: String, input: "TextField", default: "" },
     type: {
         type: String,
         required: true,
         enum: item_types_1.default,
-        input: "select"
+        input: "SelectField"
     },
     priceGroup: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Classification",
         autopopulate: true,
         required: false,
-        input: "select"
+        input: "SelectField"
     },
     images: {
         type: [mongoose_1.Schema.Types.ObjectId],
         ref: "Storage",
         autopopulate: true,
-        input: "file"
+        input: "FileField"
     },
     coo: {
         type: String,
-        input: "select"
+        input: "SelectField"
     },
     barcode: {
         type: String,
-        input: "text"
+        input: "TextField"
     },
     weight: {
         type: Number,
-        input: "number"
+        input: "NumberField"
     },
     status: {
         type: String,
-        input: "text"
     },
     manufacturer: {
         type: String,
-        input: "text"
+        input: "TextField"
     },
-    firstSalesDate: { type: Date, input: "date" },
-    lastSalesDate: { type: Date, input: "date" },
+    firstSalesDate: { type: Date, input: "DateField" },
+    lastSalesDate: { type: Date, input: "DateField" },
 }, options);
 schema.virtual("prices", {
     ref: "Price",
@@ -4141,33 +4174,33 @@ const schema = new mongoose_1.Schema({
         ref: "Item",
         required: true,
         autopopulate: { select: "name displayname type _id" },
-        input: "autocomplete"
+        input: "SelectField"
     },
     description: {
         type: String,
         set: (v) => v.toLowerCase(),
-        input: "text"
+        input: "TextField"
     },
     price: {
         type: Number,
         default: 0,
-        input: "currency",
+        input: "CurrencyField",
         set: (v) => (0, usefull_1.roundToPrecision)(v, 2)
     },
     quantity: {
         type: Number,
         default: 1,
-        input: "integer"
+        input: "IntField"
     },
     multiplyquantity: {
         type: Number,
         default: 1,
-        input: "integer"
+        input: "IntField"
     },
-    amount: { type: Number, default: 0, input: "currency" },
-    taxAmount: { type: Number, default: 0, input: "currency" },
-    grossAmount: { type: Number, default: 0, input: "currency" },
-    weight: { type: Number, default: 0, input: "number" },
+    amount: { type: Number, default: 0, input: "CurrencyField" },
+    taxAmount: { type: Number, default: 0, input: "CurrencyField" },
+    grossAmount: { type: Number, default: 0, input: "CurrencyField" },
+    weight: { type: Number, default: 0, input: "NumberField" },
     deleted: { type: Boolean, default: false }
 }, options);
 schema.method("components", function () {
@@ -4326,7 +4359,19 @@ const line_schema_1 = __importDefault(__webpack_require__(1874));
 const lineModel = mongoose_1.models.Line.discriminator("LineSalesOrder", line_schema_1.default);
 const options = { discriminatorKey: "type", collection: "transactions" };
 const schema = new mongoose_1.Schema({
-    shippingCost: { type: Number, default: 0, input: "currency" },
+    shippingCost: { type: Number, default: 0, input: "CurrencyField" },
+    terms: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Terms",
+        autopopulate: true,
+        input: "SelectField"
+    },
+    paymentMethod: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "PaymentMethod",
+        autopopulate: true,
+        input: "SelectField"
+    },
 }, options);
 schema.virtual("lines", {
     ref: "LineSalesOrder",
@@ -4368,6 +4413,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
 const pdf_1 = __importDefault(__webpack_require__(180));
+const address_schema_1 = __importDefault(__webpack_require__(9711));
 const line_schema_1 = __importDefault(__webpack_require__(2801));
 const currencies_1 = __importDefault(__webpack_require__(7131));
 //import Countries from "../../constants/countries";
@@ -4381,14 +4427,14 @@ const TransactionSchema = {
         ref: "Company",
         required: false,
         autopopulate: true,
-        input: "autocomplete"
+        input: "SelectField"
     },
     entity: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Entity",
         required: true,
         autopopulate: true,
-        input: "autocomplete",
+        input: "SelectField",
         select: true
     },
     warehouse: {
@@ -4396,30 +4442,30 @@ const TransactionSchema = {
         ref: "Warehouse",
         required: true,
         autopopulate: true,
-        input: "autocomplete",
+        input: "SelectField",
         default: "635fcec4dcd8d612939f7b90"
     },
-    number: { type: Number, input: "number" },
+    number: { type: Number, input: "IntField" },
     quantity: {
         type: Number,
         default: 0,
-        input: "integer",
+        input: "IntField",
         total: "lines"
     },
-    amount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
-    taxAmount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
-    grossAmount: { type: Number, default: 0, input: "currency", total: "lines", select: true },
-    weight: { type: Number, default: 0, input: "number" },
+    amount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
+    taxAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
+    grossAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
+    weight: { type: Number, default: 0, input: "NumberField" },
     tax: {
         type: Number,
         default: 0,
-        input: "number"
+        input: "PercentField"
     },
     exchangeRate: {
         type: Number,
         required: true,
         default: 1,
-        input: "number",
+        input: "NumberField",
         precision: 4
     },
     currency: {
@@ -4428,23 +4474,24 @@ const TransactionSchema = {
         //get: (v: any) => Currencies.getName(v),
         enum: currencies_1.default,
         default: "PLN",
-        input: "select",
+        input: "SelectField",
         resource: 'constants',
         constant: 'currencies',
         select: true
     },
+    memo: {
+        type: String,
+        input: "TextareaField"
+    },
     billingName: {
         type: String,
-        input: "text"
+        input: "TextField"
     },
     billingAddressee: {
         type: String,
         input: "text"
     },
-    billingAddress: {
-        type: String,
-        input: "text"
-    },
+    billingAddress: address_schema_1.default,
     billingAddress2: {
         type: String,
         input: "text"
@@ -4483,10 +4530,7 @@ const TransactionSchema = {
         type: String,
         input: "text"
     },
-    shippingAddress: {
-        type: String,
-        input: "text"
-    },
+    shippingAddress: address_schema_1.default,
     shippingAddress2: {
         type: String,
         input: "text"
@@ -4527,13 +4571,13 @@ const TransactionSchema = {
         type: String,
         default: "pendingapproval",
         resource: 'constants',
-        constant: 'currencies',
+        constant: 'statuses',
         //enum: TranStatus,
-        input: "select",
+        //input: "select",
         select: true
     },
-    taxNumber: { type: String, input: "text" },
-    referenceNumber: { type: String, input: "text" },
+    taxNumber: { type: String, input: "TextField" },
+    referenceNumber: { type: String, input: "TextField" },
 };
 const options = {
     discriminatorKey: "type",
@@ -4751,6 +4795,7 @@ class Routes {
     }
     routeUniversal(collection, controller) {
         this.Router.route(`/${collection}/:recordtype/fields`).get(this.Auth.authenticate.bind(this.Auth), controller.fields.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/form`).get(this.Auth.authenticate.bind(this.Auth), controller.form.bind(controller));
         this.Router.route(`/${collection}/:recordtype`).get(this.Auth.authenticate.bind(this.Auth), controller.find.bind(controller));
         this.Router.route(`/${collection}/:recordtype/new/create`).post(controller.add.bind(controller));
         if (controller.pdf)
@@ -5870,6 +5915,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findDocuments = exports.deleteDocument = exports.updateDocument = exports.saveDocument = exports.getDocument = exports.addDocument = exports.loadDocument = void 0;
 const app_1 = __webpack_require__(3165);
 const getFields_1 = __importDefault(__webpack_require__(4140));
+const getForm_1 = __importDefault(__webpack_require__(4012));
 const pdf_1 = __importDefault(__webpack_require__(180));
 //loadDocument
 function loadDocument(id) {
@@ -6025,6 +6071,7 @@ function staticsMethods(schema, options) {
     schema.statics.deleteDocument = deleteDocument;
     schema.statics.findDocuments = findDocuments;
     schema.statics.getFields = getFields_1.default;
+    schema.statics.getForm = getForm_1.default;
 }
 exports["default"] = staticsMethods;
 
@@ -6047,12 +6094,19 @@ function getFields(local, parent) {
     const virtuals = modelSchema.virtuals;
     Object.entries(virtuals).forEach(([key, value]) => {
         if (value && value.options.ref) {
-            // fields.push({
-            //   name: key,
-            //   ref: value.options.ref,
-            //   //instance: schematype.instance,
-            //   type: "subrecords"
-            // });
+            let field = {
+                field: key,
+                name: i18n_1.default.__(`${this.modelName.toLowerCase()}.${key}`),
+                ref: value.options.ref,
+                //instance: schematype.instance,
+                fieldType: "Table"
+            };
+            if (value.options.ref) {
+                let refModel = mongoose_1.models[value.options.ref];
+                if (!parent)
+                    field.fields = refModel.getFields(local, key);
+            }
+            fields.push(field);
         }
     });
     //modelSchema.eachPath(async (pathname: string, schematype: any) => {
@@ -6060,10 +6114,28 @@ function getFields(local, parent) {
         if (schematype.options.input ||
             ["Embedded", "Array"].includes(schematype.instance)) {
             if (["Embedded", "Array"].includes(schematype.instance)) {
-                //console.log(pathname, schematype.schema);
-                // this.getFields(schematype.schema, type).forEach((field) =>
-                //   fields.push({ path: pathname, ...field })
-                // );
+                //console.log('sd', pathname,JSON.stringify(schematype));
+                let field = {
+                    field: parent ? `${parent}.${pathname}` : pathname,
+                    name: i18n_1.default.__(`${this.modelName.toLowerCase()}.${pathname}`),
+                    fieldType: `${schematype.instance}Field`,
+                    fields: []
+                };
+                if (!parent)
+                    for (const [key, value] of Object.entries(schematype.schema.tree)) {
+                        let subfield = {
+                            field: `${pathname}.${key}`,
+                            name: i18n_1.default.__(`${pathname}.${key}`),
+                            required: value.required,
+                            ref: value.ref,
+                            resource: value.resource,
+                            constant: value.constant,
+                            fieldType: value.input
+                        };
+                        if (value.input)
+                            field.fields.push(subfield);
+                    }
+                fields.push(field);
             }
             else {
                 i18n_1.default.setLocale(local || "en");
@@ -6074,9 +6146,8 @@ function getFields(local, parent) {
                     ref: schematype.options.ref,
                     resource: schematype.options.resource,
                     constant: schematype.options.constant,
-                    type: schematype.options.input,
+                    fieldType: schematype.options.input,
                     select: schematype.options.select,
-                    fields: [],
                     selects: schematype.options.autopopulate ? schematype.options.autopopulate.select : "",
                 };
                 if (schematype.options.ref) {
@@ -6095,6 +6166,85 @@ function getFields(local, parent) {
     return fields;
 }
 exports["default"] = getFields;
+
+
+/***/ }),
+
+/***/ 4012:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const i18n_1 = __importDefault(__webpack_require__(6734));
+function getForm(local, parent) {
+    return {
+        sections: [
+            {
+                name: i18n_1.default.__(`${this.modelName.toLowerCase()}.main`),
+                cols: [
+                    {
+                        name: i18n_1.default.__(`${this.modelName.toLowerCase()}.billing`),
+                        rows: [
+                            ["entity", "date"],
+                            ["billingAddress"],
+                            ["paymentMethod", "terms"]
+                        ]
+                    },
+                    {
+                        name: i18n_1.default.__(`${this.modelName.toLowerCase()}.shipping`),
+                        rows: [
+                            ["shippingAddress"],
+                            ["shippingMethod", "shippingCost"],
+                            ["deliveryTerms"]
+                        ]
+                    },
+                    {
+                        name: null,
+                        component: "GoogleMap"
+                    },
+                ]
+            },
+            {
+                name: i18n_1.default.__(`${this.modelName.toLowerCase()}.items`),
+                cols: [],
+                table: "lines"
+            },
+            {
+                name: i18n_1.default.__(`${this.modelName.toLowerCase()}.others`),
+                cols: [
+                    {
+                        name: i18n_1.default.__(`${this.modelName.toLowerCase()}.accounting`),
+                        rows: [
+                            ["company"],
+                            ["currency"],
+                            ["exchangeRate"],
+                            ["tax"],
+                            ["taxNumber"]
+                        ]
+                    },
+                    {
+                        name: i18n_1.default.__(`${this.modelName.toLowerCase()}.classification`),
+                        rows: [
+                            ["referenceNumber"],
+                            ["warehouse"]["salesRep"],
+                            ["source"]
+                        ]
+                    },
+                    {
+                        name: i18n_1.default.__(`${this.modelName.toLowerCase()}.comments`),
+                        rows: [
+                            ["memo"]
+                        ]
+                    },
+                ],
+            },
+        ]
+    };
+}
+exports["default"] = getForm;
 
 
 /***/ }),

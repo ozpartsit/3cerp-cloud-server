@@ -22,8 +22,13 @@ export default class Auth {
         jwt.verify(token, this.tokenSecret, (err, value) => {
           if (err)
             res.status(500).json({ message: req.__('auth.failed_auth_token') });
-          else
+          else {
+            if (value) {
+              req.headers.user = value.user;
+              req.headers.role = value.role;
+            }
             next();
+          }
         });
       } catch (err) {
         res.status(400).json({ message: req.__('auth.invalid_token') });
@@ -31,6 +36,19 @@ export default class Auth {
 
     } else {
       res.status(401).json({ message: req.__("auth.no_token") });
+    }
+  }
+  public authorization(level: any) {
+    return (
+      req: express.Request,
+      res: Response,
+      next: express.NextFunction
+    ) => {
+      //to do - dodać weryfikacje 
+      if (level < 2 || true)
+        next();
+      else
+        res.status(500).json({ message: req.__('auth.access_denied') });
     }
   }
   public accessGranted(
@@ -49,7 +67,7 @@ export default class Auth {
       if (user) {
         const valide = await user.validatePassword(req.body.password);
         if (valide) {
-          const tokens = createTokenPair(user._id, this.tokenSecret);
+          const tokens = createTokenPair(user._id, "admin", this.tokenSecret);
           res.status(200).json(tokens);
         } else {
           res.status(403).json({ message: req.__("auth.wrong_password") });
@@ -68,7 +86,7 @@ export default class Auth {
           if (err)
             res.status(500).json({ message: req.__('auth.failed_auth_token') });
           else {
-            const tokens = createTokenPair(value.user, this.tokenSecret);
+            const tokens = createTokenPair(value.user, "admin", this.tokenSecret);
             res.status(200).json(tokens);
           }
         });
@@ -99,7 +117,12 @@ export default class Auth {
                   let userLoged = {
                     name: user.name,
                     locale: user.locale,
-                    role: "TODO",
+                    role: { _id: "admin", name: "Admin" },
+                    roles: [{ _id: "admin", name: "Admin" }, { _id: "ceo", name: "CEO" }],
+                    permissions: [
+                      { resource: "transactions", type: "salesorder", level: "full" },
+                      { resource: "items", type: "invitem", level: "full" },
+                    ],
 
                   };
                   res.status(200).json({ user: userLoged });
@@ -118,11 +141,11 @@ export default class Auth {
   }
 }
 
-function createTokenPair(user: string, tokenSecret: string) {
-  const token = jwt.sign({ user: user }, tokenSecret, {
+function createTokenPair(user: string, role: string, tokenSecret: string) {
+  const token = jwt.sign({ user: user, role: role }, tokenSecret, {
     expiresIn: "1h"
   });
-  const refreshToken = jwt.sign({ user: user }, tokenSecret, {
+  const refreshToken = jwt.sign({ user: user, role: role }, tokenSecret, {
     expiresIn: "2h"
   });
   const expires = Math.floor(addHours(new Date(), 1).getTime() / 1000);

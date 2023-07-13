@@ -225,5 +225,6 @@
 	"salesorder.paymentMethod": "salesorder.paymentMethod",
 	"paymentmethod.name": "paymentmethod.name",
 	"paymentmethod.description": "paymentmethod.description",
-	"salesorder.memo": "salesorder.memo"
+	"salesorder.memo": "salesorder.memo",
+	"auth.access_denied": "auth.access_denied"
 }
