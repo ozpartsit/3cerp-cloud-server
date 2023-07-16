@@ -4814,17 +4814,17 @@ class Routes {
     }
     routeUniversal(collection, controller) {
         this.Router.route(`/${collection}/:recordtype/fields`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.fields.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/form`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.form.bind(controller));
-        this.Router.route(`/${collection}/:recordtype`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.find.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/new/create`).post(this.Auth.authorization.bind(this.Auth), controller.add.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/form`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.form.bind(controller));
+        this.Router.route(`/${collection}/:recordtype`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.find.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/new/create`).post(this.Auth.authorization(3).bind(this.Auth), controller.add.bind(controller));
         if (controller.pdf)
-            this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(this.Auth.authorization.bind(this.Auth), controller.pdf.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/:id/logs`).get(this.Auth.authorization.bind(this.Auth), controller.logs.bind(controller));
+            this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(this.Auth.authorization(3).bind(this.Auth), controller.pdf.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/:id/logs`).get(this.Auth.authorization(3).bind(this.Auth), controller.logs.bind(controller));
         this.Router.route(`/${collection}/:recordtype/:id/:mode`)
-            .get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.get.bind(controller))
-            .put(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.update.bind(controller))
-            .post(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.save.bind(controller))
-            .delete(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization.bind(this.Auth), controller.delete.bind(controller));
+            .get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.get.bind(controller))
+            .put(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.update.bind(controller))
+            .post(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.save.bind(controller))
+            .delete(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.delete.bind(controller));
     }
     routeConstants() {
         // Constants

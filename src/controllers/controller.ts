@@ -96,9 +96,7 @@ export default class controller {
             let result = await model.findDocuments(query, options);
             let total = await model.count(query);
             // get fields
-            let fields = model.getFields(req.locale).filter((field: any) => options.select[field.field]).map(field => {
-                return { field: field.field, name: req.__(`${req.params.recordtype}.${field.field}`), type: field.type, resource: field.resource }
-            })
+            let fields = model.getFields(req.locale).filter((field: any) => options.select[field.field])
             for (let index in result) {
                 result[index] = await result[index].constantTranslate(req.locale);
 

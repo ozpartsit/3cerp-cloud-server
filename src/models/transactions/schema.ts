@@ -60,8 +60,8 @@ interface ITransactionModel extends Model<ITransaction>, IExtendedModel { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const TransactionSchema = {
-  name: { type: String, input: "text", set: (v: any) => v.toLowerCase(), select: true },
-  date: { type: Date, input: "date", required: true, select: true },
+  name: { type: String, input: "TextField", set: (v: any) => v.toLowerCase(), select: true },
+  date: { type: Date, input: "DateField", required: true, select: true },
   company: {
     type: Schema.Types.ObjectId,
     ref: "Company",
