@@ -10,6 +10,7 @@ export default class Auth {
   constructor() {
     this.tokenSecret = process.env.TOKEN_SECRET || "";
   }
+  //Weryfikuje czy token istnieje i jest aktywny 
   public authenticate(
     req: express.Request,
     res: Response,
@@ -20,9 +21,10 @@ export default class Auth {
     if (token) {
       try {
         jwt.verify(token, this.tokenSecret, (err, value) => {
-          if (err)
+          if (err) {
+            // token wygasł lub jest niepoprawny
             res.status(500).json({ message: req.__('auth.failed_auth_token') });
-          else {
+          } else {
             if (value) {
               req.headers.user = value.user;
               req.headers.role = value.role;
@@ -31,13 +33,17 @@ export default class Auth {
           }
         });
       } catch (err) {
+        // token wygasł lub jest niepoprawny
         res.status(400).json({ message: req.__('auth.invalid_token') });
       }
 
     } else {
+      // Brak tokena
       res.status(401).json({ message: req.__("auth.no_token") });
     }
   }
+
+  // weryfikuje uprawnienia do danego zasobu
   public authorization(level: any) {
     return (
       req: express.Request,
@@ -51,6 +57,8 @@ export default class Auth {
         res.status(500).json({ message: req.__('auth.access_denied') });
     }
   }
+
+  // potwierdzenie przyznania dostępu
   public accessGranted(
     req: express.Request,
     res: Response,
@@ -58,6 +66,10 @@ export default class Auth {
   ) {
     res.status(200).json({ message: req.__("auth.access_granted") });
   }
+
+  // metoda logowania użytkownika
+  // na podstawie pary email + hasło nadaje token
+  // opcjonalnie rola
   public login(
     req: express.Request,
     res: Response,
@@ -67,14 +79,26 @@ export default class Auth {
       if (user) {
         const valide = await user.validatePassword(req.body.password);
         if (valide) {
-          const tokens = createTokenPair(user._id, "admin", this.tokenSecret);
+          if (!(user.roles || []).includes(req.body.role || user.role)) {
+            // użytkownik nie ma uprawnień do tej roli
+            res.status(403).json({ message: req.__("auth.wrong_role") });
+          }
+
+          const tokens = createTokenPair(user._id, req.body.role || user.role, this.tokenSecret);
+          // zwraca parę tokenów
           res.status(200).json(tokens);
         } else {
+          // hasło nie pasuje do emaila
           res.status(403).json({ message: req.__("auth.wrong_password") });
         }
-      } else res.status(404).json({ message: req.__("auth.user_not_exist") });
+      } else {
+        // nie istnieje dostęp dla użytkownika o podanym emailu
+        res.status(404).json({ message: req.__("auth.user_not_exist") });
+      }
     });
   }
+
+  // zwraca nową parę tkenów na postawie refreshToken
   public refreshToken(
     req: express.Request,
     res: Response,
@@ -83,21 +107,26 @@ export default class Auth {
     if (req.body.refreshToken) {
       try {
         jwt.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
-          if (err)
+          if (err) {
+            // refreshToken wygasł lub jest błędny
             res.status(500).json({ message: req.__('auth.failed_auth_token') });
-          else {
-            const tokens = createTokenPair(value.user, "admin", this.tokenSecret);
+          } else {
+            const tokens = createTokenPair(value.user, value.role, this.tokenSecret);
             res.status(200).json(tokens);
           }
         });
       } catch (err) {
+        // refreshToken wygasł lub jest błędny
         res.status(400).json({ message: req.__('auth.invalid_token') });
       }
 
     } else {
+      // brak tokena w body
       res.status(401).json({ message: req.__("auth.no_token") });
     }
   }
+
+  // zwraca dane zalogowanego użytkownika
   public getUser(
     req: express.Request,
     res: Response,
@@ -108,233 +137,44 @@ export default class Auth {
     if (token) {
       try {
         jwt.verify(token, this.tokenSecret, (err, value) => {
-          if (err)
+          if (err) {
+            // token nieważny lub nieprawidłowy
             res.status(500).json({ message: req.__('auth.failed_auth_token') });
-          else {
+          } else {
             if (value && value.user) {
               Entity.findOne({ _id: value.user }).then(async (user) => {
                 if (user) {
                   let userLoged = {
+                    _id: user._id,
+                    account: "3cerpcloud",
                     name: user.name,
+                    email: user.email,
+                    firstName: "Łukasz",
+                    lastName: "Śpiewak",
+                    initials: "ŁŚ",
+                    jobTitle: "Administrator",
+                    department: "IT",
+                    company: "3C ERP Sp. z o. o.",
+                    lastLoginDate: new Date('2023-07-26'),
+                    lastAuthDate: new Date('2023-07-26'),
                     locale: user.locale,
                     role: { _id: "admin", name: "Admin" },
-                    roles: [{ _id: "admin", name: "Admin" }, { _id: "ceo", name: "CEO" }],
-                    permissions: [
-                      { resource: "transactions", type: "salesorder", level: "full" },
-                      { resource: "items", type: "invitem", level: "full" },
-                    ],
+                    roles: [{ _id: "admin", name: "Admin" }, { _id: "accounts", name: "Accounts" }],
                   };
-                  const navigation = [
-                    {
-                      icon: "mdi-clipboard-list-outline",
-                      items: [
-                        {
-                          title: "Sales Orders",
-                          link: "/transactions/salesorder",
-                          resource: "transactions",
-                          type: "salesorder",
-                        },
-                        {
-                          title: "Invoices",
-                          link: "/transactions/invoice",
-                          resource: "transactions",
-                          type: "salesorder",
-                        },
-                        { title: "Correction Notes" },
-                      ],
-                      title: "Sales Management",
-                    },
-                    {
-                      icon: "mdi-dolly",
-                      items: [
-                        {
-                          title: "Purchase Orders",
-                          link: "/transactions/purchaseorder",
-                          resource: "transactions",
-                          type: "purchaseorder",
-                        },
-                        //{ title: "Deliveries" },
-                        { title: "Item Receipts" },
-                        {
-                          title: "Shipping Methods",
-                        },
-                      ],
-                      title: "Procurement",
-                    },
-                    {
-                      icon: "mdi-warehouse",
-                      items: [
-                        {
-                          title: "Item Fulfillments",
-                          link: "/transactions/itemfulfillment",
-                          resource: "transactions",
-                          type: "itemfulfillment",
-                        },
-                        //{ title: "Inventory Transfer" },
-                        {
-                          title: "Inventory Adjustment",
-                        },
-                      ],
-                      title: "Warehousing",
-                    },
-                    {
-                      icon: "mdi-bank",
-                      items: [
-                        { title: "Exchange Rates" },
-                        { title: "Payments" },
-                        { title: "Refunds" },
-                        {
-                          title: "Payment Methods",
-                          link: "/accounting/paymentmethod",
-                          resource: "accounting",
-                          type: "paymentmethod",
-                        },
-                        {
-                          title: "Terms",
-                          link: "/accounting/terms",
-                          resource: "accounting",
-                          type: "terms",
-                        },
-                      ],
-                      title: "Accounting",
-                    },
-                    {
-                      icon: "mdi-text-account",
-                      items: [
-                        { title: "Vendors" },
-                        {
-                          title: "Customers",
-                          link: "/entities/customer",
-                          resource: "entities",
-                          type: "customer",
-                        },
-                      ],
-                      title: "Entities",
-                    },
-                    {
-                      icon: "mdi-format-list-checkbox",
-                      items: [
-                        {
-                          title: "Inventory Items",
-                          link: "/items/invitem",
-                          resource: "items",
-                          type: "invitem",
-                        },
-                        { title: "Assembly Items" },
-                        { title: "Kits" },
-                      ],
-                      title: "Items",
-                    },
-                    {
-                      icon: "mdi-storefront",
-                      items: [{ title: "Online Store" }, { title: "Marketplace" }],
-                      title: "Sales Channel",
-                    },
-                    {
-                      icon: "mdi-calendar-check",
-                      items: [
-                        {
-                          title: "Calendars",
-                          link: "/activities/calendar",
-                          resource: "activities",
-                          type: "calendar",
-                        },
-                        {
-                          title: "Project Boards",
-                          link: "/activities/project",
-                          resource: "activities",
-                          type: "project",
-                        },
-                      ],
-                      title: "Activities",
-                    },
-                    {
-                      icon: "mdi-format-list-group",
-                      items: [
-                        {
-                          title: "Price Levels",
-                          link: "/classifications/pricelevel",
-                          resource: "classifications",
-                          type: "pricelevel",
-                        },
-                        {
-                          title: "Price Groups",
-                          link: "/classifications/pricegroup",
-                          resource: "classifications",
-                          type: "pricegroup",
-                        },
-                        {
-                          title: "Groups",
-                          link: "/classifications/group",
-                          resource: "classifications",
-                          type: "group",
-                        },
-                        {
-                          title: "Categories",
-                          link: "/classifications/category",
-                          resource: "classifications",
-                          type: "category",
-                        },
-                      ],
-                      title: "Classifications",
-                    },
-                    {
-                      icon: "mdi-email-fast-outline",
-                      items: [
-                        {
-                          title: "E-Mail Addresses",
-                          link: "/emails/email",
-                          resource: "emails",
-                          type: "email",
-                        },
-                        {
-                          title: "Newsletters",
-                          // link: "/marketing/newsletter/status",
-                        },
-                        {
-                          title: "Email Templates",
-                          //link: "/templates/emailtemplate/status",
-                        },
-                        {
-                          title: "Promotions",
-                          //link: "/marketing/promotion/status",
-                        },
-                      ],
-                      title: "Marketing",
-                    },
-                    {
-                      icon: "mdi-chart-timeline",
-                      items: [
-                        {
-                          title: "Transaction Reports",
-                          link: "/reports/report",
-                          resource: "reports",
-                          type: "report",
-                        },
-                        {
-                          title: "Inventory Reports",
-                          // link: "/marketing/newsletter/status",
-                        },
-                        {
-                          title: "Customer Reports",
-                          //link: "/templates/emailtemplate/status",
-                        },
-                      ],
-                      title: "Reports",
-                    },
-                  ]
 
-                  res.status(200).json({ user: userLoged, navigation });
+                  res.status(200).json({ user: userLoged });
                 }
               })
             }
           }
         });
       } catch (err) {
+        // token nieważny lub nieprawidłowy
         res.status(400).json({ message: req.__('auth.invalid_token') });
       }
 
     } else {
+      // brak Tokena
       res.status(401).json({ message: req.__("auth.no_token") });
     }
   }
@@ -345,10 +185,10 @@ function createTokenPair(user: string, role: string, tokenSecret: string) {
     expiresIn: "1h"
   });
   const refreshToken = jwt.sign({ user: user, role: role }, tokenSecret, {
-    expiresIn: "2h"
+    expiresIn: "12h"
   });
   const expires = Math.floor(addHours(new Date(), 1).getTime() / 1000);
-  return { token, expires, refreshToken }
+  return { type: "Bearer", token, expires, refreshToken }
 }
 
 function addHours(date: Date, hours: number) {

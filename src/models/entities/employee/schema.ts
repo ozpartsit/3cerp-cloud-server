@@ -7,7 +7,7 @@ export interface IEmployee extends IEntity {
   company: ICompany;
   jobTitle?: string;
   //avatar?: IStorage;
-  role: IRole;
+  //role: IRole;
 }
 
 const options = { discriminatorKey: "type", collection: "entities" };
@@ -16,7 +16,7 @@ const schema = new Schema<IEmployee>(
     jobTitle: { type: String, input: "text" },
     //avatar: { type: Storage, input: "file" },
     company: { type: Company, input: "select" },
-    role: { type: Role, input: "select" }
+    //role: { type: Role, input: "select" }
   },
   options
 );

@@ -780,9 +780,7 @@ class controller {
                 let result = yield model.findDocuments(query, options);
                 let total = yield model.count(query);
                 // get fields
-                let fields = model.getFields(req.locale).filter((field) => options.select[field.field]).map(field => {
-                    return { field: field.field, name: req.__(`${req.params.recordtype}.${field.field}`), type: field.type, resource: field.resource };
-                });
+                let fields = model.getFields(req.locale).filter((field) => options.select[field.field]);
                 for (let index in result) {
                     result[index] = yield result[index].constantTranslate(req.locale);
                 }
@@ -1823,7 +1821,206 @@ class Auth {
                                             { resource: "items", type: "invitem", level: "full" },
                                         ],
                                     };
-                                    res.status(200).json({ user: userLoged });
+                                    const navigation = [
+                                        {
+                                            icon: "mdi-clipboard-list-outline",
+                                            items: [
+                                                {
+                                                    title: "Sales Orders",
+                                                    link: "/transactions/salesorder",
+                                                    resource: "transactions",
+                                                    type: "salesorder",
+                                                },
+                                                {
+                                                    title: "Invoices",
+                                                    link: "/transactions/invoice",
+                                                    resource: "transactions",
+                                                    type: "salesorder",
+                                                },
+                                                { title: "Correction Notes" },
+                                            ],
+                                            title: "Sales Management",
+                                        },
+                                        {
+                                            icon: "mdi-dolly",
+                                            items: [
+                                                {
+                                                    title: "Purchase Orders",
+                                                    link: "/transactions/purchaseorder",
+                                                    resource: "transactions",
+                                                    type: "purchaseorder",
+                                                },
+                                                //{ title: "Deliveries" },
+                                                { title: "Item Receipts" },
+                                                {
+                                                    title: "Shipping Methods",
+                                                },
+                                            ],
+                                            title: "Procurement",
+                                        },
+                                        {
+                                            icon: "mdi-warehouse",
+                                            items: [
+                                                {
+                                                    title: "Item Fulfillments",
+                                                    link: "/transactions/itemfulfillment",
+                                                    resource: "transactions",
+                                                    type: "itemfulfillment",
+                                                },
+                                                //{ title: "Inventory Transfer" },
+                                                {
+                                                    title: "Inventory Adjustment",
+                                                },
+                                            ],
+                                            title: "Warehousing",
+                                        },
+                                        {
+                                            icon: "mdi-bank",
+                                            items: [
+                                                { title: "Exchange Rates" },
+                                                { title: "Payments" },
+                                                { title: "Refunds" },
+                                                {
+                                                    title: "Payment Methods",
+                                                    link: "/accounting/paymentmethod",
+                                                    resource: "accounting",
+                                                    type: "paymentmethod",
+                                                },
+                                                {
+                                                    title: "Terms",
+                                                    link: "/accounting/terms",
+                                                    resource: "accounting",
+                                                    type: "terms",
+                                                },
+                                            ],
+                                            title: "Accounting",
+                                        },
+                                        {
+                                            icon: "mdi-text-account",
+                                            items: [
+                                                { title: "Vendors" },
+                                                {
+                                                    title: "Customers",
+                                                    link: "/entities/customer",
+                                                    resource: "entities",
+                                                    type: "customer",
+                                                },
+                                            ],
+                                            title: "Entities",
+                                        },
+                                        {
+                                            icon: "mdi-format-list-checkbox",
+                                            items: [
+                                                {
+                                                    title: "Inventory Items",
+                                                    link: "/items/invitem",
+                                                    resource: "items",
+                                                    type: "invitem",
+                                                },
+                                                { title: "Assembly Items" },
+                                                { title: "Kits" },
+                                            ],
+                                            title: "Items",
+                                        },
+                                        {
+                                            icon: "mdi-storefront",
+                                            items: [{ title: "Online Store" }, { title: "Marketplace" }],
+                                            title: "Sales Channel",
+                                        },
+                                        {
+                                            icon: "mdi-calendar-check",
+                                            items: [
+                                                {
+                                                    title: "Calendars",
+                                                    link: "/activities/calendar",
+                                                    resource: "activities",
+                                                    type: "calendar",
+                                                },
+                                                {
+                                                    title: "Project Boards",
+                                                    link: "/activities/project",
+                                                    resource: "activities",
+                                                    type: "project",
+                                                },
+                                            ],
+                                            title: "Activities",
+                                        },
+                                        {
+                                            icon: "mdi-format-list-group",
+                                            items: [
+                                                {
+                                                    title: "Price Levels",
+                                                    link: "/classifications/pricelevel",
+                                                    resource: "classifications",
+                                                    type: "pricelevel",
+                                                },
+                                                {
+                                                    title: "Price Groups",
+                                                    link: "/classifications/pricegroup",
+                                                    resource: "classifications",
+                                                    type: "pricegroup",
+                                                },
+                                                {
+                                                    title: "Groups",
+                                                    link: "/classifications/group",
+                                                    resource: "classifications",
+                                                    type: "group",
+                                                },
+                                                {
+                                                    title: "Categories",
+                                                    link: "/classifications/category",
+                                                    resource: "classifications",
+                                                    type: "category",
+                                                },
+                                            ],
+                                            title: "Classifications",
+                                        },
+                                        {
+                                            icon: "mdi-email-fast-outline",
+                                            items: [
+                                                {
+                                                    title: "E-Mail Addresses",
+                                                    link: "/emails/email",
+                                                    resource: "emails",
+                                                    type: "email",
+                                                },
+                                                {
+                                                    title: "Newsletters",
+                                                    // link: "/marketing/newsletter/status",
+                                                },
+                                                {
+                                                    title: "Email Templates",
+                                                    //link: "/templates/emailtemplate/status",
+                                                },
+                                                {
+                                                    title: "Promotions",
+                                                    //link: "/marketing/promotion/status",
+                                                },
+                                            ],
+                                            title: "Marketing",
+                                        },
+                                        {
+                                            icon: "mdi-chart-timeline",
+                                            items: [
+                                                {
+                                                    title: "Transaction Reports",
+                                                    link: "/reports/report",
+                                                    resource: "reports",
+                                                    type: "report",
+                                                },
+                                                {
+                                                    title: "Inventory Reports",
+                                                    // link: "/marketing/newsletter/status",
+                                                },
+                                                {
+                                                    title: "Customer Reports",
+                                                    //link: "/templates/emailtemplate/status",
+                                                },
+                                            ],
+                                            title: "Reports",
+                                        },
+                                    ];
+                                    res.status(200).json({ user: userLoged, navigation });
                                 }
                             }));
                         }
@@ -4439,8 +4636,8 @@ const currencies_1 = __importDefault(__webpack_require__(7131));
 const transaction_types_1 = __importDefault(__webpack_require__(7003));
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 const TransactionSchema = {
-    name: { type: String, input: "text", set: (v) => v.toLowerCase(), select: true },
-    date: { type: Date, input: "date", required: true, select: true },
+    name: { type: String, input: "TextField", set: (v) => v.toLowerCase(), select: true },
+    date: { type: Date, input: "DateField", required: true, select: true },
     company: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Company",

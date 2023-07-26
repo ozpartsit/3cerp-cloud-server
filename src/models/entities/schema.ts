@@ -20,6 +20,8 @@ export interface IEntity {
   email?: string;
   password?: string;
   locale?: string;
+  role?: string;
+  roles?: string[];
   salesRep: Schema.Types.ObjectId;
   warehouse: Schema.Types.ObjectId;
   currency?: string;
@@ -83,8 +85,10 @@ const schema = new Schema<IEntity>(
       default: "customer",
       input: "select"
     },
-    password: { type: String, input: "password" },
+    password: { type: String, input: "PasswordField" },
     locale: { type: String, default: "en" },
+    role: { type: String, default: "admin" },
+    roles: { type: [String] },
     salesRep: {
       type: Schema.Types.ObjectId,
       ref: "Entity",
