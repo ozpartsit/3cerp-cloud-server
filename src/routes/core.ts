@@ -135,7 +135,7 @@ export default class Routes {
         this.Auth.authorization(3).bind(this.Auth) as any,
         controller.get.bind(controller) as any
       )
-      .put(
+      .patch(
         this.Auth.authenticate.bind(this.Auth) as any,
         this.Auth.authorization(3).bind(this.Auth) as any,
         controller.update.bind(controller) as any
@@ -177,7 +177,7 @@ export default class Routes {
 
     this.Router.route("/classifications/:recordtype/:id/:mode")
       .get(this.classificationController.get.bind(this.classificationController) as any)
-      .put(this.classificationController.update.bind(this.classificationController) as any)
+      .patch(this.classificationController.update.bind(this.classificationController) as any)
       .post(this.classificationController.save.bind(this.classificationController) as any)
       .delete(this.classificationController.delete.bind(this.classificationController) as any);
   }
@@ -205,7 +205,7 @@ export default class Routes {
 
     this.Router.route("/transactions/:recordtype/:id/:mode")
       .get(this.transactionController.get.bind(this.transactionController) as any)
-      .put(this.transactionController.update.bind(this.transactionController) as any)
+      .patch(this.transactionController.update.bind(this.transactionController) as any)
       .post(this.transactionController.save.bind(this.transactionController) as any)
       .delete(this.transactionController.delete.bind(this.transactionController) as any);
   }
@@ -228,7 +228,7 @@ export default class Routes {
 
     this.Router.route("/items/:recordtype/:id/:mode")
       .get(this.itemController.get.bind(this.itemController))
-      .put(this.itemController.update.bind(this.itemController))
+      .patch(this.itemController.update.bind(this.itemController))
       .post(this.itemController.save.bind(this.itemController) as any)
       .delete(this.itemController.delete.bind(this.itemController));
   }
@@ -247,7 +247,7 @@ export default class Routes {
     );
     this.Router.route("/activities/:recordtype/:id/:mode")
       .get(this.activityController.get.bind(this.activityController))
-      .put(this.activityController.update.bind(this.activityController))
+      .patch(this.activityController.update.bind(this.activityController))
       .post(this.activityController.save.bind(this.activityController) as any)
       .delete(this.activityController.delete.bind(this.activityController));
   }
@@ -271,7 +271,7 @@ export default class Routes {
 
     this.Router.route("/entities/:recordtype/:id/:mode")
       .get(this.entityController.get.bind(this.entityController) as any)
-      .put(this.entityController.update.bind(this.entityController) as any)
+      .patch(this.entityController.update.bind(this.entityController) as any)
       .post(this.entityController.save.bind(this.entityController) as any)
       .delete(this.entityController.delete.bind(this.entityController) as any);
   }
@@ -288,7 +288,7 @@ export default class Routes {
 
     this.Router.route("/websites/:recordtype/:id/:mode")
       .get(this.websiteController.get.bind(this.websiteController) as any)
-      .put(this.websiteController.update.bind(this.websiteController) as any)
+      .patch(this.websiteController.update.bind(this.websiteController) as any)
       .post(this.websiteController.save.bind(this.websiteController) as any)
       .delete(this.websiteController.delete.bind(this.websiteController) as any);
   }
@@ -308,7 +308,7 @@ export default class Routes {
 
     this.Router.route("/emails/:recordtype/:id/:mode")
       .get(this.emailController.get.bind(this.emailController) as any)
-      .put(this.emailController.update.bind(this.emailController) as any)
+      .patch(this.emailController.update.bind(this.emailController) as any)
       .post(this.emailController.save.bind(this.emailController) as any)
       .delete(this.emailController.delete.bind(this.emailController) as any);
   }
@@ -330,7 +330,7 @@ export default class Routes {
     // );
 
     this.Router.route("/settings/:recordtype/:id/:mode?")
-      .put(this.settingController.update.bind(this.settingController) as any)
+      .patch(this.settingController.update.bind(this.settingController) as any)
     // .get(this.settingController.get.bind(this.settingController) as any)
 
     //   .post(this.settingController.save.bind(this.settingController) as any)
@@ -357,7 +357,7 @@ export default class Routes {
       .get(this.reportController.results.bind(this.reportController) as any)
 
     this.Router.route("/reports/:recordtype/:id/:mode?")
-      .put(this.reportController.update.bind(this.reportController) as any)
+      .patch(this.reportController.update.bind(this.reportController) as any)
       .get(this.reportController.get.bind(this.reportController) as any)
       .post(this.reportController.save.bind(this.reportController) as any)
       .delete(this.reportController.delete.bind(this.reportController) as any);
@@ -423,7 +423,7 @@ export default class Routes {
     );
     this.Router.route("/accounting/:recordtype/:id/:mode")
       .get(this.accountingController.get.bind(this.accountingController))
-      .put(this.accountingController.update.bind(this.accountingController))
+      .patch(this.accountingController.update.bind(this.accountingController))
       .post(this.accountingController.save.bind(this.accountingController) as any)
       .delete(this.accountingController.delete.bind(this.accountingController));
   }
