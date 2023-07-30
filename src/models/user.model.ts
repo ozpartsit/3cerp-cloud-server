@@ -9,7 +9,9 @@ export interface IUser extends IExtendedDocument {
     firstName: string;
     lastName: string;
     jobTitle: string;
+    avatar: Schema.Types.ObjectId;
     department: string;
+    initials: string;
     lastLoginDate: Date;
     lastAuthDate: Date;
     type: string;
@@ -48,6 +50,12 @@ const schema = new Schema<IUser>(
             type: String,
             input: "TextField"
         },
+        avatar: {
+            type: Schema.Types.ObjectId,
+            ref: "Storage",
+            autopopulate: true,
+            input: "FileField"
+        },
         department: {
             type: String,
             input: "TextField"
@@ -73,7 +81,6 @@ schema.virtual('initials').get(function (this: IUser) {
         return `${this.firstName[0]}${this.lastName[0]}`;
     else return "";
 });
-
 schema.virtual("accessess", {
     ref: "Access",
     localField: "_id",

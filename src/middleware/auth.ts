@@ -89,7 +89,7 @@ export default class Auth {
                 res.status(403).json({ error: { code: "auth.wrong_role", message: req.__("auth.wrong_role") } });
               }
               // aktualizacja daty ostatniego logowania
-              User.findByIdAndUpdate( user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec()
+              User.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec()
 
               const tokens = createTokenPair(user._id.toString(), req.body.role || user.role, this.tokenSecret);
               // zwraca parę tokenów
@@ -158,25 +158,26 @@ export default class Auth {
             res.status(500).json({ error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
           } else {
             if (value && value.user) {
-              console.log(value.user)
               User.findOne({ _id: value.user }).then(async (user) => {
                 if (user) {
+                  await user.populate("avatar","name path")
                   let userLoged = {
                     _id: user._id,
                     account: "3cerpcloud",
                     name: user.name,
                     email: user.email,
-                    firstName: "Łukasz",
-                    lastName: "Śpiewak",
-                    initials: "ŁŚ",
-                    jobTitle: "Administrator",
-                    department: "IT",
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    initials: user.initials,
+                    jobTitle: user.jobTitle,
+                    department: user.department,
                     company: "3C ERP Sp. z o. o.",
                     lastLoginDate: new Date('2023-07-26'),
                     lastAuthDate: new Date('2023-07-26'),
                     locale: user.locale,
-                    role: { _id: "admin", name: "Admin" },
-                    roles: [{ _id: "admin", name: "Admin" }, { _id: "accounts", name: "Accounts" }],
+                    avatar: user.avatar
+                    // role: { _id: "admin", name: "Admin" },
+                    // roles: [{ _id: "admin", name: "Admin" }, { _id: "accounts", name: "Accounts" }],
                   };
 
                   res.status(200).json({ user: userLoged });

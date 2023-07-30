@@ -147,10 +147,10 @@ export default class Routes {
   public routeFiles(controller) {
     // Files
     this.Router.route("/files/upload/:path*?").post(
+      this.Auth.authenticate.bind(this.Auth) as any,
       controller.upload.bind(controller) as any
     );
     this.Router.route("/files/:path*?").get(
-      this.Auth.authenticate.bind(this.Auth) as any,
       controller.find.bind(controller) as any
     );
 
