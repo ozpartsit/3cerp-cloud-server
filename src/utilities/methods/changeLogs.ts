@@ -7,12 +7,11 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
   if (this.isModified()) {
     let selects = this.directModifiedPaths();
     //get original document if exists (only changed fields)
-    let originalDoc = models[this.constructor.name];
-    originalDoc.findById(this.id, selects);
+    //console.log(this.type, this.constructor,selects)
+    let originalDoc = await models[this.type].findById(this.id, selects);
     if (originalDoc) {
       selects.forEach((field: string) => {
-        let ref = this[field] && this[field].constructor ? this[field].constructor.modelName : null;
-
+        let ref = this[field] && this[field].type ? this[field].constructor.modelName : null;
         this.depopulate();
         if ((this[field]).toString() !== (originalDoc[field]).toString()) {
           let changeLog = new Changelog(

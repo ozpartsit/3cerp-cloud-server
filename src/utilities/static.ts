@@ -33,7 +33,6 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 //loadDocument
 export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, id: string): Promise<T | null> {
   let doc = await this.findById(id);
-
   if (doc) {
     await doc.virtualPopulate();
     await doc.validateVirtuals(false);
@@ -105,10 +104,11 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
       document = await document.saveDocument();
       return { document, msg, saved: true };
     } else {
-      await document.recalcDocument();
+      document.recalcDocument();
+      console.log(document)
       return { document, msg, saved: false };
     }
-  }
+  } else return null;
 }
 
 export async function deleteDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string) {

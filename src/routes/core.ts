@@ -11,6 +11,7 @@ import FilesController from "../controllers/files";
 import HostingController from "../controllers/hosting";
 import EmailController from "../controllers/emails";
 
+import User from "../models/user.model";
 import shop, { IShop } from "../models/shop.model";
 
 import { StorageTypes } from "../models/storages/model";
@@ -34,6 +35,8 @@ export default class Routes {
 
   public start(app: express.Application): void {
     console.log("Start Routing");
+    //Users
+    this.routeUniversal("users", new Controller(User))
 
     //Storage
     Object.values(StorageTypes).forEach(storage => {

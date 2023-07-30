@@ -160,10 +160,9 @@ export default class Auth {
             if (value && value.user) {
               User.findOne({ _id: value.user }).then(async (user) => {
                 if (user) {
-                  await user.populate("avatar","name path")
+                  await user.populate("avatar", "name path")
                   let userLoged = {
                     _id: user._id,
-                    account: "3cerpcloud",
                     name: user.name,
                     email: user.email,
                     firstName: user.firstName,
@@ -172,15 +171,17 @@ export default class Auth {
                     jobTitle: user.jobTitle,
                     department: user.department,
                     company: "3C ERP Sp. z o. o.",
-                    lastLoginDate: new Date('2023-07-26'),
-                    lastAuthDate: new Date('2023-07-26'),
+                    lastLoginDate: user.lastLoginDate,
+                    lastAuthDate: user.lastAuthDate,
                     locale: user.locale,
-                    avatar: user.avatar
+                    avatar: user.avatar,
+                    resource: user.resource,
+                    type: user.type
                     // role: { _id: "admin", name: "Admin" },
                     // roles: [{ _id: "admin", name: "Admin" }, { _id: "accounts", name: "Accounts" }],
                   };
 
-                  res.status(200).json({ user: userLoged });
+                  res.status(200).json({ user: userLoged, token: token, role: value.role, account: "3cerpcloud" });
                 } else {
                   // user nie istnieje
                   res.status(404).json({ error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });

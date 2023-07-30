@@ -13,6 +13,7 @@ import { IExtendedModel } from "../utilities//static";
 export interface IExtendedDocument extends Document {
   deleted: boolean;
   resource: string;
+  type: string;
   setValue: (field: string, value: any, list: string, subrecord: string) => void;
   changeLogs: (document?: any, list?: string) => Promise<void>;
   virtualPopulate: () => Promise<void>;
@@ -61,7 +62,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
     await this.validateVirtuals(true);
     await this.changeLogs();
     let document = await this.save();
-    cache.del(document._id);
+    cache.del(document._id.toString());
 
     return document;
   })
