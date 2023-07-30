@@ -1,11 +1,14 @@
 import Changelog from "../../models/changelog.model";
-export default async function changeLogs(this: any, document: any, list: string) {
+import { Document, models } from 'mongoose';
+import { IExtendedDocument } from "../methods"
+export default async function changeLogs<T extends IExtendedDocument>(this: T, document?: any, list?: string) {
 
   //zmodyfikować by przed zapisaniem pobierało oryginalny obiekt i zapisywalo zmiany
-  if (this.isModified) {
+  if (this.isModified()) {
     let selects = this.directModifiedPaths();
     //get original document if exists (only changed fields)
-    let originalDoc = await this.constructor.findById(this.id, selects);
+    let originalDoc = models[this.constructor.name];
+    originalDoc.findById(this.id, selects);
     if (originalDoc) {
       selects.forEach((field: string) => {
         let ref = this[field] && this[field].constructor ? this[field].constructor.modelName : null;

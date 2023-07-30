@@ -15,7 +15,7 @@ export interface IChangelog extends IExtendedDocument {
     ref: string
 }
 
-interface IChangelogModel extends Model<IChangelog>, IExtendedModel { }
+interface IChangelogModel extends Model<IChangelog>, IExtendedModel<IChangelog> { }
 
 export const schema = new Schema<IChangelog>(
     {

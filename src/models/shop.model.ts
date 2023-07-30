@@ -10,7 +10,7 @@ export interface IShop extends IExtendedDocument {
     status: string;
     domain: string;
 }
-interface IShopModel extends Model<IShop>, IExtendedModel { }
+export interface IShopModel extends Model<IShop>, IExtendedModel<IShop> { }
 
 export const schema = new Schema<IShop>(
     {

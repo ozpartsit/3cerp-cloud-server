@@ -13,7 +13,7 @@ export interface IPrice extends IExtendedDocument {
     moq: number;
     priceLevel: IPriceLevel;
 }
-export interface IPriceModel extends Model<IPrice>, IExtendedModel { }
+export interface IPriceModel extends Model<IPrice>, IExtendedModel<IPrice> { }
 
 const schema = new Schema<IPrice>({
     item: {

@@ -1,9 +1,10 @@
 import { model, Model, Schema } from "mongoose";
 import { IExtendedModel } from "../../utilities/static";
+import { IExtendedDocument } from "../../utilities/methods";
 import fs from "fs";
 import mime from "mime-types";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
-export interface IStorage {
+export interface IStorage extends IExtendedDocument {
     //_id?: Schema.Types.ObjectId;
     name: string;
     type: string;
@@ -12,7 +13,7 @@ export interface IStorage {
     urlcomponent: string;
 
 }
-interface IStorageModel extends Model<IStorage>, IExtendedModel {
+interface IStorageModel extends Model<IStorage>, IExtendedModel<IStorage> {
     deleteFile(path: string): any;
     updateOrInsert(doc: IStorage): any;
 }
@@ -47,7 +48,7 @@ schema.method("rename", async function (path: string) {
     fs.rename(this.path, path, function (err: any) {
         let name = path.split("/").pop();
         if (err) throw err;
-        doc.name = name;
+        doc.name = name || "";
         doc.save();
         console.log("Successfully renamed - AKA moved!");
     });

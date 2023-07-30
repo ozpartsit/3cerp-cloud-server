@@ -817,7 +817,10 @@ class controller {
                 let document = yield model.getDocument(id, mode);
                 if (!document)
                     res.status(404).json({
-                        message: req.__('doc_not_found')
+                        error: {
+                            code: "doc_not_found",
+                            message: req.__('doc_not_found')
+                        }
                     });
                 else {
                     //populate response document
@@ -1174,8 +1177,10 @@ class FileController extends controller_1.default {
             try {
                 if (!req.files) {
                     res.send({
-                        status: false,
-                        message: 'No file uploaded'
+                        error: {
+                            code: "no_file",
+                            message: req.__('no_file')
+                        }
                     });
                 }
                 else {
@@ -1407,7 +1412,10 @@ class ReportController extends controller_1.default {
             let document = yield model.loadDocument(id);
             if (!document)
                 res.status(404).json({
-                    message: 'Report not found'
+                    error: {
+                        code: "doc_not_found",
+                        message: req.__('doc_not_found')
+                    }
                 });
             else {
                 let results = yield document.getResults();
@@ -1735,7 +1743,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err) {
                         // token wygasł lub jest niepoprawny
-                        res.status(500).json({ message: req.__('auth.failed_auth_token') });
+                        res.status(500).json({ error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
                     }
                     else {
                         if (value) {
@@ -1748,12 +1756,12 @@ class Auth {
             }
             catch (err) {
                 // token wygasł lub jest niepoprawny
-                res.status(400).json({ message: req.__('auth.invalid_token') });
+                res.status(400).json({ error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
             }
         }
         else {
             // Brak tokena
-            res.status(401).json({ message: req.__("auth.no_token") });
+            res.status(401).json({ error: { code: "auth.no_token", message: req.__("auth.no_token") } });
         }
     }
     // weryfikuje uprawnienia do danego zasobu
@@ -1768,7 +1776,7 @@ class Auth {
     }
     // potwierdzenie przyznania dostępu
     accessGranted(req, res, next) {
-        res.status(200).json({ message: req.__("auth.access_granted") });
+        res.status(200).json({ error: { code: "auth.access_granted", message: req.__("auth.access_granted") } });
     }
     // metoda logowania użytkownika
     // na podstawie pary email + hasło nadaje token
@@ -1780,7 +1788,7 @@ class Auth {
                 if (valide) {
                     if (!(user.roles || []).includes(req.body.role || user.role)) {
                         // użytkownik nie ma uprawnień do tej roli
-                        res.status(403).json({ message: req.__("auth.wrong_role") });
+                        res.status(403).json({ error: { code: "auth.wrong_role", message: req.__("auth.wrong_role") } });
                     }
                     const tokens = createTokenPair(user._id, req.body.role || user.role, this.tokenSecret);
                     // zwraca parę tokenów
@@ -1788,12 +1796,12 @@ class Auth {
                 }
                 else {
                     // hasło nie pasuje do emaila
-                    res.status(403).json({ message: req.__("auth.wrong_password") });
+                    res.status(403).json({ error: { code: "auth.wrong_password", message: req.__("auth.wrong_password") } });
                 }
             }
             else {
                 // nie istnieje dostęp dla użytkownika o podanym emailu
-                res.status(404).json({ message: req.__("auth.user_not_exist") });
+                res.status(404).json({ error: { code: "auth.user_not_exist", message: req.__("auth.user_not_exist") } });
             }
         }));
     }
@@ -1804,7 +1812,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
                     if (err) {
                         // refreshToken wygasł lub jest błędny
-                        res.status(500).json({ message: req.__('auth.failed_auth_token') });
+                        res.status(500).json({ error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
                     }
                     else {
                         const tokens = createTokenPair(value.user, value.role, this.tokenSecret);
@@ -1814,12 +1822,12 @@ class Auth {
             }
             catch (err) {
                 // refreshToken wygasł lub jest błędny
-                res.status(400).json({ message: req.__('auth.invalid_token') });
+                res.status(400).json({ error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
             }
         }
         else {
             // brak tokena w body
-            res.status(401).json({ message: req.__("auth.no_token") });
+            res.status(401).json({ error: { code: "auth.no_token", message: req.__("auth.no_token") } });
         }
     }
     // zwraca dane zalogowanego użytkownika
@@ -1831,7 +1839,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err) {
                         // token nieważny lub nieprawidłowy
-                        res.status(500).json({ message: req.__('auth.failed_auth_token') });
+                        res.status(500).json({ error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
                     }
                     else {
                         if (value && value.user) {
@@ -1863,12 +1871,12 @@ class Auth {
             }
             catch (err) {
                 // token nieważny lub nieprawidłowy
-                res.status(400).json({ message: req.__('auth.invalid_token') });
+                res.status(400).json({ error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
             }
         }
         else {
             // brak Tokena
-            res.status(401).json({ message: req.__("auth.no_token") });
+            res.status(401).json({ error: { code: "auth.no_token", message: req.__("auth.no_token") } });
         }
     }
 }
@@ -1941,36 +1949,32 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.errorHandler = void 0;
 const errorHandler = (error, req, res, next) => {
     console.log('ErrorHandler', error);
-    let errors = [];
+    //let errors: ResponseError[] = [];
     let status = 500;
-    let message = "Error";
-    if (!Array.isArray(error)) {
-        status = error.status || 500;
-        message = error.message;
-        errors = [error];
-    }
-    else
-        errors = error;
-    errors.forEach((error) => {
-        //if (err instanceof CustomError) res.status(err.statusCode).send({ errors: err.serializeErrors() });
-        // if (error instanceof Error.ValidatorError || Error.ValidationError) {
-        //   let errors = {};
-        //   if (error.errors) {
-        //     Object.keys(error.errors).forEach((key) => {
-        //       errors[key] = {
-        //         list: error.errors[key].list,
-        //         _id: error.errors[key]._id,
-        //         kind: error.errors[key].kind,
-        //         message: error.errors[key].message
-        //       };
-        //     });
-        //   }
-        // }
-    });
-    return res.status(400).send(errors);
-    // res.status(status).send({
-    //   message: message
-    // });
+    // let message = "Error";
+    // if (!Array.isArray(error)) {
+    //   status = error.status || 500;
+    //   message = error.message;
+    //   errors = [error];
+    // }
+    // else errors = error;
+    //errors.forEach((error: ResponseError) => {
+    //if (err instanceof CustomError) res.status(err.statusCode).send({ errors: err.serializeErrors() });
+    // if (error instanceof Error.ValidatorError || Error.ValidationError) {
+    //   let errors = {};
+    //   if (error.errors) {
+    //     Object.keys(error.errors).forEach((key) => {
+    //       errors[key] = {
+    //         list: error.errors[key].list,
+    //         _id: error.errors[key]._id,
+    //         kind: error.errors[key].kind,
+    //         message: error.errors[key].message
+    //       };
+    //     });
+    //   }
+    // }
+    //})
+    return res.status(status).send({ error: error });
 };
 exports.errorHandler = errorHandler;
 
@@ -4801,7 +4805,7 @@ class Routes {
         this.Router.route(`/${collection}/:recordtype/:id/logs`).get(this.Auth.authorization(3).bind(this.Auth), controller.logs.bind(controller));
         this.Router.route(`/${collection}/:recordtype/:id/:mode`)
             .get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.get.bind(controller))
-            .put(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.update.bind(controller))
+            .patch(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.update.bind(controller))
             .post(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.save.bind(controller))
             .delete(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.delete.bind(controller));
     }
@@ -4819,7 +4823,7 @@ class Routes {
         this.Router.route("/classifications/:recordtype/new/create").post(this.classificationController.add.bind(this.classificationController));
         this.Router.route("/classifications/:recordtype/:id/:mode")
             .get(this.classificationController.get.bind(this.classificationController))
-            .put(this.classificationController.update.bind(this.classificationController))
+            .patch(this.classificationController.update.bind(this.classificationController))
             .post(this.classificationController.save.bind(this.classificationController))
             .delete(this.classificationController.delete.bind(this.classificationController));
     }
@@ -4833,7 +4837,7 @@ class Routes {
             .get(this.transactionController.logs.bind(this.transactionController));
         this.Router.route("/transactions/:recordtype/:id/:mode")
             .get(this.transactionController.get.bind(this.transactionController))
-            .put(this.transactionController.update.bind(this.transactionController))
+            .patch(this.transactionController.update.bind(this.transactionController))
             .post(this.transactionController.save.bind(this.transactionController))
             .delete(this.transactionController.delete.bind(this.transactionController));
     }
@@ -4846,7 +4850,7 @@ class Routes {
             .get(this.itemController.logs.bind(this.itemController));
         this.Router.route("/items/:recordtype/:id/:mode")
             .get(this.itemController.get.bind(this.itemController))
-            .put(this.itemController.update.bind(this.itemController))
+            .patch(this.itemController.update.bind(this.itemController))
             .post(this.itemController.save.bind(this.itemController))
             .delete(this.itemController.delete.bind(this.itemController));
     }
@@ -4857,7 +4861,7 @@ class Routes {
         this.Router.route("/activities/:recordtype/new/create").post(this.activityController.add.bind(this.activityController));
         this.Router.route("/activities/:recordtype/:id/:mode")
             .get(this.activityController.get.bind(this.activityController))
-            .put(this.activityController.update.bind(this.activityController))
+            .patch(this.activityController.update.bind(this.activityController))
             .post(this.activityController.save.bind(this.activityController))
             .delete(this.activityController.delete.bind(this.activityController));
     }
@@ -4873,7 +4877,7 @@ class Routes {
             .get(this.entityController.logs.bind(this.entityController));
         this.Router.route("/entities/:recordtype/:id/:mode")
             .get(this.entityController.get.bind(this.entityController))
-            .put(this.entityController.update.bind(this.entityController))
+            .patch(this.entityController.update.bind(this.entityController))
             .post(this.entityController.save.bind(this.entityController))
             .delete(this.entityController.delete.bind(this.entityController));
     }
@@ -4883,7 +4887,7 @@ class Routes {
         this.Router.route("/websites/:recordtype/new/create").post(this.websiteController.add.bind(this.websiteController));
         this.Router.route("/websites/:recordtype/:id/:mode")
             .get(this.websiteController.get.bind(this.websiteController))
-            .put(this.websiteController.update.bind(this.websiteController))
+            .patch(this.websiteController.update.bind(this.websiteController))
             .post(this.websiteController.save.bind(this.websiteController))
             .delete(this.websiteController.delete.bind(this.websiteController));
     }
@@ -4895,7 +4899,7 @@ class Routes {
             .post(this.emailController.send.bind(this.emailController));
         this.Router.route("/emails/:recordtype/:id/:mode")
             .get(this.emailController.get.bind(this.emailController))
-            .put(this.emailController.update.bind(this.emailController))
+            .patch(this.emailController.update.bind(this.emailController))
             .post(this.emailController.save.bind(this.emailController))
             .delete(this.emailController.delete.bind(this.emailController));
     }
@@ -4907,7 +4911,7 @@ class Routes {
         //   this.settingController.add.bind(this.settingController) as any
         // );
         this.Router.route("/settings/:recordtype/:id/:mode?")
-            .put(this.settingController.update.bind(this.settingController));
+            .patch(this.settingController.update.bind(this.settingController));
         // .get(this.settingController.get.bind(this.settingController) as any)
         //   .post(this.settingController.save.bind(this.settingController) as any)
         //   .delete(this.settingController.delete.bind(this.settingController) as any);
@@ -4920,7 +4924,7 @@ class Routes {
         this.Router.route("/reports/:recordtype/:id/results")
             .get(this.reportController.results.bind(this.reportController));
         this.Router.route("/reports/:recordtype/:id/:mode?")
-            .put(this.reportController.update.bind(this.reportController))
+            .patch(this.reportController.update.bind(this.reportController))
             .get(this.reportController.get.bind(this.reportController))
             .post(this.reportController.save.bind(this.reportController))
             .delete(this.reportController.delete.bind(this.reportController));
@@ -4954,7 +4958,7 @@ class Routes {
         this.Router.route("/accounting/:recordtype/new/create").post(this.accountingController.add.bind(this.accountingController));
         this.Router.route("/accounting/:recordtype/:id/:mode")
             .get(this.accountingController.get.bind(this.accountingController))
-            .put(this.accountingController.update.bind(this.accountingController))
+            .patch(this.accountingController.update.bind(this.accountingController))
             .post(this.accountingController.save.bind(this.accountingController))
             .delete(this.accountingController.delete.bind(this.accountingController));
     }

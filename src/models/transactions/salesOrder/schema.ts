@@ -12,7 +12,7 @@ export interface ISalesOrder extends ITransaction {
   paymentMethod?: Schema.Types.ObjectId;
   lines: ILineSalesOrder[];
 }
-export interface ISalesOrderModel extends Model<ISalesOrder>, IExtendedModel { }
+export interface ISalesOrderModel extends Model<ISalesOrder>, IExtendedModel<ISalesOrder> { }
 
 const schema = new Schema<ISalesOrder>(
   {

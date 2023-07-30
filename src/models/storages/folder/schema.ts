@@ -3,7 +3,7 @@ import Storage, { IStorage } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 
 export interface IFolder extends IStorage { }
-export interface IFolderModel extends Model<IFolder>, IExtendedModel { }
+export interface IFolderModel extends Model<IFolder>, IExtendedModel<IFolder> { }
 
 const options = { discriminatorKey: "type", collection: "storages" };
 const schema = new Schema<IFolder>({}, options);

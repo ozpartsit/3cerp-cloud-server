@@ -1,23 +1,30 @@
 import Storage, { StorageTypes } from "../models/storages/model";
 import File, { IFile } from "../models/storages/file/schema";
-import controller from "./controller";
+import controller from "./genericController";
+import { Document, Model } from 'mongoose';
 import path from "path";
 import { Request, Response, NextFunction, RequestHandler } from "express";
-export default class FileController extends controller {
+import { IExtendedModel } from "../utilities/static";
+import { IExtendedDocument } from "../utilities/methods";
+// Typ generyczny dla modelu Mongoose
+interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
+export default class FileController<T extends IExtendedDocument> extends controller<T> {
   public storagePath: string = path.resolve("storage");
-  constructor() {
-    super({ model: Storage, submodels: StorageTypes });
+  constructor(model: IModel<T>) {
+    super(model);
   }
   public async upload(req: Request, res: Response, next: NextFunction) {
     // todo
     try {
       if (!req.files) {
         res.send({
-          status: false,
-          message: 'No file uploaded'
+          error: {
+            code: "no_file",
+            message: req.__('no_file')
+          }
         });
       } else {
-     
+
         let files: any[] = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
 
         let uploaded: IFile[] = [];

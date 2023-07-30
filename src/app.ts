@@ -14,8 +14,9 @@ import RoutesPublic from "./routes/public";
 import EmitEvents from "./services/emitEvents";
 import Email from "./services/email";
 import { errorHandler } from "./middleware/error-handler";
-import storage from "./middleware/storage";
-import Cache from "./middleware/cache";
+import storage from "./config/storage";
+//import Cache from "./middleware/cache";
+import Limiter from "./middleware/limiter";
 import path from "path";
 
 // Custom ENVIRONMENT Veriables
@@ -24,7 +25,7 @@ let env = dotenv.config({
   path: path.resolve(`.env.${process.env.NODE_ENV}`)
 });
 
-export const cache = new Cache();
+//export const cache = new Cache();
 export const email: Email = new Email();
 export class App3CERP {
   public server?: http.Server;
@@ -64,6 +65,8 @@ export class App3CERP {
     this.app.use('/storage', express.static("storage")); // Storage files
     this.app.use("/public", express.static("public"));
     this.app.use('/hosting', express.static("hosting"));
+    // Apply the rate limiting middleware to API calls only
+    this.app.use('/api', Limiter)
 
     this.app.use(StatusMonitor);
     this.app.use(i18n.init);

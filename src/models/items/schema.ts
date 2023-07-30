@@ -23,7 +23,7 @@ export interface IItem extends IExtendedDocument {
   lastSalesDate: Date;
   getPrice(): any;
 }
-interface IItemModel extends Model<IItem>, IExtendedModel { }
+interface IItemModel extends Model<IItem>, IExtendedModel<IItem> { }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 

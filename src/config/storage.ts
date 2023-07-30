@@ -40,18 +40,18 @@ export default class StorageStructure {
     fs.readdir(dirPath, (err, files) => {
       files.forEach((file: string) => {
         let folder = parent ? parent.path : encodeURI("storage");
-        let doc: IStorage = {
+        let doc: IStorage = new Storage({
           name: file,
           type: 'File',
           path: path.join(folder, encodeURI(file)),
           urlcomponent: path.join(folder, encodeURI(file)),
-        };
+        });
 
         if (fs.lstatSync(path.join(dirPath, file)).isDirectory()) {
           doc.type = "Folder";
           this.mapFiles(path.join(dirPath, file), doc);
         }
-        Storage.updateOrInsert(doc);
+        doc.save();
       });
 
     });

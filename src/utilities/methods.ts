@@ -6,79 +6,97 @@ import constantTranslate from "./methods/constantTranslate";
 import validateVirtuals from "./methods/validateVirtuals";
 import totalVirtuals from "./methods/totalVirtuals";
 import addToVirtuals from "./methods/addToVirtuals";
-import { cache, email } from "../app";
-import mongoose, { Schema } from "mongoose";
-export default function methods(schema: any, options: any) {
+import cache from "../config/cache";
+import mongoose, { Schema, Document } from "mongoose";
+import { IExtendedModel } from "../utilities//static";
+
+export interface IExtendedDocument extends Document {
+  deleted: boolean;
+  resource: string;
+  setValue: (field: string, value: any, list: string, subrecord: string) => void;
+  changeLogs: (document?: any, list?: string) => Promise<void>;
+  virtualPopulate: () => Promise<void>;
+  autoPopulate: () =>  Promise<Object>;
+  constantTranslate: (local: string) => Object;
+  validateVirtuals: (save: boolean) => Promise<[any]>;
+  totalVirtuals: () => void;
+  addToVirtuals: () => void;
+  recalcDocument: () => void;
+  saveDocument: () => Promise<any>;
+  validateDocument: () => Promise<[any]>;
+  initLocal: () => void;
+}
+
+
+
+export default function customMethodsPlugin<T extends IExtendedDocument>(schema: Schema<T>) {
   // apply method to pre
-  async function recalcDocument(this: any) {
+  function recalcDocument(this: T) {
     console.log("default recalc Record");
 
   }
-  async function validateDocument(this: any) {
+  schema.method('setValue', setValue);
+  schema.method('changeLogs', changeLogs);
+  schema.method('virtualPopulate', virtualPopulate);
+  schema.method('autoPopulate', autoPopulate);
+  schema.method('constantTranslate', constantTranslate);
+  schema.method('validateVirtuals', validateVirtuals);
+  schema.method('totalVirtuals', totalVirtuals);
+  schema.method('addToVirtuals', addToVirtuals);
+  schema.method('recalcDocument', recalcDocument);
+
+  schema.method('validateDocument', async function (this: T): Promise<[any]> {
     console.log("validateDocument");
     let errors: any = [];
     let err = this.validateSync();
     if (err) errors.push(err)
-    let virtualmsg = await this.validateVirtuals();
+    let virtualmsg = await this.validateVirtuals(false);
     if (virtualmsg && virtualmsg.length) errors.push(...virtualmsg)
     return errors;
-  }
-  async function saveDocument(this: any) {
+  })
+
+  schema.method('saveDocument', async function (this: T): Promise<T> {
     console.log("save document");
-    await this.recalcDocument();
+    this.recalcDocument();
     await this.validateVirtuals(true);
     await this.changeLogs();
     let document = await this.save();
-    cache.delCache(document._id);
-  
-    return document;
-  }
+    cache.del(document._id);
 
-  //add locals
-  async function initLocal(this: any, next: any) {
-    this.$locals.oldValue = {};
-    this.$locals.triggers = [];
-  }
+    return document;
+  })
+
+
 
   //triggers loop
-  async function actions(this: any, next: any) {
-    console.log("post valide ")
-    for (let trigger of this.$locals.triggers) {
-      if (this.actions)
-        await this.actions(trigger);
+  // async function actions(this: T, next: any) {
+  //   console.log("post valide ")
+  //   if (this.$locals.triggers) {
+  //     let triggers: any = this.$locals.triggers;
+  //     for (let trigger of triggers) {
+  //         await actions(trigger);
 
-      // remove trigger
-      this.$locals.triggers.shift();
+  //       // remove trigger
+  //       triggers.shift();
 
-      await this.validate()
-    }
+  //       await this.validate()
+  //     }
+  //   }
+  // }
 
-  }
 
-  // to do - zmienić na wartość statyczną zamiast virtualną
   // add resource
-  schema.virtual('resource').get(function (this: any) {
-    let resources = this.schema.options.collection.split(".")
+  schema.virtual('resource').get(function (this: T) {
+    let resources = this.collection.name.split(".")
     return resources[0];
   });
 
-  schema.methods.setValue = setValue;
-  schema.methods.changeLogs = changeLogs;
-  schema.methods.virtualPopulate = virtualPopulate;
-  schema.methods.autoPopulate = autoPopulate;
-  schema.methods.constantTranslate = constantTranslate;
-  schema.methods.validateVirtuals = validateVirtuals;
-  schema.methods.totalVirtuals = totalVirtuals;
-  schema.methods.addToVirtuals = addToVirtuals;
-  schema.methods.recalcDocument = recalcDocument;
-  schema.methods.saveDocument = saveDocument;
-  schema.methods.validateDocument = validateDocument;
-  schema.methods.initLocal = initLocal;
-
-  // schema.pre("save", handlerSave);
-  // schema.pre("remove", handlerSave);
+  //add locals
+  async function initLocal(this: T) {
+    this.$locals["oldValue"] = {};
+    this.$locals["triggers"] = [];
+  }
   schema.pre("init", initLocal)
-  schema.post("validate", actions);
 
 
   // add Owner ID
@@ -102,13 +120,4 @@ export default function methods(schema: any, options: any) {
 
 }
 
-export interface IExtendedDocument {
-  setValue(): any;
-  changeLogs(): any;
-  virtualPopulate(): any;
-  autoPopulate(): any;
-  validateVirtuals(): any;
-  totalVirtuals(): any;
-  addToVirtuals(): any;
-  recalcRecord(): any;
-}
+

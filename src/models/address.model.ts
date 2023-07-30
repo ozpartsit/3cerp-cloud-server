@@ -1,10 +1,11 @@
-import { Schema } from "mongoose";
+import { Schema, Model, model } from "mongoose";
+import { IExtendedDocument } from "../utilities/methods";
+import { IExtendedModel } from "../utilities/static";
+
 import axios from "axios";
-//import Countries from "../../constants/countries";
-import { IEntity } from "./schema";
-export interface IAddress {
+export interface IAddress extends IExtendedDocument {
   _id: Schema.Types.ObjectId;
-  entity: IEntity["_id"];
+  entity?: Schema.Types.ObjectId;
   name?: string;
   addressee?: string;
   address: string;
@@ -19,12 +20,15 @@ export interface IAddress {
   geoCode(geoCodeHint: string): any;
 }
 const options = {
-  discriminatorKey: "entity",
-  collection: "entities.addresses"
+  collection: "addresses",
+  type: "address"
 };
-const schema = new Schema<IAddress>(
+
+interface IAddressModel extends Model<IAddress>, IExtendedModel<IAddress> { }
+
+export const schema = new Schema<IAddress>(
   {
-    entity: { type: Schema.Types.ObjectId },
+    entity: { type: Schema.Types.ObjectId, input: "SelectField" },
     name: { type: String, input: "TextField" },
     addressee: { type: String, input: "TextField" },
     address: { type: String, required: true, input: "TextField" },
@@ -34,7 +38,6 @@ const schema = new Schema<IAddress>(
     country: {
       type: String,
       required: true,
-      resource: "constatnts",
       constant: "countries"
     },
     phone: { type: String, input: "TextField" },
@@ -65,10 +68,12 @@ schema.method("geoCode", async function (geoCodeHint: string) {
 schema.pre("save", async function (next) {
   if (!this.isModified("geoCodeHint")) return next();
   else {
-    const coordinate = await this.geoCode(this.geoCodeHint);
+    const coordinate = await this.geoCode(this.geoCodeHint || "");
     this.latitude = coordinate.latitude;
     this.longitude = coordinate.longitude;
   }
   next();
 });
-export default schema;
+
+const Address: IAddressModel = model<IAddress, IAddressModel>("Address", schema);
+export default Address;

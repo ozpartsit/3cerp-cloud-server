@@ -10,7 +10,7 @@ export interface IEmail extends IExtendedDocument {
     entity: Schema.Types.ObjectId;
     dkim: string;
 }
-interface IEmailModel extends Model<IEmail>, IExtendedModel { }
+interface IEmailModel extends Model<IEmail>, IExtendedModel<IEmail> { }
 
 export const schema = new Schema<IEmail>(
     {

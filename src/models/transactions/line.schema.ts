@@ -12,7 +12,6 @@ export interface ILine {
   type: string;
   transaction: ITransaction["_id"];
   entity: ITransaction["entity"];
-  warehouse: ITransaction["warehouse"];
   item: IItem;
   kit: Schema.Types.ObjectId;
   description: string;
@@ -50,7 +49,6 @@ const schema = new Schema<ILine>(
       ref: "Line"
     },
     entity: { type: Schema.Types.ObjectId, copy: "transaction" },
-    warehouse: { type: Schema.Types.ObjectId, copy: "transaction" },
     type: {
       type: String,
       //required: true,

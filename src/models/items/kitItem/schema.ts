@@ -8,7 +8,7 @@ const options = { discriminatorKey: "type", collection: "items" };
 export interface IKitItem extends IItem {
   components: IComponent[];
 }
-export interface IKitItemModel extends Model<IKitItem>, IExtendedModel { }
+export interface IKitItemModel extends Model<IKitItem>, IExtendedModel<IKitItem> { }
 
 const schema = new Schema<IKitItem>({}, options);
 schema.virtual("components", {

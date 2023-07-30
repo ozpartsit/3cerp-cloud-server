@@ -1,4 +1,6 @@
-export default async function totalVirtuals(this: any) {
+import { Document } from "mongoose";
+import { IExtendedDocument } from "../methods"
+export default async function totalVirtuals<T extends IExtendedDocument>(this: T) {
   // Sum selected fields
   this.schema.eachPath((pathname: string, schematype: any) => {
     if (schematype.options.total && this[schematype.options.total]) {

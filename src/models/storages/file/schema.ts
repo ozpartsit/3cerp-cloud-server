@@ -8,7 +8,7 @@ export interface IFile extends IStorage {
     size?: number;
     mime?: string;
 }
-export interface IFileModel extends Model<IFile>, IExtendedModel { }
+export interface IFileModel extends Model<IFile>, IExtendedModel<IFile> { }
 
 const options = { discriminatorKey: "type", collection: "storages", };
 const schema = new Schema<IFile>({

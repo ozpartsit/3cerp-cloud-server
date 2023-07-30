@@ -1,6 +1,6 @@
-import { Schema, model } from "mongoose";
-import { IEntity } from "../schema";
-//import SalesOrder from "../../activities/calendar/schema";
+import { Schema, Model } from "mongoose";
+import Entity, { IEntity } from "../schema";
+import { IExtendedModel } from "../../../utilities/static";
 export interface ICustomer extends IEntity {
   status: string;
   //statistics
@@ -15,6 +15,8 @@ export interface ICustomer extends IEntity {
   terms?: Schema.Types.ObjectId;
   paymentMethod?: Schema.Types.ObjectId;
 }
+
+export interface ICustomerModel extends Model<ICustomer>, IExtendedModel<ICustomer> { }
 
 const options = { discriminatorKey: "type", collection: "entities" };
 const schema = new Schema<ICustomer>(
@@ -60,13 +62,9 @@ const schema = new Schema<ICustomer>(
   options
 );
 
-// schema.virtual("salesOrders", {
-//   ref: "Calendar",
-//   localField: "name",
-//   foreignField: "name",
-//   justOne: false,
-//   autopopulate: true,
-//   model: SalesOrder
-// });
 
-export default schema;
+const Customer: ICustomerModel = Entity.discriminator<
+  ICustomer,
+  ICustomerModel
+>("Customer", schema);
+export default Customer;

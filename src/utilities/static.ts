@@ -1,49 +1,78 @@
 import { Schema, Model, Document } from "mongoose";
-import { cache, email } from "../app";
+import cache from "../config/cache";
 import getFields from "./staticts/getFields";
 import getForm from "./staticts/getForm";
-import pdf from "./pdf/pdf"
+import { IExtendedDocument } from "../utilities/methods";
+
+// interfejs rozszeżający model o uniwersalne metody
+export interface IExtendedModel<T extends Document> extends Model<T> {
+  loadDocument: (id: string) => Promise<T | null>;
+  addDocument: (data: Object) => any;
+  getDocument: (id: string, mode: string) => Promise<T | null>;
+  saveDocument: (id: string) => Promise<string | null>;
+  updateDocument: (id: string, updates: updateBody) => any;
+  deleteDocument: (id: string) => any;
+  findDocuments: (query: Object, options: any) => any;
+
+  getFields(locale?: string): any;
+  getForm(locale: string): any;
+}
+
+export default function customStaticsMethods<T extends IExtendedDocument>(schema: Schema<T, IExtendedModel<T>>) {
+  schema.statics.loadDocument = loadDocument;
+  schema.statics.getDocument = getDocument;
+  schema.statics.saveDocument = saveDocument;
+  schema.statics.updateDocument = updateDocument;
+  schema.statics.deleteDocument = deleteDocument;
+  schema.statics.findDocuments = findDocuments;
+
+  schema.statics.getFields = getFields;
+  schema.statics.getForm = getForm;
+}
+
 //loadDocument
-export async function loadDocument(this: any, id: string) {
-  let doc = await this.findOne({ _id: id });
+export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, id: string): Promise<T | null> {
+  let doc = await this.findById(id);
+
   if (doc) {
     await doc.virtualPopulate();
-    await doc.validateVirtuals();
-
+    await doc.validateVirtuals(false);
     return doc;
   } else return null;
 }
 
 //API
-export async function addDocument(this: any, data: Object) {
-  let document = new this(data);
+export async function addDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, data: Object) {
+  let document = await this.create(data);
   document.initLocal();
-  await document.recalcDocument();
+  document.recalcDocument();
   let msg = await document.validateDocument();
-  // insert document to cache
-  cache.addCache(document);
+  // Zapisanie dokumentu do cache
+  cache.set(document._id, document);
   return { document, msg };
 }
 
-export async function getDocument(this: any, id: string, mode: string) {
-  //let document = cache.getCache(id);
+export async function getDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string): Promise<T | null> {
   //if (!document) {
-  let document = await this.loadDocument(id);
+  let document: T | null = await this.loadDocument(id);
   //}
-  if (document) {
-    if (mode === "edit") cache.addCache(document);
+  if (document && document._id) {
+    if (mode === "edit") cache.set(id, document);
   }
   return document;
 }
 
-export async function saveDocument(this: any, id: string) {
-  let document = cache.getCache(id);
+// zapisuje dokument
+// najpierw sprawdza czy jest w cachu
+// jeżeli tak, zapisuje aktyywny stan i zwraca identyfikator
+// jeżeli nie, zwraca null
+export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string): Promise<string | null> {
+  let document = cache.get<T>(id);
   if (document) {
     await document.saveDocument();
-    pdf();
     return id;
   } else {
-    // to do - dodać error
+    return null;
   }
 
 }
@@ -56,34 +85,38 @@ interface updateBody {
 
 }
 
-export async function updateDocument(this: any, id: string, updates: updateBody | updateBody[]) {
-  let document = cache.getCache(id);
+export async function updateDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, updates: updateBody | updateBody[]) {
+  let document = cache.get<T | null>(id);
   let save = false;
   if (!document) {
     document = await this.loadDocument(id);
     save = true;
   }
-  let msg = [];
-  if (!Array.isArray(updates)) updates = [updates]; // array
-  for (let update of updates) {
-    msg = await document.setValue(update.field, update.value, update.list, update.subrecord);
-  }
+  if (document) {
+    let msg: any = [];
+    if (!Array.isArray(updates)) updates = [updates]; // array
+    for (let update of updates) {
+      msg = await document.setValue(update.field, update.value, update.list, update.subrecord);
+    }
 
-  if (save) {
-    document = await document.saveDocument();
-    return { document, msg };
-  } else {
-    await document.recalcDocument();
-    return { document, msg };
+
+
+    if (save) {
+      document = await document.saveDocument();
+      return { document, msg, saved: true };
+    } else {
+      await document.recalcDocument();
+      return { document, msg, saved: false };
+    }
   }
 }
 
-export async function deleteDocument(this: any, id: string) {
+export async function deleteDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string) {
   let document = await this.loadDocument(id);
   if (document) {
     document.deleted = true;
-    await document.recalcDocument();
-    cache.delCache(id);
+    document.recalcDocument();
+    cache.del(id);
     document.remove();
   } else {
     // to do - dodać error
@@ -92,7 +125,7 @@ export async function deleteDocument(this: any, id: string) {
   return id;
 }
 
-export async function findDocuments(this: any, query: Object, options: any) {
+export async function findDocuments<T extends IExtendedDocument>(this: IExtendedModel<T>, query: any, options: any) {
   let docFields = this.getFields();
   let { limit, select, sort, skip } = options;
   let populated: any = {};
@@ -141,27 +174,5 @@ export async function findDocuments(this: any, query: Object, options: any) {
 }
 
 
-export default function staticsMethods(schema: any, options: any) {
-  schema.statics.loadDocument = loadDocument;
-  schema.statics.addDocument = addDocument;
-  schema.statics.getDocument = getDocument;
-  schema.statics.saveDocument = saveDocument;
-  schema.statics.updateDocument = updateDocument;
-  schema.statics.deleteDocument = deleteDocument;
-  schema.statics.findDocuments = findDocuments;
 
-  schema.statics.getFields = getFields;
-  schema.statics.getForm = getForm;
-}
-export interface IExtendedModel {
-  loadDocument(id: string): any;
-  addDocument(data: Object): any;
-  getDocument(id: string, mode: string): any;
-  saveDocument(id: string): any;
-  updateDocument(id: string, list: string, subrecord: string, field: string, value: any): any;
-  deleteDocument(id: string): any;
-  findDocuments(query: Object, options: any): any;
 
-  getFields(): any;
-  getForm(): any;
-}

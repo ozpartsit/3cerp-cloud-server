@@ -1,7 +1,6 @@
 import { Schema, Document, Model, model } from "mongoose";
 import Item, { IItem } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
-import { IWarehouse } from "../../warehouse.model";
 import { IEntity } from "../../entities/schema";
 import Currencies from "../../../constants/currencies";
 const options = { discriminatorKey: "type", collection: "items" };
@@ -80,7 +79,7 @@ export interface IInvItem extends IItem {
   firstPurchaseDate?: Date;
   lastPurchaseDate?: Date;
 }
-export interface IInvItemModel extends Model<IInvItem>, IExtendedModel { }
+export interface IInvItemModel extends Model<IInvItem>, IExtendedModel<IInvItem> { }
 
 const schema = new Schema<IInvItem>(
   {

@@ -1,4 +1,6 @@
-export default async function autoPopulate(this: any, local: string) {
+import { Document } from "mongoose";
+import { IExtendedDocument } from "../methods"
+export default async function autoPopulate<T extends IExtendedDocument>(this: T, local: string) {
   let paths: any[] = [];
 
   this.schema.eachPath(function process(pathname: string, schemaType: any) {

@@ -1,5 +1,6 @@
 import i18n from "../../config/i18n";
-export default function constantTranslate(this: any, local: string) {
+import { IExtendedDocument } from "../methods"
+export default function constantTranslate<T extends IExtendedDocument>(this: T, local: string) {
 
     let doc = this.toObject();
 
@@ -10,7 +11,6 @@ export default function constantTranslate(this: any, local: string) {
             if (Array.isArray(this[list.path])) {
                 for (let index in doc[list.path]) {
                     doc[list.path][index] = this[list.path][index].constantTranslate(local);
-                    console.log(doc[list.path][index])
                 }
 
             }

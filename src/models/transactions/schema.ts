@@ -2,15 +2,11 @@ import { Schema, Model, model } from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import printPDF from "../../utilities/pdf/pdf";
-import { IEntity } from "../entities/schema";
-import Address from "../entities/address.schema";
-import { IWarehouse } from "../warehouse.model";
+import Entity, { IEntity } from "../entities/schema";
+import Address, { schema as AddressSchema } from "../address.model";
 import Line, { ILine } from "./line.schema";
 
-import Currencies from "../../constants/currencies";
-//import Countries from "../../constants/countries";
-import TranTypes from "../../constants/transaction.types";
-import TranStatus from "../../constants/transaction.status";
+
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface ITransaction extends IExtendedDocument {
   _id: Schema.Types.ObjectId;
@@ -19,7 +15,6 @@ export interface ITransaction extends IExtendedDocument {
   number?: number;
   status?: string;
   company: IEntity["_id"];
-  warehouse: IWarehouse["_id"];
   entity: IEntity["_id"];
   exchangeRate?: number;
   currency?: string;
@@ -31,32 +26,12 @@ export interface ITransaction extends IExtendedDocument {
   taxNumber: string;
   referenceNumber: string;
   memo: string;
-  // billingName?: string;
-  // billingAddressee?: string;
-  //billingAddress?: Address;
-  // billingAddress2?: string;
-  // billingZip?: string;
-  // billingCity: string;
-  // billingState?: string;
-  // billingCountry: string;
-  // billingPhone?: string;
-  // billingEmail?: string;
 
-  // shippingName?: string;
-  // shippingAddressee?: string;
-  //shippingAddress?: Address;
-  // shippingAddress2?: string;
-  // shippingZip?: string;
-  // shippingCity: string;
-  // shippingState?: string;
-  // shippingCountry: string;
-  // shippingPhone?: string;
-  // shippingEmail?: string;
   recalc(): any;
   autoName(): any;
   pdf(): any;
 }
-interface ITransactionModel extends Model<ITransaction>, IExtendedModel { }
+interface ITransactionModel extends Model<ITransaction>, IExtendedModel<ITransaction> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const TransactionSchema = {
@@ -76,14 +51,6 @@ const TransactionSchema = {
     autopopulate: true,
     input: "SelectField",
     select: true
-  },
-  warehouse: {
-    type: Schema.Types.ObjectId,
-    ref: "Warehouse",
-    required: true,
-    autopopulate: true,
-    input: "SelectField",
-    default: "635fcec4dcd8d612939f7b90"
   },
   number: { type: Number, input: "IntField" },
   quantity: {
@@ -111,110 +78,24 @@ const TransactionSchema = {
   currency: {
     type: String,
     required: true,
-    //get: (v: any) => Currencies.getName(v),
-    enum: Currencies,
     default: "PLN",
     input: "SelectField",
-    resource: 'constants',
     constant: 'currencies',
-    select: true
   },
   memo: {
     type: String,
     input: "TextareaField"
   },
-  billingName: {
-    type: String,
-    input: "TextField"
-  },
-  billingAddressee: {
-    type: String,
-    input: "text"
-  },
-  billingAddress: Address,
-  billingAddress2: {
-    type: String,
-    input: "text"
-  },
-  billingZip: {
-    type: String,
-    input: "text"
-  },
-  billingCity: {
-    type: String,
-    input: "text"
-  },
-  billingState: {
-    type: String,
-    input: "text"
-  },
-  billingCountry: {
-    type: String,
-    input: "select",
-    resource: 'constants',
-    constant: 'countries'
-  },
-  billingPhone: {
-    type: String,
-    input: "text"
-  },
-  billingEmail: {
-    type: String,
-    input: "text"
-  },
-  shippingName: {
-    type: String,
-    input: "text"
-  },
-  shippingAddressee: {
-    type: String,
-    input: "text"
-  },
-  shippingAddress: Address,
-  shippingAddress2: {
-    type: String,
-    input: "text"
-  },
-  shippingZip: {
-    type: String,
-    input: "text"
-  },
-  shippingCity: {
-    type: String,
-    input: "text"
-  },
-  shippingState: {
-    type: String,
-    input: "select"
-  },
-  shippingCountry: {
-    type: String,
-    input: "select",
-    resource: 'constants',
-    constant: 'countries'
-  },
-  shippingPhone: {
-    type: String,
-    input: "text"
-  },
-  shippingEmail: {
-    type: String,
-    input: "text"
-  },
+  billingAddress: AddressSchema,
+  shippingAddress: AddressSchema,
   type: {
     type: String,
     required: true,
-    //get: (v: any) => TranTypes.getName(v),
-    enum: TranTypes
   },
   status: {
     type: String,
     default: "pendingapproval",
-    resource: 'constants',
     constant: 'statuses',
-    //enum: TranStatus,
-    //input: "select",
-    select: true
   },
   taxNumber: { type: String, input: "TextField" },
   referenceNumber: { type: String, input: "TextField" },

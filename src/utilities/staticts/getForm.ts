@@ -1,5 +1,7 @@
+import { Schema, Model, Document, models } from "mongoose";
+import { IExtendedDocument } from "../methods"
 import i18n from "../../config/i18n";
-export default function getForm(this: any, local: string, parent: string) {
+export default function getForm<T extends IExtendedDocument>(this: Model<T>, local: string, parent: string) {
 
     return {
         sections: [

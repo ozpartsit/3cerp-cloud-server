@@ -1,6 +1,7 @@
-import { Schema, models } from "mongoose";
+import { Schema, Model, Document, models } from "mongoose";
+import { IExtendedDocument } from "../methods"
 import i18n from "../../config/i18n";
-export default function getFields(this: any, local: string, parent: string) {
+export default function getFields<T extends IExtendedDocument>(this: Model<T>, local?: string, parent?: string) {
   let fields: any[] = [];
   let modelSchema = this.schema;
   // this.schema.discriminators && this.schema.discriminators[type]

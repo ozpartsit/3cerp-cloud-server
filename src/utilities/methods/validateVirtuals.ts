@@ -1,4 +1,6 @@
-export default async function validateVirtuals(this: any, save: boolean) {
+import { Document } from "mongoose";
+import { IExtendedDocument } from "../methods"
+export default async function validateVirtuals<T extends IExtendedDocument>(this: T, save: boolean) {
   console.log("validateVirtuals");
   let errors: any = [];
 

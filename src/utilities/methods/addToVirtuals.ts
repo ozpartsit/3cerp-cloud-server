@@ -1,5 +1,7 @@
-export default async function addToVirtuals(
-  this: any,
+import { Document } from "mongoose";
+import { IExtendedDocument } from "../methods"
+export default async function addToVirtuals<T extends IExtendedDocument>(
+  this: T,
   virtual: string,
   newline: any,
   index: number
@@ -14,5 +16,5 @@ export default async function addToVirtuals(
     newline[field] = this[field] ? this[field]._id : this[field];
   });
   this[virtual].splice(index, 0, newline);
-  await this.validateVirtuals()
+  await this.validateVirtuals(false)
 }

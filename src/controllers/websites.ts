@@ -1,19 +1,26 @@
 import Website from "../models/shop.model";
-import controller from "./controller";
+import controller from "./genericController";
 import { Request, Response, NextFunction } from "express";
+import { Document, Model } from 'mongoose';
+import { IExtendedModel } from "../utilities/static";
+import { IExtendedDocument } from "../utilities/methods";
 import { execSync, exec } from "child_process";
 import path from "path";
 import fs from "fs";
-export default class WebsiteController extends controller {
-    constructor() {
-        super({ model: Website, submodels: {} });
+
+
+// Typ generyczny dla modelu Mongoose
+interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
+
+export default class WebsiteController<T extends IExtendedDocument> extends controller<T> {
+    constructor(model: IModel<T>) {
+        super(model);
     }
     public async save(req: Request, res: Response, next: NextFunction) {
         super.save(req, res, next);
         this.syncSites();
     }
     public async syncSites() {
-        console.log('mapShops')
         let shops = await Website.find();
         for (let site of shops) {
             let sitePath = path.resolve("hosting", site.subdomain);

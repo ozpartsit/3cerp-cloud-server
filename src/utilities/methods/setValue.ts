@@ -1,13 +1,14 @@
-import { models } from "mongoose";
-export default async function setValue(
-  this: any,
+import { models, Document } from "mongoose";
+import { IExtendedDocument } from "../methods"
+export default async function setValue<T extends IExtendedDocument>(
+  this: T,
   field: string,
   value: any,
   list: string,
   subrecord: string,
 ) {
   try {
-    let document: any;
+    let document: T;
     if (list) {
       document = this[list].find((element: any) => {
         return element._id.toString() === subrecord;
@@ -18,14 +19,16 @@ export default async function setValue(
         document = await new models[virtual.options.ref]();
         document.initLocal();
         this[list].push(document);
-        this.validateVirtuals();
+        this.validateVirtuals(false);
       }
     } else {
       document = this;
     }
 
-    document.$locals.oldValue[field] = document[field];
-    document.$locals.triggers.push({ type: "setValue", field: field, oldValue: document.$locals.oldValue[field] });
+    // document.$locals.oldValue[field] = document[field];
+    // document.$locals.triggers.push({ type: "setValue", field: field, oldValue: document.$locals.oldValue[field] });
+
+
     // to do - zmienić na metode setLocalTriggers()
     document[field] = value;
 
