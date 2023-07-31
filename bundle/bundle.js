@@ -1404,6 +1404,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const jsonwebtoken_1 = __importDefault(__webpack_require__(9344));
 const access_model_1 = __importDefault(__webpack_require__(6402));
 const user_model_1 = __importDefault(__webpack_require__(8653));
+const email_1 = __importDefault(__webpack_require__(3097));
 class Auth {
     constructor() {
         this.tokenSecret = process.env.TOKEN_SECRET || "";
@@ -1417,7 +1418,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err) {
                         // token wygasł lub jest niepoprawny
-                        res.status(500).json({ error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+                        res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
                     }
                     else {
                         if (value) {
@@ -1432,12 +1433,12 @@ class Auth {
             }
             catch (err) {
                 // token wygasł lub jest niepoprawny
-                res.status(400).json({ error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+                res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
             }
         }
         else {
             // Brak tokena
-            res.status(401).json({ error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+            res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
         }
     }
     // weryfikuje uprawnienia do danego zasobu
@@ -1452,7 +1453,7 @@ class Auth {
     }
     // potwierdzenie przyznania dostępu
     accessGranted(req, res, next) {
-        res.status(200).json({ error: { code: "auth.access_granted", message: req.__("auth.access_granted") } });
+        res.status(200).json({ status: "error", error: { code: "auth.access_granted", message: req.__("auth.access_granted") } });
     }
     // metoda logowania użytkownika
     // na podstawie pary email + hasło nadaje token
@@ -1466,7 +1467,7 @@ class Auth {
                         if (user) {
                             if (!(user.roles || []).includes(req.body.role || user.role)) {
                                 // użytkownik nie ma uprawnień do tej roli
-                                res.status(403).json({ error: { code: "auth.wrong_role", message: req.__("auth.wrong_role") } });
+                                res.status(403).json({ status: "error", error: { code: "auth.wrong_role", message: req.__("auth.wrong_role") } });
                             }
                             // aktualizacja daty ostatniego logowania
                             user_model_1.default.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec();
@@ -1476,18 +1477,18 @@ class Auth {
                         }
                         else {
                             // Użytkownik nie istnieje
-                            res.status(404).json({ error: { code: "auth.user_not_found", message: req.__("auth.user_not_found") } });
+                            res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__("auth.user_not_found") } });
                         }
                     }));
                 }
                 else {
                     // hasło nie pasuje do emaila
-                    res.status(403).json({ error: { code: "auth.wrong_password", message: req.__("auth.wrong_password") } });
+                    res.status(403).json({ status: "error", error: { code: "auth.wrong_password", message: req.__("auth.wrong_password") } });
                 }
             }
             else {
                 // nie istnieje dostęp dla użytkownika o podanym emailu
-                res.status(404).json({ error: { code: "auth.user_not_exist", message: req.__("auth.user_not_exist") } });
+                res.status(404).json({ status: "error", error: { code: "auth.user_not_exist", message: req.__("auth.user_not_exist") } });
             }
         }));
     }
@@ -1498,7 +1499,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
                     if (err) {
                         // refreshToken wygasł lub jest błędny
-                        res.status(500).json({ error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+                        res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
                     }
                     else {
                         const tokens = createTokenPair(value.user, value.role, this.tokenSecret);
@@ -1508,12 +1509,12 @@ class Auth {
             }
             catch (err) {
                 // refreshToken wygasł lub jest błędny
-                res.status(400).json({ error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+                res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
             }
         }
         else {
             // brak tokena w body
-            res.status(401).json({ error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+            res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
         }
     }
     // zwraca dane zalogowanego użytkownika
@@ -1525,7 +1526,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err) {
                         // token nieważny lub nieprawidłowy
-                        res.status(500).json({ error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+                        res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
                     }
                     else {
                         if (value && value.user) {
@@ -1555,7 +1556,7 @@ class Auth {
                                 }
                                 else {
                                     // user nie istnieje
-                                    res.status(404).json({ error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+                                    res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
                                 }
                             }));
                         }
@@ -1564,13 +1565,55 @@ class Auth {
             }
             catch (err) {
                 // token nieważny lub nieprawidłowy
-                res.status(400).json({ error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+                res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
             }
         }
         else {
             // brak Tokena
-            res.status(401).json({ error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+            res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
         }
+    }
+    resetPassword(req, res, next) {
+        access_model_1.default.findOne({ email: req.body.email }).then((access) => __awaiter(this, void 0, void 0, function* () {
+            if (access) {
+                const resetToken = jsonwebtoken_1.default.sign({ _id: access._id }, this.tokenSecret, {
+                    expiresIn: "1h"
+                });
+                let email = new email_1.default();
+                let template = {
+                    to: req.body.email,
+                    subject: '3C ERP Cloud | Reset Password',
+                    html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
+                };
+                yield email.send(template);
+                res.status(200).json({ status: "success" });
+            }
+            else {
+                // access nie istnieje
+                res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+            }
+        }));
+    }
+    setPassword(req, res, next) {
+        jsonwebtoken_1.default.verify(req.body.resetToken, this.tokenSecret, (err, value) => {
+            if (err) {
+                // resetToken wygasł lub jest błędny
+                res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+            }
+            else {
+                access_model_1.default.findOne({ _id: value._id }).then((access) => __awaiter(this, void 0, void 0, function* () {
+                    if (access) {
+                        access.password = req.body.password;
+                        access.save();
+                        res.status(200).json({ status: "success" });
+                    }
+                    else {
+                        // access nie istnieje
+                        res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+                    }
+                }));
+            }
+        });
     }
 }
 exports["default"] = Auth;
@@ -1582,7 +1625,7 @@ function createTokenPair(user, role, tokenSecret) {
         expiresIn: "12h"
     });
     const expires = Math.floor(addHours(new Date(), 1).getTime() / 1000);
-    return { type: "Bearer", token, expires, refreshToken };
+    return { status: "success", type: "Bearer", token, expires, refreshToken };
 }
 function addHours(date, hours) {
     date.setTime(date.getTime() + hours * 60 * 60 * 1000);
@@ -1680,6 +1723,7 @@ const schema = new mongoose_1.Schema({
     password: { type: String, input: "PasswordField", required: true },
     email: { type: String, input: "TextField", required: true },
     active: { type: Boolean, input: "SwitchField" },
+    temporary: { type: Boolean, input: "SwitchField" },
 }, options);
 // Methods
 schema.methods.hashPassword = function () {
@@ -3218,9 +3262,14 @@ class Routes {
     routeAuth() {
         // Auth
         this.Router.route("/auth/login").post(this.Auth.login.bind(this.Auth));
+        this.Router.route("/auth/token").post(this.Auth.login.bind(this.Auth));
         this.Router.route("/auth/refresh").post(this.Auth.refreshToken.bind(this.Auth));
         this.Router.route("/auth/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
+        this.Router.route("/auth/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
         this.Router.route("/auth/verify").get(this.Auth.authenticate.bind(this.Auth), this.Auth.accessGranted.bind(this.Auth));
+        this.Router.route("/auth/reset_password")
+            .post(this.Auth.resetPassword.bind(this.Auth))
+            .patch(this.Auth.setPassword.bind(this.Auth));
     }
     routeFiles(controller) {
         // Files
