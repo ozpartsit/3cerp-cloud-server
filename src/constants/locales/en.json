@@ -4,5 +4,8 @@
 	"GB": "GB",
 	"pendingapproval": "pendingapproval",
 	"auth.failed_auth_token": "auth.failed_auth_token",
-	"auth.wrong_role": "auth.wrong_role"
+	"auth.wrong_role": "auth.wrong_role",
+	"auth.no_token": "auth.no_token",
+	"doc_not_found": "doc_not_found",
+	"auth.user_not_found": "auth.user_not_found"
 }

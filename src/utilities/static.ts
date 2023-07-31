@@ -7,10 +7,10 @@ import { IExtendedDocument } from "../utilities/methods";
 // interfejs rozszeżający model o uniwersalne metody
 export interface IExtendedModel<T extends Document> extends Model<T> {
   loadDocument: (id: string) => Promise<T | null>;
-  addDocument: (data: Object) => any;
+  addDocument: (mode: string, data: Object) => any;
   getDocument: (id: string, mode: string) => Promise<T | null>;
-  saveDocument: (id: string) => Promise<string | null>;
-  updateDocument: (id: string, updates: updateBody) => any;
+  saveDocument: (id: string) => Promise<any>;
+  updateDocument: (id: string, mode: string, updates: updateBody) => any;
   deleteDocument: (id: string) => any;
   findDocuments: (query: Object, options: any) => any;
 
@@ -20,6 +20,7 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
 
 export default function customStaticsMethods<T extends IExtendedDocument>(schema: Schema<T, IExtendedModel<T>>) {
   schema.statics.loadDocument = loadDocument;
+  schema.statics.addDocument = addDocument;
   schema.statics.getDocument = getDocument;
   schema.statics.saveDocument = saveDocument;
   schema.statics.updateDocument = updateDocument;
@@ -41,14 +42,21 @@ export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, 
 }
 
 //API
-export async function addDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, data: Object) {
+export async function addDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, mode: string, data: Object) {
   let document = await this.create(data);
   document.initLocal();
   document.recalcDocument();
   let msg = await document.validateDocument();
-  // Zapisanie dokumentu do cache
-  cache.set(document._id, document);
-  return { document, msg };
+  if (mode === "advanced") {
+    // Zapisanie dokumentu do cache
+    cache.set(document._id, document);
+    return { document, msg, saved: false };
+  } else {
+    await document.saveDocument();
+    return { document, msg, saved: true };
+  }
+
+
 }
 
 export async function getDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string): Promise<T | null> {
@@ -56,7 +64,7 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
   let document: T | null = await this.loadDocument(id);
   //}
   if (document && document._id) {
-    if (mode === "edit") cache.set(id, document);
+    if (mode === "advanced") cache.set(id, document);
   }
   return document;
 }
@@ -65,13 +73,13 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
 // najpierw sprawdza czy jest w cachu
 // jeżeli tak, zapisuje aktyywny stan i zwraca identyfikator
 // jeżeli nie, zwraca null
-export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string): Promise<string | null> {
+export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string): Promise<any> {
   let document = cache.get<T>(id);
   if (document) {
     await document.saveDocument();
-    return id;
+    return { document_id: id, saved: true };
   } else {
-    return null;
+    return { document_id: null, saved: false };
   }
 
 }
@@ -84,13 +92,14 @@ interface updateBody {
 
 }
 
-export async function updateDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, updates: updateBody | updateBody[]) {
-  let document = cache.get<T | null>(id);
-  let save = false;
-  if (!document) {
+export async function updateDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, updates: updateBody | updateBody[]) {
+  let document: T | null | undefined = null;
+  if (mode === "advanced") {
+    document = cache.get<T | null>(id);
+  } else {
     document = await this.loadDocument(id);
-    save = true;
   }
+
   if (document) {
     let msg: any = [];
     if (!Array.isArray(updates)) updates = [updates]; // array
@@ -98,17 +107,15 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
       msg = await document.setValue(update.field, update.value, update.list, update.subrecord);
     }
 
-
-
-    if (save) {
-      document = await document.saveDocument();
-      return { document, msg, saved: true };
-    } else {
+    if (mode === "advanced") {
       document.recalcDocument();
-      console.log(document)
       return { document, msg, saved: false };
+
+    } else {
+      await document.saveDocument();
+      return { document, msg, saved: true };
     }
-  } else return null;
+  } else return { document: null, msg: "error", saved: false };
 }
 
 export async function deleteDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string) {
@@ -117,12 +124,13 @@ export async function deleteDocument<T extends IExtendedDocument>(this: IExtende
     document.deleted = true;
     document.recalcDocument();
     cache.del(id);
-    document.remove();
+    await document.remove();
+    return { saved: true };
   } else {
-    // to do - dodać error
+    return { saved: false };
   }
 
-  return id;
+
 }
 
 export async function findDocuments<T extends IExtendedDocument>(this: IExtendedModel<T>, query: any, options: any) {

@@ -17,14 +17,14 @@ class GenericController<T extends IExtendedDocument> {
     }
 
     public async add(req: Request, res: Response, next: NextFunction) {
-
+        let { mode } = req.params;
         try {
             //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-            let { document, msg } = await this.model.addDocument(req.body);
+            let { document, msg, saved } = await this.model.addDocument(mode, req.body);
             //populate response document
             await document.autoPopulate();
             document = document.constantTranslate(req.locale);
-            res.json({ document, msg });
+            res.json({ document, msg, saved });
         } catch (error) {
             return next(error);
         }
@@ -35,7 +35,7 @@ class GenericController<T extends IExtendedDocument> {
         let { recordtype, id, mode } = req.params;
         try {
             let document = await this.model.getDocument(id, mode);
-            
+
             if (!document) res.status(404).json(
                 {
                     error: {
@@ -48,7 +48,7 @@ class GenericController<T extends IExtendedDocument> {
                 //populate response document
                 await document.autoPopulate();
                 let docObject = document.constantTranslate(req.locale);
-                res.json(docObject);
+                res.json({ document: docObject, mode: mode === "advanced" ? mode : "simple" });
             }
         } catch (error) {
             return next(error);
@@ -58,14 +58,26 @@ class GenericController<T extends IExtendedDocument> {
     public async save(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {
-            let document = await this.model.saveDocument(id);
-            res.json(document);
+            let { document_id, saved } = await this.model.saveDocument(id);
+            if (!document_id) {
+                res.status(404).json(
+                    {
+                        error: {
+                            code: "doc_not_found",
+                            message: req.__('doc_not_found')
+                        }
+                    }
+                )
+            } else {
+                res.json({ document_id, saved });
+            }
+
         } catch (error) {
             return next(error);
         }
     }
     public async update(req: Request, res: Response, next: NextFunction) {
-        let { recordtype, id } = req.params;
+        let { recordtype, mode, id } = req.params;
         try {
             // let document = null;
             // if (Array.isArray(req.body)) { // to do - może upateDocument zmienić by przyjomwał cały obiek body?
@@ -78,11 +90,24 @@ class GenericController<T extends IExtendedDocument> {
             //     document = await model.updateDocument(id, list, subrecord, field, value, save);
             // }
             let update = req.body;
-            let { document, msg } = await this.model.updateDocument(id, update);
-            //populate response document
-            await document.autoPopulate();
-            document = document.constantTranslate(req.locale);
-            res.json({ document, msg });
+            let { document, msg, saved } = await this.model.updateDocument(id, mode, update);
+
+            if (!document) {
+                res.status(404).json(
+                    {
+                        error: {
+                            code: "doc_not_found",
+                            message: req.__('doc_not_found')
+                        }
+                    }
+                )
+            } else {
+                //populate response document
+                await document.autoPopulate();
+                document = document.constantTranslate(req.locale);
+                res.json({ document, msg, saved });
+            }
+
         } catch (error) {
             return next(error);
         }
@@ -91,7 +116,7 @@ class GenericController<T extends IExtendedDocument> {
     public delete(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {// to do - do poprawy
-            let document = this.model.deleteDocument(id)
+            let document = this.model.deleteDocument(id);
             res.json(document);
         } catch (error) {
             return next(error);

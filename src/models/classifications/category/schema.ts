@@ -6,7 +6,7 @@ const options = { discriminatorKey: "type", collection: "classifications" };
 export interface ICategory extends IClassification {
 
 }
-export interface ICategoryModel extends Model<ICategory>, IExtendedModel { }
+export interface ICategoryModel extends Model<ICategory>, IExtendedModel<ICategory> { }
 
 export const schema = new Schema<ICategory>(
     {},

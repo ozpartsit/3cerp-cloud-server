@@ -29,7 +29,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.App3CERP = exports.email = exports.cache = void 0;
+exports.App3CERP = exports.email = void 0;
 const express_1 = __importDefault(__webpack_require__(6860));
 const express_fileupload_1 = __importDefault(__webpack_require__(6674));
 const dotenv = __importStar(__webpack_require__(5142));
@@ -44,14 +44,15 @@ const public_1 = __importDefault(__webpack_require__(93));
 const emitEvents_1 = __importDefault(__webpack_require__(1321));
 const email_1 = __importDefault(__webpack_require__(3097));
 const error_handler_1 = __webpack_require__(9868);
-const storage_1 = __importDefault(__webpack_require__(4091));
-const cache_1 = __importDefault(__webpack_require__(9732));
+const storage_1 = __importDefault(__webpack_require__(2402));
+//import Cache from "./middleware/cache";
+const limiter_1 = __importDefault(__webpack_require__(3545));
 const path_1 = __importDefault(__webpack_require__(1017));
 // Custom ENVIRONMENT Veriables
 let env = dotenv.config({
     path: path_1.default.resolve(`.env.${"production"}`)
 });
-exports.cache = new cache_1.default();
+//export const cache = new Cache();
 exports.email = new email_1.default();
 class App3CERP {
     constructor() {
@@ -86,6 +87,8 @@ class App3CERP {
         this.app.use('/storage', express_1.default.static("storage")); // Storage files
         this.app.use("/public", express_1.default.static("public"));
         this.app.use('/hosting', express_1.default.static("hosting"));
+        // Apply the rate limiting middleware to API calls only
+        this.app.use('/api', limiter_1.default);
         this.app.use(statusMonitor_1.default);
         this.app.use(i18n_1.default.init);
     }
@@ -118,6 +121,22 @@ class App3CERP {
 }
 exports.App3CERP = App3CERP;
 new App3CERP().startServer();
+
+
+/***/ }),
+
+/***/ 7429:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const node_cache_1 = __importDefault(__webpack_require__(4580));
+// Ustawienie czasu życia cache (w sekundach)
+const cache = new node_cache_1.default({ stdTTL: 60 * 20, checkperiod: 120 * 20 });
+exports["default"] = cache;
 
 
 /***/ }),
@@ -234,6 +253,78 @@ exports["default"] = __webpack_require__(3222)({
         }],
     ignoreStartsWith: '/admin'
 });
+
+
+/***/ }),
+
+/***/ 2402:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+//requiring path and fs modules
+const path_1 = __importDefault(__webpack_require__(1017));
+const fs_1 = __importDefault(__webpack_require__(7147));
+const schema_1 = __importDefault(__webpack_require__(9106));
+class StorageStructure {
+    constructor() {
+        //resolve storage path of directory
+        this.storagePath = path_1.default.resolve("storage");
+        this.importPath = path_1.default.resolve("storage", "import");
+        this.exportPath = path_1.default.resolve("storage", "export");
+        this.uploadsPath = path_1.default.resolve("storage", "uploads");
+        if (!fs_1.default.existsSync(this.storagePath))
+            fs_1.default.mkdirSync(this.storagePath);
+        if (!fs_1.default.existsSync(this.importPath))
+            fs_1.default.mkdirSync(this.importPath);
+        if (!fs_1.default.existsSync(this.exportPath))
+            fs_1.default.mkdirSync(this.exportPath);
+        if (!fs_1.default.existsSync(this.uploadsPath))
+            fs_1.default.mkdirSync(this.uploadsPath);
+    }
+    init() {
+        console.log("Init Storage", this.storagePath);
+        this.mapFiles(this.storagePath, null);
+    }
+    makeDir(path) {
+        if (!fs_1.default.existsSync(path)) {
+            fs_1.default.mkdirSync(path);
+        }
+    }
+    delDir(path) {
+        try {
+            fs_1.default.rmdirSync(path, { recursive: true });
+            console.log(`${path} is deleted!`);
+        }
+        catch (err) {
+            console.error(`Error while deleting ${path}.`);
+        }
+    }
+    mapFiles(dirPath, 
+    //parentPath: string = "root",
+    parent) {
+        fs_1.default.readdir(dirPath, (err, files) => {
+            files.forEach((file) => {
+                let folder = parent ? parent.path : encodeURI("storage");
+                let doc = new schema_1.default({
+                    name: file,
+                    type: 'File',
+                    path: path_1.default.join(folder, encodeURI(file)),
+                    urlcomponent: path_1.default.join(folder, encodeURI(file)),
+                });
+                if (fs_1.default.lstatSync(path_1.default.join(dirPath, file)).isDirectory()) {
+                    doc.type = "Folder";
+                    this.mapFiles(path_1.default.join(dirPath, file), doc);
+                }
+                doc.save();
+            });
+        });
+    }
+}
+exports["default"] = StorageStructure;
 
 
 /***/ }),
@@ -387,9 +478,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getStates = void 0;
-const app_1 = __webpack_require__(3165);
+const cache_1 = __importDefault(__webpack_require__(7429));
 const states = {
     PL: ["PL_DS", "PL_KP", "PL_LU", "PL_LB", "PL_MZ", "PL_MA", "PL_OP", "PL_PK", "PL_PD", "PL_PM", "PL_WN", "PL_WP", "PL_ZP", "PL_LD", "PL_SL", "PL_SK"],
     GB: ["GB_NIR", "GB_ENG", "GB_SCT", "GB_WLS"]
@@ -401,7 +495,7 @@ function getStates(query) {
             return states[query.country];
         }
         if (query.id) {
-            let document = app_1.cache.getCache(query.id);
+            let document = cache_1.default.get(query.id);
             if (document) {
                 if (query.field == 'billingState')
                     return states[document["billingCountry"]] || [];
@@ -465,153 +559,6 @@ exports.getStatus = getStatus;
 
 /***/ }),
 
-/***/ 7003:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-// class TranTypes {
-//   private elements: any[];
-//   constructor() {
-//     this.elements = [
-//       { _id: "SalesOrder", name: "Sales Order" },
-//       { _id: "Invoice", name: "Invoice" }
-//     ];
-//   }
-//   public getEnum(): any[] {
-//     return this.elements.map((element: any) => element._id);
-//   }
-//   public getProperties(_id: String): Object {
-//     return this.elements.find((element: any) => element._id === _id) || {};
-//   }
-//   public getName(_id: String): String {
-//     let element = this.elements.find((element: any) => element._id === _id);
-//     return element ? element.name : "";
-//   }
-// }
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-// export default new TranTypes();
-exports["default"] = ["SalesOrder", "Invoice"];
-
-
-/***/ }),
-
-/***/ 76:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const model_1 = __importStar(__webpack_require__(7397));
-const controller_1 = __importDefault(__webpack_require__(450));
-class IAccountingController extends controller_1.default {
-    constructor() {
-        super({ model: model_1.default, submodels: model_1.AccountingTypes });
-    }
-}
-exports["default"] = IAccountingController;
-
-
-/***/ }),
-
-/***/ 5282:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const model_1 = __importStar(__webpack_require__(625));
-const controller_1 = __importDefault(__webpack_require__(450));
-class IActivityController extends controller_1.default {
-    constructor() {
-        super({ model: model_1.default, submodels: model_1.ActivityTypes });
-    }
-}
-exports["default"] = IActivityController;
-
-
-/***/ }),
-
-/***/ 3096:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const model_1 = __importStar(__webpack_require__(2731));
-const controller_1 = __importDefault(__webpack_require__(450));
-class ClassificationController extends controller_1.default {
-    constructor() {
-        super({ model: model_1.default, submodels: model_1.ClassificationTypes });
-    }
-}
-exports["default"] = ClassificationController;
-
-
-/***/ }),
-
 /***/ 2110:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -666,322 +613,6 @@ exports["default"] = controller;
 
 /***/ }),
 
-/***/ 450:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __importDefault(__webpack_require__(1185));
-const email_1 = __importDefault(__webpack_require__(3097));
-const changelog_model_1 = __importDefault(__webpack_require__(7617));
-class controller {
-    constructor(models) {
-        this.models = {};
-        this.models = models;
-    }
-    setModel(recordtype, db) {
-        if (this.models) {
-            let Model = (this.models.submodels[recordtype] || this.models.model);
-            //Model.getFields();
-            // Create or assign models from dedicate BD - to do
-            if (db) {
-                const connection = mongoose_1.default.connections.find(conn => conn.name === db);
-                if (connection) {
-                    if (!connection.models[Model.modelName])
-                        Model = connection.model(Model.modelName, Model.schema); //- działa
-                    else
-                        Model = connection.models[Model.modelName];
-                }
-            }
-            return Model;
-        }
-        else
-            throw 'błąd';
-    }
-    add(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // init Model and create new Document
-            const model = this.setModel(req.params.recordtype);
-            try {
-                //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-                let { document, msg } = yield model.addDocument(req.body);
-                //populate response document
-                yield document.autoPopulate();
-                document = document.constantTranslate(req.locale);
-                res.json({ document, msg });
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    find(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const model = this.setModel(req.params.recordtype);
-            try {
-                let query = {};
-                let options = { select: { name: 1, type: 1, resource: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
-                let filters = (req.query.filters || "").toString();
-                if (filters) {
-                    query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
-                }
-                //query.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-                let select = (req.query.select || req.query.fields || "").toString();
-                if (select) {
-                    options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, link: 1 });
-                }
-                else {
-                    // add default field to select
-                    model.getFields(req.locale).forEach(field => {
-                        if (field.select)
-                            options.select[field.field] = 1;
-                    });
-                }
-                // Sort
-                let sort = (req.query.sort || "").toString();
-                if (sort) {
-                    options.sort = sort.split(",").reduce((o, f) => {
-                        // -date = desc sort per date field
-                        if (f[0] == "-") {
-                            f = f.substring(1);
-                            o[f] = 1;
-                        }
-                        else {
-                            o[f] = 1;
-                        }
-                        return o;
-                    }, {});
-                }
-                // search by keyword
-                let search = (req.query.search || "").toString();
-                if (search) {
-                    query['name'] = { $regex: `,*${req.query.search}.*` };
-                }
-                // loop per query params
-                for (const [key, value] of Object.entries(req.query)) {
-                    if (["filters", "select", "fields", "search", "sort", "page", "limit"].includes(key))
-                        query[key] = { $eq: value };
-                    // add verify field exists
-                }
-                options.limit = parseInt((req.query.limit || 50).toString());
-                options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
-                let result = yield model.findDocuments(query, options);
-                let total = yield model.count(query);
-                // get fields
-                let fields = model.getFields(req.locale).filter((field) => options.select[field.field]);
-                for (let index in result) {
-                    result[index] = yield result[index].constantTranslate(req.locale);
-                }
-                //to do - test przypisania do source.field
-                // result = result.map(line => {
-                //     let row = {};
-                //     for (const [key, value] of Object.entries(options.select)) {
-                //         console.log(key, value,line[key])
-                //         row[key] = line[key];
-                //     }
-                //     return row;
-                // })
-                // console.log(result)
-                const data = {
-                    fields: fields,
-                    docs: result,
-                    totalDocs: total,
-                    limit: options.limit,
-                    page: options.skip,
-                    totalPages: Math.ceil(total / options.limit)
-                };
-                res.json(data);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    get(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype, id, mode } = req.params;
-            const model = this.setModel(recordtype);
-            try {
-                let document = yield model.getDocument(id, mode);
-                if (!document)
-                    res.status(404).json({
-                        error: {
-                            code: "doc_not_found",
-                            message: req.__('doc_not_found')
-                        }
-                    });
-                else {
-                    //populate response document
-                    yield document.autoPopulate();
-                    document = document.constantTranslate(req.locale);
-                    res.json(document);
-                }
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    save(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype, id } = req.params;
-            const model = this.setModel(recordtype);
-            try {
-                let document = yield model.saveDocument(id);
-                res.json(document);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    update(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype, id } = req.params;
-            const model = this.setModel(recordtype);
-            try {
-                // let document = null;
-                // if (Array.isArray(req.body)) { // to do - może upateDocument zmienić by przyjomwał cały obiek body?
-                //     for (let update of req.body) {
-                //         let { list, subrecord, field, value, save } = update;
-                //         document = await model.updateDocument(id, update);
-                //     }
-                // } else {
-                //     let { list, subrecord, field, value, save } = req.body;
-                //     document = await model.updateDocument(id, list, subrecord, field, value, save);
-                // }
-                let update = req.body;
-                let { document, msg } = yield model.updateDocument(id, update);
-                //populate response document
-                yield document.autoPopulate();
-                document = document.constantTranslate(req.locale);
-                res.json({ document, msg });
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    delete(req, res, next) {
-        let { recordtype, id } = req.params;
-        const model = this.setModel(recordtype);
-        try { // to do - do poprawy
-            let document = model.deleteDocument(id);
-            res.json(document);
-        }
-        catch (error) {
-            return next(error);
-        }
-    }
-    send(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype, id } = req.params;
-            const model = this.setModel(recordtype);
-            let config = req.body;
-            try {
-                let email = new email_1.default();
-                let status = yield email.send(config);
-                res.json(status);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    fields(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype } = req.params;
-            const model = this.setModel(recordtype);
-            try {
-                let fields = yield model.getFields(req.locale);
-                res.json(fields);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    form(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype } = req.params;
-            const model = this.setModel(recordtype);
-            try {
-                let form = yield model.getForm(req.locale);
-                if (form) {
-                    let fields = yield model.getFields(req.locale);
-                    form.sections.forEach((section) => {
-                        if (section.table) {
-                            section.table = fields.find((f) => f.field == section.table) || null;
-                        }
-                        section.cols.forEach((col) => {
-                            if (col.rows)
-                                col.rows.forEach((row) => {
-                                    if (row)
-                                        row.forEach((field, index) => {
-                                            row[index] = fields.find((f) => f.field == field) || null;
-                                            if (row[index]) {
-                                                if (row[index].type != "EmbeddedField")
-                                                    delete row[index].fields;
-                                                delete row[index].selects;
-                                                delete row[index].ref;
-                                            }
-                                        });
-                                });
-                        });
-                    });
-                }
-                res.json(form);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    logs(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype, id } = req.params;
-            const model = this.setModel(recordtype);
-            try {
-                let query = { document: id };
-                let results = yield changelog_model_1.default.find(query)
-                    .populate({ path: 'newValue', select: 'name' })
-                    .populate({ path: 'oldValue', select: 'name' })
-                    .exec();
-                // parse to plain result
-                let changelogs = results.map((line) => {
-                    return {
-                        newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue,
-                        oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue,
-                        date: new Date(line.createdAt).toISOString().substr(0, 10),
-                        field: line.field,
-                        list: line.list
-                    };
-                });
-                res.json(changelogs);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-}
-exports["default"] = controller;
-
-
-/***/ }),
-
 /***/ 4267:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -1000,11 +631,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const email_model_1 = __importDefault(__webpack_require__(8499));
-const controller_1 = __importDefault(__webpack_require__(450));
+const genericController_1 = __importDefault(__webpack_require__(2893));
 const child_process_1 = __webpack_require__(2081);
-class EmailController extends controller_1.default {
-    constructor() {
-        super({ model: email_model_1.default, submodels: {} });
+class EmailControllerr extends genericController_1.default {
+    constructor(model) {
+        super(model);
     }
     save(req, res, next) {
         const _super = Object.create(null, {
@@ -1082,46 +713,7 @@ class EmailController extends controller_1.default {
         });
     }
 }
-exports["default"] = EmailController;
-
-
-/***/ }),
-
-/***/ 5067:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const model_1 = __importStar(__webpack_require__(8702));
-const controller_1 = __importDefault(__webpack_require__(450));
-class EntityController extends controller_1.default {
-    constructor() {
-        super({ model: model_1.default, submodels: model_1.EntityTypes });
-    }
-}
-exports["default"] = EntityController;
+exports["default"] = EmailControllerr;
 
 
 /***/ }),
@@ -1130,25 +722,6 @@ exports["default"] = EntityController;
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -1162,13 +735,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const model_1 = __importStar(__webpack_require__(248));
 const schema_1 = __importDefault(__webpack_require__(7662));
-const controller_1 = __importDefault(__webpack_require__(450));
+const genericController_1 = __importDefault(__webpack_require__(2893));
 const path_1 = __importDefault(__webpack_require__(1017));
-class FileController extends controller_1.default {
-    constructor() {
-        super({ model: model_1.default, submodels: model_1.StorageTypes });
+class FileController extends genericController_1.default {
+    constructor(model) {
+        super(model);
         this.storagePath = path_1.default.resolve("storage");
     }
     upload(req, res, next) {
@@ -1210,6 +782,312 @@ class FileController extends controller_1.default {
     }
 }
 exports["default"] = FileController;
+
+
+/***/ }),
+
+/***/ 2893:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const email_1 = __importDefault(__webpack_require__(3097));
+const changelog_model_1 = __importDefault(__webpack_require__(7617));
+// Uniwersalny kontroler generyczny
+class GenericController {
+    constructor(model) {
+        this.model = model;
+    }
+    add(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { mode } = req.params;
+            try {
+                //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
+                let { document, msg, saved } = yield this.model.addDocument(mode, req.body);
+                //populate response document
+                yield document.autoPopulate();
+                document = document.constantTranslate(req.locale);
+                res.json({ document, msg, saved });
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    get(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype, id, mode } = req.params;
+            try {
+                let document = yield this.model.getDocument(id, mode);
+                if (!document)
+                    res.status(404).json({
+                        error: {
+                            code: "doc_not_found",
+                            message: req.__('doc_not_found')
+                        }
+                    });
+                else {
+                    //populate response document
+                    yield document.autoPopulate();
+                    let docObject = document.constantTranslate(req.locale);
+                    res.json({ document: docObject, mode: mode === "advanced" ? mode : "simple" });
+                }
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    save(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype, id } = req.params;
+            try {
+                let { document_id, saved } = yield this.model.saveDocument(id);
+                if (!document_id) {
+                    res.status(404).json({
+                        error: {
+                            code: "doc_not_found",
+                            message: req.__('doc_not_found')
+                        }
+                    });
+                }
+                else {
+                    res.json({ document_id, saved });
+                }
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    update(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype, mode, id } = req.params;
+            try {
+                // let document = null;
+                // if (Array.isArray(req.body)) { // to do - może upateDocument zmienić by przyjomwał cały obiek body?
+                //     for (let update of req.body) {
+                //         let { list, subrecord, field, value, save } = update;
+                //         document = await model.updateDocument(id, update);
+                //     }
+                // } else {
+                //     let { list, subrecord, field, value, save } = req.body;
+                //     document = await model.updateDocument(id, list, subrecord, field, value, save);
+                // }
+                let update = req.body;
+                let { document, msg, saved } = yield this.model.updateDocument(id, mode, update);
+                if (!document) {
+                    res.status(404).json({
+                        error: {
+                            code: "doc_not_found",
+                            message: req.__('doc_not_found')
+                        }
+                    });
+                }
+                else {
+                    //populate response document
+                    yield document.autoPopulate();
+                    document = document.constantTranslate(req.locale);
+                    res.json({ document, msg, saved });
+                }
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    delete(req, res, next) {
+        let { recordtype, id } = req.params;
+        try { // to do - do poprawy
+            let document = this.model.deleteDocument(id);
+            res.json(document);
+        }
+        catch (error) {
+            return next(error);
+        }
+    }
+    send(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype, id } = req.params;
+            let config = req.body;
+            try {
+                let email = new email_1.default();
+                let status = yield email.send(config);
+                res.json(status);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    fields(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype } = req.params;
+            try {
+                let fields = yield this.model.getFields(req.locale);
+                res.json(fields);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    form(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype } = req.params;
+            try {
+                let form = yield this.model.getForm(req.locale);
+                if (form) {
+                    let fields = yield this.model.getFields(req.locale);
+                    form.sections.forEach((section) => {
+                        if (section.table) {
+                            section.table = fields.find((f) => f.field == section.table) || null;
+                        }
+                        section.cols.forEach((col) => {
+                            if (col.rows)
+                                col.rows.forEach((row) => {
+                                    if (row)
+                                        row.forEach((field, index) => {
+                                            row[index] = fields.find((f) => f.field == field) || null;
+                                            if (row[index]) {
+                                                if (row[index].type != "EmbeddedField")
+                                                    delete row[index].fields;
+                                                delete row[index].selects;
+                                                delete row[index].ref;
+                                            }
+                                        });
+                                });
+                        });
+                    });
+                }
+                res.json(form);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    logs(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { recordtype, id } = req.params;
+            try {
+                let query = { document: id };
+                let results = yield changelog_model_1.default.find(query)
+                    .populate({ path: 'newValue', select: 'name' })
+                    .populate({ path: 'oldValue', select: 'name' })
+                    .exec();
+                // parse to plain result
+                let changelogs = results.map((line) => {
+                    return {
+                        newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue,
+                        oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue,
+                        date: new Date(line.createdAt).toISOString().substr(0, 10),
+                        field: line.field,
+                        list: line.list
+                    };
+                });
+                res.json(changelogs);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    find(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let query = {};
+                let options = { select: { name: 1, type: 1, resource: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
+                let filters = (req.query.filters || "").toString();
+                if (filters) {
+                    query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+                }
+                //query.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
+                let select = (req.query.select || req.query.fields || "").toString();
+                if (select) {
+                    options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, link: 1 });
+                }
+                else {
+                    // add default field to select
+                    this.model.getFields(req.locale).forEach(field => {
+                        if (field.select)
+                            options.select[field.field] = 1;
+                    });
+                }
+                // Sort
+                let sort = (req.query.sort || "").toString();
+                if (sort) {
+                    options.sort = sort.split(",").reduce((o, f) => {
+                        // -date = desc sort per date field
+                        if (f[0] == "-") {
+                            f = f.substring(1);
+                            o[f] = 1;
+                        }
+                        else {
+                            o[f] = 1;
+                        }
+                        return o;
+                    }, {});
+                }
+                // search by keyword
+                let search = (req.query.search || "").toString();
+                if (search) {
+                    query['name'] = { $regex: `,*${req.query.search}.*` };
+                }
+                // loop per query params
+                for (const [key, value] of Object.entries(req.query)) {
+                    if (["filters", "select", "fields", "search", "sort", "page", "limit"].includes(key))
+                        query[key] = { $eq: value };
+                    // add verify field exists
+                }
+                options.limit = parseInt((req.query.limit || 50).toString());
+                options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
+                let result = yield this.model.findDocuments(query, options);
+                let total = yield this.model.count(query);
+                // get fields
+                let fields = this.model.getFields(req.locale).filter((field) => options.select[field.field]);
+                for (let index in result) {
+                    result[index] = yield result[index].constantTranslate(req.locale);
+                }
+                //to do - test przypisania do source.field
+                // result = result.map(line => {
+                //     let row = {};
+                //     for (const [key, value] of Object.entries(options.select)) {
+                //         console.log(key, value,line[key])
+                //         row[key] = line[key];
+                //     }
+                //     return row;
+                // })
+                // console.log(result)
+                const data = {
+                    fields: fields,
+                    docs: result,
+                    totalDocs: total,
+                    limit: options.limit,
+                    page: options.skip,
+                    totalPages: Math.ceil(total / options.limit)
+                };
+                res.json(data);
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+}
+exports["default"] = GenericController;
 
 
 /***/ }),
@@ -1343,46 +1221,7 @@ exports["default"] = controller;
 
 /***/ }),
 
-/***/ 1199:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const model_1 = __importStar(__webpack_require__(7849));
-const controller_1 = __importDefault(__webpack_require__(450));
-class ItemController extends controller_1.default {
-    constructor() {
-        super({ model: model_1.default, submodels: model_1.ItemTypes });
-    }
-}
-exports["default"] = ItemController;
-
-
-/***/ }),
-
-/***/ 3002:
+/***/ 2069:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1399,197 +1238,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const model_1 = __importDefault(__webpack_require__(8947));
-const controller_1 = __importDefault(__webpack_require__(450));
-class ReportController extends controller_1.default {
-    constructor() {
-        super({ model: model_1.default, submodels: {} });
+const genericController_1 = __importDefault(__webpack_require__(2893));
+class TransactionController extends genericController_1.default {
+    constructor(model) {
+        super(model);
     }
-    results(req, res, next) {
+    pdf(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             let { recordtype, id } = req.params;
-            const model = this.setModel(recordtype);
-            let document = yield model.loadDocument(id);
-            if (!document)
+            let document = yield this.model.getDocument(id, 'view');
+            if (document) {
+                let pdf = yield document.pdf();
+                res.contentType('application/pdf;charset=UTF-8');
+                res.send(pdf);
+            }
+            else {
                 res.status(404).json({
                     error: {
                         code: "doc_not_found",
                         message: req.__('doc_not_found')
                     }
                 });
-            else {
-                let results = yield document.getResults();
-                res.json(results);
             }
-        });
-    }
-}
-exports["default"] = ReportController;
-
-
-/***/ }),
-
-/***/ 4604:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const table_model_1 = __importDefault(__webpack_require__(8556));
-const dashboard_model_1 = __importDefault(__webpack_require__(984));
-class SettingController {
-    constructor() {
-        this.models = {
-            table: table_model_1.default,
-            dashboard: dashboard_model_1.default
-        };
-    }
-    add(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const model = this.models[req.params.recordtype];
-            try {
-                let document = new model(req.body);
-                document.initLocal();
-                document.save();
-                res.json(document);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    update(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const model = this.models[req.params.recordtype];
-            try {
-                //let document = new model(req.body);
-                // to do - update
-                let document = yield model.findOne({ _id: req.params.id });
-                if (document) {
-                    document = yield document.updateOne(req.body);
-                }
-                res.json(document);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-    find(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const model = this.models[req.params.recordtype];
-            try {
-                // to to - zwraca tablice a powinno jeden element
-                let query = req.query;
-                let table = query.table;
-                let defaultSetting = defaultSettings[table];
-                let document = yield model.find(query);
-                if (document.length)
-                    res.json(document);
-                else
-                    res.json([defaultSetting]);
-            }
-            catch (error) {
-                return next(error);
-            }
-        });
-    }
-}
-exports["default"] = SettingController;
-// to do - przenieść do odzielnego pliku
-const defaultSettings = {
-    "salesorder.pendingapproval": { headers: ["name", "date", "entity", "amount"] },
-    "salesorder.open": { headers: ["name", "date", "entity", "amount"] }
-};
-
-
-/***/ }),
-
-/***/ 2069:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const model_1 = __importStar(__webpack_require__(235));
-const controller_1 = __importDefault(__webpack_require__(450));
-class TransactionController extends controller_1.default {
-    constructor() {
-        super({ model: model_1.default, submodels: model_1.TransactionTypes });
-    }
-    pdf(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype, id } = req.params;
-            const model = this.setModel(recordtype);
-            let document = yield model.getDocument(id, 'view');
-            let pdf = yield document.pdf();
-            res.contentType('application/pdf;charset=UTF-8');
-            res.send(pdf);
         });
     }
 }
 exports["default"] = TransactionController;
-
-
-/***/ }),
-
-/***/ 6606:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const warehouse_model_1 = __importDefault(__webpack_require__(2419));
-const controller_1 = __importDefault(__webpack_require__(450));
-class WarehouseController extends controller_1.default {
-    constructor() {
-        super({ model: warehouse_model_1.default, submodels: {} });
-    }
-}
-exports["default"] = WarehouseController;
 
 
 /***/ }),
@@ -1612,13 +1286,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const shop_model_1 = __importDefault(__webpack_require__(1725));
-const controller_1 = __importDefault(__webpack_require__(450));
+const genericController_1 = __importDefault(__webpack_require__(2893));
 const child_process_1 = __webpack_require__(2081);
 const path_1 = __importDefault(__webpack_require__(1017));
 const fs_1 = __importDefault(__webpack_require__(7147));
-class WebsiteController extends controller_1.default {
-    constructor() {
-        super({ model: shop_model_1.default, submodels: {} });
+class WebsiteController extends genericController_1.default {
+    constructor(model) {
+        super(model);
     }
     save(req, res, next) {
         const _super = Object.create(null, {
@@ -1631,7 +1305,6 @@ class WebsiteController extends controller_1.default {
     }
     syncSites() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('mapShops');
             let shops = yield shop_model_1.default.find();
             for (let site of shops) {
                 let sitePath = path_1.default.resolve("hosting", site.subdomain);
@@ -1729,7 +1402,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const jsonwebtoken_1 = __importDefault(__webpack_require__(9344));
-const model_1 = __importDefault(__webpack_require__(8702));
+const access_model_1 = __importDefault(__webpack_require__(6402));
+const user_model_1 = __importDefault(__webpack_require__(8653));
 class Auth {
     constructor() {
         this.tokenSecret = process.env.TOKEN_SECRET || "";
@@ -1749,6 +1423,8 @@ class Auth {
                         if (value) {
                             req.headers.user = value.user;
                             req.headers.role = value.role;
+                            // aktualizacja daty ostatniego authenticate
+                            user_model_1.default.findByIdAndUpdate(value.user, { $set: { lastAuthDate: new Date() } }).exec();
                         }
                         next();
                     }
@@ -1782,17 +1458,27 @@ class Auth {
     // na podstawie pary email + hasło nadaje token
     // opcjonalnie rola
     login(req, res, next) {
-        model_1.default.findOne({ email: req.body.email }).then((user) => __awaiter(this, void 0, void 0, function* () {
-            if (user) {
-                const valide = yield user.validatePassword(req.body.password);
+        access_model_1.default.findOne({ email: req.body.email }).then((access) => __awaiter(this, void 0, void 0, function* () {
+            if (access) {
+                const valide = yield access.validatePassword(req.body.password);
                 if (valide) {
-                    if (!(user.roles || []).includes(req.body.role || user.role)) {
-                        // użytkownik nie ma uprawnień do tej roli
-                        res.status(403).json({ error: { code: "auth.wrong_role", message: req.__("auth.wrong_role") } });
-                    }
-                    const tokens = createTokenPair(user._id, req.body.role || user.role, this.tokenSecret);
-                    // zwraca parę tokenów
-                    res.status(200).json(tokens);
+                    user_model_1.default.findOne({ _id: access.user }).then((user) => __awaiter(this, void 0, void 0, function* () {
+                        if (user) {
+                            if (!(user.roles || []).includes(req.body.role || user.role)) {
+                                // użytkownik nie ma uprawnień do tej roli
+                                res.status(403).json({ error: { code: "auth.wrong_role", message: req.__("auth.wrong_role") } });
+                            }
+                            // aktualizacja daty ostatniego logowania
+                            user_model_1.default.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec();
+                            const tokens = createTokenPair(user._id.toString(), req.body.role || user.role, this.tokenSecret);
+                            // zwraca parę tokenów
+                            res.status(200).json(tokens);
+                        }
+                        else {
+                            // Użytkownik nie istnieje
+                            res.status(404).json({ error: { code: "auth.user_not_found", message: req.__("auth.user_not_found") } });
+                        }
+                    }));
                 }
                 else {
                     // hasło nie pasuje do emaila
@@ -1843,26 +1529,33 @@ class Auth {
                     }
                     else {
                         if (value && value.user) {
-                            model_1.default.findOne({ _id: value.user }).then((user) => __awaiter(this, void 0, void 0, function* () {
+                            user_model_1.default.findOne({ _id: value.user }).then((user) => __awaiter(this, void 0, void 0, function* () {
                                 if (user) {
+                                    yield user.populate("avatar", "name path");
                                     let userLoged = {
                                         _id: user._id,
-                                        account: "3cerpcloud",
                                         name: user.name,
                                         email: user.email,
-                                        firstName: "Łukasz",
-                                        lastName: "Śpiewak",
-                                        initials: "ŁŚ",
-                                        jobTitle: "Administrator",
-                                        department: "IT",
+                                        firstName: user.firstName,
+                                        lastName: user.lastName,
+                                        initials: user.initials,
+                                        jobTitle: user.jobTitle,
+                                        department: user.department,
                                         company: "3C ERP Sp. z o. o.",
-                                        lastLoginDate: new Date('2023-07-26'),
-                                        lastAuthDate: new Date('2023-07-26'),
+                                        lastLoginDate: user.lastLoginDate,
+                                        lastAuthDate: user.lastAuthDate,
                                         locale: user.locale,
-                                        role: { _id: "admin", name: "Admin" },
-                                        roles: [{ _id: "admin", name: "Admin" }, { _id: "accounts", name: "Accounts" }],
+                                        avatar: user.avatar,
+                                        resource: user.resource,
+                                        type: user.type
+                                        // role: { _id: "admin", name: "Admin" },
+                                        // roles: [{ _id: "admin", name: "Admin" }, { _id: "accounts", name: "Accounts" }],
                                     };
-                                    res.status(200).json({ user: userLoged });
+                                    res.status(200).json({ user: userLoged, token: token, role: value.role, account: "3cerpcloud" });
+                                }
+                                else {
+                                    // user nie istnieje
+                                    res.status(404).json({ error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
                                 }
                             }));
                         }
@@ -1895,48 +1588,6 @@ function addHours(date, hours) {
     date.setTime(date.getTime() + hours * 60 * 60 * 1000);
     return date;
 }
-
-
-/***/ }),
-
-/***/ 9732:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-class DataCache {
-    constructor() {
-        this.cache = {};
-        console.log("init cache");
-        this.cache = {};
-        this.resetCache = this.resetCache.bind(this);
-    }
-    addCache(Document) {
-        if (Document && !this.getCache(Document._id)) {
-            this.cache[Document._id] = Document;
-        }
-        else {
-            //throw new Error("the document is now open!");
-        }
-    }
-    getCache(DocumentID) {
-        if (DocumentID)
-            return this.cache[DocumentID];
-        else
-            return this.cache;
-    }
-    delCache(DocumentID) {
-        if (DocumentID)
-            delete this.cache[DocumentID];
-    }
-    getLength() {
-        return Object.keys(this.cache).length;
-    }
-    resetCache() {
-        this.cache = {};
-    }
-}
-exports["default"] = DataCache;
 
 
 /***/ }),
@@ -1981,7 +1632,7 @@ exports.errorHandler = errorHandler;
 
 /***/ }),
 
-/***/ 4091:
+/***/ 3545:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1989,444 +1640,148 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-//requiring path and fs modules
-const path_1 = __importDefault(__webpack_require__(1017));
-const fs_1 = __importDefault(__webpack_require__(7147));
-const schema_1 = __importDefault(__webpack_require__(9106));
-class StorageStructure {
-    constructor() {
-        //resolve storage path of directory
-        this.storagePath = path_1.default.resolve("storage");
-        this.importPath = path_1.default.resolve("storage", "import");
-        this.exportPath = path_1.default.resolve("storage", "export");
-        this.uploadsPath = path_1.default.resolve("storage", "uploads");
-        if (!fs_1.default.existsSync(this.storagePath))
-            fs_1.default.mkdirSync(this.storagePath);
-        if (!fs_1.default.existsSync(this.importPath))
-            fs_1.default.mkdirSync(this.importPath);
-        if (!fs_1.default.existsSync(this.exportPath))
-            fs_1.default.mkdirSync(this.exportPath);
-        if (!fs_1.default.existsSync(this.uploadsPath))
-            fs_1.default.mkdirSync(this.uploadsPath);
-    }
-    init() {
-        console.log("Init Storage", this.storagePath);
-        this.mapFiles(this.storagePath, null);
-    }
-    makeDir(path) {
-        if (!fs_1.default.existsSync(path)) {
-            fs_1.default.mkdirSync(path);
-        }
-    }
-    delDir(path) {
+const express_rate_limit_1 = __importDefault(__webpack_require__(6985));
+exports["default"] = (0, express_rate_limit_1.default)({
+    windowMs: 1 * 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+
+/***/ }),
+
+/***/ 6402:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const mongoose_1 = __webpack_require__(1185);
+const bcryptjs_1 = __importDefault(__webpack_require__(8432));
+const SALT_WORK_FACTOR = 10;
+const options = {
+    collection: "accesses",
+    type: "access"
+};
+const schema = new mongoose_1.Schema({
+    user: { type: mongoose_1.Schema.Types.ObjectId, required: true },
+    password: { type: String, input: "PasswordField", required: true },
+    email: { type: String, input: "TextField", required: true },
+    active: { type: Boolean, input: "SwitchField" },
+}, options);
+// Methods
+schema.methods.hashPassword = function () {
+    return __awaiter(this, void 0, void 0, function* () {
+        const salt = yield bcryptjs_1.default.genSalt(SALT_WORK_FACTOR);
+        return yield bcryptjs_1.default.hash(this.password, salt);
+    });
+};
+schema.method("validatePassword", function (newPassword) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield bcryptjs_1.default.compare(newPassword, this.password);
+    });
+});
+schema.pre("save", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!this.isModified("password"))
+            return next();
+        else
+            this.password = yield this.hashPassword();
+        next();
+    });
+});
+const Access = (0, mongoose_1.model)("Access", schema);
+exports["default"] = Access;
+
+
+/***/ }),
+
+/***/ 9173:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.schema = void 0;
+const mongoose_1 = __webpack_require__(1185);
+const axios_1 = __importDefault(__webpack_require__(2167));
+const options = {
+    collection: "addresses",
+    type: "address"
+};
+exports.schema = new mongoose_1.Schema({
+    entity: { type: mongoose_1.Schema.Types.ObjectId, input: "SelectField" },
+    name: { type: String, input: "TextField" },
+    addressee: { type: String, input: "TextField" },
+    address: { type: String, required: true, input: "TextField" },
+    address2: { type: String, input: "TextField" },
+    city: { type: String, required: true, input: "TextField" },
+    zip: { type: String, required: true, input: "TextField" },
+    country: {
+        type: String,
+        required: true,
+        constant: "countries"
+    },
+    phone: { type: String, input: "TextField" },
+    geoCodeHint: {
+        type: String,
+        get: (v) => v ? `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}` : '',
+        input: "TextField"
+    },
+    latitude: { type: String, input: "TextField" },
+    longitude: { type: String, input: "TextField" }
+}, options);
+exports.schema.method("geoCode", function (geoCodeHint) {
+    return __awaiter(this, void 0, void 0, function* () {
         try {
-            fs_1.default.rmdirSync(path, { recursive: true });
-            console.log(`${path} is deleted!`);
+            const response = yield axios_1.default.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${geoCodeHint}&key=${process.env.GOOGLE_API_KEY}`);
+            return {
+                latitude: response.data.results[0].geometry.location.lat,
+                longitude: response.data.results[0].geometry.location.lng
+            };
         }
         catch (err) {
-            console.error(`Error while deleting ${path}.`);
+            return {};
         }
-    }
-    mapFiles(dirPath, 
-    //parentPath: string = "root",
-    parent) {
-        fs_1.default.readdir(dirPath, (err, files) => {
-            files.forEach((file) => {
-                let folder = parent ? parent.path : encodeURI("storage");
-                let doc = {
-                    name: file,
-                    type: 'File',
-                    path: path_1.default.join(folder, encodeURI(file)),
-                    urlcomponent: path_1.default.join(folder, encodeURI(file)),
-                };
-                if (fs_1.default.lstatSync(path_1.default.join(dirPath, file)).isDirectory()) {
-                    doc.type = "Folder";
-                    this.mapFiles(path_1.default.join(dirPath, file), doc);
-                }
-                schema_1.default.updateOrInsert(doc);
-            });
-        });
-    }
-}
-exports["default"] = StorageStructure;
-
-
-/***/ }),
-
-/***/ 7397:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AccountingTypes = void 0;
-const schema_1 = __importDefault(__webpack_require__(4465));
-const schema_2 = __importDefault(__webpack_require__(5401));
-const schema_3 = __importDefault(__webpack_require__(7510));
-exports["default"] = schema_1.default;
-// interface Types {
-//     terms: ITermsModel;
-//     paymentmethod: IPaymentMethodModel;
-// }
-exports.AccountingTypes = {
-    terms: schema_1.default.discriminator("Terms", schema_2.default),
-    paymentmethod: schema_1.default.discriminator("PaymentMethod", schema_3.default),
-};
-
-
-/***/ }),
-
-/***/ 7510:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const options = { discriminatorKey: "type", collection: "accounting" };
-const schema = new mongoose_1.Schema({}, options);
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 4465:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-// Schemas ////////////////////////////////////////////////////////////////////////////////
-const options = {
-    discriminatorKey: "type",
-    collection: "accounting",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-};
-const schema = new mongoose_1.Schema({
-    name: { type: String, required: true, input: "text" },
-    description: { type: String, input: "text", default: "" },
-    type: {
-        type: String,
-        required: true,
-    },
-}, options);
-const Accounting = (0, mongoose_1.model)("Accounting", schema);
-exports["default"] = Accounting;
-
-
-/***/ }),
-
-/***/ 5401:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const options = { discriminatorKey: "type", collection: "accounting" };
-const schema = new mongoose_1.Schema({}, options);
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 5287:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const options = {
-    discriminatorKey: "activity",
-    collection: "activities.tasks_events",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-};
-const schema = new mongoose_1.Schema({
-    activity: { type: mongoose_1.Schema.Types.ObjectId },
-    name: {
-        type: String,
-        required: true,
-    },
-    type: {
-        type: String,
-        default: 'Event',
-        required: true,
-    },
-    description: {
-        type: String,
-        default: ""
-    },
-    date: { type: Date, input: "date", required: true },
-    endDate: { type: Date, input: "date" },
-    color: {
-        type: String,
-        default: "#e1e1e1"
-    },
-}, options);
-const Event = (0, mongoose_1.model)("Event", schema);
-exports["default"] = Event;
-
-
-/***/ }),
-
-/***/ 6809:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(1190));
-const event_schema_1 = __importDefault(__webpack_require__(5287));
-const options = { discriminatorKey: "type", collection: "activities" };
-const schema = new mongoose_1.Schema({}, options);
-schema.virtual("events", {
-    ref: "Event",
-    localField: "_id",
-    foreignField: "activity",
-    justOne: false,
-    autopopulate: true,
-    model: event_schema_1.default
+    });
 });
-const Calendar = schema_1.default.discriminator("Calendar", schema);
-exports["default"] = Calendar;
-
-
-/***/ }),
-
-/***/ 625:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ActivityTypes = void 0;
-const schema_1 = __importDefault(__webpack_require__(1190));
-const schema_2 = __importDefault(__webpack_require__(6809));
-const event_schema_1 = __importDefault(__webpack_require__(5287));
-const schema_3 = __importDefault(__webpack_require__(3674));
-const task_schema_1 = __importDefault(__webpack_require__(5837));
-exports["default"] = schema_1.default;
-exports.ActivityTypes = {
-    calendar: schema_2.default,
-    project: schema_3.default,
-    event: event_schema_1.default,
-    task: task_schema_1.default,
-};
-
-
-/***/ }),
-
-/***/ 3674:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(1190));
-const task_schema_1 = __importDefault(__webpack_require__(5837));
-const task_group_schema_1 = __importDefault(__webpack_require__(6116));
-const task_tag_schema_1 = __importDefault(__webpack_require__(7672));
-const options = { discriminatorKey: "type", collection: "activities" };
-const schema = new mongoose_1.Schema({}, options);
-schema.virtual("tasks", {
-    ref: "Task",
-    localField: "_id",
-    foreignField: "activity",
-    justOne: false,
-    autopopulate: true,
-    model: task_schema_1.default,
-    options: { sort: { index: 1 } },
+exports.schema.pre("save", function (next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!this.isModified("geoCodeHint"))
+            return next();
+        else {
+            const coordinate = yield this.geoCode(this.geoCodeHint || "");
+            this.latitude = coordinate.latitude;
+            this.longitude = coordinate.longitude;
+        }
+        next();
+    });
 });
-schema.virtual("groups", {
-    ref: "TaskGroup",
-    localField: "_id",
-    foreignField: "activity",
-    justOne: false,
-    autopopulate: { select: "name displayname color" },
-    model: task_group_schema_1.default,
-    options: { sort: { index: 1 } },
-});
-schema.virtual("tags", {
-    ref: "TaskTag",
-    localField: "_id",
-    foreignField: "activity",
-    justOne: false,
-    autopopulate: { select: "name displayname color" },
-    model: task_tag_schema_1.default
-});
-const Project = schema_1.default.discriminator("Project", schema);
-exports["default"] = Project;
-
-
-/***/ }),
-
-/***/ 6116:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const task_status_schema_1 = __importDefault(__webpack_require__(8961));
-const options = {
-    discriminatorKey: "type",
-    collection: "activities.classification",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-};
-const schema = new mongoose_1.Schema({}, options);
-const TaskGroup = task_status_schema_1.default.discriminator("TaskGroup", schema);
-exports["default"] = TaskGroup;
-
-
-/***/ }),
-
-/***/ 5837:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const options = {
-    discriminatorKey: "activity",
-    collection: "activities.tasks_events",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-};
-const schema = new mongoose_1.Schema({
-    index: {
-        type: Number
-    },
-    activity: { type: mongoose_1.Schema.Types.ObjectId },
-    name: {
-        type: String,
-        required: true,
-    },
-    type: {
-        type: String,
-        default: 'Task',
-        required: true,
-    },
-    description: {
-        type: String,
-        default: ""
-    },
-    date: { type: Date },
-    endDate: { type: Date },
-    group: { type: mongoose_1.Schema.Types.ObjectId },
-    tags: {
-        type: [mongoose_1.Schema.Types.ObjectId],
-        ref: "TaskTag",
-        autopopulate: { select: "name displayname color" },
-    }
-}, options);
-const Task = (0, mongoose_1.model)("Task", schema);
-exports["default"] = Task;
-
-
-/***/ }),
-
-/***/ 8961:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const options = {
-    discriminatorKey: "type",
-    collection: "activities.classification",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-};
-const schema = new mongoose_1.Schema({
-    index: {
-        type: Number
-    },
-    activity: { type: mongoose_1.Schema.Types.ObjectId },
-    name: {
-        type: String,
-        required: true,
-    },
-    description: {
-        type: String,
-        default: ""
-    },
-    type: {
-        type: String
-    },
-    color: {
-        type: String,
-        default: "#e1e1e1"
-    },
-}, options);
-const TaskStatus = (0, mongoose_1.model)("TaskStatus", schema);
-exports["default"] = TaskStatus;
-
-
-/***/ }),
-
-/***/ 7672:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const task_status_schema_1 = __importDefault(__webpack_require__(8961));
-const options = {
-    discriminatorKey: "type",
-    collection: "activities.classification",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-};
-const schema = new mongoose_1.Schema({}, options);
-const TaskTag = task_status_schema_1.default.discriminator("TaskTag", schema);
-exports["default"] = TaskTag;
-
-
-/***/ }),
-
-/***/ 1190:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-// Schemas ////////////////////////////////////////////////////////////////////////////////
-const options = {
-    discriminatorKey: "type",
-    collection: "activities",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-};
-const schema = new mongoose_1.Schema({
-    name: { type: String, required: true, input: "text" },
-    description: { type: String, input: "text", default: "" },
-    type: {
-        type: String,
-        required: true,
-    },
-    status: {
-        type: String,
-        default: "open"
-    },
-}, options);
-const Activity = (0, mongoose_1.model)("Activity", schema);
-exports["default"] = Activity;
+const Address = (0, mongoose_1.model)("Address", exports.schema);
+exports["default"] = Address;
 
 
 /***/ }),
@@ -2491,152 +1846,28 @@ exports["default"] = Changelog;
 
 /***/ }),
 
-/***/ 1108:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(6617));
-const options = { discriminatorKey: "type", collection: "classifications" };
-exports.schema = new mongoose_1.Schema({}, options);
-exports.schema.index({ name: 1 });
-const Category = schema_1.default.discriminator("Category", exports.schema);
-exports["default"] = Category;
-
-
-/***/ }),
-
-/***/ 9560:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(6617));
-const options = { discriminatorKey: "type", collection: "classifications" };
-exports.schema = new mongoose_1.Schema({}, options);
-exports.schema.index({ name: 1 });
-const Group = schema_1.default.discriminator("Group", exports.schema);
-exports["default"] = Group;
-
-
-/***/ }),
-
-/***/ 2731:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ClassificationTypes = void 0;
-const schema_1 = __importDefault(__webpack_require__(6617));
-const schema_2 = __importDefault(__webpack_require__(3124));
-const schema_3 = __importDefault(__webpack_require__(7446));
-const schema_4 = __importDefault(__webpack_require__(9560));
-const schema_5 = __importDefault(__webpack_require__(1108));
-exports["default"] = schema_1.default;
-exports.ClassificationTypes = {
-    pricelevel: schema_2.default,
-    pricegroup: schema_3.default,
-    group: schema_4.default,
-    category: schema_5.default
-};
-
-
-/***/ }),
-
-/***/ 7446:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(6617));
-const options = { discriminatorKey: "type", collection: "classifications" };
-exports.schema = new mongoose_1.Schema({
-    name: {
-        type: String,
-        required: true,
-        input: "text"
-    }
-}, options);
-exports.schema.index({ name: 1 });
-const PriceGroup = schema_1.default.discriminator("PriceGroup", exports.schema);
-exports["default"] = PriceGroup;
-
-
-/***/ }),
-
-/***/ 3124:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(6617));
-const options = { discriminatorKey: "type", collection: "classifications" };
-exports.schema = new mongoose_1.Schema({
-    base: {
-        type: String,
-        required: true,
-        default: "baseprice"
-    },
-    percentageChange: {
-        type: Number,
-        required: true,
-        default: 1
-    }
-}, options);
-exports.schema.index({ name: 1 });
-const PriceLevel = schema_1.default.discriminator("PriceLevel", exports.schema);
-exports["default"] = PriceLevel;
-
-
-/***/ }),
-
-/***/ 6617:
+/***/ 791:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
-// Schemas ////////////////////////////////////////////////////////////////////////////////
-const ClassificationSchema = {
-    name: { type: String, input: "text" },
-    description: { type: String, input: "text" },
-    type: {
-        type: String,
-        required: true,
-    },
-};
 const options = {
-    discriminatorKey: "type",
-    collection: "classifications",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    collection: "contacts",
+    type: "contact"
 };
-const schema = new mongoose_1.Schema(ClassificationSchema, options);
-const Classification = (0, mongoose_1.model)("Classification", schema);
-exports["default"] = Classification;
+const schema = new mongoose_1.Schema({
+    entity: { type: mongoose_1.Schema.Types.ObjectId },
+    name: { type: String, input: "TextField" },
+    firstName: { type: String, input: "TextField" },
+    lastName: { type: String, input: "TextField" },
+    email: { type: String, input: "TextField" },
+    phone: { type: String, input: "TextField" },
+    jobTitle: { type: String, input: "TextField" },
+    description: { type: String, input: "TextField" }
+}, options);
+const Contact = (0, mongoose_1.model)("Contact", schema);
+exports["default"] = Contact;
 
 
 /***/ }),
@@ -2690,227 +1921,16 @@ exports["default"] = Email;
 
 /***/ }),
 
-/***/ 9711:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const axios_1 = __importDefault(__webpack_require__(2167));
-const options = {
-    discriminatorKey: "entity",
-    collection: "entities.addresses"
-};
-const schema = new mongoose_1.Schema({
-    entity: { type: mongoose_1.Schema.Types.ObjectId },
-    name: { type: String, input: "TextField" },
-    addressee: { type: String, input: "TextField" },
-    address: { type: String, required: true, input: "TextField" },
-    address2: { type: String, input: "TextField" },
-    city: { type: String, required: true, input: "TextField" },
-    zip: { type: String, required: true, input: "TextField" },
-    country: {
-        type: String,
-        required: true,
-        resource: "constatnts",
-        constant: "countries"
-    },
-    phone: { type: String, input: "TextField" },
-    geoCodeHint: {
-        type: String,
-        get: (v) => v ? `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}` : '',
-        input: "TextField"
-    },
-    latitude: { type: String, input: "TextField" },
-    longitude: { type: String, input: "TextField" }
-}, options);
-schema.method("geoCode", function (geoCodeHint) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const response = yield axios_1.default.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${geoCodeHint}&key=${process.env.GOOGLE_API_KEY}`);
-            return {
-                latitude: response.data.results[0].geometry.location.lat,
-                longitude: response.data.results[0].geometry.location.lng
-            };
-        }
-        catch (err) {
-            return {};
-        }
-    });
-});
-schema.pre("save", function (next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!this.isModified("geoCodeHint"))
-            return next();
-        else {
-            const coordinate = yield this.geoCode(this.geoCodeHint);
-            this.latitude = coordinate.latitude;
-            this.longitude = coordinate.longitude;
-        }
-        next();
-    });
-});
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 3155:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const currencies_1 = __importDefault(__webpack_require__(7131));
-const options = {
-    discriminatorKey: "entity",
-    collection: "entities.balances"
-};
-const schema = new mongoose_1.Schema({
-    entity: { type: mongoose_1.Schema.Types.ObjectId },
-    company: { type: mongoose_1.Schema.Types.ObjectId },
-    currency: {
-        type: String,
-        //get: (v: any) => Currencies.getName(v),
-        enum: currencies_1.default,
-        required: true,
-        input: "SelectField"
-    },
-    balance: { type: Number, required: true, default: 0, input: "currency" }
-}, options);
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 7044:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const tranNumbers_schema_1 = __importDefault(__webpack_require__(9050));
-const tranNumModel = (0, mongoose_1.model)("TranNumbers", tranNumbers_schema_1.default);
-const options = { discriminatorKey: "type", collection: "entities" };
-const schema = new mongoose_1.Schema({}, options);
-schema.method("incNumber", function (type) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (this.type !== "company")
-            throw new Error("Only Company Record can inc transaction numbers");
-        let format = this.transactionNumbers.find((transaction) => transaction.type === type);
-        if (format && format.currentNumber)
-            format.currentNumber++;
-        this.save();
-    });
-});
-schema.virtual("transactionNumbers", {
-    ref: "TranNumbers",
-    localField: "_id",
-    foreignField: "entity",
-    justOne: false,
-    autopopulate: true,
-    model: tranNumModel
-});
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 9050:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const transaction_types_1 = __importDefault(__webpack_require__(7003));
-const options = {
-    discriminatorKey: "entity",
-    collection: "entities.tranNumbers"
-};
-const schema = new mongoose_1.Schema({
-    company: { type: mongoose_1.Schema.Types.ObjectId },
-    type: {
-        type: String,
-        required: true,
-        //get: (v: any) => TranTypes.getName(v),
-        enum: transaction_types_1.default
-    },
-    prefix: { type: String, input: "text" },
-    sufix: { type: String, input: "text" },
-    initNumber: { type: Number, required: true, default: 1, input: "integer" },
-    currentNumber: {
-        type: Number,
-        required: true,
-        default: 1,
-        input: "integer"
-    }
-}, options);
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 2868:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const options = {
-    discriminatorKey: "entity",
-    collection: "entities.contacts",
-    type: "contact"
-};
-const schema = new mongoose_1.Schema({
-    entity: { type: mongoose_1.Schema.Types.ObjectId },
-    name: { type: String, input: "TextField" },
-    firstName: { type: String, input: "TextField" },
-    lastName: { type: String, input: "TextField" },
-    email: { type: String, input: "TextField" },
-    phone: { type: String, input: "TextField" },
-    jobTitle: { type: String, input: "TextField" }
-}, options);
-exports["default"] = schema;
-
-
-/***/ }),
-
 /***/ 9692:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
+const schema_1 = __importDefault(__webpack_require__(9793));
 const options = { discriminatorKey: "type", collection: "entities" };
 const schema = new mongoose_1.Schema({
     status: {
@@ -2951,59 +1971,8 @@ const schema = new mongoose_1.Schema({
         input: "SelectField"
     },
 }, options);
-// schema.virtual("salesOrders", {
-//   ref: "Calendar",
-//   localField: "name",
-//   foreignField: "name",
-//   justOne: false,
-//   autopopulate: true,
-//   model: SalesOrder
-// });
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 4822:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(7044));
-const options = { discriminatorKey: "type", collection: "entities" };
-const schema = new mongoose_1.Schema({
-    jobTitle: { type: String, input: "text" },
-    //avatar: { type: Storage, input: "file" },
-    company: { type: schema_1.default, input: "select" },
-    //role: { type: Role, input: "select" }
-}, options);
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 4880:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __webpack_require__(3124);
-const options = {
-    discriminatorKey: "entity",
-    collection: "entities.grouplevels"
-};
-const schema = new mongoose_1.Schema({
-    entity: { type: mongoose_1.Schema.Types.ObjectId },
-    priceGroup: { type: String, required: true },
-    priceLevel: { type: schema_1.schema, ref: "PriceLevel", required: true },
-    moq: { type: Number, required: true, default: 1 },
-}, options);
-exports["default"] = schema;
+const Customer = schema_1.default.discriminator("Customer", schema);
+exports["default"] = Customer;
 
 
 /***/ }),
@@ -3017,19 +1986,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EntityTypes = void 0;
-const mongoose_1 = __webpack_require__(1185);
 const schema_1 = __importDefault(__webpack_require__(9793));
-const schema_2 = __importDefault(__webpack_require__(7044));
-const schema_3 = __importDefault(__webpack_require__(9692));
-const schema_4 = __importDefault(__webpack_require__(4449));
-const schema_5 = __importDefault(__webpack_require__(4822));
-const Entity = (0, mongoose_1.model)("Entity", schema_1.default);
-exports["default"] = Entity;
+const schema_2 = __importDefault(__webpack_require__(9692));
+exports["default"] = schema_1.default;
 exports.EntityTypes = {
-    customer: Entity.discriminator("Customer", schema_3.default),
-    comapany: Entity.discriminator("Company", schema_2.default),
-    vendor: Entity.discriminator("Vendor", schema_4.default),
-    employee: Entity.discriminator("Employee", schema_5.default)
+    customer: schema_2.default
 };
 
 
@@ -3039,156 +2000,34 @@ exports.EntityTypes = {
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
-const bcryptjs_1 = __importDefault(__webpack_require__(8432));
-const contact_schema_1 = __importDefault(__webpack_require__(2868));
-const address_schema_1 = __importDefault(__webpack_require__(9711));
-const balance_schema_1 = __importDefault(__webpack_require__(3155));
-const grouplevel_schema_1 = __importDefault(__webpack_require__(4880));
-//import Countries from "../../constants/countries";
-const contactModel = (0, mongoose_1.model)("Contact", contact_schema_1.default);
-const balanceModel = (0, mongoose_1.model)("Balance", balance_schema_1.default);
-const addressModel = (0, mongoose_1.model)("Address", address_schema_1.default);
-const groupLevelModel = (0, mongoose_1.model)("GroupLevel", grouplevel_schema_1.default);
-// Schemas ////////////////////////////////////////////////////////////////////////////////
-const SALT_WORK_FACTOR = 10;
+const contact_model_1 = __importDefault(__webpack_require__(791));
+const address_model_1 = __importDefault(__webpack_require__(9173));
 const options = {
     discriminatorKey: "type", collection: "entities", toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
 const schema = new mongoose_1.Schema({
-    email: { type: String, input: "text" },
+    email: { type: String, input: "TextField" },
     name: {
         type: String,
         required: true,
-        min: [3, "Must be at least 3 characters long, got {VALUE}"],
-        input: "text"
+        input: "TextField"
     },
-    firstName: { type: String, input: "text" },
-    lastName: { type: String, input: "text" },
     type: {
         type: String,
-        required: true,
-        enum: ["company", "customer", "vendor", "employee"],
-        default: "customer",
-        input: "select"
+        required: true
     },
-    password: { type: String, input: "PasswordField" },
     locale: { type: String, default: "en" },
-    role: { type: String, default: "admin" },
-    roles: { type: [String] },
-    salesRep: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Entity",
-        autopopulate: true,
-        input: "select"
-    },
-    warehouse: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Warehouse",
-        autopopulate: true,
-        input: "select"
-    },
     currency: {
         type: String,
         required: true,
-        //get: (v: any) => Currencies.getName(v),
-        //enum: Currencies,
-        default: "PLN",
-        input: "select",
-        resource: 'constants',
+        input: "SelectField",
         constant: 'currencies'
-    },
-    billingName: {
-        type: String,
-        input: "text"
-    },
-    billingAddressee: {
-        type: String,
-        input: "text"
-    },
-    billingAddress: address_schema_1.default,
-    billingAddress2: {
-        type: String,
-        input: "text"
-    },
-    billingZip: {
-        type: String,
-        input: "text"
-    },
-    billingCity: {
-        type: String,
-        input: "text"
-    },
-    billingState: {
-        type: String,
-        input: "select"
-    },
-    billingCountry: {
-        type: String,
-        input: "select",
-        resource: 'constants',
-        constant: 'countries'
-    },
-    billingPhone: {
-        type: String,
-        input: "text"
-    },
-    billingEmail: {
-        type: String,
-        input: "text"
-    },
-    shippingName: {
-        type: String,
-        input: "text"
-    },
-    shippingAddressee: {
-        type: String,
-        input: "text"
-    },
-    shippingAddress: address_schema_1.default,
-    shippingAddress2: {
-        type: String,
-        input: "text"
-    },
-    shippingZip: {
-        type: String,
-        input: "text"
-    },
-    shippingCity: {
-        type: String,
-        input: "text"
-    },
-    shippingState: {
-        type: String,
-        input: "select"
-    },
-    shippingCountry: {
-        type: String,
-        input: "select",
-        resource: 'constants',
-        constant: 'countries'
-    },
-    shippingPhone: {
-        type: String,
-        input: "text"
-    },
-    shippingEmail: {
-        type: String,
-        input: "text"
     },
     taxNumber: { type: String, input: "TextField" },
     tax: {
@@ -3203,7 +2042,7 @@ schema.virtual("addresses", {
     foreignField: "entity",
     justOne: false,
     autopopulate: true,
-    model: addressModel
+    model: address_model_1.default
 });
 schema.virtual("contacts", {
     ref: "Contact",
@@ -3211,60 +2050,14 @@ schema.virtual("contacts", {
     foreignField: "entity",
     justOne: false,
     autopopulate: true,
-    model: contactModel
-});
-schema.virtual("balances", {
-    ref: "Balance",
-    localField: "_id",
-    foreignField: "entity",
-    justOne: false,
-    autopopulate: true,
-    model: balanceModel
-});
-schema.virtual("groupLevels", {
-    ref: "GroupLevel",
-    localField: "_id",
-    foreignField: "entity",
-    justOne: false,
-    autopopulate: true,
-    model: groupLevelModel
-});
-// Methods
-schema.methods.hashPassword = function () {
-    return __awaiter(this, void 0, void 0, function* () {
-        const salt = yield bcryptjs_1.default.genSalt(SALT_WORK_FACTOR);
-        return yield bcryptjs_1.default.hash(this.password, salt);
-    });
-};
-schema.method("validatePassword", function (newPassword) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return yield bcryptjs_1.default.compare(newPassword, this.password);
-    });
-});
-schema.pre("save", function (next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!this.isModified("password"))
-            return next();
-        else
-            this.password = yield this.hashPassword();
-        next();
-    });
+    model: contact_model_1.default
 });
 schema.index({ name: 1 });
-exports["default"] = schema;
-
-
-/***/ }),
-
-/***/ 4449:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const options = { discriminatorKey: "type", collection: "entities" };
-const schema = new mongoose_1.Schema({}, options);
-exports["default"] = schema;
+const Entity = (0, mongoose_1.model)("Entity", schema);
+Entity.init().then(function (Event) {
+    console.log('Entity Builded');
+});
+exports["default"] = Entity;
 
 
 /***/ }),
@@ -3599,211 +2392,6 @@ exports["default"] = Service;
 
 /***/ }),
 
-/***/ 984:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
-const mongoose_1 = __webpack_require__(1185);
-exports.schema = new mongoose_1.Schema({
-    type: {
-        type: String,
-        required: true,
-        default: "dashboard"
-    },
-    dashboard: {
-        type: String,
-        required: true,
-    },
-    entity: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Entity"
-    },
-    widgets: {
-        type: []
-    }
-}, {
-    collection: "settings",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-});
-exports.schema.index({ name: 1 });
-const Dashboard = (0, mongoose_1.model)("Dashboard", exports.schema);
-exports["default"] = Dashboard;
-
-
-/***/ }),
-
-/***/ 8556:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
-const mongoose_1 = __webpack_require__(1185);
-exports.schema = new mongoose_1.Schema({
-    type: {
-        type: String,
-        required: true,
-        default: "table"
-    },
-    table: {
-        type: String,
-        required: true,
-    },
-    entity: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Entity"
-    },
-    headers: {
-        type: [String]
-    }
-}, {
-    collection: "settings",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-});
-exports.schema.index({ name: 1 });
-const Setting = (0, mongoose_1.model)("Setting", exports.schema);
-exports["default"] = Setting;
-
-
-/***/ }),
-
-/***/ 8947:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
-const mongoose_1 = __webpack_require__(1185);
-const i18n_1 = __importDefault(__webpack_require__(6734));
-exports.schema = new mongoose_1.Schema({
-    name: {
-        type: String,
-        required: true,
-        input: "text"
-    },
-    description: {
-        type: String,
-        input: "text"
-    },
-    type: {
-        type: String,
-        required: true,
-        default: "report"
-    },
-    columns: {
-        type: []
-    },
-    filters: {
-        type: []
-    }
-}, {
-    collection: "reports",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-});
-//
-// schema.virtual('fields').get(function (this: any) {
-//     let model: any = models["Transaction"];
-//     return model.getFields()
-// });
-exports.schema.method("getResults", function () {
-    return __awaiter(this, void 0, void 0, function* () {
-        let results = [];
-        let sort = { _id: 1 };
-        let select = { type: true };
-        let query = {};
-        let populated = {};
-        for (let column of this.columns) {
-            // to do - poprawić
-            let fieldsSelect = { name: 1, resource: 1, type: 1 };
-            let fields = column.field.split('.');
-            if (fields.length > 1) {
-                if (populated[fields[0]]) {
-                    populated[fields[0]].select[fields[1]] = 1;
-                    populated[fields[0]].populate.push({
-                        path: fields[1],
-                        select: 'name resource type'
-                    });
-                }
-                else {
-                    fieldsSelect[fields[1]] = 1;
-                    populated[fields[0]] = {
-                        path: fields[0],
-                        select: fieldsSelect,
-                        populate: [{
-                                path: fields[1],
-                                select: 'name resource type'
-                            }]
-                    };
-                }
-            }
-            else {
-                if (column.ref) {
-                    if (!populated[fields[0]]) {
-                        populated[fields[0]] = {
-                            path: fields[0],
-                            select: fieldsSelect
-                        };
-                    }
-                }
-                select[column.field] = true;
-            }
-        }
-        //console.log(populated, select)
-        //await this.find(query)
-        //.populate(populated)
-        //.sort(sort).skip(skip).limit(limit).select(select);
-        //console.log(populated)
-        let data = yield (0, mongoose_1.model)("Transaction").find(query)
-            .populate(Object.values(populated))
-            .sort(sort)
-            .select(select);
-        results = data.map((line) => {
-            let row = { _id: line._id, type: line.type, resource: line.resource };
-            this.columns.forEach((c) => {
-                let fields = c.field.split('.');
-                let value = undefined;
-                fields.forEach((field, index) => {
-                    if (index) {
-                        value = value[field];
-                    }
-                    else
-                        value = line[field];
-                });
-                if (c.constant) { // parse constat value to object
-                    value = { _id: value, name: i18n_1.default.__(value) };
-                }
-                row[c.field] = value;
-            });
-            return row;
-        });
-        data = [];
-        return results;
-    });
-});
-exports.schema.index({ name: 1 });
-const Report = (0, mongoose_1.model)("Report", exports.schema);
-exports["default"] = Report;
-
-
-/***/ }),
-
 /***/ 1725:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
@@ -3970,7 +2558,7 @@ exports.schema.method("rename", function (path) {
             let name = path.split("/").pop();
             if (err)
                 throw err;
-            doc.name = name;
+            doc.name = name || "";
             doc.save();
             console.log("Successfully renamed - AKA moved!");
         });
@@ -4007,74 +2595,6 @@ exports.schema.static("addFile", function (files, path) {
 });
 const Storage = (0, mongoose_1.model)("Storage", exports.schema);
 exports["default"] = Storage;
-
-
-/***/ }),
-
-/***/ 1674:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(5740));
-const options = { discriminatorKey: "type", collection: "transactions" };
-const schema = new mongoose_1.Schema({}, options);
-const InventoryAdjustment = schema_1.default.discriminator("InventoryAdjustment", schema);
-exports["default"] = InventoryAdjustment;
-
-
-/***/ }),
-
-/***/ 145:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const options = { discriminatorKey: "type", collection: "transactions" };
-const schema = new mongoose_1.Schema({}, options);
-const Invoice = (0, mongoose_1.model)("Invoice", schema);
-exports["default"] = Invoice;
-
-
-/***/ }),
-
-/***/ 7799:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(5740));
-const options = { discriminatorKey: "type", collection: "transactions" };
-const schema = new mongoose_1.Schema({}, options);
-const ItemFulfillment = schema_1.default.discriminator("ItemFulfillment", schema);
-exports["default"] = ItemFulfillment;
-
-
-/***/ }),
-
-/***/ 7506:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(5740));
-const options = { discriminatorKey: "type", collection: "transactions" };
-const schema = new mongoose_1.Schema({}, options);
-const ItemReceipt = schema_1.default.discriminator("ItemReceipt", schema);
-exports["default"] = ItemReceipt;
 
 
 /***/ }),
@@ -4164,7 +2684,6 @@ const schema = new mongoose_1.Schema({
         ref: "Line"
     },
     entity: { type: mongoose_1.Schema.Types.ObjectId, copy: "transaction" },
-    warehouse: { type: mongoose_1.Schema.Types.ObjectId, copy: "transaction" },
     type: {
         type: String,
         //required: true,
@@ -4258,38 +2777,20 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TransactionTypes = void 0;
 const schema_1 = __importDefault(__webpack_require__(5740));
 const schema_2 = __importDefault(__webpack_require__(8982));
-const schema_3 = __importDefault(__webpack_require__(145));
-const schema_4 = __importDefault(__webpack_require__(7799));
-const schema_5 = __importDefault(__webpack_require__(7506));
-const schema_6 = __importDefault(__webpack_require__(1674));
-const schema_7 = __importDefault(__webpack_require__(6472));
+// import Invoice, { IInvoiceModel } from "./invoice/schema";
+// import ItemFulfillment, { IItemFulfillmentModel } from "./itemFulfillment/schema";
+// import ItemReceipt, { IItemReceiptModel } from "./itemReceipt/schema";
+// import InventoryAdjustment, { IInventoryAdjustmentModel } from "./inventoryAdjustment/schema";
+// import PurchaseOrder, { IPurchaseOrderModel } from "./purchaseOrder/schema";
 exports["default"] = schema_1.default;
 exports.TransactionTypes = {
     salesorder: schema_2.default,
-    invoice: schema_3.default,
-    itemfulfillment: schema_4.default,
-    itemreceipt: schema_5.default,
-    inventoryadjustment: schema_6.default,
-    purchaseorder: schema_7.default
+    // invoice: Invoice,
+    // itemfulfillment: ItemFulfillment,
+    // itemreceipt: ItemReceipt,
+    // inventoryadjustment: InventoryAdjustment,
+    // purchaseorder: PurchaseOrder
 };
-
-
-/***/ }),
-
-/***/ 6472:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const mongoose_1 = __webpack_require__(1185);
-const schema_1 = __importDefault(__webpack_require__(5740));
-const options = { discriminatorKey: "type", collection: "transactions" };
-const schema = new mongoose_1.Schema({}, options);
-const PurchaseOrder = schema_1.default.discriminator("PurchaseOrder", schema);
-exports["default"] = PurchaseOrder;
 
 
 /***/ }),
@@ -4310,7 +2811,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
 const options = {
-    //discriminatorKey: "type",
     collection: "transactions.lines",
     foreignField: "transaction",
     toJSON: { virtuals: true },
@@ -4323,13 +2823,6 @@ const schema = new mongoose_1.Schema({
 schema.pre("validate", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("pre valide line SO");
-        // if (this.kit) {
-        //   let kit = this.parent["lines"].find(line => line._id.toString() == this.kit.toString());
-        //   if (kit)
-        //     this.quantity = (this.multiplyquantity || 1) * (kit.quantity || 1);
-        //   else
-        //     this.deleted = true;
-        // }
         next();
     });
 });
@@ -4415,11 +2908,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const mongoose_1 = __webpack_require__(1185);
 const pdf_1 = __importDefault(__webpack_require__(180));
-const address_schema_1 = __importDefault(__webpack_require__(9711));
+const address_model_1 = __webpack_require__(9173);
 const line_schema_1 = __importDefault(__webpack_require__(2801));
-const currencies_1 = __importDefault(__webpack_require__(7131));
-//import Countries from "../../constants/countries";
-const transaction_types_1 = __importDefault(__webpack_require__(7003));
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 const TransactionSchema = {
     name: { type: String, input: "TextField", set: (v) => v.toLowerCase(), select: true },
@@ -4438,14 +2928,6 @@ const TransactionSchema = {
         autopopulate: true,
         input: "SelectField",
         select: true
-    },
-    warehouse: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Warehouse",
-        required: true,
-        autopopulate: true,
-        input: "SelectField",
-        default: "635fcec4dcd8d612939f7b90"
     },
     number: { type: Number, input: "IntField" },
     quantity: {
@@ -4473,110 +2955,24 @@ const TransactionSchema = {
     currency: {
         type: String,
         required: true,
-        //get: (v: any) => Currencies.getName(v),
-        enum: currencies_1.default,
         default: "PLN",
         input: "SelectField",
-        resource: 'constants',
         constant: 'currencies',
-        select: true
     },
     memo: {
         type: String,
         input: "TextareaField"
     },
-    billingName: {
-        type: String,
-        input: "TextField"
-    },
-    billingAddressee: {
-        type: String,
-        input: "text"
-    },
-    billingAddress: address_schema_1.default,
-    billingAddress2: {
-        type: String,
-        input: "text"
-    },
-    billingZip: {
-        type: String,
-        input: "text"
-    },
-    billingCity: {
-        type: String,
-        input: "text"
-    },
-    billingState: {
-        type: String,
-        input: "text"
-    },
-    billingCountry: {
-        type: String,
-        input: "select",
-        resource: 'constants',
-        constant: 'countries'
-    },
-    billingPhone: {
-        type: String,
-        input: "text"
-    },
-    billingEmail: {
-        type: String,
-        input: "text"
-    },
-    shippingName: {
-        type: String,
-        input: "text"
-    },
-    shippingAddressee: {
-        type: String,
-        input: "text"
-    },
-    shippingAddress: address_schema_1.default,
-    shippingAddress2: {
-        type: String,
-        input: "text"
-    },
-    shippingZip: {
-        type: String,
-        input: "text"
-    },
-    shippingCity: {
-        type: String,
-        input: "text"
-    },
-    shippingState: {
-        type: String,
-        input: "select"
-    },
-    shippingCountry: {
-        type: String,
-        input: "select",
-        resource: 'constants',
-        constant: 'countries'
-    },
-    shippingPhone: {
-        type: String,
-        input: "text"
-    },
-    shippingEmail: {
-        type: String,
-        input: "text"
-    },
+    billingAddress: address_model_1.schema,
+    shippingAddress: address_model_1.schema,
     type: {
         type: String,
         required: true,
-        //get: (v: any) => TranTypes.getName(v),
-        enum: transaction_types_1.default
     },
     status: {
         type: String,
         default: "pendingapproval",
-        resource: 'constants',
         constant: 'statuses',
-        //enum: TranStatus,
-        //input: "select",
-        select: true
     },
     taxNumber: { type: String, input: "TextField" },
     referenceNumber: { type: String, input: "TextField" },
@@ -4649,37 +3045,80 @@ exports["default"] = Transaction;
 
 /***/ }),
 
-/***/ 2419:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ 8653:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.schema = void 0;
 const mongoose_1 = __webpack_require__(1185);
-exports.schema = new mongoose_1.Schema({
+const access_model_1 = __importDefault(__webpack_require__(6402));
+const options = {
+    discriminatorKey: "type", collection: "users", toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+};
+const schema = new mongoose_1.Schema({
+    email: { type: String, input: "TextField" },
     name: {
         type: String,
         required: true,
-        min: [2, "Must be at least 2 characters long, got {VALUE}"],
-        input: "text"
+        input: "TextField"
+    },
+    firstName: {
+        type: String,
+        input: "TextField"
+    },
+    lastName: {
+        type: String,
+        input: "TextField"
+    },
+    jobTitle: {
+        type: String,
+        input: "TextField"
+    },
+    avatar: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Storage",
+        autopopulate: true,
+        input: "FileField"
+    },
+    department: {
+        type: String,
+        input: "TextField"
+    },
+    lastLoginDate: {
+        type: Date
+    },
+    lastAuthDate: {
+        type: Date
     },
     type: {
         type: String,
-        required: true,
-        enum: ["warehouse"],
-        default: "warehouse"
-    }
-}, {
-    collection: "warehouses",
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+        required: true
+    },
+    locale: { type: String, default: "en", input: "SelectField" },
+    role: { type: String, required: true, input: "TextField" },
+    roles: { type: [String], input: "SelectField" },
+}, options);
+schema.virtual('initials').get(function () {
+    if (this.firstName && this.lastName)
+        return `${this.firstName[0]}${this.lastName[0]}`;
+    else
+        return "";
 });
-exports.schema.index({ name: 1 });
-const Warehouse = (0, mongoose_1.model)("Warehouse", exports.schema);
-Warehouse.init().then(function (Event) {
-    console.log('Warehouse Builded');
+schema.virtual("accessess", {
+    ref: "Access",
+    localField: "_id",
+    foreignField: "User",
+    justOne: false,
+    autopopulate: true,
+    model: access_model_1.default
 });
-exports["default"] = Warehouse;
+schema.index({ name: 1 });
+const User = (0, mongoose_1.model)("User", schema);
+exports["default"] = User;
 
 
 /***/ }),
@@ -4704,263 +3143,94 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 //import subdomain from "express-subdomain";
 const auth_1 = __importDefault(__webpack_require__(9422));
 const express_1 = __importDefault(__webpack_require__(6860));
-const warehouses_1 = __importDefault(__webpack_require__(6606));
-const classifications_1 = __importDefault(__webpack_require__(3096));
-const entities_1 = __importDefault(__webpack_require__(5067));
+const genericController_1 = __importDefault(__webpack_require__(2893));
 const transactions_1 = __importDefault(__webpack_require__(2069));
-const items_1 = __importDefault(__webpack_require__(1199));
-const activities_1 = __importDefault(__webpack_require__(5282));
 const websites_1 = __importDefault(__webpack_require__(718));
 const constants_1 = __importDefault(__webpack_require__(2110));
 const files_1 = __importDefault(__webpack_require__(4758));
 const hosting_1 = __importDefault(__webpack_require__(2101));
 const emails_1 = __importDefault(__webpack_require__(4267));
-const settings_1 = __importDefault(__webpack_require__(4604));
-const reports_1 = __importDefault(__webpack_require__(3002));
-const accounting_1 = __importDefault(__webpack_require__(76));
+const user_model_1 = __importDefault(__webpack_require__(8653));
 const shop_model_1 = __importDefault(__webpack_require__(1725));
+const model_1 = __webpack_require__(248);
+const model_2 = __webpack_require__(235);
+const model_3 = __webpack_require__(7849);
+const model_4 = __webpack_require__(8702);
+const email_model_1 = __importDefault(__webpack_require__(8499));
+const shop_model_2 = __importDefault(__webpack_require__(1725));
 class Routes {
     constructor() {
         this.Router = express_1.default.Router();
-        this.Router2 = express_1.default.Router();
+        this.RouterHosting = express_1.default.Router();
         this.RouterFiles = express_1.default.Router();
-        this.RouterCustom = express_1.default.Router();
         this.Auth = new auth_1.default();
-        this.entityController = new entities_1.default();
-        this.classificationController = new classifications_1.default();
-        this.warehouseController = new warehouses_1.default();
-        this.transactionController = new transactions_1.default();
-        this.websiteController = new websites_1.default();
-        this.itemController = new items_1.default();
-        this.activityController = new activities_1.default();
+        this.websiteController = new websites_1.default(shop_model_2.default);
         this.constantController = new constants_1.default();
-        this.filesController = new files_1.default();
         this.hostingController = new hosting_1.default();
-        this.emailController = new emails_1.default();
-        this.settingController = new settings_1.default();
-        this.reportController = new reports_1.default();
-        this.accountingController = new accounting_1.default();
+        this.emailController = new emails_1.default(email_model_1.default);
     }
     start(app) {
         console.log("Start Routing");
-        this.routeConstants();
-        // this.routeTransactions();
-        this.routeUniversal("transactions", this.transactionController);
-        this.routeWarehouses();
-        //this.routeClassifications();
-        this.routeUniversal("classifications", this.classificationController);
-        //this.routeItems();
-        this.routeUniversal("items", this.itemController);
-        //this.routeActivities();
-        this.routeUniversal("activities", this.activityController);
-        //this.routeUsers();
-        this.routeUniversal("entities", this.entityController);
-        //this.routeWebsites();
-        this.routeUniversal("websites", this.websiteController);
-        this.routeAuth();
-        this.routeFiles();
-        this.routeHosting();
-        this.routeCustom();
-        //this.routeEmails();
-        this.routeUniversal("emails", this.emailController);
-        this.routeSettings();
-        this.routeReports();
-        this.routeAccounting();
-        app.use(subdomain("*", this.Router2));
-        //app.use("/hosting", this.Router2);
-        app.use("/api/core", this.Router);
-        //app.use("/api/core/storage", this.RouterFiles);
-        //Custom
-        app.use("/api/custom", this.RouterCustom);
-    }
-    routeCustom() {
-        // Constants
-        this.RouterCustom.route("/items").get(function (req, res) {
-            return __awaiter(this, void 0, void 0, function* () {
-                // let db = mongoose.connection.db;
-                // let items = await db.collection('items').find().toArray();
-                // console.log(items.length)
-                // if (items.length) {
-                //   let tmp = await db.collection('transactions.lines').findOne();
-                //   if (tmp) {
-                //     for (let item of items) {
-                //       console.log(item.name);
-                //       await db.collection('items').updateOne({ name: item.name }, { $set: { type: 'InvItem' } })
-                //       delete tmp._id;
-                //       tmp.item = item._id;
-                //       await db.collection('transactions.lines').insertOne(tmp);
-                //     }
-                //   }
-                // }
-            });
+        //Users
+        this.routeUniversal("users", new genericController_1.default(user_model_1.default));
+        //Storage
+        Object.values(model_1.StorageTypes).forEach(storage => {
+            this.routeFiles(new files_1.default(storage));
         });
+        //Transactions
+        Object.values(model_2.TransactionTypes).forEach(transaction => {
+            this.routeUniversal("transactions", new transactions_1.default(transaction));
+        });
+        //Items
+        Object.values(model_3.ItemTypes).forEach(item => {
+            this.routeUniversal("items", new genericController_1.default(item));
+        });
+        //Entities
+        Object.values(model_4.EntityTypes).forEach(entity => {
+            this.routeUniversal("entities", new genericController_1.default(entity));
+        });
+        this.routeUniversal("emails", this.emailController);
+        this.routeUniversal("websites", this.websiteController);
+        this.routeConstants();
+        this.routeAuth();
+        this.routeHosting();
+        app.use(subdomain("*", this.RouterHosting));
+        app.use("/api/core", this.Router);
     }
     routeUniversal(collection, controller) {
         this.Router.route(`/${collection}/:recordtype/fields`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.fields.bind(controller));
         this.Router.route(`/${collection}/:recordtype/form`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.form.bind(controller));
         this.Router.route(`/${collection}/:recordtype`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.find.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/new/create`).post(this.Auth.authorization(3).bind(this.Auth), controller.add.bind(controller));
+        this.Router.route(`/${collection}/:recordtype/new/:mode?`).post(this.Auth.authorization(3).bind(this.Auth), controller.add.bind(controller));
         if (controller.pdf)
             this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(this.Auth.authorization(3).bind(this.Auth), controller.pdf.bind(controller));
         this.Router.route(`/${collection}/:recordtype/:id/logs`).get(this.Auth.authorization(3).bind(this.Auth), controller.logs.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/:id/:mode`)
+        this.Router.route(`/${collection}/:recordtype/:id/:mode?`)
             .get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.get.bind(controller))
             .patch(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.update.bind(controller))
-            .post(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.save.bind(controller))
+            .put(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.save.bind(controller))
             .delete(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.delete.bind(controller));
     }
     routeConstants() {
         // Constants
         this.Router.route("/constants/:recordtype").get(this.constantController.get);
     }
-    routeWarehouses() {
-        // Warehouses
-        this.Router.route("/warehouses/:recordtype").get(this.warehouseController.find.bind(this.warehouseController));
-    }
-    routeClassifications() {
-        // Classifications
-        this.Router.route("/classifications/:recordtype").get(this.classificationController.find.bind(this.classificationController));
-        this.Router.route("/classifications/:recordtype/new/create").post(this.classificationController.add.bind(this.classificationController));
-        this.Router.route("/classifications/:recordtype/:id/:mode")
-            .get(this.classificationController.get.bind(this.classificationController))
-            .patch(this.classificationController.update.bind(this.classificationController))
-            .post(this.classificationController.save.bind(this.classificationController))
-            .delete(this.classificationController.delete.bind(this.classificationController));
-    }
-    routeTransactions() {
-        // Transactions
-        this.Router.route("/transactions/:recordtype/fields").get(this.Auth.authenticate.bind(this.Auth), this.transactionController.fields.bind(this.transactionController));
-        this.Router.route("/transactions/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.transactionController.find.bind(this.transactionController));
-        this.Router.route("/transactions/:recordtype/new/create").post(this.transactionController.add.bind(this.transactionController));
-        this.Router.route("/transactions/:recordtype/:id/pdf").get(this.transactionController.pdf.bind(this.transactionController));
-        this.Router.route("/transactions/:recordtype/:id/logs")
-            .get(this.transactionController.logs.bind(this.transactionController));
-        this.Router.route("/transactions/:recordtype/:id/:mode")
-            .get(this.transactionController.get.bind(this.transactionController))
-            .patch(this.transactionController.update.bind(this.transactionController))
-            .post(this.transactionController.save.bind(this.transactionController))
-            .delete(this.transactionController.delete.bind(this.transactionController));
-    }
-    routeItems() {
-        //Items
-        this.Router.route("/items/").get(this.Auth.authenticate.bind(this.Auth), this.itemController.find.bind(this.itemController));
-        this.Router.route("/items/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.itemController.find.bind(this.itemController));
-        this.Router.route("/items/:recordtype/new/create").post(this.itemController.add.bind(this.itemController));
-        this.Router.route("/items/:recordtype/:id/logs")
-            .get(this.itemController.logs.bind(this.itemController));
-        this.Router.route("/items/:recordtype/:id/:mode")
-            .get(this.itemController.get.bind(this.itemController))
-            .patch(this.itemController.update.bind(this.itemController))
-            .post(this.itemController.save.bind(this.itemController))
-            .delete(this.itemController.delete.bind(this.itemController));
-    }
-    routeActivities() {
-        //Activities
-        this.Router.route("/activities/").get(this.Auth.authenticate.bind(this.Auth), this.activityController.find.bind(this.activityController));
-        this.Router.route("/activities/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.activityController.find.bind(this.activityController));
-        this.Router.route("/activities/:recordtype/new/create").post(this.activityController.add.bind(this.activityController));
-        this.Router.route("/activities/:recordtype/:id/:mode")
-            .get(this.activityController.get.bind(this.activityController))
-            .patch(this.activityController.update.bind(this.activityController))
-            .post(this.activityController.save.bind(this.activityController))
-            .delete(this.activityController.delete.bind(this.activityController));
-    }
-    routeUsers() {
-        // Users
-        // this.Router.route("/entities/:recordtype/:id/options").get(
-        //   this.Auth.authenticate.bind(this.Auth) as any,
-        //   this.entityController.options.bind(this.entityController) as any
-        // );
-        this.Router.route("/entities/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.entityController.find.bind(this.entityController));
-        this.Router.route("/entities/:recordtype/new/create").post(this.entityController.add.bind(this.entityController));
-        this.Router.route("/entities/:recordtype/:id/logs")
-            .get(this.entityController.logs.bind(this.entityController));
-        this.Router.route("/entities/:recordtype/:id/:mode")
-            .get(this.entityController.get.bind(this.entityController))
-            .patch(this.entityController.update.bind(this.entityController))
-            .post(this.entityController.save.bind(this.entityController))
-            .delete(this.entityController.delete.bind(this.entityController));
-    }
-    routeWebsites() {
-        // Websites
-        this.Router.route("/websites/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.websiteController.find.bind(this.websiteController));
-        this.Router.route("/websites/:recordtype/new/create").post(this.websiteController.add.bind(this.websiteController));
-        this.Router.route("/websites/:recordtype/:id/:mode")
-            .get(this.websiteController.get.bind(this.websiteController))
-            .patch(this.websiteController.update.bind(this.websiteController))
-            .post(this.websiteController.save.bind(this.websiteController))
-            .delete(this.websiteController.delete.bind(this.websiteController));
-    }
-    routeEmails() {
-        // Emails
-        this.Router.route("/emails/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.emailController.find.bind(this.emailController));
-        this.Router.route("/emails/:recordtype/new/create").post(this.emailController.add.bind(this.emailController));
-        this.Router.route("/emails/:recordtype/:id/send")
-            .post(this.emailController.send.bind(this.emailController));
-        this.Router.route("/emails/:recordtype/:id/:mode")
-            .get(this.emailController.get.bind(this.emailController))
-            .patch(this.emailController.update.bind(this.emailController))
-            .post(this.emailController.save.bind(this.emailController))
-            .delete(this.emailController.delete.bind(this.emailController));
-    }
-    routeSettings() {
-        // Settings
-        this.Router.route("/settings/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.settingController.find.bind(this.settingController));
-        this.Router.route("/settings/:recordtype/new/create").post(this.Auth.authenticate.bind(this.Auth), this.settingController.add.bind(this.settingController));
-        // this.Router.route("/settings/:recordtype/new/create").post(
-        //   this.settingController.add.bind(this.settingController) as any
-        // );
-        this.Router.route("/settings/:recordtype/:id/:mode?")
-            .patch(this.settingController.update.bind(this.settingController));
-        // .get(this.settingController.get.bind(this.settingController) as any)
-        //   .post(this.settingController.save.bind(this.settingController) as any)
-        //   .delete(this.settingController.delete.bind(this.settingController) as any);
-    }
-    routeReports() {
-        // Reports
-        this.Router.route("/reports/:recordtype/fields").get(this.Auth.authenticate.bind(this.Auth), this.reportController.fields.bind(this.reportController));
-        this.Router.route("/reports/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.reportController.find.bind(this.reportController));
-        this.Router.route("/reports/:recordtype/new/create").post(this.Auth.authenticate.bind(this.Auth), this.reportController.add.bind(this.reportController));
-        this.Router.route("/reports/:recordtype/:id/results")
-            .get(this.reportController.results.bind(this.reportController));
-        this.Router.route("/reports/:recordtype/:id/:mode?")
-            .patch(this.reportController.update.bind(this.reportController))
-            .get(this.reportController.get.bind(this.reportController))
-            .post(this.reportController.save.bind(this.reportController))
-            .delete(this.reportController.delete.bind(this.reportController));
-    }
     routeAuth() {
         // Auth
-        // to do - do usunięcia
-        this.Router.route("/login").post(this.Auth.login.bind(this.Auth));
-        this.Router.route("/auth").get(this.Auth.authenticate.bind(this.Auth), this.Auth.accessGranted.bind(this.Auth));
-        this.Router.route("/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
-        //new auth
         this.Router.route("/auth/login").post(this.Auth.login.bind(this.Auth));
         this.Router.route("/auth/refresh").post(this.Auth.refreshToken.bind(this.Auth));
         this.Router.route("/auth/user").get(this.Auth.authenticate.bind(this.Auth), this.Auth.getUser.bind(this.Auth));
         this.Router.route("/auth/verify").get(this.Auth.authenticate.bind(this.Auth), this.Auth.accessGranted.bind(this.Auth));
     }
-    routeFiles() {
+    routeFiles(controller) {
         // Files
-        this.Router.route("/files/upload/:path*?").post(this.filesController.upload.bind(this.filesController));
-        this.Router.route("/files/:path*?").get(this.Auth.authenticate.bind(this.Auth), this.filesController.find.bind(this.filesController));
+        this.Router.route("/files/upload/:path*?").post(this.Auth.authenticate.bind(this.Auth), controller.upload.bind(controller));
+        this.Router.route("/files/:path*?").get(controller.find.bind(controller));
     }
     routeHosting() {
         // Hosting
-        this.Router2.route("/:view?/:param?").get(this.hostingController.get);
-        this.Router2.route("*").get(this.hostingController.get);
-    }
-    routeAccounting() {
-        //Accounting
-        this.Router.route("/accounting/").get(this.Auth.authenticate.bind(this.Auth), this.accountingController.find.bind(this.accountingController));
-        this.Router.route("/accounting/:recordtype").get(this.Auth.authenticate.bind(this.Auth), this.accountingController.find.bind(this.accountingController));
-        this.Router.route("/accounting/:recordtype/new/create").post(this.accountingController.add.bind(this.accountingController));
-        this.Router.route("/accounting/:recordtype/:id/:mode")
-            .get(this.accountingController.get.bind(this.accountingController))
-            .patch(this.accountingController.update.bind(this.accountingController))
-            .post(this.accountingController.save.bind(this.accountingController))
-            .delete(this.accountingController.delete.bind(this.accountingController));
+        this.RouterHosting.route("/:view?/:param?").get(this.hostingController.get);
+        this.RouterHosting.route("*").get(this.hostingController.get);
     }
 }
 exports["default"] = Routes;
@@ -5246,80 +3516,71 @@ const constantTranslate_1 = __importDefault(__webpack_require__(7442));
 const validateVirtuals_1 = __importDefault(__webpack_require__(4002));
 const totalVirtuals_1 = __importDefault(__webpack_require__(4649));
 const addToVirtuals_1 = __importDefault(__webpack_require__(2329));
-const app_1 = __webpack_require__(3165);
-function methods(schema, options) {
+const cache_1 = __importDefault(__webpack_require__(7429));
+function customMethodsPlugin(schema) {
     // apply method to pre
     function recalcDocument() {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log("default recalc Record");
-        });
+        console.log("default recalc Record");
     }
-    function validateDocument() {
+    schema.method('setValue', setValue_1.default);
+    schema.method('changeLogs', changeLogs_1.default);
+    schema.method('virtualPopulate', virtualPopulate_1.default);
+    schema.method('autoPopulate', autoPopulate_1.default);
+    schema.method('constantTranslate', constantTranslate_1.default);
+    schema.method('validateVirtuals', validateVirtuals_1.default);
+    schema.method('totalVirtuals', totalVirtuals_1.default);
+    schema.method('addToVirtuals', addToVirtuals_1.default);
+    schema.method('recalcDocument', recalcDocument);
+    schema.method('validateDocument', function () {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("validateDocument");
             let errors = [];
             let err = this.validateSync();
             if (err)
                 errors.push(err);
-            let virtualmsg = yield this.validateVirtuals();
+            let virtualmsg = yield this.validateVirtuals(false);
             if (virtualmsg && virtualmsg.length)
                 errors.push(...virtualmsg);
             return errors;
         });
-    }
-    function saveDocument() {
+    });
+    schema.method('saveDocument', function () {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("save document");
-            yield this.recalcDocument();
+            this.recalcDocument();
             yield this.validateVirtuals(true);
             yield this.changeLogs();
             let document = yield this.save();
-            app_1.cache.delCache(document._id);
+            cache_1.default.del(document._id.toString());
             return document;
         });
-    }
-    //add locals
-    function initLocal(next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.$locals.oldValue = {};
-            this.$locals.triggers = [];
-        });
-    }
+    });
     //triggers loop
-    function actions(next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log("post valide ");
-            for (let trigger of this.$locals.triggers) {
-                if (this.actions)
-                    yield this.actions(trigger);
-                // remove trigger
-                this.$locals.triggers.shift();
-                yield this.validate();
-            }
-        });
-    }
-    // to do - zmienić na wartość statyczną zamiast virtualną
+    // async function actions(this: T, next: any) {
+    //   console.log("post valide ")
+    //   if (this.$locals.triggers) {
+    //     let triggers: any = this.$locals.triggers;
+    //     for (let trigger of triggers) {
+    //         await actions(trigger);
+    //       // remove trigger
+    //       triggers.shift();
+    //       await this.validate()
+    //     }
+    //   }
+    // }
     // add resource
     schema.virtual('resource').get(function () {
-        let resources = this.schema.options.collection.split(".");
+        let resources = this.collection.name.split(".");
         return resources[0];
     });
-    schema.methods.setValue = setValue_1.default;
-    schema.methods.changeLogs = changeLogs_1.default;
-    schema.methods.virtualPopulate = virtualPopulate_1.default;
-    schema.methods.autoPopulate = autoPopulate_1.default;
-    schema.methods.constantTranslate = constantTranslate_1.default;
-    schema.methods.validateVirtuals = validateVirtuals_1.default;
-    schema.methods.totalVirtuals = totalVirtuals_1.default;
-    schema.methods.addToVirtuals = addToVirtuals_1.default;
-    schema.methods.recalcDocument = recalcDocument;
-    schema.methods.saveDocument = saveDocument;
-    schema.methods.validateDocument = validateDocument;
-    schema.methods.initLocal = initLocal;
-    // schema.pre("save", handlerSave);
-    // schema.pre("remove", handlerSave);
+    //add locals
+    function initLocal() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.$locals["oldValue"] = {};
+            this.$locals["triggers"] = [];
+        });
+    }
     schema.pre("init", initLocal);
-    schema.post("validate", actions);
     // add Owner ID
     // schema.add({
     //   ownerAccount: {
@@ -5339,7 +3600,7 @@ function methods(schema, options) {
     //next();
     //});
 }
-exports["default"] = methods;
+exports["default"] = customMethodsPlugin;
 
 
 /***/ }),
@@ -5370,7 +3631,7 @@ function addToVirtuals(virtual, newline, index) {
             newline[field] = this[field] ? this[field]._id : this[field];
         });
         this[virtual].splice(index, 0, newline);
-        yield this.validateVirtuals();
+        yield this.validateVirtuals(false);
     });
 }
 exports["default"] = addToVirtuals;
@@ -5450,16 +3711,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const changelog_model_1 = __importDefault(__webpack_require__(7617));
+const mongoose_1 = __webpack_require__(1185);
 function changeLogs(document, list) {
     return __awaiter(this, void 0, void 0, function* () {
         //zmodyfikować by przed zapisaniem pobierało oryginalny obiekt i zapisywalo zmiany
-        if (this.isModified) {
+        if (this.isModified()) {
             let selects = this.directModifiedPaths();
             //get original document if exists (only changed fields)
-            let originalDoc = yield this.constructor.findById(this.id, selects);
+            //console.log(this.type, this.constructor,selects)
+            let originalDoc = yield mongoose_1.models[this.type].findById(this.id, selects);
             if (originalDoc) {
                 selects.forEach((field) => {
-                    let ref = this[field] && this[field].constructor ? this[field].constructor.modelName : null;
+                    let ref = this[field] && this[field].type ? this[field].constructor.modelName : null;
                     this.depopulate();
                     if ((this[field]).toString() !== (originalDoc[field]).toString()) {
                         let changeLog = new changelog_model_1.default({
@@ -5504,7 +3767,6 @@ function constantTranslate(local) {
             if (Array.isArray(this[list.path])) {
                 for (let index in doc[list.path]) {
                     doc[list.path][index] = this[list.path][index].constantTranslate(local);
-                    console.log(doc[list.path][index]);
                 }
             }
         }
@@ -5551,14 +3813,14 @@ function setValue(field, value, list, subrecord) {
                     document = yield new mongoose_1.models[virtual.options.ref]();
                     document.initLocal();
                     this[list].push(document);
-                    this.validateVirtuals();
+                    this.validateVirtuals(false);
                 }
             }
             else {
                 document = this;
             }
-            document.$locals.oldValue[field] = document[field];
-            document.$locals.triggers.push({ type: "setValue", field: field, oldValue: document.$locals.oldValue[field] });
+            // document.$locals.oldValue[field] = document[field];
+            // document.$locals.triggers.push({ type: "setValue", field: field, oldValue: document.$locals.oldValue[field] });
             // to do - zmienić na metode setLocalTriggers()
             document[field] = value;
             //populate new field value
@@ -5914,17 +4176,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findDocuments = exports.deleteDocument = exports.updateDocument = exports.saveDocument = exports.getDocument = exports.addDocument = exports.loadDocument = void 0;
-const app_1 = __webpack_require__(3165);
+const cache_1 = __importDefault(__webpack_require__(7429));
 const getFields_1 = __importDefault(__webpack_require__(4140));
 const getForm_1 = __importDefault(__webpack_require__(4012));
-const pdf_1 = __importDefault(__webpack_require__(180));
+function customStaticsMethods(schema) {
+    schema.statics.loadDocument = loadDocument;
+    schema.statics.addDocument = addDocument;
+    schema.statics.getDocument = getDocument;
+    schema.statics.saveDocument = saveDocument;
+    schema.statics.updateDocument = updateDocument;
+    schema.statics.deleteDocument = deleteDocument;
+    schema.statics.findDocuments = findDocuments;
+    schema.statics.getFields = getFields_1.default;
+    schema.statics.getForm = getForm_1.default;
+}
+exports["default"] = customStaticsMethods;
 //loadDocument
 function loadDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        let doc = yield this.findOne({ _id: id });
+        let doc = yield this.findById(id);
         if (doc) {
             yield doc.virtualPopulate();
-            yield doc.validateVirtuals();
+            yield doc.validateVirtuals(false);
             return doc;
         }
         else
@@ -5933,68 +4206,81 @@ function loadDocument(id) {
 }
 exports.loadDocument = loadDocument;
 //API
-function addDocument(data) {
+function addDocument(mode, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        let document = new this(data);
+        let document = yield this.create(data);
         document.initLocal();
-        yield document.recalcDocument();
+        document.recalcDocument();
         let msg = yield document.validateDocument();
-        // insert document to cache
-        app_1.cache.addCache(document);
-        return { document, msg };
+        if (mode === "advanced") {
+            // Zapisanie dokumentu do cache
+            cache_1.default.set(document._id, document);
+            return { document, msg, saved: false };
+        }
+        else {
+            yield document.saveDocument();
+            return { document, msg, saved: true };
+        }
     });
 }
 exports.addDocument = addDocument;
 function getDocument(id, mode) {
     return __awaiter(this, void 0, void 0, function* () {
-        //let document = cache.getCache(id);
         //if (!document) {
         let document = yield this.loadDocument(id);
         //}
-        if (document) {
-            if (mode === "edit")
-                app_1.cache.addCache(document);
+        if (document && document._id) {
+            if (mode === "advanced")
+                cache_1.default.set(id, document);
         }
         return document;
     });
 }
 exports.getDocument = getDocument;
+// zapisuje dokument
+// najpierw sprawdza czy jest w cachu
+// jeżeli tak, zapisuje aktyywny stan i zwraca identyfikator
+// jeżeli nie, zwraca null
 function saveDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        let document = app_1.cache.getCache(id);
+        let document = cache_1.default.get(id);
         if (document) {
             yield document.saveDocument();
-            (0, pdf_1.default)();
-            return id;
+            return { document_id: id, saved: true };
         }
         else {
-            // to do - dodać error
+            return { document_id: null, saved: false };
         }
     });
 }
 exports.saveDocument = saveDocument;
-function updateDocument(id, updates) {
+function updateDocument(id, mode, updates) {
     return __awaiter(this, void 0, void 0, function* () {
-        let document = app_1.cache.getCache(id);
-        let save = false;
-        if (!document) {
-            document = yield this.loadDocument(id);
-            save = true;
-        }
-        let msg = [];
-        if (!Array.isArray(updates))
-            updates = [updates]; // array
-        for (let update of updates) {
-            msg = yield document.setValue(update.field, update.value, update.list, update.subrecord);
-        }
-        if (save) {
-            document = yield document.saveDocument();
-            return { document, msg };
+        let document = null;
+        if (mode === "advanced") {
+            document = cache_1.default.get(id);
         }
         else {
-            yield document.recalcDocument();
-            return { document, msg };
+            document = yield this.loadDocument(id);
         }
+        if (document) {
+            let msg = [];
+            if (!Array.isArray(updates))
+                updates = [updates]; // array
+            for (let update of updates) {
+                msg = yield document.setValue(update.field, update.value, update.list, update.subrecord);
+            }
+            if (mode === "advanced") {
+                document.recalcDocument();
+                return { document, msg, saved: false };
+            }
+            else {
+                yield document.saveDocument();
+                return { document, msg, saved: true };
+            }
+        }
+        else
+            return { document: null, msg: "error", saved: false };
     });
 }
 exports.updateDocument = updateDocument;
@@ -6003,14 +4289,14 @@ function deleteDocument(id) {
         let document = yield this.loadDocument(id);
         if (document) {
             document.deleted = true;
-            yield document.recalcDocument();
-            app_1.cache.delCache(id);
-            document.remove();
+            document.recalcDocument();
+            cache_1.default.del(id);
+            yield document.remove();
+            return { saved: true };
         }
         else {
-            // to do - dodać error
+            return { saved: false };
         }
-        return id;
     });
 }
 exports.deleteDocument = deleteDocument;
@@ -6063,18 +4349,6 @@ function findDocuments(query, options) {
     });
 }
 exports.findDocuments = findDocuments;
-function staticsMethods(schema, options) {
-    schema.statics.loadDocument = loadDocument;
-    schema.statics.addDocument = addDocument;
-    schema.statics.getDocument = getDocument;
-    schema.statics.saveDocument = saveDocument;
-    schema.statics.updateDocument = updateDocument;
-    schema.statics.deleteDocument = deleteDocument;
-    schema.statics.findDocuments = findDocuments;
-    schema.statics.getFields = getFields_1.default;
-    schema.statics.getForm = getForm_1.default;
-}
-exports["default"] = staticsMethods;
 
 
 /***/ }),
@@ -6338,6 +4612,13 @@ module.exports = require("express-fileupload");
 
 /***/ }),
 
+/***/ 6985:
+/***/ ((module) => {
+
+module.exports = require("express-rate-limit");
+
+/***/ }),
+
 /***/ 3222:
 /***/ ((module) => {
 
@@ -6377,6 +4658,13 @@ module.exports = require("mongoose");
 /***/ ((module) => {
 
 module.exports = require("mongoose-paginate-v2");
+
+/***/ }),
+
+/***/ 4580:
+/***/ ((module) => {
+
+module.exports = require("node-cache");
 
 /***/ }),
 

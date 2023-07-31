@@ -10,7 +10,7 @@ export interface IReport extends IExtendedDocument {
     filters: any[];
     getResults(): any;
 }
-interface IReportModel extends Model<IReport>, IExtendedModel { }
+interface IReportModel extends Model<IReport>, IExtendedModel<IReport> { }
 
 export const schema = new Schema<IReport>(
     {

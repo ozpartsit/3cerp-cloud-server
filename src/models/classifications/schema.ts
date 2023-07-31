@@ -8,7 +8,7 @@ export interface IClassification extends IExtendedDocument {
     name: string;
     description: string;
 }
-interface IClassificationModel extends Model<IClassification>, IExtendedModel { }
+interface IClassificationModel extends Model<IClassification>, IExtendedModel<IClassification> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const ClassificationSchema = {

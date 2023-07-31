@@ -9,6 +9,7 @@ export interface IAccess extends IExtendedDocument {
     password: string;
     email: string;
     active: boolean;
+    temporary: boolean;
     validatePassword(password: string): boolean;
     hashPassword(): any;
 }
@@ -27,6 +28,7 @@ const schema = new Schema<IAccess>(
         password: { type: String, input: "PasswordField", required: true },
         email: { type: String, input: "TextField", required: true },
         active: { type: Boolean, input: "SwitchField" },
+        temporary: { type: Boolean, input: "SwitchField" },
     },
     options
 );

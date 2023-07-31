@@ -8,7 +8,7 @@ export interface IPriceLevel extends IClassification {
     base: string;
     percentageChange: number;
 }
-export interface IPriceLevelModel extends Model<IPriceLevel>, IExtendedModel {}
+export interface IPriceLevelModel extends Model<IPriceLevel>, IExtendedModel<IPriceLevel> {}
 
 export const schema = new Schema<IPriceLevel>(
     {

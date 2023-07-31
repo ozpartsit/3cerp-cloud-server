@@ -86,7 +86,7 @@ export default class Routes {
       controller.find.bind(controller) as any
     );
 
-    this.Router.route(`/${collection}/:recordtype/new/create`).post(
+    this.Router.route(`/${collection}/:recordtype/new/:mode?`).post(
       this.Auth.authorization(3).bind(this.Auth) as any,
       controller.add.bind(controller) as any
     );
@@ -101,7 +101,7 @@ export default class Routes {
       controller.logs.bind(controller) as any
     );
 
-    this.Router.route(`/${collection}/:recordtype/:id/:mode`)
+    this.Router.route(`/${collection}/:recordtype/:id/:mode?`)
       .get(
         this.Auth.authenticate.bind(this.Auth) as any,
         this.Auth.authorization(3).bind(this.Auth) as any,
@@ -112,7 +112,7 @@ export default class Routes {
         this.Auth.authorization(3).bind(this.Auth) as any,
         controller.update.bind(controller) as any
       )
-      .post(
+      .put(
         this.Auth.authenticate.bind(this.Auth) as any,
         this.Auth.authorization(3).bind(this.Auth) as any,
         controller.save.bind(controller) as any
@@ -135,17 +135,31 @@ export default class Routes {
   public routeAuth() {
     // Auth
     this.Router.route("/auth/login").post(this.Auth.login.bind(this.Auth) as any);
+    this.Router.route("/auth/token").post(this.Auth.login.bind(this.Auth) as any);
+
     this.Router.route("/auth/refresh").post(
       this.Auth.refreshToken.bind(this.Auth) as any
     );
+
     this.Router.route("/auth/user").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.getUser.bind(this.Auth) as any
     );
+
+    this.Router.route("/auth/user").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.getUser.bind(this.Auth) as any
+    );
+
     this.Router.route("/auth/verify").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.accessGranted.bind(this.Auth) as any
     );
+
+    this.Router.route("/auth/reset_password")
+      .post(this.Auth.resetPassword.bind(this.Auth) as any)
+      .patch(this.Auth.setPassword.bind(this.Auth) as any);
+
   }
   public routeFiles(controller) {
     // Files
