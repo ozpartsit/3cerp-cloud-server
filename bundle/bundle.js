@@ -261,6 +261,15 @@ exports["default"] = __webpack_require__(3222)({
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -269,6 +278,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const path_1 = __importDefault(__webpack_require__(1017));
 const fs_1 = __importDefault(__webpack_require__(7147));
 const schema_1 = __importDefault(__webpack_require__(9106));
+const schema_2 = __importDefault(__webpack_require__(7662));
+const schema_3 = __importDefault(__webpack_require__(7559));
 class StorageStructure {
     constructor() {
         //resolve storage path of directory
@@ -288,6 +299,7 @@ class StorageStructure {
     init() {
         console.log("Init Storage", this.storagePath);
         this.mapFiles(this.storagePath, null);
+        this.mapFolders();
     }
     makeDir(path) {
         if (!fs_1.default.existsSync(path)) {
@@ -307,19 +319,39 @@ class StorageStructure {
     //parentPath: string = "root",
     parent) {
         fs_1.default.readdir(dirPath, (err, files) => {
-            files.forEach((file) => {
+            files.forEach((file) => __awaiter(this, void 0, void 0, function* () {
                 let folder = parent ? parent.path : encodeURI("storage");
-                let doc = new schema_1.default({
+                const filePath = path_1.default.posix.join(folder, encodeURI(file));
+                let doc = {
                     name: file,
-                    type: 'File',
-                    path: path_1.default.join(folder, encodeURI(file)),
-                    urlcomponent: path_1.default.join(folder, encodeURI(file)),
-                });
+                    path: path_1.default.posix.join(folder, encodeURI(file)),
+                    urlcomponent: path_1.default.posix.join(folder, encodeURI(file)),
+                    type: ""
+                };
                 if (fs_1.default.lstatSync(path_1.default.join(dirPath, file)).isDirectory()) {
+                    let storage = yield schema_3.default.findOne({ path: filePath }).exec();
                     doc.type = "Folder";
-                    this.mapFiles(path_1.default.join(dirPath, file), doc);
+                    let folder = new schema_3.default(doc);
+                    if (!storage)
+                        folder.save();
+                    this.mapFiles(path_1.default.join(dirPath, file), folder);
                 }
-                doc.save();
+                else {
+                    let storage = yield schema_2.default.findOne({ path: filePath }).exec();
+                    if (!storage) {
+                        doc.type = "File";
+                        let file = new schema_2.default(doc);
+                        file.save();
+                    }
+                }
+            }));
+        });
+    }
+    mapFolders() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let folders = yield schema_1.default.find({ type: "Folder" }).exec();
+            folders.forEach((folder) => {
+                this.makeDir(folder.path);
             });
         });
     }
@@ -738,6 +770,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const schema_1 = __importDefault(__webpack_require__(7662));
 const genericController_1 = __importDefault(__webpack_require__(2893));
 const path_1 = __importDefault(__webpack_require__(1017));
+const customError_1 = __importDefault(__webpack_require__(7352));
 class FileController extends genericController_1.default {
     constructor(model) {
         super(model);
@@ -748,12 +781,7 @@ class FileController extends genericController_1.default {
             // todo
             try {
                 if (!req.files) {
-                    res.send({
-                        error: {
-                            code: "no_file",
-                            message: req.__('no_file')
-                        }
-                    });
+                    throw new customError_1.default("no_file", 404);
                 }
                 else {
                     let files = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
@@ -764,13 +792,11 @@ class FileController extends genericController_1.default {
                         let doc = new schema_1.default({
                             name: file.name,
                             type: "File",
-                            path: path_1.default.join("storage", encodeURI(dirPath), encodeURI(file.name)),
-                            urlcomponent: path_1.default.join("storage", encodeURI(dirPath), encodeURI(file.name)),
+                            path: path_1.default.posix.join("storage", encodeURI(dirPath), encodeURI(file.name)),
+                            urlcomponent: path_1.default.posix.join("storage", encodeURI(dirPath), encodeURI(file.name)),
                         });
-                        //Storage.updateOrInsert(doc)
                         let newFile = yield doc.save();
                         uploaded.push(newFile);
-                        //send response
                     }
                     res.send(uploaded);
                 }
@@ -805,6 +831,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const email_1 = __importDefault(__webpack_require__(3097));
 const changelog_model_1 = __importDefault(__webpack_require__(7617));
+const customError_1 = __importDefault(__webpack_require__(7352));
 // Uniwersalny kontroler generyczny
 class GenericController {
     constructor(model) {
@@ -831,13 +858,9 @@ class GenericController {
             let { recordtype, id, mode } = req.params;
             try {
                 let document = yield this.model.getDocument(id, mode);
-                if (!document)
-                    res.status(404).json({
-                        error: {
-                            code: "doc_not_found",
-                            message: req.__('doc_not_found')
-                        }
-                    });
+                if (!document) {
+                    throw new customError_1.default("doc_not_found", 404);
+                }
                 else {
                     //populate response document
                     yield document.autoPopulate();
@@ -856,12 +879,7 @@ class GenericController {
             try {
                 let { document_id, saved } = yield this.model.saveDocument(id);
                 if (!document_id) {
-                    res.status(404).json({
-                        error: {
-                            code: "doc_not_found",
-                            message: req.__('doc_not_found')
-                        }
-                    });
+                    throw new customError_1.default("doc_not_found", 404);
                 }
                 else {
                     res.json({ document_id, saved });
@@ -889,12 +907,7 @@ class GenericController {
                 let update = req.body;
                 let { document, msg, saved } = yield this.model.updateDocument(id, mode, update);
                 if (!document) {
-                    res.status(404).json({
-                        error: {
-                            code: "doc_not_found",
-                            message: req.__('doc_not_found')
-                        }
-                    });
+                    throw new customError_1.default("doc_not_found", 404);
                 }
                 else {
                     //populate response document
@@ -1239,26 +1252,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const genericController_1 = __importDefault(__webpack_require__(2893));
+const customError_1 = __importDefault(__webpack_require__(7352));
 class TransactionController extends genericController_1.default {
     constructor(model) {
         super(model);
     }
     pdf(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { recordtype, id } = req.params;
-            let document = yield this.model.getDocument(id, 'view');
-            if (document) {
-                let pdf = yield document.pdf();
-                res.contentType('application/pdf;charset=UTF-8');
-                res.send(pdf);
+            try {
+                let { recordtype, id } = req.params;
+                let document = yield this.model.getDocument(id, 'view');
+                if (document) {
+                    let pdf = yield document.pdf();
+                    res.contentType('application/pdf;charset=UTF-8');
+                    res.send(pdf);
+                }
+                else {
+                    throw new customError_1.default("doc_not_found", 404);
+                }
             }
-            else {
-                res.status(404).json({
-                    error: {
-                        code: "doc_not_found",
-                        message: req.__('doc_not_found')
-                    }
-                });
+            catch (error) {
+                return next(error);
             }
         });
     }
@@ -1405,6 +1419,7 @@ const jsonwebtoken_1 = __importDefault(__webpack_require__(9344));
 const access_model_1 = __importDefault(__webpack_require__(6402));
 const user_model_1 = __importDefault(__webpack_require__(8653));
 const email_1 = __importDefault(__webpack_require__(3097));
+const customError_1 = __importDefault(__webpack_require__(7352));
 class Auth {
     constructor() {
         this.tokenSecret = process.env.TOKEN_SECRET || "";
@@ -1418,7 +1433,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err) {
                         // token wygasł lub jest niepoprawny
-                        res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+                        throw new customError_1.default("auth.failed_auth_token", 500);
                     }
                     else {
                         if (value) {
@@ -1431,14 +1446,13 @@ class Auth {
                     }
                 });
             }
-            catch (err) {
-                // token wygasł lub jest niepoprawny
-                res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+            catch (error) {
+                throw error;
             }
         }
         else {
             // Brak tokena
-            res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+            throw new customError_1.default("auth.no_token", 401);
         }
     }
     // weryfikuje uprawnienia do danego zasobu
@@ -1453,7 +1467,7 @@ class Auth {
     }
     // potwierdzenie przyznania dostępu
     accessGranted(req, res, next) {
-        res.status(200).json({ status: "error", error: { code: "auth.access_granted", message: req.__("auth.access_granted") } });
+        res.status(200).json({ success: { code: "auth.access_granted", message: req.__("auth.access_granted") } });
     }
     // metoda logowania użytkownika
     // na podstawie pary email + hasło nadaje token
@@ -1467,7 +1481,7 @@ class Auth {
                         if (user) {
                             if (!(user.roles || []).includes(req.body.role || user.role)) {
                                 // użytkownik nie ma uprawnień do tej roli
-                                res.status(403).json({ status: "error", error: { code: "auth.wrong_role", message: req.__("auth.wrong_role") } });
+                                throw new customError_1.default("auth.wrong_role", 403);
                             }
                             // aktualizacja daty ostatniego logowania
                             user_model_1.default.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec();
@@ -1477,18 +1491,18 @@ class Auth {
                         }
                         else {
                             // Użytkownik nie istnieje
-                            res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__("auth.user_not_found") } });
+                            throw new customError_1.default("auth.user_not_found", 404);
                         }
                     }));
                 }
                 else {
                     // hasło nie pasuje do emaila
-                    res.status(403).json({ status: "error", error: { code: "auth.wrong_password", message: req.__("auth.wrong_password") } });
+                    throw new customError_1.default("auth.wrong_password", 403);
                 }
             }
             else {
                 // nie istnieje dostęp dla użytkownika o podanym emailu
-                res.status(404).json({ status: "error", error: { code: "auth.user_not_exist", message: req.__("auth.user_not_exist") } });
+                throw new customError_1.default("auth.user_not_exist", 404);
             }
         }));
     }
@@ -1499,7 +1513,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
                     if (err) {
                         // refreshToken wygasł lub jest błędny
-                        res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+                        throw new customError_1.default("auth.failed_auth_token", 500);
                     }
                     else {
                         const tokens = createTokenPair(value.user, value.role, this.tokenSecret);
@@ -1509,12 +1523,12 @@ class Auth {
             }
             catch (err) {
                 // refreshToken wygasł lub jest błędny
-                res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+                throw new customError_1.default("auth.invalid_token", 400);
             }
         }
         else {
             // brak tokena w body
-            res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+            throw new customError_1.default("auth.no_token", 401);
         }
     }
     // zwraca dane zalogowanego użytkownika
@@ -1526,7 +1540,7 @@ class Auth {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err) {
                         // token nieważny lub nieprawidłowy
-                        res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+                        throw new customError_1.default("auth.failed_auth_token", 500);
                     }
                     else {
                         if (value && value.user) {
@@ -1556,7 +1570,7 @@ class Auth {
                                 }
                                 else {
                                     // user nie istnieje
-                                    res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+                                    throw new customError_1.default("auth.user_not_found", 404);
                                 }
                             }));
                         }
@@ -1565,12 +1579,12 @@ class Auth {
             }
             catch (err) {
                 // token nieważny lub nieprawidłowy
-                res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+                throw new customError_1.default("auth.invalid_token", 400);
             }
         }
         else {
             // brak Tokena
-            res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+            throw new customError_1.default("auth.no_token", 401);
         }
     }
     resetPassword(req, res, next) {
@@ -1581,6 +1595,7 @@ class Auth {
                 });
                 let email = new email_1.default();
                 let template = {
+                    from: 'notification@3cerp.cloud',
                     to: req.body.email,
                     subject: '3C ERP Cloud | Reset Password',
                     html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
@@ -1590,7 +1605,7 @@ class Auth {
             }
             else {
                 // access nie istnieje
-                res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+                throw new customError_1.default("auth.user_not_found", 404);
             }
         }));
     }
@@ -1598,7 +1613,7 @@ class Auth {
         jsonwebtoken_1.default.verify(req.body.resetToken, this.tokenSecret, (err, value) => {
             if (err) {
                 // resetToken wygasł lub jest błędny
-                res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+                throw new customError_1.default("auth.failed_auth_token", 500);
             }
             else {
                 access_model_1.default.findOne({ _id: value._id }).then((access) => __awaiter(this, void 0, void 0, function* () {
@@ -1609,7 +1624,7 @@ class Auth {
                     }
                     else {
                         // access nie istnieje
-                        res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+                        throw new customError_1.default("auth.user_not_found", 404);
                     }
                 }));
             }
@@ -1642,9 +1657,7 @@ function addHours(date, hours) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.errorHandler = void 0;
 const errorHandler = (error, req, res, next) => {
-    console.log('ErrorHandler', error);
-    //let errors: ResponseError[] = [];
-    let status = 500;
+    console.log('ErrorHandler', error.message);
     // let message = "Error";
     // if (!Array.isArray(error)) {
     //   status = error.status || 500;
@@ -1668,7 +1681,7 @@ const errorHandler = (error, req, res, next) => {
     //   }
     // }
     //})
-    return res.status(status).send({ error: error });
+    return res.status(error.status || 500).send({ error: { message: req.__(error.message) } });
 };
 exports.errorHandler = errorHandler;
 
@@ -2507,8 +2520,17 @@ const mime_types_1 = __importDefault(__webpack_require__(9514));
 const options = { discriminatorKey: "type", collection: "storages", };
 const schema = new mongoose_1.Schema({
     //size: { type: Number, set: (v: any) => getFileSize(this.path) },
-    mime: { type: String, set: (v) => mime_types_1.default.lookup(v).toString() },
+    mime: { type: String },
 }, options);
+// Pre-hook wykonujący się przed zapisaniem dokumentu do bazy danych
+schema.pre('save', function (next) {
+    // Sprawdzamy, czy pole "name" zostało zmodyfikowane (lub jest nowe)
+    if (this.isModified('name') || this.isNew) {
+        // Ustawiamy pole "mime" na podstawie pola "name" z odpowiednim formatowaniem
+        this.mime = mime_types_1.default.lookup(this.name).toString();
+    }
+    next();
+});
 const File = schema_1.default.discriminator("File", schema);
 exports["default"] = File;
 
@@ -2574,7 +2596,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.schema = void 0;
 const mongoose_1 = __webpack_require__(1185);
 const fs_1 = __importDefault(__webpack_require__(7147));
-const mime_types_1 = __importDefault(__webpack_require__(9514));
 const options = {
     collection: "storages",
     toJSON: { virtuals: true },
@@ -2608,33 +2629,15 @@ exports.schema.method("rename", function (path) {
         });
     });
 });
-exports.schema.static("deleteFile", function (path) {
+exports.schema.method("deleteFile", function () {
     return __awaiter(this, void 0, void 0, function* () {
-        let model = this;
-        fs_1.default.unlink(path, function (err) {
+        let doc = this;
+        fs_1.default.unlink(this.path, function (err) {
             if (err)
                 throw err;
-            model.deleteOne({ path: path });
+            doc.delete();
             console.log("Successfully removed!");
         });
-    });
-});
-exports.schema.static("addFile", function (files, path) {
-    return __awaiter(this, void 0, void 0, function* () {
-        for (let file of files) {
-            let name = file.name;
-            file.mv(path, function (err) {
-                if (err)
-                    throw err;
-            });
-            let doc = new this({
-                name: name,
-                type: mime_types_1.default.lookup(name).toString(),
-                path: path,
-                urlcomponent: encodeURI(`${path}/${name}`)
-            });
-            doc.save();
-        }
     });
 });
 const Storage = (0, mongoose_1.model)("Storage", exports.schema);
@@ -3458,7 +3461,7 @@ class Email {
         this.host = "mail0.small.pl";
         this.port = 465;
         this.secure = true;
-        this.user = "notification@3c-erp.eu";
+        this.user = "notification@3cerp.cloud";
         this.pass = "Test1!";
         this.transporter = nodemailer_1.default.createTransport({
             pool: true,
@@ -3536,6 +3539,23 @@ class EmitEvents {
     }
 }
 exports["default"] = EmitEvents;
+
+
+/***/ }),
+
+/***/ 7352:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class CustomError extends Error {
+    constructor(message, status) {
+        super(message);
+        this.status = status;
+        this.name = this.constructor.name; // Ustawiamy nazwę błędu na nazwę klasy
+    }
+}
+exports["default"] = CustomError;
 
 
 /***/ }),
@@ -4225,6 +4245,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findDocuments = exports.deleteDocument = exports.updateDocument = exports.saveDocument = exports.getDocument = exports.addDocument = exports.loadDocument = void 0;
+const mongoose_1 = __webpack_require__(1185);
 const cache_1 = __importDefault(__webpack_require__(7429));
 const getFields_1 = __importDefault(__webpack_require__(4140));
 const getForm_1 = __importDefault(__webpack_require__(4012));
@@ -4243,46 +4264,60 @@ exports["default"] = customStaticsMethods;
 //loadDocument
 function loadDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        let doc = yield this.findById(id);
-        if (doc) {
-            yield doc.virtualPopulate();
-            yield doc.validateVirtuals(false);
-            return doc;
+        try {
+            let doc = yield this.findById(id);
+            if (doc) {
+                yield doc.virtualPopulate();
+                yield doc.validateVirtuals(false);
+                return doc;
+            }
+            else
+                return null;
         }
-        else
-            return null;
+        catch (error) {
+            throw error;
+        }
     });
 }
 exports.loadDocument = loadDocument;
 //API
 function addDocument(mode, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        let document = yield this.create(data);
-        document.initLocal();
-        document.recalcDocument();
-        let msg = yield document.validateDocument();
-        if (mode === "advanced") {
-            // Zapisanie dokumentu do cache
-            cache_1.default.set(document._id, document);
-            return { document, msg, saved: false };
+        try {
+            let document = yield this.create(data);
+            document.initLocal();
+            document.recalcDocument();
+            let msg = yield document.validateDocument();
+            if (mode === "advanced") {
+                // Zapisanie dokumentu do cache
+                cache_1.default.set(document._id, document);
+                return { document, msg, saved: false };
+            }
+            else {
+                yield document.saveDocument();
+                return { document, msg, saved: true };
+            }
         }
-        else {
-            yield document.saveDocument();
-            return { document, msg, saved: true };
+        catch (error) {
+            throw error;
         }
     });
 }
 exports.addDocument = addDocument;
 function getDocument(id, mode) {
     return __awaiter(this, void 0, void 0, function* () {
-        //if (!document) {
-        let document = yield this.loadDocument(id);
-        //}
-        if (document && document._id) {
-            if (mode === "advanced")
-                cache_1.default.set(id, document);
+        try {
+            let document = yield this.loadDocument(id);
+            if (document && document._id) {
+                const cacheID = new mongoose_1.Types.ObjectId().toString();
+                if (mode === "advanced")
+                    cache_1.default.set(cacheID, document);
+            }
+            return document;
         }
-        return document;
+        catch (error) {
+            throw error;
+        }
     });
 }
 exports.getDocument = getDocument;
@@ -4292,109 +4327,129 @@ exports.getDocument = getDocument;
 // jeżeli nie, zwraca null
 function saveDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        let document = cache_1.default.get(id);
-        if (document) {
-            yield document.saveDocument();
-            return { document_id: id, saved: true };
+        try {
+            let document = cache_1.default.get(id);
+            if (document) {
+                yield document.saveDocument();
+                return { document_id: id, saved: true };
+            }
+            else {
+                return { document_id: null, saved: false };
+            }
         }
-        else {
-            return { document_id: null, saved: false };
+        catch (error) {
+            throw error;
         }
     });
 }
 exports.saveDocument = saveDocument;
 function updateDocument(id, mode, updates) {
     return __awaiter(this, void 0, void 0, function* () {
-        let document = null;
-        if (mode === "advanced") {
-            document = cache_1.default.get(id);
-        }
-        else {
-            document = yield this.loadDocument(id);
-        }
-        if (document) {
-            let msg = [];
-            if (!Array.isArray(updates))
-                updates = [updates]; // array
-            for (let update of updates) {
-                msg = yield document.setValue(update.field, update.value, update.list, update.subrecord);
-            }
+        try {
+            let document = null;
             if (mode === "advanced") {
-                document.recalcDocument();
-                return { document, msg, saved: false };
+                document = cache_1.default.get(id);
             }
             else {
-                yield document.saveDocument();
-                return { document, msg, saved: true };
+                document = yield this.loadDocument(id);
             }
+            if (document) {
+                let msg = [];
+                if (!Array.isArray(updates))
+                    updates = [updates]; // array
+                for (let update of updates) {
+                    msg = yield document.setValue(update.field, update.value, update.list, update.subrecord);
+                }
+                if (mode === "advanced") {
+                    document.recalcDocument();
+                    return { document, msg, saved: false };
+                }
+                else {
+                    yield document.saveDocument();
+                    return { document, msg, saved: true };
+                }
+            }
+            else
+                return { document: null, msg: "error", saved: false };
         }
-        else
-            return { document: null, msg: "error", saved: false };
+        catch (error) {
+            throw error;
+        }
     });
 }
 exports.updateDocument = updateDocument;
 function deleteDocument(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        let document = yield this.loadDocument(id);
-        if (document) {
-            document.deleted = true;
-            document.recalcDocument();
-            cache_1.default.del(id);
-            yield document.remove();
-            return { saved: true };
+        try {
+            let document = yield this.loadDocument(id);
+            if (document) {
+                document.deleted = true;
+                document.recalcDocument();
+                cache_1.default.del(id);
+                yield document.remove();
+                return { saved: true };
+            }
+            else {
+                return { saved: false };
+            }
         }
-        else {
-            return { saved: false };
+        catch (error) {
+            throw error;
         }
     });
 }
 exports.deleteDocument = deleteDocument;
 function findDocuments(query, options) {
     return __awaiter(this, void 0, void 0, function* () {
-        let docFields = this.getFields();
-        let { limit, select, sort, skip } = options;
-        let populated = {};
-        for (const [key, value] of Object.entries(select)) {
-            // to do - poprawić
-            let fieldsSelect = { name: 1, resource: 1, type: 1 };
-            let fields = key.split('.');
-            if (fields.length > 1) {
-                if (populated[fields[0]]) {
-                    populated[fields[0]].select[fields[1]] = 1;
-                    populated[fields[0]].populate.push({
-                        path: fields[1],
-                        select: 'name resource type'
-                    });
-                }
-                else {
-                    fieldsSelect[fields[1]] = 1;
-                    populated[fields[0]] = {
-                        path: fields[0],
-                        select: fieldsSelect,
-                        populate: [{
-                                path: fields[1],
-                                select: 'name resource type'
-                            }]
-                    };
-                }
-                delete select[key];
-            }
-            else {
-                let field = docFields.find((field) => field.field == fields[0]);
-                if (field && field.ref) {
-                    if (!populated[fields[0]]) {
+        try {
+            let docFields = this.getFields();
+            let { limit, select, sort, skip } = options;
+            let populated = {};
+            for (const [key, value] of Object.entries(select)) {
+                // to do - poprawić
+                let fieldsSelect = { name: 1, resource: 1, type: 1 };
+                let fields = key.split('.');
+                if (fields.length > 1) {
+                    if (populated[fields[0]]) {
+                        populated[fields[0]].select[fields[1]] = 1;
+                        populated[fields[0]].populate.push({
+                            path: fields[1],
+                            select: 'name resource type'
+                        });
+                    }
+                    else {
+                        fieldsSelect[fields[1]] = 1;
                         populated[fields[0]] = {
                             path: fields[0],
-                            select: field.selects || fieldsSelect
+                            select: fieldsSelect,
+                            populate: [{
+                                    path: fields[1],
+                                    select: 'name resource type'
+                                }]
                         };
+                    }
+                    delete select[key];
+                }
+                else {
+                    let field = docFields.find((field) => field.field == fields[0]);
+                    if (field && field.ref) {
+                        if (!populated[fields[0]]) {
+                            populated[fields[0]] = {
+                                path: fields[0],
+                                select: field.selects || fieldsSelect
+                            };
+                        }
                     }
                 }
             }
+            let result = yield this.find(query)
+                .populate(Object.values(populated))
+                .sort(sort).skip(skip).limit(limit).select(select);
+            return result;
         }
-        let result = yield this.find(query)
-            .populate(Object.values(populated))
-            .sort(sort).skip(skip).limit(limit).select(select);
-        return result;
+        catch (error) {
+            throw error;
+        }
     });
 }
 exports.findDocuments = findDocuments;

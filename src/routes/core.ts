@@ -36,29 +36,34 @@ export default class Routes {
   public start(app: express.Application): void {
     console.log("Start Routing");
     //Users
-    this.routeUniversal("users", new Controller(User))
+    this.routeUniversal("users", "user", new Controller(User))
 
     //Storage
-    Object.values(StorageTypes).forEach(storage => {
-      this.routeFiles(new FilesController(storage))
+    Object.values(StorageTypes).forEach(async (storage) => {
+      this.routeUniversal(storage.collection.collectionName, storage.modelName, new Controller(storage))
     })
+    //Upload
+    this.routeFiles(new FilesController(StorageTypes.folder))
+
     //Transactions
     Object.values(TransactionTypes).forEach(transaction => {
-      this.routeUniversal("transactions", new TransactionController(transaction))
+      this.routeUniversal(transaction.collection.collectionName, transaction.modelName, new TransactionController(transaction))
     })
     //Items
     Object.values(ItemTypes).forEach(item => {
-      this.routeUniversal("items", new Controller(item))
+      this.routeUniversal(item.collection.collectionName, item.modelName, new Controller(item))
     })
     //Entities
     Object.values(EntityTypes).forEach(entity => {
-      this.routeUniversal("entities", new Controller(entity))
+      this.routeUniversal(entity.collection.collectionName, entity.modelName, new Controller(entity))
     })
-
-    this.routeUniversal("emails", this.emailController);
-    this.routeUniversal("websites", this.websiteController)
-
+    // Emails
+    this.routeUniversal("emails", "email", this.emailController);
+    // website
+    this.routeUniversal("websites", "webshop", this.websiteController)
+    // constatns
     this.routeConstants();
+    //Auth
     this.routeAuth();
     this.routeHosting();
 
@@ -69,39 +74,41 @@ export default class Routes {
   }
 
 
-  public routeUniversal(collection: any, controller: any) {
-    this.Router.route(`/${collection}/:recordtype/fields`).get(
+  public routeUniversal(collection: string, recordtype: string, controller: any) {
+    let path = (`/${collection}/${recordtype}`).toLowerCase();
+    console.log(path)
+    this.Router.route(`${path}/fields`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(3).bind(this.Auth) as any,
       controller.fields.bind(controller) as any
     );
-    this.Router.route(`/${collection}/:recordtype/form`).get(
+    this.Router.route(`${path}/form`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(3).bind(this.Auth) as any,
       controller.form.bind(controller) as any
     );
-    this.Router.route(`/${collection}/:recordtype`).get(
+    this.Router.route(`${path}`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(3).bind(this.Auth) as any,
       controller.find.bind(controller) as any
     );
 
-    this.Router.route(`/${collection}/:recordtype/new/:mode?`).post(
+    this.Router.route(`${path}/new/:mode?`).post(
       this.Auth.authorization(3).bind(this.Auth) as any,
       controller.add.bind(controller) as any
     );
     if (controller.pdf)
-      this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(
+      this.Router.route(`${path}/:id/pdf`).get(
         this.Auth.authorization(3).bind(this.Auth) as any,
         controller.pdf.bind(controller) as any
       );
 
-    this.Router.route(`/${collection}/:recordtype/:id/logs`).get(
+    this.Router.route(`${path}/:id/logs`).get(
       this.Auth.authorization(3).bind(this.Auth) as any,
       controller.logs.bind(controller) as any
     );
 
-    this.Router.route(`/${collection}/:recordtype/:id/:mode?`)
+    this.Router.route(`${path}/:id/:mode?`)
       .get(
         this.Auth.authenticate.bind(this.Auth) as any,
         this.Auth.authorization(3).bind(this.Auth) as any,
@@ -163,14 +170,10 @@ export default class Routes {
   }
   public routeFiles(controller) {
     // Files
-    this.Router.route("/files/upload/:path*?").post(
+    this.Router.route("/storage/upload").post(
       this.Auth.authenticate.bind(this.Auth) as any,
       controller.upload.bind(controller) as any
     );
-    this.Router.route("/files/:path*?").get(
-      controller.find.bind(controller) as any
-    );
-
   }
   public routeHosting() {
     // Hosting

@@ -43,26 +43,38 @@ export default class StorageStructure {
       files.forEach(async (file: string) => {
         let folder = parent ? parent.path : encodeURI("storage");
         const filePath = path.posix.join(folder, encodeURI(file));
-        let doc = {
-          name: file,
-          path: path.posix.join(folder, encodeURI(file)),
-          urlcomponent: path.posix.join(folder, encodeURI(file)),
-          type: ""
-        };
+
 
         if (fs.lstatSync(path.join(dirPath, file)).isDirectory()) {
           let storage = await Folder.findOne({ path: filePath }).exec();
+
+          let doc = {
+            name: file,
+            path: filePath,
+            urlcomponent: filePath,
+            type: "Folder",
+          };
+
           doc.type = "Folder";
-          let folder = new Folder(doc);
-          if (!storage) folder.save();
-          this.mapFiles(path.join(dirPath, file), folder);
+          let newFolder = new Folder(doc);
+          if (!storage) newFolder.save();
+          this.mapFiles(path.join(dirPath, file), newFolder);
 
         } else {
           let storage = await File.findOne({ path: filePath }).exec();
           if (!storage) {
-            doc.type = "File";
-            let file = new File(doc);
-            file.save();
+
+            let doc = {
+              name: file,
+              path: filePath,
+              urlcomponent: filePath,
+              type: "File",
+              folderPath: folder,
+              folder: parent
+            };
+
+            let newFile = new File(doc);
+            newFile.save();
           }
         }
 

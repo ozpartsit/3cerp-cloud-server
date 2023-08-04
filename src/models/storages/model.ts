@@ -5,11 +5,13 @@ import File, { IFileModel } from "./file/schema";
 export default Storage;
 
 interface Types {
-    folder: IFolderModel;
     file: IFileModel;
+    folder: IFolderModel;
+ 
 }
 
 export const StorageTypes: Types = {
-    folder: Folder,
-    file: File
+    file: File,
+    folder: Folder
+   
 };

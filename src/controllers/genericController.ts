@@ -231,6 +231,7 @@ class GenericController<T extends IExtendedDocument> {
 
             let result = await this.model.findDocuments(query, options);
             let total = await this.model.count(query);
+       
             // get fields
             let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
             for (let index in result) {

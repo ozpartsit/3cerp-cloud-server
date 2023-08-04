@@ -4,6 +4,7 @@ import i18n from "../../config/i18n";
 export default function getFields<T extends IExtendedDocument>(this: Model<T>, local?: string, parent?: string) {
   let fields: any[] = [];
   let modelSchema = this.schema;
+
   // this.schema.discriminators && this.schema.discriminators[type]
   //   ? this.schema.discriminators[type]
   //   : this.schema;
@@ -75,8 +76,10 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
 
         if (schematype.options.ref) {
           let refModel: any = models[schematype.options.ref];
-          field.resource = refModel.schema.options.collection;
-          if (!parent) field.fields = refModel.getFields(local, pathname);
+          if (refModel) {
+            field.resource = refModel.schema.options.collection;
+            if (!parent) field.fields = refModel.getFields(local, pathname);
+          }
         }
         if (field.type != "subrecords") fields.push(field);
       }

@@ -17,7 +17,7 @@ interface IStorageModel extends Model<IStorage>, IExtendedModel<IStorage> {
     updateOrInsert(doc: IStorage): any;
 }
 const options = {
-    collection: "storages",
+    collection: "storage",
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
