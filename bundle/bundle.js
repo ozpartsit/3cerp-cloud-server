@@ -3458,7 +3458,7 @@ class Email {
         this.host = "mail0.small.pl";
         this.port = 465;
         this.secure = true;
-        this.user = "notification@3cerp.cloud";
+        this.user = "notification@3c-erp.eu";
         this.pass = "Test1!";
         this.transporter = nodemailer_1.default.createTransport({
             pool: true,

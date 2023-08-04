@@ -4,7 +4,7 @@ import { IExtendedModel } from "../utilities/static";
 import { IExtendedDocument } from "../utilities/methods";
 import Email from "../services/email";
 import Changelog from "../models/changelog.model";
-
+import CustomError from "../utilities/errors/customError";
 // Typ generyczny dla modelu Mongoose
 interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
 
@@ -36,15 +36,9 @@ class GenericController<T extends IExtendedDocument> {
         try {
             let document = await this.model.getDocument(id, mode);
 
-            if (!document) res.status(404).json(
-                {
-                    error: {
-                        code: "doc_not_found",
-                        message: req.__('doc_not_found')
-                    }
-                }
-            )
-            else {
+            if (!document) {
+                throw new CustomError("doc_not_found", 404);
+            } else {
                 //populate response document
                 await document.autoPopulate();
                 let docObject = document.constantTranslate(req.locale);
@@ -60,14 +54,7 @@ class GenericController<T extends IExtendedDocument> {
         try {
             let { document_id, saved } = await this.model.saveDocument(id);
             if (!document_id) {
-                res.status(404).json(
-                    {
-                        error: {
-                            code: "doc_not_found",
-                            message: req.__('doc_not_found')
-                        }
-                    }
-                )
+                throw new CustomError("doc_not_found", 404);
             } else {
                 res.json({ document_id, saved });
             }
@@ -93,14 +80,7 @@ class GenericController<T extends IExtendedDocument> {
             let { document, msg, saved } = await this.model.updateDocument(id, mode, update);
 
             if (!document) {
-                res.status(404).json(
-                    {
-                        error: {
-                            code: "doc_not_found",
-                            message: req.__('doc_not_found')
-                        }
-                    }
-                )
+                throw new CustomError("doc_not_found", 404);
             } else {
                 //populate response document
                 await document.autoPopulate();

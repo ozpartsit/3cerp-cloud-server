@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import Access from "../models/access.model";
 import User from "../models/user.model";
 import Email from "../services/email";
+import CustomError from "../utilities/errors/customError";
 interface Response extends express.Response {
   user: string | jwt.JwtPayload;
 }
@@ -25,7 +26,7 @@ export default class Auth {
         jwt.verify(token, this.tokenSecret, (err, value) => {
           if (err) {
             // token wygasł lub jest niepoprawny
-            res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+            throw new CustomError("auth.failed_auth_token", 500);
           } else {
             if (value) {
               req.headers.user = value.user;
@@ -36,14 +37,12 @@ export default class Auth {
             next();
           }
         });
-      } catch (err) {
-        // token wygasł lub jest niepoprawny
-        res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+      } catch (error) {
+        throw error;
       }
-
     } else {
       // Brak tokena
-      res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+      throw new CustomError("auth.no_token", 401);
     }
   }
 
@@ -58,7 +57,7 @@ export default class Auth {
       if (level < 2 || true)
         next();
       else
-        res.status(500).json({ status: "error", error: { code: "auth.access_denied", message: req.__('auth.access_denied') } });
+        throw new CustomError("auth.access_denied", 401);
     }
   }
 
@@ -68,7 +67,7 @@ export default class Auth {
     res: Response,
     next: express.NextFunction
   ) {
-    res.status(200).json({ status: "error", error: { code: "auth.access_granted", message: req.__("auth.access_granted") } });
+    res.status(200).json({ success: { code: "auth.access_granted", message: req.__("auth.access_granted") } });
   }
 
   // metoda logowania użytkownika
@@ -87,7 +86,7 @@ export default class Auth {
             if (user) {
               if (!(user.roles || []).includes(req.body.role || user.role)) {
                 // użytkownik nie ma uprawnień do tej roli
-                res.status(403).json({ status: "error", error: { code: "auth.wrong_role", message: req.__("auth.wrong_role") } });
+                throw new CustomError("auth.wrong_role", 403);
               }
               // aktualizacja daty ostatniego logowania
               User.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec()
@@ -97,7 +96,7 @@ export default class Auth {
               res.status(200).json(tokens);
             } else {
               // Użytkownik nie istnieje
-              res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__("auth.user_not_found") } });
+              throw new CustomError("auth.user_not_found", 404);
             }
 
           })
@@ -106,11 +105,11 @@ export default class Auth {
 
         } else {
           // hasło nie pasuje do emaila
-          res.status(403).json({ status: "error", error: { code: "auth.wrong_password", message: req.__("auth.wrong_password") } });
+          throw new CustomError("auth.wrong_password", 403);
         }
       } else {
         // nie istnieje dostęp dla użytkownika o podanym emailu
-        res.status(404).json({ status: "error", error: { code: "auth.user_not_exist", message: req.__("auth.user_not_exist") } });
+        throw new CustomError("auth.user_not_exist", 404);
       }
     });
   }
@@ -126,7 +125,7 @@ export default class Auth {
         jwt.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
           if (err) {
             // refreshToken wygasł lub jest błędny
-            res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+            throw new CustomError("auth.failed_auth_token", 500);
           } else {
             const tokens = createTokenPair(value.user, value.role, this.tokenSecret);
             res.status(200).json(tokens);
@@ -134,12 +133,12 @@ export default class Auth {
         });
       } catch (err) {
         // refreshToken wygasł lub jest błędny
-        res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+        throw new CustomError("auth.invalid_token", 400);
       }
 
     } else {
       // brak tokena w body
-      res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+      throw new CustomError("auth.no_token", 401);
     }
   }
 
@@ -156,7 +155,7 @@ export default class Auth {
         jwt.verify(token, this.tokenSecret, (err, value) => {
           if (err) {
             // token nieważny lub nieprawidłowy
-            res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+            throw new CustomError("auth.failed_auth_token", 500);
           } else {
             if (value && value.user) {
               User.findOne({ _id: value.user }).then(async (user) => {
@@ -185,7 +184,7 @@ export default class Auth {
                   res.status(200).json({ user: userLoged, token: token, role: value.role, account: "3cerpcloud" });
                 } else {
                   // user nie istnieje
-                  res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+                  throw new CustomError("auth.user_not_found", 404);
                 }
               })
             }
@@ -193,12 +192,12 @@ export default class Auth {
         });
       } catch (err) {
         // token nieważny lub nieprawidłowy
-        res.status(400).json({ status: "error", error: { code: "auth.invalid_token", message: req.__('auth.invalid_token') } });
+        throw new CustomError("auth.invalid_token", 400);
       }
 
     } else {
       // brak Tokena
-      res.status(401).json({ status: "error", error: { code: "auth.no_token", message: req.__("auth.no_token") } });
+      throw new CustomError("auth.no_token", 401);
     }
   }
 
@@ -216,6 +215,7 @@ export default class Auth {
         let email = new Email();
 
         let template = {
+          from: 'notification@3cerp.cloud',
           to: req.body.email,
           subject: '3C ERP Cloud | Reset Password',
           html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
@@ -224,7 +224,7 @@ export default class Auth {
         res.status(200).json({ status: "success" });
       } else {
         // access nie istnieje
-        res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+        throw new CustomError("auth.user_not_found", 404);
       }
     })
   }
@@ -237,7 +237,7 @@ export default class Auth {
     jwt.verify(req.body.resetToken, this.tokenSecret, (err, value) => {
       if (err) {
         // resetToken wygasł lub jest błędny
-        res.status(500).json({ status: "error", error: { code: "auth.failed_auth_token", message: req.__('auth.failed_auth_token') } });
+        throw new CustomError("auth.failed_auth_token", 500);
       } else {
         Access.findOne({ _id: value._id }).then(async (access) => {
           if (access) {
@@ -246,7 +246,7 @@ export default class Auth {
             res.status(200).json({ status: "success" });
           } else {
             // access nie istnieje
-            res.status(404).json({ status: "error", error: { code: "auth.user_not_found", message: req.__('auth.user_not_found') } });
+            throw new CustomError("auth.user_not_found", 404);
           }
         })
       }

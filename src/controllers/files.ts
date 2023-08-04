@@ -6,6 +6,7 @@ import path from "path";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import { IExtendedModel } from "../utilities/static";
 import { IExtendedDocument } from "../utilities/methods";
+import CustomError from "../utilities/errors/customError";
 // Typ generyczny dla modelu Mongoose
 interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
 export default class FileController<T extends IExtendedDocument> extends controller<T> {
@@ -17,12 +18,7 @@ export default class FileController<T extends IExtendedDocument> extends control
     // todo
     try {
       if (!req.files) {
-        res.send({
-          error: {
-            code: "no_file",
-            message: req.__('no_file')
-          }
-        });
+        throw new CustomError("no_file", 404);
       } else {
 
         let files: any[] = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
@@ -35,15 +31,12 @@ export default class FileController<T extends IExtendedDocument> extends control
           let doc = new File({
             name: file.name,
             type: "File",
-            path: path.join("storage", encodeURI(dirPath), encodeURI(file.name)),
-            urlcomponent: path.join("storage", encodeURI(dirPath), encodeURI(file.name)),
+            path: path.posix.join("storage", encodeURI(dirPath), encodeURI(file.name)),
+            urlcomponent: path.posix.join("storage", encodeURI(dirPath), encodeURI(file.name)),
           });
 
-          //Storage.updateOrInsert(doc)
           let newFile = await doc.save();
           uploaded.push(newFile)
-          //send response
-
         }
         res.send(uploaded);
       }

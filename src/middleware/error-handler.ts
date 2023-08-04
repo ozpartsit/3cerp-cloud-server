@@ -1,19 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { Error } from "mongoose";
-//import { CustomError } from "../errors/custom-errors";
-interface ResponseError extends Error {
-  status?: number;
-  errors?: any;
-}
+import CustomError from "../utilities/errors/customError";
+
 export const errorHandler = (
-  error: ResponseError[] | ResponseError,
+  error: CustomError,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  console.log('ErrorHandler', error);
-  //let errors: ResponseError[] = [];
-  let status = 500;
+  console.log('ErrorHandler', error.message);
+
+
   // let message = "Error";
   // if (!Array.isArray(error)) {
   //   status = error.status || 500;
@@ -40,6 +37,6 @@ export const errorHandler = (
   // }
   //})
 
-  return res.status(status).send({ error: error });
+  return res.status(error.status || 500).send({ error: { message: req.__(error.message) } });
 
 };

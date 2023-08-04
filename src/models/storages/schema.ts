@@ -2,7 +2,6 @@ import { model, Model, Schema } from "mongoose";
 import { IExtendedModel } from "../../utilities/static";
 import { IExtendedDocument } from "../../utilities/methods";
 import fs from "fs";
-import mime from "mime-types";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface IStorage extends IExtendedDocument {
     //_id?: Schema.Types.ObjectId;
@@ -53,29 +52,15 @@ schema.method("rename", async function (path: string) {
         console.log("Successfully renamed - AKA moved!");
     });
 });
-schema.static("deleteFile", async function (path: string) {
-    let model = this;
-    fs.unlink(path, function (err: any) {
+schema.method("deleteFile", async function () {
+    let doc = this;
+    fs.unlink(this.path, function (err: any) {
         if (err) throw err;
-        model.deleteOne({ path: path });
+        doc.delete();
         console.log("Successfully removed!");
     });
 });
-schema.static("addFile", async function (files: any, path: string) {
-    for (let file of files) {
-        let name = file.name;
-        file.mv(path, function (err) {
-            if (err) throw err;
-        });
-        let doc = new this({
-            name: name,
-            type: mime.lookup(name).toString(),
-            path: path,
-            urlcomponent: encodeURI(`${path}/${name}`)
-        });
-        doc.save();
-    }
-});
+
 
 const Storage: IStorageModel = model<IStorage, IStorageModel>("Storage", schema);
 export default Storage;

@@ -8,7 +8,7 @@ export default class Email {
   private host: string = "mail0.small.pl";
   private port: number = 465;
   private secure: boolean = true;
-  private user: string = "notification@3c-erp.eu";
+  private user: string = "notification@3cerp.cloud";
   private pass: string = "Test1!";
   public email: any;
   constructor() {

@@ -2,7 +2,8 @@
 import path from "path";
 import fs from "fs";
 import Storage, { IStorage } from "../models/storages/schema";
-
+import File, { IFile } from "../models/storages/file/schema";
+import Folder, { IFolder } from "../models/storages/folder/schema";
 export default class StorageStructure {
   //resolve storage path of directory
   public storagePath: string = path.resolve("storage");
@@ -18,6 +19,7 @@ export default class StorageStructure {
   public init() {
     console.log("Init Storage", this.storagePath);
     this.mapFiles(this.storagePath, null);
+    this.mapFolders();
   }
   public makeDir(path: string) {
     if (!fs.existsSync(path)) {
@@ -35,25 +37,45 @@ export default class StorageStructure {
   private mapFiles(
     dirPath: string,
     //parentPath: string = "root",
-    parent: IStorage | null
+    parent: IStorage | IFile | IFolder | null
   ) {
     fs.readdir(dirPath, (err, files) => {
-      files.forEach((file: string) => {
+      files.forEach(async (file: string) => {
         let folder = parent ? parent.path : encodeURI("storage");
-        let doc: IStorage = new Storage({
+        const filePath = path.posix.join(folder, encodeURI(file));
+        let doc = {
           name: file,
-          type: 'File',
-          path: path.join(folder, encodeURI(file)),
-          urlcomponent: path.join(folder, encodeURI(file)),
-        });
+          path: path.posix.join(folder, encodeURI(file)),
+          urlcomponent: path.posix.join(folder, encodeURI(file)),
+          type: ""
+        };
 
         if (fs.lstatSync(path.join(dirPath, file)).isDirectory()) {
+          let storage = await Folder.findOne({ path: filePath }).exec();
           doc.type = "Folder";
-          this.mapFiles(path.join(dirPath, file), doc);
+          let folder = new Folder(doc);
+          if (!storage) folder.save();
+          this.mapFiles(path.join(dirPath, file), folder);
+
+        } else {
+          let storage = await File.findOne({ path: filePath }).exec();
+          if (!storage) {
+            doc.type = "File";
+            let file = new File(doc);
+            file.save();
+          }
         }
-        doc.save();
+
       });
 
     });
   }
+  private async mapFolders() {
+    let folders = await Storage.find({ type: "Folder" }).exec();
+    folders.forEach((folder: IStorage) => {
+      this.makeDir(folder.path);
+    })
+  }
+
 }
+
