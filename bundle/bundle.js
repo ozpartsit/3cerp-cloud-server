@@ -322,26 +322,33 @@ class StorageStructure {
             files.forEach((file) => __awaiter(this, void 0, void 0, function* () {
                 let folder = parent ? parent.path : encodeURI("storage");
                 const filePath = path_1.default.posix.join(folder, encodeURI(file));
-                let doc = {
-                    name: file,
-                    path: path_1.default.posix.join(folder, encodeURI(file)),
-                    urlcomponent: path_1.default.posix.join(folder, encodeURI(file)),
-                    type: ""
-                };
                 if (fs_1.default.lstatSync(path_1.default.join(dirPath, file)).isDirectory()) {
                     let storage = yield schema_3.default.findOne({ path: filePath }).exec();
+                    let doc = {
+                        name: file,
+                        path: filePath,
+                        urlcomponent: filePath,
+                        type: "Folder",
+                    };
                     doc.type = "Folder";
-                    let folder = new schema_3.default(doc);
+                    let newFolder = new schema_3.default(doc);
                     if (!storage)
-                        folder.save();
-                    this.mapFiles(path_1.default.join(dirPath, file), folder);
+                        newFolder.save();
+                    this.mapFiles(path_1.default.join(dirPath, file), newFolder);
                 }
                 else {
                     let storage = yield schema_2.default.findOne({ path: filePath }).exec();
                     if (!storage) {
-                        doc.type = "File";
-                        let file = new schema_2.default(doc);
-                        file.save();
+                        let doc = {
+                            name: file,
+                            path: filePath,
+                            urlcomponent: filePath,
+                            type: "File",
+                            folderPath: folder,
+                            folder: parent
+                        };
+                        let newFile = new schema_2.default(doc);
+                        newFile.save();
                     }
                 }
             }));
@@ -768,6 +775,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const schema_1 = __importDefault(__webpack_require__(7662));
+const schema_2 = __importDefault(__webpack_require__(7559));
 const genericController_1 = __importDefault(__webpack_require__(2893));
 const path_1 = __importDefault(__webpack_require__(1017));
 const customError_1 = __importDefault(__webpack_require__(7352));
@@ -786,14 +794,23 @@ class FileController extends genericController_1.default {
                 else {
                     let files = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
                     let uploaded = [];
+                    let dirPath = "storage/uploads";
+                    if (req.body && req.body.folder) {
+                        let folder = yield schema_2.default.findById(req.body.folder).exec();
+                        if (folder) {
+                            dirPath = folder.path;
+                        }
+                        else {
+                            throw new customError_1.default("folder_not_found", 404);
+                        }
+                    }
                     for (let file of files) {
-                        let dirPath = "uploads";
                         file.mv(path_1.default.join(this.storagePath, dirPath, file.name));
                         let doc = new schema_1.default({
                             name: file.name,
                             type: "File",
-                            path: path_1.default.posix.join("storage", encodeURI(dirPath), encodeURI(file.name)),
-                            urlcomponent: path_1.default.posix.join("storage", encodeURI(dirPath), encodeURI(file.name)),
+                            path: path_1.default.posix.join(encodeURI(dirPath), encodeURI(file.name)),
+                            urlcomponent: path_1.default.posix.join(encodeURI(dirPath), encodeURI(file.name)),
                         });
                         let newFile = yield doc.save();
                         uploaded.push(newFile);
@@ -2521,6 +2538,8 @@ const options = { discriminatorKey: "type", collection: "storages", };
 const schema = new mongoose_1.Schema({
     //size: { type: Number, set: (v: any) => getFileSize(this.path) },
     mime: { type: String },
+    folderPath: { type: String },
+    folder: { type: mongoose_1.Schema.Types.ObjectId },
 }, options);
 // Pre-hook wykonujący się przed zapisaniem dokumentu do bazy danych
 schema.pre('save', function (next) {
@@ -2569,8 +2588,8 @@ const schema_2 = __importDefault(__webpack_require__(7559));
 const schema_3 = __importDefault(__webpack_require__(7662));
 exports["default"] = schema_1.default;
 exports.StorageTypes = {
-    folder: schema_2.default,
-    file: schema_3.default
+    file: schema_3.default,
+    folder: schema_2.default
 };
 
 
@@ -2597,7 +2616,7 @@ exports.schema = void 0;
 const mongoose_1 = __webpack_require__(1185);
 const fs_1 = __importDefault(__webpack_require__(7147));
 const options = {
-    collection: "storages",
+    collection: "storage",
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
@@ -3219,40 +3238,48 @@ class Routes {
     start(app) {
         console.log("Start Routing");
         //Users
-        this.routeUniversal("users", new genericController_1.default(user_model_1.default));
+        this.routeUniversal("users", "user", new genericController_1.default(user_model_1.default));
         //Storage
-        Object.values(model_1.StorageTypes).forEach(storage => {
-            this.routeFiles(new files_1.default(storage));
-        });
+        Object.values(model_1.StorageTypes).forEach((storage) => __awaiter(this, void 0, void 0, function* () {
+            this.routeUniversal(storage.collection.collectionName, storage.modelName, new genericController_1.default(storage));
+        }));
+        //Upload
+        this.routeFiles(new files_1.default(model_1.StorageTypes.folder));
         //Transactions
         Object.values(model_2.TransactionTypes).forEach(transaction => {
-            this.routeUniversal("transactions", new transactions_1.default(transaction));
+            this.routeUniversal(transaction.collection.collectionName, transaction.modelName, new transactions_1.default(transaction));
         });
         //Items
         Object.values(model_3.ItemTypes).forEach(item => {
-            this.routeUniversal("items", new genericController_1.default(item));
+            this.routeUniversal(item.collection.collectionName, item.modelName, new genericController_1.default(item));
         });
         //Entities
         Object.values(model_4.EntityTypes).forEach(entity => {
-            this.routeUniversal("entities", new genericController_1.default(entity));
+            this.routeUniversal(entity.collection.collectionName, entity.modelName, new genericController_1.default(entity));
         });
-        this.routeUniversal("emails", this.emailController);
-        this.routeUniversal("websites", this.websiteController);
+        // Emails
+        this.routeUniversal("emails", "email", this.emailController);
+        // website
+        this.routeUniversal("websites", "webshop", this.websiteController);
+        // constatns
         this.routeConstants();
+        //Auth
         this.routeAuth();
         this.routeHosting();
         app.use(subdomain("*", this.RouterHosting));
         app.use("/api/core", this.Router);
     }
-    routeUniversal(collection, controller) {
-        this.Router.route(`/${collection}/:recordtype/fields`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.fields.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/form`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.form.bind(controller));
-        this.Router.route(`/${collection}/:recordtype`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.find.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/new/:mode?`).post(this.Auth.authorization(3).bind(this.Auth), controller.add.bind(controller));
+    routeUniversal(collection, recordtype, controller) {
+        let path = (`/${collection}/${recordtype}`).toLowerCase();
+        console.log(path);
+        this.Router.route(`${path}/fields`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.fields.bind(controller));
+        this.Router.route(`${path}/form`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.form.bind(controller));
+        this.Router.route(`${path}`).get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.find.bind(controller));
+        this.Router.route(`${path}/new/:mode?`).post(this.Auth.authorization(3).bind(this.Auth), controller.add.bind(controller));
         if (controller.pdf)
-            this.Router.route(`/${collection}/:recordtype/:id/pdf`).get(this.Auth.authorization(3).bind(this.Auth), controller.pdf.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/:id/logs`).get(this.Auth.authorization(3).bind(this.Auth), controller.logs.bind(controller));
-        this.Router.route(`/${collection}/:recordtype/:id/:mode?`)
+            this.Router.route(`${path}/:id/pdf`).get(this.Auth.authorization(3).bind(this.Auth), controller.pdf.bind(controller));
+        this.Router.route(`${path}/:id/logs`).get(this.Auth.authorization(3).bind(this.Auth), controller.logs.bind(controller));
+        this.Router.route(`${path}/:id/:mode?`)
             .get(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.get.bind(controller))
             .patch(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.update.bind(controller))
             .put(this.Auth.authenticate.bind(this.Auth), this.Auth.authorization(3).bind(this.Auth), controller.save.bind(controller))
@@ -3276,8 +3303,7 @@ class Routes {
     }
     routeFiles(controller) {
         // Files
-        this.Router.route("/files/upload/:path*?").post(this.Auth.authenticate.bind(this.Auth), controller.upload.bind(controller));
-        this.Router.route("/files/:path*?").get(controller.find.bind(controller));
+        this.Router.route("/storage/upload").post(this.Auth.authenticate.bind(this.Auth), controller.upload.bind(controller));
     }
     routeHosting() {
         // Hosting
@@ -4531,9 +4557,11 @@ function getFields(local, parent) {
                 };
                 if (schematype.options.ref) {
                     let refModel = mongoose_1.models[schematype.options.ref];
-                    field.resource = refModel.schema.options.collection;
-                    if (!parent)
-                        field.fields = refModel.getFields(local, pathname);
+                    if (refModel) {
+                        field.resource = refModel.schema.options.collection;
+                        if (!parent)
+                            field.fields = refModel.getFields(local, pathname);
+                    }
                 }
                 if (field.type != "subrecords")
                     fields.push(field);

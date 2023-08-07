@@ -4,6 +4,7 @@ import Access from "../models/access.model";
 import User from "../models/user.model";
 import Email from "../services/email";
 import CustomError from "../utilities/errors/customError";
+import i18n from "../config/i18n";
 interface Response extends express.Response {
   user: string | jwt.JwtPayload;
 }
@@ -19,10 +20,10 @@ export default class Auth {
     res: Response,
     next: express.NextFunction
   ) {
-    const tokenParts = (req.headers.authorization || "").split(" ");
-    const token = tokenParts[1];
-    if (token) {
-      try {
+    try {
+      const tokenParts = (req.headers.authorization || "").split(" ");
+      const token = tokenParts[1];
+      if (token) {
         jwt.verify(token, this.tokenSecret, (err, value) => {
           if (err) {
             // token wygasł lub jest niepoprawny
@@ -37,12 +38,13 @@ export default class Auth {
             next();
           }
         });
-      } catch (error) {
-        throw error;
+
+      } else {
+        // Brak tokena
+        throw new CustomError("auth.no_token", 401);
       }
-    } else {
-      // Brak tokena
-      throw new CustomError("auth.no_token", 401);
+    } catch (error) {
+      return next(error);
     }
   }
 
@@ -53,11 +55,15 @@ export default class Auth {
       res: Response,
       next: express.NextFunction
     ) => {
-      //to do - dodać weryfikacje 
-      if (level < 2 || true)
-        next();
-      else
-        throw new CustomError("auth.access_denied", 401);
+      try {
+        //to do - dodać weryfikacje 
+        if (level < 2 || true)
+          next();
+        else
+          throw new CustomError("auth.access_denied", 401);
+      } catch (error) {
+        return next(error);
+      }
     }
   }
 
@@ -79,37 +85,40 @@ export default class Auth {
     next: express.NextFunction
   ) {
     Access.findOne({ email: req.body.email }).then(async (access) => {
-      if (access) {
-        const valide = await access.validatePassword(req.body.password);
-        if (valide) {
-          User.findOne({ _id: access.user }).then(async (user) => {
-            if (user) {
-              if (!(user.roles || []).includes(req.body.role || user.role)) {
-                // użytkownik nie ma uprawnień do tej roli
-                throw new CustomError("auth.wrong_role", 403);
+      try {
+        if (access) {
+          const valide = await access.validatePassword(req.body.password);
+          if (valide) {
+            User.findOne({ _id: access.user }).then(async (user) => {
+              if (user) {
+                if (!(user.roles || []).includes(req.body.role || user.role)) {
+                  // użytkownik nie ma uprawnień do tej roli
+                  throw new CustomError("auth.wrong_role", 403);
+                }
+                // aktualizacja daty ostatniego logowania
+                User.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec()
+
+                const tokens = createTokenPair(user._id.toString(), req.body.role || user.role, this.tokenSecret);
+                // zwraca parę tokenów
+                res.status(200).json(tokens);
+              } else {
+                // Użytkownik nie istnieje
+                throw new CustomError("auth.user_not_found", 404);
               }
-              // aktualizacja daty ostatniego logowania
-              User.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec()
 
-              const tokens = createTokenPair(user._id.toString(), req.body.role || user.role, this.tokenSecret);
-              // zwraca parę tokenów
-              res.status(200).json(tokens);
-            } else {
-              // Użytkownik nie istnieje
-              throw new CustomError("auth.user_not_found", 404);
-            }
+            })
 
-          })
-
-
-
+          } else {
+            // hasło nie pasuje do emaila
+            throw new CustomError("auth.wrong_password", 403);
+          }
         } else {
-          // hasło nie pasuje do emaila
-          throw new CustomError("auth.wrong_password", 403);
+          // nie istnieje dostęp dla użytkownika o podanym emailu
+          throw new CustomError("auth.user_not_exist", 404);
+
         }
-      } else {
-        // nie istnieje dostęp dla użytkownika o podanym emailu
-        throw new CustomError("auth.user_not_exist", 404);
+      } catch (error) {
+        return next(error);
       }
     });
   }
@@ -120,8 +129,9 @@ export default class Auth {
     res: Response,
     next: express.NextFunction
   ) {
-    if (req.body.refreshToken) {
-      try {
+    try {
+      if (req.body.refreshToken) {
+
         jwt.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
           if (err) {
             // refreshToken wygasł lub jest błędny
@@ -131,14 +141,14 @@ export default class Auth {
             res.status(200).json(tokens);
           }
         });
-      } catch (err) {
-        // refreshToken wygasł lub jest błędny
-        throw new CustomError("auth.invalid_token", 400);
-      }
 
-    } else {
-      // brak tokena w body
-      throw new CustomError("auth.no_token", 401);
+
+      } else {
+        // brak tokena w body
+        throw new CustomError("auth.no_token", 401);
+      }
+    } catch (error) {
+      return next(error);
     }
   }
 
@@ -148,10 +158,10 @@ export default class Auth {
     res: Response,
     next: express.NextFunction
   ) {
-    const tokenParts = (req.headers.authorization || "").split(" ");
-    const token = tokenParts[1];
-    if (token) {
-      try {
+    try {
+      const tokenParts = (req.headers.authorization || "").split(" ");
+      const token = tokenParts[1];
+      if (token) {
         jwt.verify(token, this.tokenSecret, (err, value) => {
           if (err) {
             // token nieważny lub nieprawidłowy
@@ -190,68 +200,75 @@ export default class Auth {
             }
           }
         });
-      } catch (err) {
-        // token nieważny lub nieprawidłowy
-        throw new CustomError("auth.invalid_token", 400);
+      } else {
+        // brak Tokena
+        throw new CustomError("auth.no_token", 401);
       }
-
-    } else {
-      // brak Tokena
-      throw new CustomError("auth.no_token", 401);
+    } catch (error) {
+      return next(error);
     }
   }
 
-  public resetPassword(
+  public async resetPassword(
     req: express.Request,
     res: Response,
     next: express.NextFunction
   ) {
-    Access.findOne({ email: req.body.email }).then(async (access) => {
-      if (access) {
-        const resetToken = jwt.sign({ _id: access._id }, this.tokenSecret, {
-          expiresIn: "1h"
-        });
+    i18n.setLocale(req.locale || "en");
+    try {
+      await Access.findOne({ email: req.body.email }).then(async (access) => {
+        if (access) {
+          const resetToken = jwt.sign({ _id: access._id }, this.tokenSecret, {
+            expiresIn: "1h"
+          });
 
-        let email = new Email();
+          let email = new Email();
 
-        let template = {
-          from: 'notification@3cerp.cloud',
-          to: req.body.email,
-          subject: '3C ERP Cloud | Reset Password',
-          html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
+          let template = {
+            from: 'notification@3cerp.cloud',
+            to: req.body.email,
+            subject: '3C ERP Cloud | Reset Password',
+            html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
+          }
+          await email.send(template);
+          res.status(200).json({ status: "success", data: { message: req.__("auth.reset_password") } });
+        } else {
+          // access nie istnieje
+          throw new CustomError("auth.user_not_found", 404);
         }
-        await email.send(template);
-        res.status(200).json({ status: "success" });
-      } else {
-        // access nie istnieje
-        throw new CustomError("auth.user_not_found", 404);
-      }
-    })
+      })
+    } catch (error) {
+      return next(error);
+    }
   }
 
-  public setPassword(
+  public async setPassword(
     req: express.Request,
     res: Response,
     next: express.NextFunction
   ) {
-    jwt.verify(req.body.resetToken, this.tokenSecret, (err, value) => {
-      if (err) {
-        // resetToken wygasł lub jest błędny
-        throw new CustomError("auth.failed_auth_token", 500);
-      } else {
-        Access.findOne({ _id: value._id }).then(async (access) => {
-          if (access) {
-            access.password = req.body.password;
-            access.save();
-            res.status(200).json({ status: "success" });
-          } else {
-            // access nie istnieje
-            throw new CustomError("auth.user_not_found", 404);
-          }
-        })
-      }
-    });
-
+    i18n.setLocale(req.locale || "en");
+    try {
+      jwt.verify(req.body.resetToken, this.tokenSecret, async (err, value) => {
+        if (err) {
+          // resetToken wygasł lub jest błędny
+          throw new CustomError("auth.failed_auth_token", 500);
+        } else {
+          await Access.findOne({ _id: value._id }).then(async (access) => {
+            if (access) {
+              access.password = req.body.password;
+              await access.save();
+              res.status(200).json({ status: "success", data: { message: req.__("auth.password_updated") } });
+            } else {
+              // access nie istnieje
+              throw new CustomError("auth.user_not_found", 404);
+            }
+          })
+        }
+      });
+    } catch (error) {
+      return next(error);
+    }
   }
 }
 

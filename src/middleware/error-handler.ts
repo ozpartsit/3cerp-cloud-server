@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { Error } from "mongoose";
 import CustomError from "../utilities/errors/customError";
-
+import i18n from "../config/i18n";
 export const errorHandler = (
   error: CustomError,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  i18n.setLocale(req.locale || "en");
   console.log('ErrorHandler', error.message);
 
 
@@ -37,6 +38,6 @@ export const errorHandler = (
   // }
   //})
 
-  return res.status(error.status || 500).send({ error: { message: req.__(error.message) } });
+  return res.status(error.status || 500).send({ status: "error", error: { message: req.__(error.message) } });
 
 };

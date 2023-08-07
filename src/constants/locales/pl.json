@@ -1,3 +1,8 @@
 {
-	"auth.no_token": "auth.no_token"
+	"auth.no_token": "Brak Tokena",
+	"auth.user_not_exist": "Użytkownik nie istnieje",
+	"auth.wrong_password": "Nieprawdiłowe hasło",
+	"auth.user_not_found": "Użutkownik nie znaleziony",
+	"auth.reset_password": "Na podany adres email została wysłana instrukcja.",
+	"auth.password_updated": "Hasło zaktualizowane"
 }
