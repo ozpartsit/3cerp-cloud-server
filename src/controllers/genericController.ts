@@ -106,8 +106,7 @@ class GenericController<T extends IExtendedDocument> {
         let { recordtype, id } = req.params;
         let config = req.body;
         try {
-            let email: Email = new Email();
-            let status = await email.send(config);
+            let status = await Email.send(config);
             res.json(status);
         } catch (error) {
             return next(error);

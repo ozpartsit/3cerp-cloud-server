@@ -3,12 +3,15 @@ import url from "url"
 import fs from "fs";
 import ejs from "ejs";
 import path from "path";
-import i18n from "../config/i18n";
+import { I18n } from "i18n";
 import Item, { ItemTypes } from "../models/items/model";
 import Shop from "../models/shop.model";
 export default class controller {
   public async get(req: Request, res: Response, next: NextFunction) {
-    i18n.setLocale(req.locale);
+    //i18n
+    const hostingi18n = new I18n();
+    hostingi18n.setLocale(req.locale);
+
 
     let hostingPath = path.resolve("hosting");
     let views = path.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
@@ -88,9 +91,8 @@ export default class controller {
           req.params.view = "404";
         }
       }
-
-      // i18n
-      i18n.configure({
+      
+      hostingi18n.configure({
         directory: path.join(views, "/locales")
       });
 

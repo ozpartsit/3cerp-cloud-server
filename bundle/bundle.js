@@ -87,6 +87,8 @@ class App3CERP {
         this.app.use('/storage', express_1.default.static("storage")); // Storage files
         this.app.use("/public", express_1.default.static("public"));
         this.app.use('/hosting', express_1.default.static("hosting"));
+        //temporary public local files
+        this.app.use('/locales', express_1.default.static(path_1.default.join(__dirname, 'constants', 'locales')));
         // Apply the rate limiting middleware to API calls only
         this.app.use('/api', limiter_1.default);
         this.app.use(statusMonitor_1.default);
@@ -1437,16 +1439,17 @@ const access_model_1 = __importDefault(__webpack_require__(6402));
 const user_model_1 = __importDefault(__webpack_require__(8653));
 const email_1 = __importDefault(__webpack_require__(3097));
 const customError_1 = __importDefault(__webpack_require__(7352));
+const i18n_1 = __importDefault(__webpack_require__(6734));
 class Auth {
     constructor() {
         this.tokenSecret = process.env.TOKEN_SECRET || "";
     }
     //Weryfikuje czy token istnieje i jest aktywny 
     authenticate(req, res, next) {
-        const tokenParts = (req.headers.authorization || "").split(" ");
-        const token = tokenParts[1];
-        if (token) {
-            try {
+        try {
+            const tokenParts = (req.headers.authorization || "").split(" ");
+            const token = tokenParts[1];
+            if (token) {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err) {
                         // token wygasł lub jest niepoprawny
@@ -1463,23 +1466,28 @@ class Auth {
                     }
                 });
             }
-            catch (error) {
-                throw error;
+            else {
+                // Brak tokena
+                throw new customError_1.default("auth.no_token", 401);
             }
         }
-        else {
-            // Brak tokena
-            throw new customError_1.default("auth.no_token", 401);
+        catch (error) {
+            return next(error);
         }
     }
     // weryfikuje uprawnienia do danego zasobu
     authorization(level) {
         return (req, res, next) => {
-            //to do - dodać weryfikacje 
-            if (level < 2 || true)
-                next();
-            else
-                {}
+            try {
+                //to do - dodać weryfikacje 
+                if (level < 2 || true)
+                    next();
+                else
+                    {}
+            }
+            catch (error) {
+                return next(error);
+            }
         };
     }
     // potwierdzenie przyznania dostępu
@@ -1491,42 +1499,47 @@ class Auth {
     // opcjonalnie rola
     login(req, res, next) {
         access_model_1.default.findOne({ email: req.body.email }).then((access) => __awaiter(this, void 0, void 0, function* () {
-            if (access) {
-                const valide = yield access.validatePassword(req.body.password);
-                if (valide) {
-                    user_model_1.default.findOne({ _id: access.user }).then((user) => __awaiter(this, void 0, void 0, function* () {
-                        if (user) {
-                            if (!(user.roles || []).includes(req.body.role || user.role)) {
-                                // użytkownik nie ma uprawnień do tej roli
-                                throw new customError_1.default("auth.wrong_role", 403);
+            try {
+                if (access) {
+                    const valide = yield access.validatePassword(req.body.password);
+                    if (valide) {
+                        user_model_1.default.findOne({ _id: access.user }).then((user) => __awaiter(this, void 0, void 0, function* () {
+                            if (user) {
+                                if (!(user.roles || []).includes(req.body.role || user.role)) {
+                                    // użytkownik nie ma uprawnień do tej roli
+                                    throw new customError_1.default("auth.wrong_role", 403);
+                                }
+                                // aktualizacja daty ostatniego logowania
+                                user_model_1.default.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec();
+                                const tokens = createTokenPair(user._id.toString(), req.body.role || user.role, this.tokenSecret);
+                                // zwraca parę tokenów
+                                res.status(200).json(tokens);
                             }
-                            // aktualizacja daty ostatniego logowania
-                            user_model_1.default.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec();
-                            const tokens = createTokenPair(user._id.toString(), req.body.role || user.role, this.tokenSecret);
-                            // zwraca parę tokenów
-                            res.status(200).json(tokens);
-                        }
-                        else {
-                            // Użytkownik nie istnieje
-                            throw new customError_1.default("auth.user_not_found", 404);
-                        }
-                    }));
+                            else {
+                                // Użytkownik nie istnieje
+                                throw new customError_1.default("auth.user_not_found", 404);
+                            }
+                        }));
+                    }
+                    else {
+                        // hasło nie pasuje do emaila
+                        throw new customError_1.default("auth.wrong_password", 403);
+                    }
                 }
                 else {
-                    // hasło nie pasuje do emaila
-                    throw new customError_1.default("auth.wrong_password", 403);
+                    // nie istnieje dostęp dla użytkownika o podanym emailu
+                    throw new customError_1.default("auth.user_not_exist", 404);
                 }
             }
-            else {
-                // nie istnieje dostęp dla użytkownika o podanym emailu
-                throw new customError_1.default("auth.user_not_exist", 404);
+            catch (error) {
+                return next(error);
             }
         }));
     }
     // zwraca nową parę tkenów na postawie refreshToken
     refreshToken(req, res, next) {
-        if (req.body.refreshToken) {
-            try {
+        try {
+            if (req.body.refreshToken) {
                 jsonwebtoken_1.default.verify(req.body.refreshToken, this.tokenSecret, (err, value) => {
                     if (err) {
                         // refreshToken wygasł lub jest błędny
@@ -1538,22 +1551,21 @@ class Auth {
                     }
                 });
             }
-            catch (err) {
-                // refreshToken wygasł lub jest błędny
-                throw new customError_1.default("auth.invalid_token", 400);
+            else {
+                // brak tokena w body
+                throw new customError_1.default("auth.no_token", 401);
             }
         }
-        else {
-            // brak tokena w body
-            throw new customError_1.default("auth.no_token", 401);
+        catch (error) {
+            return next(error);
         }
     }
     // zwraca dane zalogowanego użytkownika
     getUser(req, res, next) {
-        const tokenParts = (req.headers.authorization || "").split(" ");
-        const token = tokenParts[1];
-        if (token) {
-            try {
+        try {
+            const tokenParts = (req.headers.authorization || "").split(" ");
+            const token = tokenParts[1];
+            if (token) {
                 jsonwebtoken_1.default.verify(token, this.tokenSecret, (err, value) => {
                     if (err) {
                         // token nieważny lub nieprawidłowy
@@ -1594,56 +1606,71 @@ class Auth {
                     }
                 });
             }
-            catch (err) {
-                // token nieważny lub nieprawidłowy
-                throw new customError_1.default("auth.invalid_token", 400);
+            else {
+                // brak Tokena
+                throw new customError_1.default("auth.no_token", 401);
             }
         }
-        else {
-            // brak Tokena
-            throw new customError_1.default("auth.no_token", 401);
+        catch (error) {
+            return next(error);
         }
     }
     resetPassword(req, res, next) {
-        access_model_1.default.findOne({ email: req.body.email }).then((access) => __awaiter(this, void 0, void 0, function* () {
-            if (access) {
-                const resetToken = jsonwebtoken_1.default.sign({ _id: access._id }, this.tokenSecret, {
-                    expiresIn: "1h"
-                });
-                let email = new email_1.default();
-                let template = {
-                    from: 'notification@3cerp.cloud',
-                    to: req.body.email,
-                    subject: '3C ERP Cloud | Reset Password',
-                    html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
-                };
-                yield email.send(template);
-                res.status(200).json({ status: "success" });
-            }
-            else {
-                // access nie istnieje
-                throw new customError_1.default("auth.user_not_found", 404);
-            }
-        }));
-    }
-    setPassword(req, res, next) {
-        jsonwebtoken_1.default.verify(req.body.resetToken, this.tokenSecret, (err, value) => {
-            if (err) {
-                // resetToken wygasł lub jest błędny
-                throw new customError_1.default("auth.failed_auth_token", 500);
-            }
-            else {
-                access_model_1.default.findOne({ _id: value._id }).then((access) => __awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
+            i18n_1.default.setLocale(req.locale || "en");
+            try {
+                yield access_model_1.default.findOne({ email: req.body.email }).then((access) => __awaiter(this, void 0, void 0, function* () {
                     if (access) {
-                        access.password = req.body.password;
-                        access.save();
-                        res.status(200).json({ status: "success" });
+                        const resetToken = jsonwebtoken_1.default.sign({ _id: access._id }, this.tokenSecret, {
+                            expiresIn: "1h"
+                        });
+                        let email = new email_1.default();
+                        let template = {
+                            from: 'notification@3cerp.cloud',
+                            to: req.body.email,
+                            subject: '3C ERP Cloud | Reset Password',
+                            html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
+                        };
+                        yield email.send(template);
+                        res.status(200).json({ status: "success", data: { message: req.__("auth.reset_password") } });
                     }
                     else {
                         // access nie istnieje
                         throw new customError_1.default("auth.user_not_found", 404);
                     }
                 }));
+            }
+            catch (error) {
+                return next(error);
+            }
+        });
+    }
+    setPassword(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            i18n_1.default.setLocale(req.locale || "en");
+            try {
+                yield jsonwebtoken_1.default.verify(req.body.resetToken, this.tokenSecret, (err, value) => __awaiter(this, void 0, void 0, function* () {
+                    if (err) {
+                        // resetToken wygasł lub jest błędny
+                        throw new customError_1.default("auth.failed_auth_token", 500);
+                    }
+                    else {
+                        yield access_model_1.default.findOne({ _id: value._id }).then((access) => __awaiter(this, void 0, void 0, function* () {
+                            if (access) {
+                                access.password = req.body.password;
+                                yield access.save();
+                                res.status(200).json({ status: "success", data: { message: req.__("auth.password_updated") } });
+                            }
+                            else {
+                                // access nie istnieje
+                                throw new customError_1.default("auth.user_not_found", 404);
+                            }
+                        }));
+                    }
+                }));
+            }
+            catch (error) {
+                return next(error);
             }
         });
     }
@@ -1668,12 +1695,17 @@ function addHours(date, hours) {
 /***/ }),
 
 /***/ 9868:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.errorHandler = void 0;
+const i18n_1 = __importDefault(__webpack_require__(6734));
 const errorHandler = (error, req, res, next) => {
+    i18n_1.default.setLocale(req.locale || "en");
     console.log('ErrorHandler', error.message);
     // let message = "Error";
     // if (!Array.isArray(error)) {
@@ -1698,7 +1730,7 @@ const errorHandler = (error, req, res, next) => {
     //   }
     // }
     //})
-    return res.status(error.status || 500).send({ error: { message: req.__(error.message) } });
+    return res.status(error.status || 500).send({ status: "error", error: { message: req.__(error.message) } });
 };
 exports.errorHandler = errorHandler;
 

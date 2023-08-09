@@ -12,7 +12,7 @@ import RoutesCore from "./routes/core";
 import RoutesMaintenance from "./routes/maintenance";
 import RoutesPublic from "./routes/public";
 import EmitEvents from "./services/emitEvents";
-import Email from "./services/email";
+import EmailServer from "./services/email";
 import { errorHandler } from "./middleware/error-handler";
 import storage from "./config/storage";
 //import Cache from "./middleware/cache";
@@ -26,7 +26,6 @@ let env = dotenv.config({
 });
 
 //export const cache = new Cache();
-export const email: Email = new Email();
 export class App3CERP {
   public server?: http.Server;
   public app: express.Application = express();
@@ -49,6 +48,7 @@ export class App3CERP {
     this.dbConnect();
     this.mountRoutes();
     this.storage.init();
+    EmailServer.verify();
     //this.hosting.init();
   }
   private config(): void {
@@ -65,6 +65,9 @@ export class App3CERP {
     this.app.use('/storage', express.static("storage")); // Storage files
     this.app.use("/public", express.static("public"));
     this.app.use('/hosting', express.static("hosting"));
+
+    //temporary public local files
+    this.app.use('/locales', express.static(path.join(__dirname, 'constants', 'locales')));
     // Apply the rate limiting middleware to API calls only
     this.app.use('/api', Limiter)
 

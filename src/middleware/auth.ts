@@ -214,7 +214,7 @@ export default class Auth {
     res: Response,
     next: express.NextFunction
   ) {
-    i18n.setLocale(req.locale || "en");
+
     try {
       await Access.findOne({ email: req.body.email }).then(async (access) => {
         if (access) {
@@ -222,15 +222,16 @@ export default class Auth {
             expiresIn: "1h"
           });
 
-          let email = new Email();
-
           let template = {
             from: 'notification@3cerp.cloud',
             to: req.body.email,
             subject: '3C ERP Cloud | Reset Password',
-            html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
+            html: await Email.render("reset_password.ejs", { link: resetToken, locale: req.locale || "en" })
           }
-          await email.send(template);
+
+          await Email.send(template);
+
+
           res.status(200).json({ status: "success", data: { message: req.__("auth.reset_password") } });
         } else {
           // access nie istnieje
@@ -249,7 +250,7 @@ export default class Auth {
   ) {
     i18n.setLocale(req.locale || "en");
     try {
-      jwt.verify(req.body.resetToken, this.tokenSecret, async (err, value) => {
+      await jwt.verify(req.body.resetToken, this.tokenSecret, async (err, value) => {
         if (err) {
           // resetToken wygasł lub jest błędny
           throw new CustomError("auth.failed_auth_token", 500);
@@ -265,7 +266,7 @@ export default class Auth {
             }
           })
         }
-      });
+      })
     } catch (error) {
       return next(error);
     }
