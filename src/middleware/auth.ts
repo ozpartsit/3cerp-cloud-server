@@ -271,6 +271,34 @@ export default class Auth {
       return next(error);
     }
   }
+
+
+  public async contactForm(
+    req: express.Request,
+    res: Response,
+    next: express.NextFunction
+  ) {
+    try {
+
+      if (!req.body.email) {
+        // email jest wymagany
+        throw new CustomError("auth.email_required", 404);
+      }
+      let template = {
+        from: 'notification@3cerp.cloud',
+        to: req.body.email,
+        subject: '3C ERP Cloud | Thanks for Reaching Out!',
+        html: await Email.render("contact_form.ejs", { data: req.body, locale: req.locale || "en" })
+      }
+
+      await Email.send(template);
+      // to do - dopisać tworzenie leada
+      res.status(200).json({ status: "success", data: { message: req.__("auth.contact_form") } });
+
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 function createTokenPair(user: string, role: string, tokenSecret: string) {

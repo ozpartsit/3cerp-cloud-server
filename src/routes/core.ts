@@ -167,6 +167,9 @@ export default class Routes {
       .post(this.Auth.resetPassword.bind(this.Auth) as any)
       .patch(this.Auth.setPassword.bind(this.Auth) as any);
 
+    this.Router.route("/auth/signup")
+      .post(this.Auth.contactForm.bind(this.Auth) as any);
+
   }
   public routeFiles(controller) {
     // Files

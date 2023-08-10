@@ -4,5 +4,9 @@
 	"auth.no_token": "auth.no_token",
 	"doc_not_found": "doc_not_found",
 	"auth.user_not_found": "auth.user_not_found",
-	"auth.user_not_exist": "auth.user_not_exist"
+	"auth.user_not_exist": "auth.user_not_exist",
+	"folder_not_found": "folder_not_found",
+	"auth.email_required": "auth.email_required",
+	"missing ) after argument list in C:\\Users\\lukas\\Documents\\GitHub\\3cerp-cloud-server\\src\\services\\templates\\contact_form.ejs while compiling ejs\n\nIf the above error is not helpful, you may want to try EJS-Lint:\nhttps://github.com/RyanZim/EJS-Lint\nOr, if you meant to create an async function, pass `async: true` as an option.": "missing ) after argument list in C:\\Users\\lukas\\Documents\\GitHub\\3cerp-cloud-server\\src\\services\\templates\\contact_form.ejs while compiling ejs\n\nIf the above error is not helpful, you may want to try EJS-Lint:\nhttps://github.com/RyanZim/EJS-Lint\nOr, if you meant to create an async function, pass `async: true` as an option.",
+	"auth.contact_form": "auth.contact_form"
 }

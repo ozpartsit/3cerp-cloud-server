@@ -24,7 +24,7 @@ export default class FileController<T extends IExtendedDocument> extends control
 
         let files: any[] = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
 
-        let uploaded: IFile[] = [];
+        let uploadedFiles: IFile[] = [];
         let dirPath = "storage/uploads";
         if (req.body && req.body.folder) {
           let folder = await Folder.findById(req.body.folder).exec()
@@ -45,12 +45,12 @@ export default class FileController<T extends IExtendedDocument> extends control
           });
 
           let newFile = await doc.save();
-          uploaded.push(newFile)
+          uploadedFiles.push(newFile)
         }
-        res.send(uploaded);
+        res.send({uploadedFiles});
       }
-    } catch (err) {
-      res.status(500).send(err);
+    } catch (error) {
+      return next(error);
     }
   }
 }

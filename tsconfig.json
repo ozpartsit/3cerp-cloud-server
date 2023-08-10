@@ -29,7 +29,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.json"
+    "src/**/*.json",
+    "src/**/*.ejs"
   ],
   "exclude": [
     "node_modules"

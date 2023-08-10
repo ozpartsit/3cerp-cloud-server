@@ -29,7 +29,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.App3CERP = exports.email = void 0;
+exports.App3CERP = void 0;
 const express_1 = __importDefault(__webpack_require__(6860));
 const express_fileupload_1 = __importDefault(__webpack_require__(6674));
 const dotenv = __importStar(__webpack_require__(5142));
@@ -53,7 +53,6 @@ let env = dotenv.config({
     path: path_1.default.resolve(`.env.${"production"}`)
 });
 //export const cache = new Cache();
-exports.email = new email_1.default();
 class App3CERP {
     constructor() {
         this.app = (0, express_1.default)();
@@ -71,6 +70,7 @@ class App3CERP {
         this.dbConnect();
         this.mountRoutes();
         this.storage.init();
+        email_1.default.verify();
         //this.hosting.init();
     }
     config() {
@@ -82,6 +82,9 @@ class App3CERP {
         this.app.use((0, express_fileupload_1.default)({
             createParentPath: true
         }));
+        //EJS template engine
+        this.app.set('templates', './services/templates');
+        this.app.set('view engine', 'ejs');
         //this.app.use(helmet());
         // serving static files
         this.app.use('/storage', express_1.default.static("storage")); // Storage files
@@ -795,7 +798,7 @@ class FileController extends genericController_1.default {
                 }
                 else {
                     let files = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
-                    let uploaded = [];
+                    let uploadedFiles = [];
                     let dirPath = "storage/uploads";
                     if (req.body && req.body.folder) {
                         let folder = yield schema_2.default.findById(req.body.folder).exec();
@@ -815,13 +818,13 @@ class FileController extends genericController_1.default {
                             urlcomponent: path_1.default.posix.join(encodeURI(dirPath), encodeURI(file.name)),
                         });
                         let newFile = yield doc.save();
-                        uploaded.push(newFile);
+                        uploadedFiles.push(newFile);
                     }
-                    res.send(uploaded);
+                    res.send({ uploadedFiles });
                 }
             }
-            catch (err) {
-                res.status(500).send(err);
+            catch (error) {
+                return next(error);
             }
         });
     }
@@ -955,8 +958,7 @@ class GenericController {
             let { recordtype, id } = req.params;
             let config = req.body;
             try {
-                let email = new email_1.default();
-                let status = yield email.send(config);
+                let status = yield email_1.default.send(config);
                 res.json(status);
             }
             catch (error) {
@@ -1144,13 +1146,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const fs_1 = __importDefault(__webpack_require__(7147));
 const ejs_1 = __importDefault(__webpack_require__(9632));
 const path_1 = __importDefault(__webpack_require__(1017));
-const i18n_1 = __importDefault(__webpack_require__(6734));
+const i18n_1 = __webpack_require__(2425);
 const model_1 = __importDefault(__webpack_require__(7849));
 const shop_model_1 = __importDefault(__webpack_require__(1725));
 class controller {
     get(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            i18n_1.default.setLocale(req.locale);
+            //i18n
+            const hostingi18n = new i18n_1.I18n();
+            hostingi18n.setLocale(req.locale);
             let hostingPath = path_1.default.resolve("hosting");
             let views = path_1.default.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
             // check if exists shop - to do (customize template)
@@ -1227,8 +1231,7 @@ class controller {
                         req.params.view = "404";
                     }
                 }
-                // i18n
-                i18n_1.default.configure({
+                hostingi18n.configure({
                     directory: path_1.default.join(views, "/locales")
                 });
                 try {
@@ -1617,21 +1620,19 @@ class Auth {
     }
     resetPassword(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            i18n_1.default.setLocale(req.locale || "en");
             try {
                 yield access_model_1.default.findOne({ email: req.body.email }).then((access) => __awaiter(this, void 0, void 0, function* () {
                     if (access) {
                         const resetToken = jsonwebtoken_1.default.sign({ _id: access._id }, this.tokenSecret, {
                             expiresIn: "1h"
                         });
-                        let email = new email_1.default();
                         let template = {
                             from: 'notification@3cerp.cloud',
                             to: req.body.email,
                             subject: '3C ERP Cloud | Reset Password',
-                            html: `<a href="https://3cerp.cloud/auth/reset_password?resetToken=${resetToken}">Reset Password</a>`
+                            html: yield email_1.default.render("reset_password.ejs", { link: resetToken, locale: req.locale || "en" })
                         };
-                        yield email.send(template);
+                        yield email_1.default.send(template);
                         res.status(200).json({ status: "success", data: { message: req.__("auth.reset_password") } });
                     }
                     else {
@@ -3513,7 +3514,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Email = void 0;
 const nodemailer_1 = __importDefault(__webpack_require__(5184));
+const ejs_1 = __importDefault(__webpack_require__(9632));
+const path_1 = __importDefault(__webpack_require__(1017));
+const i18n_1 = __webpack_require__(2425);
 class Email {
     constructor() {
         this.host = "mail0.small.pl";
@@ -3521,6 +3526,12 @@ class Email {
         this.secure = true;
         this.user = "notification@3cerp.cloud";
         this.pass = "Test1!";
+        this.emaili18n = new i18n_1.I18n();
+        //ustawienie lokalizacji biblioteki
+        this.emaili18n.configure({
+            directory: path_1.default.join(__dirname, 'templates', "/locales"),
+        });
+        // konfiguracja bramki wychodzącej
         this.transporter = nodemailer_1.default.createTransport({
             pool: true,
             host: this.host,
@@ -3531,13 +3542,29 @@ class Email {
                 pass: this.pass
             }
         });
-        // this.email = {
-        //   from: 'test@ozparts.eu',
-        //   to: 'it@ozparts.eu',
-        //   subject: 'test',
-        //   html: 'test'
-        // }
     }
+    verify() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.transporter.verify(function (error, success) {
+                if (error) {
+                    console.log(error);
+                }
+                else {
+                    console.log("Email Server is ready.");
+                }
+            });
+        });
+    }
+    render(template, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // i18n
+            this.emaili18n.setLocale(options.locale || 'en');
+            options.i18n = this.emaili18n;
+            const emailContent = yield ejs_1.default.renderFile(path_1.default.join(__dirname, 'templates', template), options);
+            return emailContent;
+        });
+    }
+    // to do - dodać interfejs i możliwość tablicy
     send(email = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.transporter.sendMail(email);
@@ -3552,7 +3579,8 @@ class Email {
         });
     }
 }
-exports["default"] = Email;
+exports.Email = Email;
+exports["default"] = new Email();
 
 
 /***/ }),
