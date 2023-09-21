@@ -1,9 +1,15 @@
 import nodemailer from "nodemailer";
+//to do - zastanowić sie nad użyciem.
 import EmailTemplate from "email-templates";
 
+import fs from "fs";
 import ejs from "ejs";
 import path from "path";
 import { I18n } from "i18n";
+import { IAccess } from "../models/access.model";
+
+
+
 export class Email {
   private transporter: any;
   private host: string = "mail0.small.pl";
@@ -11,10 +17,13 @@ export class Email {
   private secure: boolean = true;
   private user: string = "notification@3cerp.cloud";
   private pass: string = "Test1!";
+  public from: string = `3C ERP CLOUD <${this.user}>`;
   public email: any;
   emaili18n = new I18n();
 
+
   constructor() {
+
     //ustawienie lokalizacji biblioteki
     this.emaili18n.configure({
       directory: path.join(__dirname, 'templates', "/locales"),
@@ -41,13 +50,25 @@ export class Email {
       }
     });
   }
+  async getBase64(img: string) {
 
+    try {
+      // Ścieżka do obrazka
+      const imagePath = path.join(__dirname, 'templates', 'imgs', img);
+      const data = await fs.readFileSync(imagePath);
+      const base64Data = data.toString('base64');
+      return "data:image/png;base64," + base64Data;
+    } catch (err) {
+      throw err;
+    }
+
+
+  }
 
   async render(template: string, options: any) {
     // i18n
     this.emaili18n.setLocale(options.locale || 'en');
     options.i18n = this.emaili18n;
-
     const emailContent = await ejs.renderFile(path.join(__dirname, 'templates', template), options);
     return emailContent;
   }
@@ -63,6 +84,45 @@ export class Email {
     //   }
 
     // });
+  }
+
+  // System Templates
+
+  
+  //resetPassword
+  async resetPassword(to: string, resetToken: string, locale = "en") {
+    let template = {
+      from: this.from,
+      to: to,
+      subject: this.emaili18n.__('3C ERP Cloud | Reset Password'),
+      html: await this.render("default.ejs", { template: 'reset_password.ejs', link: resetToken, locale: locale }),
+      attachments: [
+        {
+          filename: 'header.png',
+          path: path.join(__dirname, 'templates', 'imgs', 'header.png'),
+          cid: 'header' // Wartość 'cid' musi pasować do src w tagu <img>
+        }
+      ]
+    }
+    return template;
+  }
+  //Sign Up
+  async signUp(to: string, locale = "en") {
+    let template = {
+      from: this.from,
+      to: to,
+      subject: this.emaili18n.__('3C ERP Cloud | Thanks for Reaching Out!'),
+      html: await this.render("default.ejs", { template: "contact_form.ejs", locale: locale }),
+      attachments: [
+        {
+          filename: 'header.png',
+          path: path.join(__dirname, 'templates', 'imgs', 'header.png'),
+          cid: 'header' // Wartość 'cid' musi pasować do src w tagu <img>
+        }
+      ]
+
+    }
+    return template;
   }
 }
 

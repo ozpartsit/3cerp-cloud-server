@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Document, Model, Types } from 'mongoose';
+import { Document, Model, Types, modelNames } from 'mongoose';
 import { IExtendedModel } from "../utilities/static";
 import { IExtendedDocument } from "../utilities/methods";
 import Email from "../services/email";
@@ -19,12 +19,13 @@ class GenericController<T extends IExtendedDocument> {
     public async add(req: Request, res: Response, next: NextFunction) {
         let { mode } = req.params;
         try {
-            //req.body.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-            let { document, msg, saved } = await this.model.addDocument(mode, req.body);
+            //req.body.account = req.headers.account; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
+            this.model = this.model.setAccount(req.headers.account);
+            let { document, saved } = await this.model.addDocument(mode, req.body.document);
             //populate response document
             await document.autoPopulate();
             document = document.constantTranslate(req.locale);
-            res.json({ document, msg, saved });
+            res.json({ status: "success", data: { document, saved } });
         } catch (error) {
             return next(error);
         }
@@ -34,15 +35,15 @@ class GenericController<T extends IExtendedDocument> {
     async get(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
         try {
+            this.model = this.model.setAccount(req.headers.account);
             let document = await this.model.getDocument(id, mode);
-
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
                 //populate response document
                 await document.autoPopulate();
                 let docObject = document.constantTranslate(req.locale);
-                res.json({ document: docObject, mode: mode === "advanced" ? mode : "simple" });
+                res.json({ status: "success", data: { document: docObject, mode: mode === "advanced" ? mode : "simple" } });
             }
         } catch (error) {
             return next(error);
@@ -52,11 +53,12 @@ class GenericController<T extends IExtendedDocument> {
     public async save(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {
-            let { document_id, saved } = await this.model.saveDocument(id);
+            this.model = this.model.setAccount(req.headers.account);
+            let { document_id, saved } = await this.model.saveDocument(id, req.body.document);
             if (!document_id) {
                 throw new CustomError("doc_not_found", 404);
             } else {
-                res.json({ document_id, saved });
+                res.json({ status: "success", data: { document_id, saved } });
             }
 
         } catch (error) {
@@ -66,6 +68,7 @@ class GenericController<T extends IExtendedDocument> {
     public async update(req: Request, res: Response, next: NextFunction) {
         let { recordtype, mode, id } = req.params;
         try {
+            this.model = this.model.setAccount(req.headers.account);
             // let document = null;
             // if (Array.isArray(req.body)) { // to do - może upateDocument zmienić by przyjomwał cały obiek body?
             //     for (let update of req.body) {
@@ -77,7 +80,7 @@ class GenericController<T extends IExtendedDocument> {
             //     document = await model.updateDocument(id, list, subrecord, field, value, save);
             // }
             let update = req.body;
-            let { document, msg, saved } = await this.model.updateDocument(id, mode, update);
+            let { document, saved } = await this.model.updateDocument(id, mode, update);
 
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
@@ -85,7 +88,7 @@ class GenericController<T extends IExtendedDocument> {
                 //populate response document
                 await document.autoPopulate();
                 document = document.constantTranslate(req.locale);
-                res.json({ document, msg, saved });
+                res.json({ status: "success", data: { document, saved } });
             }
 
         } catch (error) {
@@ -93,11 +96,12 @@ class GenericController<T extends IExtendedDocument> {
         }
     }
 
-    public delete(req: Request, res: Response, next: NextFunction) {
+    public async delete(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {// to do - do poprawy
+            this.model = this.model.setAccount(req.headers.account);
             let document = this.model.deleteDocument(id);
-            res.json(document);
+            res.json({ status: "success", data: { document } });
         } catch (error) {
             return next(error);
         }
@@ -180,6 +184,7 @@ class GenericController<T extends IExtendedDocument> {
     public async find(req: Request, res: Response, next: NextFunction) {
 
         try {
+            this.model = this.model.setAccount(req.headers.account);
             let query: any = {};
 
             let options = { select: { name: 1, type: 1, resource: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
@@ -230,7 +235,7 @@ class GenericController<T extends IExtendedDocument> {
 
             let result = await this.model.findDocuments(query, options);
             let total = await this.model.count(query);
-       
+
             // get fields
             let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
             for (let index in result) {
@@ -258,7 +263,7 @@ class GenericController<T extends IExtendedDocument> {
                 totalPages: Math.ceil(total / options.limit)
             }
 
-            res.json(data);
+            res.json({ status: "success", data: data });
         } catch (error) {
             return next(error);
         }

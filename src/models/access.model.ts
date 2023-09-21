@@ -1,18 +1,24 @@
-import { Schema, Model, model } from "mongoose";
+import { Schema, Model, model, PopulatedDoc } from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
+import User, { IUser } from "../models/user.model";
 import bcrypt from "bcryptjs";
+import Email from "../services/email";
+import jwt from "jsonwebtoken";
 export interface IAccess extends IExtendedDocument {
 
     _id: Schema.Types.ObjectId;
-    user: Schema.Types.ObjectId;
+    user: IUser["_id"];
+    account: Schema.Types.ObjectId;
     password: string;
     email: string;
     active: boolean;
     temporary: boolean;
     validatePassword(password: string): boolean;
     hashPassword(): any;
+    resetPassword(locale?: string): any;
 }
+
 const SALT_WORK_FACTOR = 10;
 
 const options = {
@@ -24,7 +30,8 @@ interface IAccessModel extends Model<IAccess>, IExtendedModel<IAccess> { }
 
 const schema = new Schema<IAccess>(
     {
-        user: { type: Schema.Types.ObjectId, required: true },
+        user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        account: { type: Schema.Types.ObjectId, required: true },
         password: { type: String, input: "PasswordField", required: true },
         email: { type: String, input: "TextField", required: true },
         active: { type: Boolean, input: "SwitchField" },
@@ -37,6 +44,20 @@ const schema = new Schema<IAccess>(
 schema.methods.hashPassword = async function () {
     const salt = await bcrypt.genSalt(SALT_WORK_FACTOR);
     return await bcrypt.hash(this.password, salt);
+};
+
+schema.methods.resetPassword = async function (locale: string) {
+    const tokenSecret: string = process.env.TOKEN_SECRET || "";
+    const resetToken = jwt.sign({ _id: this._id }, tokenSecret, {
+        expiresIn: "1h"
+    });
+    if (!locale) {
+        await this.populate('user', 'locale');
+        const user = this.user as unknown as IUser;
+        locale = user.locale || "en";
+    }
+    let template = await Email.resetPassword(this.email, resetToken, locale);
+    await Email.send(template);
 };
 
 schema.method("validatePassword", async function (newPassword: string) {

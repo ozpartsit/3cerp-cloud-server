@@ -32,6 +32,7 @@ export default class Auth {
             if (value) {
               req.headers.user = value.user;
               req.headers.role = value.role;
+              req.headers.account = value.account;
               // aktualizacja daty ostatniego authenticate
               User.findByIdAndUpdate(value.user, { $set: { lastAuthDate: new Date() } }).exec();
             }
@@ -49,15 +50,17 @@ export default class Auth {
   }
 
   // weryfikuje uprawnienia do danego zasobu
-  public authorization(level: any) {
+  public authorization(collection: string, recordtype: string, id?: string, mode?: string) {
     return (
       req: express.Request,
       res: Response,
       next: express.NextFunction
     ) => {
       try {
+        let { recordtype, id, mode } = req.params;
         //to do - dodać weryfikacje 
-        if (level < 2 || true)
+
+        if (true)
           next();
         else
           throw new CustomError("auth.access_denied", 401);
@@ -98,7 +101,7 @@ export default class Auth {
                 // aktualizacja daty ostatniego logowania
                 User.findByIdAndUpdate(user._id, { $set: { lastLoginDate: new Date(), lastAuthDate: new Date() } }).exec()
 
-                const tokens = createTokenPair(user._id.toString(), req.body.role || user.role, this.tokenSecret);
+                const tokens = createTokenPair(access.account.toString(), user._id.toString(), req.body.role || user.role, this.tokenSecret);
                 // zwraca parę tokenów
                 res.status(200).json(tokens);
               } else {
@@ -137,7 +140,7 @@ export default class Auth {
             // refreshToken wygasł lub jest błędny
             throw new CustomError("auth.failed_auth_token", 500);
           } else {
-            const tokens = createTokenPair(value.user, value.role, this.tokenSecret);
+            const tokens = createTokenPair(value.account, value.user, value.role, this.tokenSecret);
             res.status(200).json(tokens);
           }
         });
@@ -186,12 +189,36 @@ export default class Auth {
                     locale: user.locale,
                     avatar: user.avatar,
                     resource: user.resource,
-                    type: user.type
+                    type: user.type,
                     // role: { _id: "admin", name: "Admin" },
                     // roles: [{ _id: "admin", name: "Admin" }, { _id: "accounts", name: "Accounts" }],
                   };
-
-                  res.status(200).json({ user: userLoged, token: token, role: value.role, account: "3cerpcloud" });
+                  // to do - generować na podstawie roli
+                  const permissions = {
+                    transactions: {
+                      salesorder: ["view", "create", "edit", "delete"],
+                      itemfulfillment: ["view", "create", "edit", "delete"],
+                      invoice: ["view", "create", "edit"],
+                    },
+                    items: {
+                      invitem: ["view", "create", "edit"],
+                      kititem: ["view", "create", "edit"],
+                      service: ["view", "edit"],
+                    },
+                    entities: {
+                      customer: ["view", "create", "edit"],
+                      vendor: ["view", "create", "edit"]
+                    }
+                  }
+                  const preferences = {
+                    locale: user.locale,
+                    TimezoneOffset: 2,
+                    export: {
+                      decimalSeparator: "dot",
+                      csvSeparator: "comma"
+                    }
+                  }
+                  res.status(200).json({ user: userLoged, permissions, preferences, token: token, role: value.role, account: "3cerpcloud" });
                 } else {
                   // user nie istnieje
                   throw new CustomError("auth.user_not_found", 404);
@@ -218,20 +245,14 @@ export default class Auth {
     try {
       await Access.findOne({ email: req.body.email }).then(async (access) => {
         if (access) {
-          const resetToken = jwt.sign({ _id: access._id }, this.tokenSecret, {
-            expiresIn: "1h"
-          });
+          // const resetToken = jwt.sign({ _id: access._id }, this.tokenSecret, {
+          //   expiresIn: "1h"
+          // });
 
-          let template = {
-            from: 'notification@3cerp.cloud',
-            to: req.body.email,
-            subject: '3C ERP Cloud | Reset Password',
-            html: await Email.render("reset_password.ejs", { link: resetToken, locale: req.locale || "en" })
-          }
+          // let template = await Email.resetPassword(req.body.email, resetToken, req.locale);
+          // await Email.send(template);
 
-          await Email.send(template);
-
-
+          await access.resetPassword(req.locale);
           res.status(200).json({ status: "success", data: { message: req.__("auth.reset_password") } });
         } else {
           // access nie istnieje
@@ -284,13 +305,7 @@ export default class Auth {
         // email jest wymagany
         throw new CustomError("auth.email_required", 404);
       }
-      let template = {
-        from: 'notification@3cerp.cloud',
-        to: req.body.email,
-        subject: '3C ERP Cloud | Thanks for Reaching Out!',
-        html: await Email.render("contact_form.ejs", { data: req.body, locale: req.locale || "en" })
-      }
-
+      let template = await Email.signUp(req.body.email, req.locale)
       await Email.send(template);
       // to do - dopisać tworzenie leada
       res.status(200).json({ status: "success", data: { message: req.__("auth.contact_form") } });
@@ -301,11 +316,11 @@ export default class Auth {
   }
 }
 
-function createTokenPair(user: string, role: string, tokenSecret: string) {
-  const token = jwt.sign({ user: user, role: role }, tokenSecret, {
+function createTokenPair(account: string, user: string, role: string, tokenSecret: string) {
+  const token = jwt.sign({ account: account, user: user, role: role }, tokenSecret, {
     expiresIn: "1h"
   });
-  const refreshToken = jwt.sign({ user: user, role: role }, tokenSecret, {
+  const refreshToken = jwt.sign({ account: account, user: user, role: role }, tokenSecret, {
     expiresIn: "12h"
   });
   const expires = Math.floor(addHours(new Date(), 1).getTime() / 1000);

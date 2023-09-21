@@ -5,5 +5,7 @@
 	"auth.user_not_found": "Nie znaleziono użytkownika.",
 	"auth.reset_password": "Na podany email została wysłana wiadomość z instrukcją zmiany hasła.",
 	"auth.password_updated": "Hasło zostało zaktualizowane.",
-	"auth.failed_auth_token": "Token autoryzacyjny jest nieprawidłowy, zaloguj się ponownie."
+	"auth.failed_auth_token": "Token autoryzacyjny jest nieprawidłowy, zaloguj się ponownie.",
+	"salesorder.lines": "salesorder.lines",
+	"No recipients defined": "No recipients defined"
 }

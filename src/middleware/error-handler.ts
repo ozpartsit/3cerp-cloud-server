@@ -9,7 +9,7 @@ export const errorHandler = (
   next: NextFunction
 ) => {
   i18n.setLocale(req.locale || "en");
-  console.log('ErrorHandler', error.message);
+  console.log('ErrorHandler', error.message || error);
 
 
   // let message = "Error";
@@ -38,6 +38,6 @@ export const errorHandler = (
   // }
   //})
 
-  return res.status(error.status || 500).send({ status: "error", error: { message: req.__(error.message) } });
+  return res.status(error.status || 500).send({ status: "error", error: { message: req.__(error.message || error.toString()) } });
 
 };

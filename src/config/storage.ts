@@ -4,17 +4,13 @@ import fs from "fs";
 import Storage, { IStorage } from "../models/storages/schema";
 import File, { IFile } from "../models/storages/file/schema";
 import Folder, { IFolder } from "../models/storages/folder/schema";
+import { Types } from 'mongoose';
 export default class StorageStructure {
   //resolve storage path of directory
-  public storagePath: string = path.resolve("storage");
-  public importPath: string = path.resolve("storage", "import");
-  public exportPath: string = path.resolve("storage", "export");
-  public uploadsPath: string = path.resolve("storage", "uploads");
+  public storagePath: string = path.posix.resolve("storage");
+
   constructor() {
     if (!fs.existsSync(this.storagePath)) fs.mkdirSync(this.storagePath);
-    if (!fs.existsSync(this.importPath)) fs.mkdirSync(this.importPath);
-    if (!fs.existsSync(this.exportPath)) fs.mkdirSync(this.exportPath);
-    if (!fs.existsSync(this.uploadsPath)) fs.mkdirSync(this.uploadsPath);
   }
   public init() {
     console.log("Init Storage", this.storagePath);
@@ -45,21 +41,8 @@ export default class StorageStructure {
         const filePath = path.posix.join(folder, encodeURI(file));
 
 
-        if (fs.lstatSync(path.join(dirPath, file)).isDirectory()) {
-          let storage = await Folder.findOne({ path: filePath }).exec();
-
-          let doc = {
-            name: file,
-            path: filePath,
-            urlcomponent: filePath,
-            type: "Folder",
-          };
-
-          doc.type = "Folder";
-          let newFolder = new Folder(doc);
-          if (!storage) newFolder.save();
-          this.mapFiles(path.join(dirPath, file), newFolder);
-
+        if (fs.lstatSync(path.posix.join(dirPath, file)).isDirectory()) {
+          console.log("Folder")
         } else {
           let storage = await File.findOne({ path: filePath }).exec();
           if (!storage) {

@@ -11,13 +11,14 @@ import mongoose, { Schema, Document } from "mongoose";
 import { IExtendedModel } from "../utilities//static";
 
 export interface IExtendedDocument extends Document {
+  account: Schema.Types.ObjectId;
   deleted: boolean;
   resource: string;
   type: string;
-  setValue: (field: string, value: any, list: string, subrecord: string) => void;
+  setValue: (field: string, value: any, list: string, subrecord: string) => Promise<void>;
   changeLogs: (document?: any, list?: string) => Promise<void>;
   virtualPopulate: () => Promise<void>;
-  autoPopulate: () =>  Promise<Object>;
+  autoPopulate: () => Promise<Object>;
   constantTranslate: (local: string) => Object;
   validateVirtuals: (save: boolean) => Promise<[any]>;
   totalVirtuals: () => void;
@@ -45,6 +46,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
   schema.method('totalVirtuals', totalVirtuals);
   schema.method('addToVirtuals', addToVirtuals);
   schema.method('recalcDocument', recalcDocument);
+  schema.method('initLocal', initLocal);
 
   schema.method('validateDocument', async function (this: T): Promise<[any]> {
     console.log("validateDocument");
@@ -97,9 +99,13 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
     this.$locals["oldValue"] = {};
     this.$locals["triggers"] = [];
   }
+
+  schema.pre("save", function () {
+    let model: any = this.constructor;
+    this.type = model.modelName.split("_")[0];
+  })
+
   schema.pre("init", initLocal)
-
-
   // add Owner ID
   // schema.add({
   //   ownerAccount: {

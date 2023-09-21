@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function validateVirtuals<T extends IExtendedDocument>(this: T, save: boolean) {
   console.log("validateVirtuals");
@@ -18,7 +18,7 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
           // set index - useful to sort
           line.index = index;
           // if line is new init new document
-          if (!line.schema) line = new list.options.model(line);
+          if (!line.schema) line = new models[list.options.ref](line);
           // assign foreignField to documents from virtual field
           line[list.options.foreignField] = this[list.options.localField];
           // assign temporarily this to parent key

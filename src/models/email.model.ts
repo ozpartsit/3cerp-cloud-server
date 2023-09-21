@@ -23,7 +23,7 @@ export const schema = new Schema<IEmail>(
         type: {
             type: String,
             required: true,
-            default: "email"
+            default: "Email"
         },
         description: {
             type: String,

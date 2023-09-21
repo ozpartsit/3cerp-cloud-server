@@ -5,6 +5,7 @@ import Access, { IAccess } from "./access.model";
 
 export interface IUser extends IExtendedDocument {
     _id: Schema.Types.ObjectId;
+    account: Schema.Types.ObjectId;
     name: string;
     firstName: string;
     lastName: string;
@@ -32,6 +33,7 @@ const options = {
 };
 const schema = new Schema<IUser>(
     {
+        account: { type: Schema.Types.ObjectId, required: true },
         email: { type: String, input: "TextField" },
         name: {
             type: String,
@@ -87,6 +89,7 @@ schema.virtual("accessess", {
     foreignField: "User",
     justOne: false,
     autopopulate: true,
+    copyFields: ["account"],
     model: Access
 });
 

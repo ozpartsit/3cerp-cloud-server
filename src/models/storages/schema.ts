@@ -2,9 +2,9 @@ import { model, Model, Schema } from "mongoose";
 import { IExtendedModel } from "../../utilities/static";
 import { IExtendedDocument } from "../../utilities/methods";
 import fs from "fs";
+import Folder from "./folder/schema";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface IStorage extends IExtendedDocument {
-    //_id?: Schema.Types.ObjectId;
     name: string;
     type: string;
     path: string;

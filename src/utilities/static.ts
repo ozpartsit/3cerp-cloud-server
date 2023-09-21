@@ -1,24 +1,42 @@
-import { Schema, Model, Document, Types } from "mongoose";
+import { Schema, Model, Document, Types, model, models } from "mongoose";
 import cache from "../config/cache";
 import getFields from "./staticts/getFields";
 import getForm from "./staticts/getForm";
 import { IExtendedDocument } from "../utilities/methods";
+import Account from "../models/account.model";
+
 
 // interfejs rozszeżający model o uniwersalne metody
 export interface IExtendedModel<T extends Document> extends Model<T> {
+  account: Schema.Types.ObjectId;
+  type: string;
   loadDocument: (id: string) => Promise<T | null>;
   addDocument: (mode: string, data: Object) => any;
   getDocument: (id: string, mode: string) => Promise<T | null>;
-  saveDocument: (id: string) => Promise<any>;
+  saveDocument: (id: string, data: Object) => Promise<any>;
   updateDocument: (id: string, mode: string, updates: updateBody) => any;
   deleteDocument: (id: string) => any;
   findDocuments: (query: Object, options: any) => any;
 
   getFields(locale?: string): any;
   getForm(locale: string): any;
+
+  setAccount(account: string | string[] | undefined): this;
 }
 
 export default function customStaticsMethods<T extends IExtendedDocument>(schema: Schema<T, IExtendedModel<T>>) {
+  let account = new Schema({
+    account: {
+      type: Schema.Types.ObjectId,
+      required: true,
+    },
+    type: {
+      type: String
+    }
+  })
+  schema.add(account);
+  schema.index({ account: 1 });
+
   schema.statics.loadDocument = loadDocument;
   schema.statics.addDocument = addDocument;
   schema.statics.getDocument = getDocument;
@@ -29,6 +47,47 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 
   schema.statics.getFields = getFields;
   schema.statics.getForm = getForm;
+
+  schema.statics.setAccount = setAccount;
+
+}
+
+
+//setCollection
+
+function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema.Types.ObjectId): Model<IExtendedDocument> {
+  if (account) {
+    if (models[`${account}_${this.modelName}`])
+      return models[`${this.modelName}_${account}`]
+    else {
+      // ustawienie dla każdego dokumentu domyślnego account;
+      let defaultAccount = new Schema({
+        account: {
+          type: Schema.Types.ObjectId,
+          required: true,
+          default: account
+        }
+      })
+      this.schema.add(defaultAccount);
+
+      // Dodaanie filtrów do wszytstkich queries
+      this.schema.pre("find", function () {
+        this.where({ account: account });
+      })
+      this.schema.pre('findOne', function () {
+        this.where({ account: account });
+      });
+      
+      // weryfikowanie poprawności account
+      this.schema.pre("save", function () {
+        if (this.account.toString() !== account.toString()) throw "wrong account";
+      })
+
+      return model<IExtendedDocument>(`${this.modelName}_${account}`, this.schema, this.collection.collectionName);
+    }
+  } else {
+    throw "account is requred"
+  }
 }
 
 //loadDocument
@@ -48,17 +107,18 @@ export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, 
 //API
 export async function addDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, mode: string, data: Object) {
   try {
-    let document = await this.create(data);
+    let document = new this(data || {})//await this.create(data || {});
+
     document.initLocal();
     document.recalcDocument();
-    let msg = await document.validateDocument();
+    //let message = await document.validateDocument();
     if (mode === "advanced") {
       // Zapisanie dokumentu do cache
-      cache.set(document._id, document);
-      return { document, msg, saved: false };
+      cache.set(document._id.toString(), document);
+      return { document, saved: false };
     } else {
       await document.saveDocument();
-      return { document, msg, saved: true };
+      return { document, saved: true };
     }
   } catch (error) {
     throw error;
@@ -83,15 +143,16 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
 // najpierw sprawdza czy jest w cachu
 // jeżeli tak, zapisuje aktyywny stan i zwraca identyfikator
 // jeżeli nie, zwraca null
-export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string): Promise<any> {
+export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string, data: Object): Promise<any> {
   try {
     let document = cache.get<T>(id);
-    if (document) {
-      await document.saveDocument();
-      return { document_id: id, saved: true };
+    if (!document) {
+      document = new this(data || {});
     } else {
-      return { document_id: null, saved: false };
+      // to do - sprawdzić różnice 
     }
+    await document.saveDocument();
+    return { document_id: id, saved: true };
   } catch (error) {
     throw error;
   }
@@ -115,21 +176,20 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
     }
 
     if (document) {
-      let msg: any = [];
       if (!Array.isArray(updates)) updates = [updates]; // array
       for (let update of updates) {
-        msg = await document.setValue(update.field, update.value, update.list, update.subrecord);
+        await document.setValue(update.field, update.value, update.list, update.subrecord);
       }
 
       if (mode === "advanced") {
         document.recalcDocument();
-        return { document, msg, saved: false };
+        return { document, saved: false };
 
       } else {
         await document.saveDocument();
-        return { document, msg, saved: true };
+        return { document, saved: true };
       }
-    } else return { document: null, msg: "error", saved: false };
+    } else return { document: null, saved: false };
   } catch (error) {
     throw error;
   }

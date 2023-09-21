@@ -17,7 +17,7 @@ export default class WebsiteController<T extends IExtendedDocument> extends cont
         super(model);
     }
     public async save(req: Request, res: Response, next: NextFunction) {
-        super.save(req, res, next);
+        await super.save(req, res, next);
         this.syncSites();
     }
     public async syncSites() {

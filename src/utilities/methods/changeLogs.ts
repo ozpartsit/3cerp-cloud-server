@@ -8,29 +8,33 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
     let selects = this.directModifiedPaths();
     //get original document if exists (only changed fields)
     //console.log(this.type, this.constructor,selects)
-    let originalDoc = await models[this.type].findById(this.id, selects);
-    if (originalDoc) {
-      selects.forEach((field: string) => {
-        let ref = this[field] && this[field].type ? this[field].constructor.modelName : null;
-        this.depopulate();
-        if ((this[field]).toString() !== (originalDoc[field]).toString()) {
-          let changeLog = new Changelog(
-            {
-              document: document || this.id,
-              field: field,
-              list: list,
-              record: list ? this.id : null,
-              newValue: this[field],
-              oldValue: originalDoc[field],
-              ref: ref
-            }
-          );
-          changeLog.save();
-        } else {
-          this.unmarkModified(field);
-        }
+    const constructor: any = this.constructor;
+    const type = constructor.modelName.split("_")[0];
+    if (!this.isNew && this.type) {
+      let originalDoc = await models[type].findById(this.id, selects);
+      if (originalDoc) {
+        selects.forEach((field: string) => {
+          let ref = this[field] && this[field].type ? this[field].constructor.modelName : null;
+          this.depopulate();
+          if ((this[field]).toString() !== (originalDoc[field]).toString()) {
+            let changeLog = new Changelog(
+              {
+                document: document || this.id,
+                field: field,
+                list: list,
+                record: list ? this.id : null,
+                newValue: this[field],
+                oldValue: originalDoc[field],
+                ref: ref
+              }
+            );
+            changeLog.save();
+          } else {
+            this.unmarkModified(field);
+          }
 
-      })
+        })
+      }
     }
   }
 }
