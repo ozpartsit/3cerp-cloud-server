@@ -175,7 +175,7 @@ class GenericController<T extends IExtendedDocument> {
                     list: line.list
                 }
             })
-            res.json(changelogs);
+            res.json({ status: "success", data: { changelogs } });
         } catch (error) {
             return next(error);
         }

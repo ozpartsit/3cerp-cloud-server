@@ -13,10 +13,11 @@ import EmailController from "../controllers/emails";
 import AccountController from "../controllers/accounts";
 
 // External Services
-import DPDController from "../controllers/dpd";
+import DPDController from "../controllers/external/dpd";
 
 import Account from "../models/account.model";
 import User from "../models/user.model";
+import Preference from "../models/preference.model";
 
 import { StorageTypes } from "../models/storages/model";
 import { TransactionTypes } from "../models/transactions/model";
@@ -48,6 +49,8 @@ export default class Routes {
     this.routeUniversal("accounts", "account", this.accountController)
     //Users
     this.routeUniversal("users", "user", new Controller(User))
+    //Preferences
+    this.routeUniversal("preferences", "preference", new Controller(Preference))
 
     //Storage
     Object.values(StorageTypes).forEach(async (storage) => {
@@ -175,13 +178,14 @@ export default class Routes {
       this.Auth.getUser.bind(this.Auth) as any
     );
 
-    this.Router.route("/auth/user").get(
+    this.Router.route("/auth/access/:collection/:recordtype/:id?/:mode?").get(
       this.Auth.authenticate.bind(this.Auth) as any,
-      this.Auth.getUser.bind(this.Auth) as any
+      this.Auth.authorization().bind(this.Auth) as any,
+      this.Auth.accessGranted.bind(this.Auth) as any
     );
-
-    this.Router.route("/auth/verify").get(
+    this.Router.route("/auth/acesss").post(
       this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization.bind(this.Auth) as any,
       this.Auth.accessGranted.bind(this.Auth) as any
     );
 

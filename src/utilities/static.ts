@@ -74,6 +74,9 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
       this.schema.pre("find", function () {
         this.where({ account: account });
       })
+      this.schema.pre("count", function () {
+        this.where({ account: account });
+      })
       this.schema.pre('findOne', function () {
         this.where({ account: account });
       });

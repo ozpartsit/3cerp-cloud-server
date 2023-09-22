@@ -9,6 +9,7 @@ import DB from "./config/database";
 import i18n from "./config/i18n";
 import StatusMonitor from "./config/statusMonitor";
 import RoutesCore from "./routes/core";
+import RoutesUI from "./routes/ui";
 import RoutesMaintenance from "./routes/maintenance";
 import RoutesPublic from "./routes/public";
 import EmitEvents from "./services/emitEvents";
@@ -33,6 +34,7 @@ export class App3CERP {
 
   public db: DB = new DB();
   public routesCore: RoutesCore = new RoutesCore();
+  public routesUI: RoutesUI = new RoutesUI();
   public routesMaintenance: RoutesMaintenance = new RoutesMaintenance();
   public routesPublic: RoutesPublic = new RoutesPublic();
   public emitEvents: EmitEvents = new EmitEvents();
@@ -76,6 +78,7 @@ export class App3CERP {
   }
   private mountRoutes(): void {
     this.routesCore.start(this.app);
+    this.routesUI.start(this.app);
     this.routesMaintenance.start(this.app, this);
     this.routesPublic.start(this.app);
     this.emitEvents.start(this.app);

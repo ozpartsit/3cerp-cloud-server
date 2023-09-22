@@ -5,6 +5,7 @@ import User from "../models/user.model";
 import Email from "../services/email";
 import CustomError from "../utilities/errors/customError";
 import i18n from "../config/i18n";
+import Preference from "../models/preference.model";
 interface Response extends express.Response {
   user: string | jwt.JwtPayload;
 }
@@ -23,6 +24,7 @@ export default class Auth {
     try {
       const tokenParts = (req.headers.authorization || "").split(" ");
       const token = tokenParts[1];
+
       if (token) {
         jwt.verify(token, this.tokenSecret, (err, value) => {
           if (err) {
@@ -36,6 +38,7 @@ export default class Auth {
               // aktualizacja daty ostatniego authenticate
               User.findByIdAndUpdate(value.user, { $set: { lastAuthDate: new Date() } }).exec();
             }
+
             next();
           }
         });
@@ -50,19 +53,33 @@ export default class Auth {
   }
 
   // weryfikuje uprawnienia do danego zasobu
-  public authorization(collection: string, recordtype: string, id?: string, mode?: string) {
+  public authorization(collection?: string, recordtype?: string, id?: string, mode?: string) {
     return (
       req: express.Request,
       res: Response,
       next: express.NextFunction
     ) => {
       try {
-        let { recordtype, id, mode } = req.params;
+        let access = true;
         //to do - dodać weryfikacje 
 
-        if (true)
+        const check = (collection, recordtype, id, mode) => {
+          if (mode == "all") return false;
+          else return true;
+        }
+
+        if (req.method == "POST") {
+          let { collection, recordtype, id, mode } = req.body;
+          access = check(collection, recordtype, id, mode);
+        } else {
+          let { collection, recordtype, id, mode } = req.params;
+          access = check(collection, recordtype, id, mode);
+        }
+
+
+        if (access) {
           next();
-        else
+        } else
           throw new CustomError("auth.access_denied", 401);
       } catch (error) {
         return next(error);
@@ -186,7 +203,6 @@ export default class Auth {
                     company: "3C ERP Sp. z o. o.",
                     lastLoginDate: user.lastLoginDate,
                     lastAuthDate: user.lastAuthDate,
-                    locale: user.locale,
                     avatar: user.avatar,
                     resource: user.resource,
                     type: user.type,
@@ -196,28 +212,21 @@ export default class Auth {
                   // to do - generować na podstawie roli
                   const permissions = {
                     transactions: {
-                      salesorder: ["view", "create", "edit", "delete"],
-                      itemfulfillment: ["view", "create", "edit", "delete"],
-                      invoice: ["view", "create", "edit"],
+                      salesorder: ["view", "add", "edit", "all"],
+                      itemfulfillment: ["view", "add", "edit", "all"],
+                      invoice: ["view", "add", "edit"],
                     },
                     items: {
-                      invitem: ["view", "create", "edit"],
-                      kititem: ["view", "create", "edit"],
+                      invitem: ["view", "add", "edit"],
+                      kititem: ["view", "add", "edit"],
                       service: ["view", "edit"],
                     },
                     entities: {
-                      customer: ["view", "create", "edit"],
-                      vendor: ["view", "create", "edit"]
+                      customer: ["view", "add", "edit"],
+                      vendor: ["view", "add", "edit"]
                     }
                   }
-                  const preferences = {
-                    locale: user.locale,
-                    TimezoneOffset: 2,
-                    export: {
-                      decimalSeparator: "dot",
-                      csvSeparator: "comma"
-                    }
-                  }
+                  const preferences = await Preference.findById(value.user);
                   res.status(200).json({ user: userLoged, permissions, preferences, token: token, role: value.role, account: "3cerpcloud" });
                 } else {
                   // user nie istnieje

@@ -2,6 +2,7 @@ import { Schema, model, Model } from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 import Access, { IAccess } from "./access.model";
+import Preference, { IPreference } from "./preference.model";
 
 export interface IUser extends IExtendedDocument {
     _id: Schema.Types.ObjectId;
@@ -21,7 +22,7 @@ export interface IUser extends IExtendedDocument {
     role: string,
     roles: string[],
     accesses?: IAccess[];
-
+    initPreference(): Promise<IPreference & { _id: any; }>
 }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -93,6 +94,26 @@ schema.virtual("accessess", {
     model: Access
 });
 
+schema.methods.initPreference = async function () {
+
+    let PreferenceModel = Preference.setAccount(this.account.toString());
+    return await PreferenceModel.findById(this._id).then(async (res) => {
+        //jeżeli folder w DB nie istnieje - dodaj
+        if (!res) {
+            return await new PreferenceModel({
+                _id: this._id,
+                user: this._id,
+                type: "Preference",
+            }).save();
+        } else {
+            return res;
+        }
+    })
+};
+
+schema.post('save', function () {
+    this.initPreference();
+});
 
 schema.index({ name: 1 });
 

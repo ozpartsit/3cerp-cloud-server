@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Request, Response, NextFunction } from 'express';
-import CustomError from "../utilities/errors/customError";
+import CustomError from "../../utilities/errors/customError";
 
 export default class controller {
     public token: string;

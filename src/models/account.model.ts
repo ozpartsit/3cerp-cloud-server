@@ -72,7 +72,7 @@ schema.index({ name: 1 });
 
 schema.methods.initStorage = async function () {
 
-    let FolderModel = await Folder.setAccount(this._id);
+    let FolderModel = Folder.setAccount(this._id);
     return await FolderModel.findOne({ path: encodeURI(this.id) }).then(async (res) => {
         //jeżeli folder w DB nie istnieje - dodaj
         if (!res) {
