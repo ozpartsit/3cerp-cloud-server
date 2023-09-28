@@ -76,7 +76,8 @@ const schema = new Schema<ILine>(
     quantity: {
       type: Number,
       default: 1,
-      input: "IntField"
+      input: "IntField",
+      min: 1
     },
     multiplyquantity: {
       type: Number,

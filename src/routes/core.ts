@@ -1,6 +1,5 @@
 
 import Auth from "../middleware/auth";
-import subdomain from "../middleware/subdomain";
 import express, { Request, Response, NextFunction } from "express";
 import Controller from "../controllers/genericController";
 
@@ -8,12 +7,10 @@ import TransactionController from "../controllers/transactions";
 import WebsiteController from "../controllers/websites";
 import ConstantController from "../controllers/constants";
 import FilesController from "../controllers/files";
-import HostingController from "../controllers/hosting";
 import EmailController from "../controllers/emails";
 import AccountController from "../controllers/accounts";
 
-// External Services
-import DPDController from "../controllers/external/dpd";
+
 
 import Account from "../models/account.model";
 import User from "../models/user.model";
@@ -30,17 +27,14 @@ export default class Routes {
   public Router: express.Router = express.Router();
   public RouterHosting: express.Router = express.Router();
   public RouterFiles: express.Router = express.Router();
-  public RouterDPD: express.Router = express.Router();
 
 
   public Auth: Auth = new Auth();
   public websiteController = new WebsiteController(Shop);
   public constantController: ConstantController = new ConstantController();
-  public hostingController: HostingController = new HostingController();
   public emailController = new EmailController(Email);
   public accountController = new AccountController(Account);
 
-  public dpdController = new DPDController();
 
   public start(app: express.Application): void {
     console.log("Start Routing");
@@ -77,23 +71,8 @@ export default class Routes {
     this.routeUniversal("websites", "webshop", this.websiteController)
     // constatns
     this.routeConstants();
-    //Auth
-    this.routeAuth();
-    this.routeHosting();
 
-    this.routerDPD();
-
-    app.use(subdomain("*", this.RouterHosting));
     app.use("/api/core", this.Router);
-    app.use("/api/dpd", this.RouterDPD);
-  }
-
-  public routerDPD() {
-    // DPD
-    this.RouterDPD.route("/shipment/:param?").post(
-      this.Auth.authenticate.bind(this.Auth) as any,
-      this.dpdController.shipment.bind(this.dpdController) as any
-    );
   }
 
 
@@ -162,55 +141,11 @@ export default class Routes {
       this.constantController.get as any
     );
   }
-
-
-  public routeAuth() {
-    // Auth
-    this.Router.route("/auth/login").post(this.Auth.login.bind(this.Auth) as any);
-    this.Router.route("/auth/token").post(this.Auth.login.bind(this.Auth) as any);
-
-    this.Router.route("/auth/refresh").post(
-      this.Auth.refreshToken.bind(this.Auth) as any
-    );
-
-    this.Router.route("/auth/user").get(
-      this.Auth.authenticate.bind(this.Auth) as any,
-      this.Auth.getUser.bind(this.Auth) as any
-    );
-
-    this.Router.route("/auth/access/:collection/:recordtype/:id?/:mode?").get(
-      this.Auth.authenticate.bind(this.Auth) as any,
-      this.Auth.authorization().bind(this.Auth) as any,
-      this.Auth.accessGranted.bind(this.Auth) as any
-    );
-    this.Router.route("/auth/acesss").post(
-      this.Auth.authenticate.bind(this.Auth) as any,
-      this.Auth.authorization.bind(this.Auth) as any,
-      this.Auth.accessGranted.bind(this.Auth) as any
-    );
-
-    this.Router.route("/auth/reset_password")
-      .post(this.Auth.resetPassword.bind(this.Auth) as any)
-      .patch(this.Auth.setPassword.bind(this.Auth) as any);
-
-    this.Router.route("/auth/signup")
-      .post(this.Auth.contactForm.bind(this.Auth) as any);
-
-  }
   public routeFiles(controller) {
     // Files
     this.Router.route("/storage/upload").post(
       this.Auth.authenticate.bind(this.Auth) as any,
       controller.upload.bind(controller) as any
-    );
-  }
-  public routeHosting() {
-    // Hosting
-    this.RouterHosting.route("/:view?/:param?").get(
-      this.hostingController.get as any
-    );
-    this.RouterHosting.route("*").get(
-      this.hostingController.get as any
     );
   }
 

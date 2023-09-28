@@ -11,8 +11,7 @@ export interface INotification extends IExtendedDocument {
     name: string;
     description: string;
     date: Date;
-    read: Date;
-    archived: boolean;
+    status: string;
     link: string;
     document: Schema.Types.ObjectId;
     ref: string;
@@ -34,9 +33,8 @@ const schema = new Schema<INotification>(
         name: { type: String, default: "New Notification", required: true },
         description: { type: String, default: "New Botification", required: true },
         date: { type: Date, default: new Date(), required: true },
-        read: { type: Date },
         link: { type: String },
-        archived: { type: Boolean, default: false },
+        status: { type: String, default: "unread" },
         document: {
             refPath: 'ref',
             autopopulate: true,

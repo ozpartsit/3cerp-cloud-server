@@ -8,9 +8,13 @@ import compression from "compression";
 import DB from "./config/database";
 import i18n from "./config/i18n";
 import StatusMonitor from "./config/statusMonitor";
+// Routing
 import RoutesCore from "./routes/core";
 import RoutesUI from "./routes/ui";
+import RoutesAuth from "./routes/auth";
+import RoutesHosting from "./routes/hosting";
 import RoutesMaintenance from "./routes/maintenance";
+import RoutesExternal from "./routes/external";
 import RoutesPublic from "./routes/public";
 import EmitEvents from "./services/emitEvents";
 import EmailServer from "./services/email";
@@ -33,10 +37,14 @@ export class App3CERP {
   public PORT: string | number = process.env.PORT || 8080;
 
   public db: DB = new DB();
+  // Routing
   public routesCore: RoutesCore = new RoutesCore();
   public routesUI: RoutesUI = new RoutesUI();
+  public routesAuth: RoutesAuth = new RoutesAuth();
+  public routesHosting: RoutesHosting = new RoutesHosting();
   public routesMaintenance: RoutesMaintenance = new RoutesMaintenance();
   public routesPublic: RoutesPublic = new RoutesPublic();
+
   public emitEvents: EmitEvents = new EmitEvents();
 
   public storage = new storage();
@@ -77,10 +85,14 @@ export class App3CERP {
     this.app.use(i18n.init);
   }
   private mountRoutes(): void {
+    // Routing
     this.routesCore.start(this.app);
     this.routesUI.start(this.app);
+    this.routesAuth.start(this.app);
+    this.routesHosting.start(this.app);
     this.routesMaintenance.start(this.app, this);
     this.routesPublic.start(this.app);
+    
     this.emitEvents.start(this.app);
     this.app.use(errorHandler);
   }

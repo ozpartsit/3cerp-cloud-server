@@ -22,7 +22,7 @@ export default class Routes {
 
     public routerNotifications() {
         // get
-        this.Router.route("/notifications/:id/view").get(
+        this.Router.route("/notifications/view/:id").get(
             this.Auth.authenticate.bind(this.Auth) as any,
             this.notificationController.get.bind(this.notificationController) as any
         );
@@ -37,7 +37,12 @@ export default class Routes {
             this.notificationController.find.bind(this.notificationController) as any
         );
         // Archive
-        this.Router.route("/notifications/:id/archive").delete(
+        this.Router.route("/notifications/archive/:id").patch(
+            this.Auth.authenticate.bind(this.Auth) as any,
+            this.notificationController.archive.bind(this.notificationController) as any
+        );
+        // delete
+        this.Router.route("/notifications/delete/:id").delete(
             this.Auth.authenticate.bind(this.Auth) as any,
             this.notificationController.archive.bind(this.notificationController) as any
         );

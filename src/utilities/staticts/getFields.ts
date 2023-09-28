@@ -14,7 +14,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
   }
   const virtuals: Virtuals = modelSchema.virtuals;
   Object.entries(virtuals).forEach(([key, value]) => {
-    if (value && value.options.ref) {
+    if (!parent && value && value.options.ref) {
       let field: any = {
         field: key,
         name: i18n.__(`${this.modelName.toLowerCase()}.${key}`),
@@ -24,7 +24,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
       };
       if (value.options.ref) {
         let refModel: any = models[value.options.ref];
-        if (!parent) field.fields = refModel.getFields(local, key);
+        field.fields = refModel.getFields(local, key);
       }
       fields.push(field)
     }
@@ -53,7 +53,9 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             ref: value.ref,
             resource: value.resource,
             constant: value.constant,
-            fieldType: value.input
+            fieldType: value.input,
+            min: schematype.options.min,
+            max: schematype.options.max,
           }
           if (value.input)
             field.fields.push(subfield)
@@ -70,8 +72,10 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
           resource: schematype.options.resource,
           constant: schematype.options.constant,
           fieldType: schematype.options.input,
-          select: schematype.options.select,
-          selects: schematype.options.autopopulate ? schematype.options.autopopulate.select : "",
+          min: schematype.options.min,
+          max: schematype.options.max,
+          //select: schematype.options.select,
+          //selects: schematype.options.autopopulate ? schematype.options.autopopulate.select : "",
         }
 
         if (schematype.options.ref) {

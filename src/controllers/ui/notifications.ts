@@ -12,7 +12,7 @@ export default class NotificationController {
     public async check(req: Request, res: Response, next: NextFunction) {
         // check new
         let Model = Notification.setAccount(req.headers.account);
-        const total = await Model.count({ read: { $exists: false } })
+        const total = await Model.count({ status: "unread" })
             .exec()
 
         res.json({ status: "success", data: { total } });
@@ -21,13 +21,13 @@ export default class NotificationController {
     public async find(req: Request, res: Response, next: NextFunction) {
         // find
         let Model = Notification.setAccount(req.headers.account);
-        const filters: any = { archived: false };
+        const filters: any = { status: { $nin: ["archived"] } };
 
         if (req.params.status) {
-            if (req.params.status === "archived") filters.archived = true;
-            if (req.params.status === "unread") filters.read = { read: { $exists: false } };
+            if (req.params.status === "archived") filters.status = "archived";
+            if (req.params.status === "unread") filters.status = { $nin: ["archived", "read"] };
         }
-        
+
         const array = await Model.find(filters)
             .populate({ path: 'document', select: 'name' })
             .exec()
@@ -47,10 +47,10 @@ export default class NotificationController {
 
         let Model = Notification.setAccount(req.headers.account);
         const document = await Model.findById(req.params.id)
-        .populate({ path: 'document', select: 'name' })
-        .exec();
+            .populate({ path: 'document', select: 'name' })
+            .exec();
         if (document) {
-            document.read = new Date();
+            document.status = "read";
             document.save();
         }
         res.json({ status: "success", data: { document } });
@@ -58,17 +58,29 @@ export default class NotificationController {
     }
     public async archive(req: Request, res: Response, next: NextFunction) {
         let Model = Notification.setAccount(req.headers.account);
-        const document = await Model.findById(req.params.id)
-        .populate({ path: 'document', select: 'name' })
-        .exec();
-        if (document) {
-            document.archived = true;
-            document.save();
+        if (req.params.id == "all") {
+            await Model.updateMany({}, { $set: { status: "archived" } });
+        } else {
+            const document = await Model.findById(req.params.id)
+                .populate({ path: 'document', select: 'name' })
+                .exec();
+            if (document) {
+                document.status = "archived";
+                document.save();
+            }
+            res.json({ status: "success", data: { document } });
         }
-        res.json({ status: "success", data: { document } });
-
     }
-    //search
+    //delete
+    public async delete(req: Request, res: Response, next: NextFunction) {
+        let Model = Notification.setAccount(req.headers.account);
+        if (req.params.id == "all") {
+            await Model.deleteMany({}, { $set: { status: "archived" } });
+        } else {
+            const document = await Model.findByIdAndDelete(req.params.id).exec();
+            res.json({ status: "success", data: { document } });
+        }
+    }
 
 }
 

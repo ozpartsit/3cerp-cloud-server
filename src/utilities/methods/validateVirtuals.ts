@@ -6,17 +6,21 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
 
   const virtuals: any[] = Object.values(this.schema.virtuals);
   for (let list of virtuals) {
-    if (list.options.ref && !list.options.justOne) {
+    if (list.options.ref) {
       if (this[list.path] && this[list.path].length) {
         // sort items before for loop
         if (list.options.options) {
-          if (list.options.options.sort)
+          if (list.options.options.sort )
             this[list.path].sort((a: any, b: any) => a.index - b.index)
         }
-        for (const [index, value] of this[list.path].entries()) {
+        // justOne parse to Array;
+        let docs = this[list.path];
+        if (list.options.justOne) docs = [this[list.path]];
+
+        for (const [index, value] of docs.entries()) {
           let line = value;
           // set index - useful to sort
-          line.index = index;
+          if (!list.options.justOne) line.index = index;
           // if line is new init new document
           if (!line.schema) line = new models[list.options.ref](line);
           // assign foreignField to documents from virtual field

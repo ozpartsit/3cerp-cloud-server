@@ -22,6 +22,7 @@ export interface IUser extends IExtendedDocument {
     role: string,
     roles: string[],
     accesses?: IAccess[];
+    preference: IPreference;
     initPreference(): Promise<IPreference & { _id: any; }>
 }
 
@@ -87,11 +88,20 @@ schema.virtual('initials').get(function (this: IUser) {
 schema.virtual("accessess", {
     ref: "Access",
     localField: "_id",
-    foreignField: "User",
-    justOne: false,
+    foreignField: "user",
+    justOne: true,
     autopopulate: true,
     copyFields: ["account"],
     model: Access
+});
+schema.virtual("preference", {
+    ref: "Preference",
+    localField: "_id",
+    foreignField: "user",
+    justOne: true,
+    autopopulate: true,
+    copyFields: ["account","user"],
+    model: Preference
 });
 
 schema.methods.initPreference = async function () {
