@@ -39,7 +39,7 @@ schema.virtual("lines", {
   justOne: false,
   autopopulate: true,
   model: lineModel,
-  copyFields: ["entity"]
+  copyFields: ["entity", "account"],
 });
 
 schema.pre("validate", async function (next) {

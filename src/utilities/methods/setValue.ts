@@ -4,22 +4,43 @@ export default async function setValue<T extends IExtendedDocument>(
   this: T,
   field: string,
   value: any,
-  list: string,
-  subrecord: string,
+  subdoc: string,
+  subdoc_id: string,
+  deepdoc: string,
+  deepdoc_id: string,
 ) {
   try {
     let document: T;
-    if (list) {
-      document = this[list].find((element: any) => {
-        return element._id.toString() === subrecord;
+    if (subdoc) {
+      let virtual: any = this.schema.virtuals[subdoc];
+      document = this[subdoc].find((element: any) => {
+        return element._id.toString() === subdoc_id;
       });
-
+      if (deepdoc) {
+        subdoc = deepdoc;
+        if (!document) throw 'bład'
+        else {
+          let parent = document;
+          virtual = parent.schema.virtuals[subdoc];
+          document = parent[subdoc].find((element: any) => {
+            return element._id.toString() === deepdoc_id;
+          });
+        }
+      }
       if (!document) {
-        let virtual: any = this.schema.virtuals[list];
-        document = await new models[virtual.options.ref]();
-        document.initLocal();
-        this[list].push(document);
-        this.validateVirtuals(false);
+        if (virtual) {
+          document = await new models[virtual.options.ref]();
+          document.initLocal();
+          if (virtual.options.justOne) {
+            this[subdoc] = document;
+          } else {
+            this[subdoc].push(document);
+          }
+
+          this.validateVirtuals(false);
+        } else {
+          console.log(this.schema.path(subdoc))
+        }
       }
     } else {
       document = this;

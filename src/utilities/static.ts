@@ -57,7 +57,9 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 
 function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema.Types.ObjectId): Model<IExtendedDocument> {
   if (account) {
-    if (models[`${account}_${this.modelName}`])
+    if (this.modelName.includes(account.toString()))
+      return models[`${this.modelName}`]
+    if (models[`${this.modelName}_${account}`])
       return models[`${this.modelName}_${account}`]
     else {
       // ustawienie dla każdego dokumentu domyślnego account;
@@ -80,7 +82,7 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
       this.schema.pre('findOne', function () {
         this.where({ account: account });
       });
-      
+
       // weryfikowanie poprawności account
       this.schema.pre("save", function () {
         if (this.account.toString() !== account.toString()) throw "wrong account";
@@ -133,8 +135,9 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
   try {
     let document: T | null = await this.loadDocument(id);
     if (document && document._id) {
-      const cacheID = new Types.ObjectId().toString();
-      if (mode === "advanced") cache.set(cacheID, document);
+      //const cacheID = new Types.ObjectId().toString();
+      // to do - cacheID - jeżeli chcemy otwierać ten sam dokument w jedym momencie;
+      if (mode === "advanced") cache.set(id, document);
     }
     return document;
   } catch (error) {
@@ -148,12 +151,14 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
 // jeżeli nie, zwraca null
 export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string, data: Object): Promise<any> {
   try {
+    console.log(id)
     let document = cache.get<T>(id);
     if (!document) {
       document = new this(data || {});
     } else {
       // to do - sprawdzić różnice 
     }
+
     await document.saveDocument();
     return { document_id: id, saved: true };
   } catch (error) {
@@ -162,8 +167,8 @@ export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, 
 }
 
 interface updateBody {
-  list: string,
-  subrecord: string,
+  subdoc: string,
+  subdoc_id: string,
   field: string,
   value: any,
 
@@ -171,7 +176,7 @@ interface updateBody {
 
 export async function updateDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, updates: updateBody | updateBody[]) {
   try {
-    let document: T | null | undefined = null;
+    let document: T | null | any | undefined = null;
     if (mode === "advanced") {
       document = cache.get<T | null>(id);
     } else {
@@ -181,11 +186,12 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
     if (document) {
       if (!Array.isArray(updates)) updates = [updates]; // array
       for (let update of updates) {
-        await document.setValue(update.field, update.value, update.list, update.subrecord);
+        await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id);
       }
-
+      
       if (mode === "advanced") {
         document.recalcDocument();
+        cache.set(id, document);
         return { document, saved: false };
 
       } else {

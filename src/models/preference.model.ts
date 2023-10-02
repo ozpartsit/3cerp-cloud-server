@@ -14,6 +14,7 @@ export interface IPreference extends IExtendedDocument {
     exportDecimalSeparator: string;
     exportCsvSeparator: string;
     tooltips: boolean;
+    notifications: boolean;
 }
 
 
@@ -35,6 +36,7 @@ const schema = new Schema<IPreference>(
         exportDecimalSeparator: { type: String, default: "en", input: "SelectField" },
         exportCsvSeparator: { type: String, default: "en", input: "SelectField" },
         tooltips: { type: Boolean, default: true, input: "SwitchField" },
+        notifications: { type: Boolean, default: true, input: "SwitchField" },
     },
     options
 );

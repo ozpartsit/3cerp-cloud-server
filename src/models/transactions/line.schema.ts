@@ -12,6 +12,7 @@ export interface ILine {
   type: string;
   transaction: ITransaction["_id"];
   entity: ITransaction["entity"];
+  account: ITransaction["account"];
   item: IItem;
   kit: Schema.Types.ObjectId;
   description: string;
@@ -49,6 +50,7 @@ const schema = new Schema<ILine>(
       ref: "Line"
     },
     entity: { type: Schema.Types.ObjectId, copy: "transaction" },
+    account: { type: Schema.Types.ObjectId, copy: "transaction" },
     type: {
       type: String,
       //required: true,
@@ -114,7 +116,7 @@ schema.method("actions", async function (trigger) {
 });
 
 schema.pre("validate", async function (next) {
-  console.log("pre valide transaction line");
+  //console.log("pre valide transaction line");
 
   //if (this.deleted) throw new Error.ValidationError();
 

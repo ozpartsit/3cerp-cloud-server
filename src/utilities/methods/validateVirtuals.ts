@@ -10,7 +10,7 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
       if (this[list.path] && this[list.path].length) {
         // sort items before for loop
         if (list.options.options) {
-          if (list.options.options.sort )
+          if (list.options.options.sort)
             this[list.path].sort((a: any, b: any) => a.index - b.index)
         }
         // justOne parse to Array;
@@ -46,6 +46,7 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
           } catch (err: any) {
             err._id = line._id;
             err.list = list.path;
+            console.log(err)
             errors.push(err);
           }
 

@@ -17,7 +17,7 @@ const schema = new Schema<ILineSalesOrder>({
 }, options);
 
 schema.pre("validate", async function (next) {
-  console.log("pre valide line SO");
+  //console.log("pre valide line SO");
 
   next();
 });

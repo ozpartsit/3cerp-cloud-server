@@ -8,8 +8,8 @@ export interface IChangelog extends IExtendedDocument {
     type: string;
     entity: Schema.Types.ObjectId;
     field: string;
-    list: string;
-    record: Schema.Types.ObjectId;
+    subdoc: string;
+    subdoc_id: Schema.Types.ObjectId;
     newValue: string | Date | Schema.Types.ObjectId;
     oldValue: string | Date | Schema.Types.ObjectId;
     ref: string
@@ -35,10 +35,10 @@ export const schema = new Schema<IChangelog>(
             type: String,
             required: true,
         },
-        list: {
+        subdoc: {
             type: String,
         },
-        record: {
+        subdoc_id: {
             type: Schema.Types.ObjectId,
 
         },

@@ -59,9 +59,9 @@ const TransactionSchema = {
     input: "IntField",
     total: "lines"
   },
-  amount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
-  taxAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
-  grossAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: true },
+  amount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: false },
+  taxAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: false },
+  grossAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: false },
   weight: { type: Number, default: 0, input: "NumberField" },
   tax: {
     type: Number,
@@ -114,7 +114,7 @@ schema.virtual("lines", {
   justOne: false,
   autopopulate: true,
   model: Line,
-  copyFields: ["entity"],
+  copyFields: ["entity", "account"],
   options: { sort: { index: 1 } },
 });
 schema.method("pdf", async function () {

@@ -1,7 +1,7 @@
 import Changelog from "../../models/changelog.model";
 import { Document, models } from 'mongoose';
 import { IExtendedDocument } from "../methods"
-export default async function changeLogs<T extends IExtendedDocument>(this: T, document?: any, list?: string) {
+export default async function changeLogs<T extends IExtendedDocument>(this: T, document?: any, subdoc?: string) {
 
   //zmodyfikować by przed zapisaniem pobierało oryginalny obiekt i zapisywalo zmiany
   if (this.isModified()) {
@@ -16,13 +16,13 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
         selects.forEach((field: string) => {
           let ref = this[field] && this[field].type ? this[field].constructor.modelName : null;
           this.depopulate();
-          if ((this[field]).toString() !== (originalDoc[field]).toString()) {
+          if ((this[field]).toString() !== (originalDoc[field] || "").toString()) {
             let changeLog = new Changelog(
               {
                 document: document || this.id,
                 field: field,
-                list: list,
-                record: list ? this.id : null,
+                subdoc: subdoc,
+                subdoc_id: subdoc ? this.id : null,
                 newValue: this[field],
                 oldValue: originalDoc[field],
                 ref: ref

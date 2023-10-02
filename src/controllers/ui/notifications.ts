@@ -25,7 +25,7 @@ export default class NotificationController {
 
         if (req.params.status) {
             if (req.params.status === "archived") filters.status = "archived";
-            if (req.params.status === "unread") filters.status = { $nin: ["archived", "read"] };
+            if (["unread", "new"].includes(req.params.status)) filters.status = { $nin: ["archived", "read"] };
         }
 
         const array = await Model.find(filters)
