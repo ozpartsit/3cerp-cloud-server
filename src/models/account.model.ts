@@ -53,7 +53,7 @@ const schema = new Schema<IAccount>(
 schema.virtual("accessess", {
     ref: "Access",
     localField: "_id",
-    foreignField: "Account",
+    foreignField: "account",
     justOne: false,
     autopopulate: true,
     model: Access
@@ -61,7 +61,7 @@ schema.virtual("accessess", {
 schema.virtual("users", {
     ref: "User",
     localField: "_id",
-    foreignField: "Account",
+    foreignField: "account",
     justOne: false,
     autopopulate: true,
     copyFields: ["account"],

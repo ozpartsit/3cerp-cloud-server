@@ -23,11 +23,11 @@ export default class FileController<T extends IExtendedDocument> extends control
       if (!req.files) {
         throw new CustomError("no_file", 404);
       } else {
- 
+
         let files: any[] = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
 
         let uploadedFiles: IFile[] = [];
-        let folderModel = Folder.setAccount(req.headers.account);
+        let folderModel = Folder.setAccount(req.headers.account, req.headers.user);
         let folder = await folderModel.findOne().exec();
 
         if (req.body && req.body.folder) {
@@ -39,7 +39,7 @@ export default class FileController<T extends IExtendedDocument> extends control
 
         // jeżeli folder główny nie istnieje, tworzy go i zwraca
         if (!folder) {
-          const account = await Account.findById(req.headers.account)
+          const account = await Account.findById(req.headers.account, req.headers.user)
           if (account) folder = await account.initStorage()
           else throw new CustomError("account_not_found", 404);
         }
@@ -48,8 +48,8 @@ export default class FileController<T extends IExtendedDocument> extends control
           // scieżka do docelowej lokalizacji plików
           const filePath = path.posix.join(folder.path, encodeURI(file.name));
           file.mv(path.posix.join(this.storagePath, filePath));
-          
-          let FileModel = await File.setAccount(req.headers.account);
+
+          let FileModel = await File.setAccount(req.headers.account, req.headers.user);
           let doc = new FileModel({
             name: file.name,
             type: "File",

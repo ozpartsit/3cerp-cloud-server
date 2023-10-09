@@ -4,7 +4,7 @@ import i18n from "../../config/i18n";
 export default function getFields<T extends IExtendedDocument>(this: Model<T>, local?: string, parent?: string) {
   let fields: any[] = [];
   let modelSchema = this.schema;
-
+  let modelName = this.modelName.toLowerCase().split("_")[0]
   // this.schema.discriminators && this.schema.discriminators[type]
   //   ? this.schema.discriminators[type]
   //   : this.schema;
@@ -17,7 +17,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
     if (!parent && value && value.options.ref) {
       let field: any = {
         field: key,
-        name: i18n.__(`${this.modelName.toLowerCase()}.${key}`),
+        name: i18n.__(`${modelName}.${key}`),
         ref: value.options.ref,
         //instance: schematype.instance,
         fieldType: "Table"
@@ -33,14 +33,14 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
   for (const [pathname, schematype] of Object.entries<any>(modelSchema.paths)) {
 
     if (
-      schematype.options.input ||
+      schematype.options.input || schematype.options.ref ||
       ["Embedded", "Array"].includes(schematype.instance)
     ) {
       if (["Embedded", "Array"].includes(schematype.instance)) {
         //console.log('sd', pathname,JSON.stringify(schematype));
         let field: any = {
           field: parent ? `${parent}.${pathname}` : pathname,
-          name: i18n.__(`${this.modelName.toLowerCase()}.${pathname}`),
+          name: i18n.__(`${modelName}.${pathname}`),
           fieldType: `${schematype.instance}Field`,
           fields: []
         }
@@ -63,10 +63,9 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
         fields.push(field);
       } else {
         i18n.setLocale(local || "en");
-
         let field: any = {
           field: parent ? `${parent}.${pathname}` : pathname,
-          name: i18n.__(`${this.modelName.toLowerCase()}.${pathname}`),
+          name: i18n.__(`${modelName}.${pathname}`),
           required: schematype.isRequired,
           ref: schematype.options.ref,
           resource: schematype.options.resource,

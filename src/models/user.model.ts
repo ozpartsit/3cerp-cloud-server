@@ -100,13 +100,13 @@ schema.virtual("preference", {
     foreignField: "user",
     justOne: true,
     autopopulate: true,
-    copyFields: ["account","user"],
+    copyFields: ["account", "user"],
     model: Preference
 });
 
 schema.methods.initPreference = async function () {
 
-    let PreferenceModel = Preference.setAccount(this.account.toString());
+    let PreferenceModel = Preference.setAccount(this.account.toString(), this._id.toString());
     return await PreferenceModel.findById(this._id).then(async (res) => {
         //jeżeli folder w DB nie istnieje - dodaj
         if (!res) {

@@ -20,6 +20,7 @@ import { StorageTypes } from "../models/storages/model";
 import { TransactionTypes } from "../models/transactions/model";
 import { ItemTypes } from "../models/items/model";
 import { EntityTypes } from "../models/entities/model";
+//import { FavoritesTypes } from "../models/favorites/model";
 import Email from "../models/email.model";
 import Shop from "../models/shop.model";
 
@@ -65,6 +66,11 @@ export default class Routes {
     Object.values(EntityTypes).forEach(entity => {
       this.routeUniversal(entity.collection.collectionName, entity.modelName, new Controller(entity))
     })
+    //favorites
+    // Object.values(FavoritesTypes).forEach(favorite => {
+    //   console.log(`ui/favorites`,favorite.modelName)
+    //   this.routeUniversal(`ui/favorites`, favorite.modelName, new Controller(favorite))
+    // })
     // Emails
     this.routeUniversal("emails", "email", this.emailController);
     // website

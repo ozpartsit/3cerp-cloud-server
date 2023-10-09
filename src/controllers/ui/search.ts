@@ -10,7 +10,20 @@ export default class NotificationController {
     constructor() {
 
     }
-
+    public async scope(req: Request, res: Response, next: NextFunction) {
+        let results = [
+            { name: "Sales Orders", _id: 'salesorder' },
+            { name: "Invoices", _id: 'invoice' },
+            { name: "Customers", _id: 'customers' },
+            { name: "Vendors", _id: 'ventors' },
+            { name: "Inventory Items", _id: 'invitems' },
+            { name: "Kit Items", _id: 'kititem' },
+        ]
+        const data = {
+            docs: results,
+        }
+        res.json({ status: "success", data });
+    }
     public async find(req: Request, res: Response, next: NextFunction) {
 
         const results: any = [];

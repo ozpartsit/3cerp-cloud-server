@@ -16,7 +16,7 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
         selects.forEach((field: string) => {
           let ref = this[field] && this[field].type ? this[field].constructor.modelName : null;
           this.depopulate();
-          if ((this[field]).toString() !== (originalDoc[field] || "").toString()) {
+          if ((this[field] || "").toString() !== (originalDoc[field] || "").toString()) {
             let changeLog = new Changelog(
               {
                 document: document || this.id,

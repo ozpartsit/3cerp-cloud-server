@@ -35,8 +35,8 @@ interface ITransactionModel extends Model<ITransaction>, IExtendedModel<ITransac
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const TransactionSchema = {
-  name: { type: String, input: "TextField", set: (v: any) => v.toLowerCase(), select: true },
-  date: { type: Date, input: "DateField", required: true, select: true },
+  name: { type: String, input: "TextField", set: (v: any) => v.toLowerCase() },
+  date: { type: Date, input: "DateField", required: true, defaultSelect: true },
   company: {
     type: Schema.Types.ObjectId,
     ref: "Company",
@@ -50,7 +50,7 @@ const TransactionSchema = {
     required: true,
     autopopulate: true,
     input: "SelectField",
-    select: true
+    defaultSelect: true
   },
   number: { type: Number, input: "IntField" },
   quantity: {
@@ -59,9 +59,9 @@ const TransactionSchema = {
     input: "IntField",
     total: "lines"
   },
-  amount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: false },
-  taxAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: false },
-  grossAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", select: false },
+  amount: { type: Number, default: 0, input: "CurrencyField", total: "lines", defaultSelect: true },
+  taxAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", defaultSelect: true },
+  grossAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", defaultSelect: true },
   weight: { type: Number, default: 0, input: "NumberField" },
   tax: {
     type: Number,
@@ -81,6 +81,7 @@ const TransactionSchema = {
     default: "PLN",
     input: "SelectField",
     constant: 'currencies',
+    defaultSelect: true
   },
   memo: {
     type: String,

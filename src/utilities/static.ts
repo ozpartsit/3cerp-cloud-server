@@ -2,6 +2,7 @@ import { Schema, Model, Document, Types, model, models } from "mongoose";
 import cache from "../config/cache";
 import getFields from "./staticts/getFields";
 import getForm from "./staticts/getForm";
+import getSelect from "./staticts/getSelect";
 import { IExtendedDocument } from "../utilities/methods";
 import Account from "../models/account.model";
 
@@ -20,8 +21,9 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
 
   getFields(locale?: string): any;
   getForm(locale: string): any;
+  getSelect(): any;
 
-  setAccount(account: string | string[] | undefined): this;
+  setAccount(account: string | string[] | undefined, user?: string | string[] | undefined): this;
 }
 
 export default function customStaticsMethods<T extends IExtendedDocument>(schema: Schema<T, IExtendedModel<T>>) {
@@ -47,7 +49,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 
   schema.statics.getFields = getFields;
   schema.statics.getForm = getForm;
-
+  schema.statics.getSelect = getSelect;
   schema.statics.setAccount = setAccount;
 
 }
@@ -55,13 +57,14 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 
 //setCollection
 
-function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema.Types.ObjectId): Model<IExtendedDocument> {
+function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema.Types.ObjectId, user?: Schema.Types.ObjectId): Model<IExtendedDocument> {
   if (account) {
     if (this.modelName.includes(account.toString()))
       return models[`${this.modelName}`]
     if (models[`${this.modelName}_${account}`])
       return models[`${this.modelName}_${account}`]
     else {
+      let filters: any = { account: account };
       // ustawienie dla każdego dokumentu domyślnego account;
       let defaultAccount = new Schema({
         account: {
@@ -72,15 +75,29 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
       })
       this.schema.add(defaultAccount);
 
+      //ustawienie domyśłnego User na podstawie req
+      if (this.schema.paths.user) {
+        let defaultUser = new Schema({
+          user: {
+            type: Schema.Types.ObjectId,
+            required: true,
+            default: user
+          }
+        })
+        this.schema.add(defaultUser);
+        filters.user = user;
+      }
+
+
       // Dodaanie filtrów do wszytstkich queries
       this.schema.pre("find", function () {
-        this.where({ account: account });
+        this.where(filters);
       })
       this.schema.pre("count", function () {
-        this.where({ account: account });
+        this.where(filters);
       })
       this.schema.pre('findOne', function () {
-        this.where({ account: account });
+        this.where(filters);
       });
 
       // weryfikowanie poprawności account
@@ -188,7 +205,7 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
       for (let update of updates) {
         await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id);
       }
-      
+
       if (mode === "advanced") {
         document.recalcDocument();
         cache.set(id, document);
@@ -226,26 +243,38 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
     let docFields = this.getFields();
     let { limit, select, sort, skip } = options;
     let populated: any = {};
+
     for (const [key, value] of Object.entries(select)) {
       // to do - poprawić
       let fieldsSelect = { name: 1, resource: 1, type: 1 };
       let fields = key.split('.');
       if (fields.length > 1) {
+        // sprawdza typ pola
+        let field = docFields.find((field: any) => field.field == fields[0]);
+        field = field.fields.find((field: any) => field.field == key);
+
         if (populated[fields[0]]) {
           populated[fields[0]].select[fields[1]] = 1;
-          populated[fields[0]].populate.push({
-            path: fields[1],
-            select: 'name resource type'
-          })
+
+          // jeżeli ref to dodaje do populate
+          if (field && field.ref) {
+            populated[fields[0]].populate.push({
+              path: fields[1],
+              select: 'name resource type'
+            })
+          }
         } else {
           fieldsSelect[fields[1]] = 1;
           populated[fields[0]] = {
             path: fields[0],
             select: fieldsSelect,
-            populate: [{
+            populate: []
+          }
+          if (field && field.ref) {
+            populated[fields[0]].populate.push({
               path: fields[1],
               select: 'name resource type'
-            }]
+            })
           }
         }
         delete select[key];
@@ -261,7 +290,6 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
         }
       }
     }
-
 
     let result = await this.find(query)
       .populate(Object.values(populated))

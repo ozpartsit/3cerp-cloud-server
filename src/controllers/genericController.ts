@@ -5,6 +5,8 @@ import { IExtendedDocument } from "../utilities/methods";
 import Email from "../services/email";
 import Changelog from "../models/changelog.model";
 import CustomError from "../utilities/errors/customError";
+
+
 // Typ generyczny dla modelu Mongoose
 interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
 
@@ -20,7 +22,7 @@ class GenericController<T extends IExtendedDocument> {
         let { mode } = req.params;
         try {
             //req.body.account = req.headers.account; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-            this.model = this.model.setAccount(req.headers.account);
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let { document, saved } = await this.model.addDocument(mode, req.body.document);
             //populate response document
             await document.autoPopulate();
@@ -35,7 +37,7 @@ class GenericController<T extends IExtendedDocument> {
     async get(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
         try {
-            this.model = this.model.setAccount(req.headers.account);
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let document = await this.model.getDocument(id, mode);
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
@@ -53,7 +55,7 @@ class GenericController<T extends IExtendedDocument> {
     public async save(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {
-            this.model = this.model.setAccount(req.headers.account);
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let { document_id, saved } = await this.model.saveDocument(id, req.body.document);
             if (!document_id) {
                 throw new CustomError("doc_not_found", 404);
@@ -68,7 +70,7 @@ class GenericController<T extends IExtendedDocument> {
     public async update(req: Request, res: Response, next: NextFunction) {
         let { recordtype, mode, id } = req.params;
         try {
-            this.model = this.model.setAccount(req.headers.account);
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
             // let document = null;
             // if (Array.isArray(req.body)) { // to do - może upateDocument zmienić by przyjomwał cały obiek body?
             //     for (let update of req.body) {
@@ -99,7 +101,7 @@ class GenericController<T extends IExtendedDocument> {
     public async delete(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {// to do - do poprawy
-            this.model = this.model.setAccount(req.headers.account);
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let document = this.model.deleteDocument(id);
             res.json({ status: "success", data: { document } });
         } catch (error) {
@@ -184,10 +186,10 @@ class GenericController<T extends IExtendedDocument> {
     public async find(req: Request, res: Response, next: NextFunction) {
 
         try {
-            this.model = this.model.setAccount(req.headers.account);
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let query: any = {};
 
-            let options = { select: { name: 1, type: 1, resource: 1, link: 1 }, sort: {}, limit: 50, skip: 0 };
+            let options = { select: { name: 1, type: 1, resource: 1 }, sort: {}, limit: 50, skip: 0 };
             let filters = (req.query.filters || "").toString();
             if (filters) {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
@@ -195,11 +197,11 @@ class GenericController<T extends IExtendedDocument> {
             //query.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
             let select = (req.query.select || req.query.fields || "").toString();
             if (select) {
-                options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, link: 1 });
+                options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1 });
             } else {
                 // add default field to select
-                this.model.getFields(req.locale).forEach(field => {
-                    if (field.select) options.select[field.field] = 1;
+                this.model.getSelect().forEach(field => {
+                    options.select[field] = 1;
                 })
             }
             // Sort
@@ -232,7 +234,6 @@ class GenericController<T extends IExtendedDocument> {
 
             options.limit = parseInt((req.query.limit || 50).toString());
             options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
-
             let result = await this.model.findDocuments(query, options);
             let total = await this.model.count(query);
 
@@ -255,7 +256,7 @@ class GenericController<T extends IExtendedDocument> {
             // console.log(result)
 
             const data = {
-                fields: fields,
+                //fields: fields,
                 docs: result,
                 totalDocs: total,
                 limit: options.limit,
