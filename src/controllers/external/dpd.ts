@@ -12,10 +12,10 @@ export default class controller {
 
     }
     public async login() {
-        this.token = await axios.post('https://api-preprod.dpsin.dpdgroup.com:8443/shipping/v1/login', {}, {
+        this.token = await axios.post('https://api.dpdgroup.com/shipping/v1/login', {}, {
             headers: {
-                "X-DPD-LOGIN": "test",
-                "X-DPD-PASSWORD": "thetu4Ee",
+                "X-DPD-LOGIN": "5003301",
+                "X-DPD-PASSWORD": "EaaQLb4UhKAATuwb",
                 "X-DPD-BUCODE": "021"
             }
         })
@@ -37,7 +37,7 @@ export default class controller {
         if (new Date() > this.expires) await this.login();
         try {
             let queries = formatQueryParams(req.query);
-            await axios.post(`https://api-preprod.dpsin.dpdgroup.com:8443/shipping/v1/shipment?${queries}`, req.body, {
+            await axios.post(`https://api.dpdgroup.com/shipping/v1/shipment?${queries}`, req.body, {
                 headers: {
                     Authorization: `Bearer ${this.token}`,
                     "Content-Type": "application/json"
@@ -47,7 +47,12 @@ export default class controller {
                     res.json({ status: "success", data: response.data });
                 })
                 .catch(function (error) {
-                    throw new CustomError(error.response.data.errorCode, 404);
+                    let errorMsg = "Unknown Error";
+                    if (!Array.isArray(error.response.data)) errorMsg = error.response.data.errorCode;
+                    else errorMsg = error.response.data[0].errorCode;
+                    if (!errorMsg) errorMsg = JSON.stringify(error.response.data);
+
+                    throw new CustomError(errorMsg, 404);
 
                 });
         } catch (error) {

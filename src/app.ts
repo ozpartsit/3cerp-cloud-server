@@ -43,6 +43,7 @@ export class App3CERP {
   public routesAuth: RoutesAuth = new RoutesAuth();
   public routesHosting: RoutesHosting = new RoutesHosting();
   public routesMaintenance: RoutesMaintenance = new RoutesMaintenance();
+  public routesExternal: RoutesExternal = new RoutesExternal();
   public routesPublic: RoutesPublic = new RoutesPublic();
 
   public emitEvents: EmitEvents = new EmitEvents();
@@ -91,6 +92,7 @@ export class App3CERP {
     this.routesAuth.start(this.app);
     this.routesHosting.start(this.app);
     this.routesMaintenance.start(this.app, this);
+    this.routesExternal.start(this.app);
     this.routesPublic.start(this.app);
     
     this.emitEvents.start(this.app);

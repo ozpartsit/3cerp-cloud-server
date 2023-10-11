@@ -20,7 +20,7 @@ export default class Routes {
     public routerDPD() {
         // DPD
         this.RouterDPD.route("/shipment/:param?").post(
-            this.Auth.authenticate.bind(this.Auth) as any,
+            //this.Auth.authenticate.bind(this.Auth) as any,
             this.dpdController.shipment.bind(this.dpdController) as any
         );
     }

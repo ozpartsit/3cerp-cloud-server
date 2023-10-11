@@ -156,5 +156,10 @@
 	"user.roles": "user.roles",
 	"FavoriteLink_64f4cc1c9842bd71489d1fa0 validation failed: user: Cast to ObjectId failed for value \"1\" (type string) at path \"user\"": "FavoriteLink_64f4cc1c9842bd71489d1fa0 validation failed: user: Cast to ObjectId failed for value \"1\" (type string) at path \"user\"",
 	"favoritecategory.links": "favoritecategory.links",
-	"If you are populating a virtual, you must set the localField and foreignField options": "If you are populating a virtual, you must set the localField and foreignField options"
+	"If you are populating a virtual, you must set the localField and foreignField options": "If you are populating a virtual, you must set the localField and foreignField options",
+	"CustomError": "CustomError",
+	"DONT_MATCH_DICTIONARY": "DONT_MATCH_DICTIONARY",
+	"{\"errorOrigin\":\"BU-API\"}": "{\"errorOrigin\":\"BU-API\"}",
+	"validation.request.body.schema.required": "validation.request.body.schema.required",
+	"{\"errorCode\":\"\",\"errorOrigin\":\"BU-API\"}": "{\"errorCode\":\"\",\"errorOrigin\":\"BU-API\"}"
 }
