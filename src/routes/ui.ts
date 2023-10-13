@@ -5,13 +5,15 @@ import express, { Request, Response, NextFunction } from "express";
 import Controller from "../controllers/genericController";
 import NotificationController from "../controllers/ui/notifications";
 import SearchController from "../controllers/ui/search";
+import NotesController from "../controllers/ui/notes";
 import { FavoritesTypes } from "../models/favorites/model";
-
+import Note from "../models/note.model";
 export default class Routes {
     public Router: express.Router = express.Router();
     public Auth: Auth = new Auth();
     public notificationController = new NotificationController();
     public searchController = new SearchController();
+    public notesController = new NotesController(Note);
     //public favoritesController = new Controller(FavoritesTypes.category)
 
     public start(app: express.Application): void {
@@ -25,10 +27,14 @@ export default class Routes {
             console.log(`favorites`, favorite.modelName)
             this.routeUniversal(`favorites`, favorite.modelName, new Controller(favorite))
         })
+        //Notes
+        this.routeUniversal(`notes`, Note.modelName, new Controller(Note))
+
         app.use("/api/core/ui", this.Router);
     }
 
-
+    
+    
     public routerNotifications() {
         // get
         this.Router.route("/notifications/view/:id").get(

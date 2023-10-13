@@ -4,6 +4,7 @@ import CustomError from "../../utilities/errors/customError";
 import Notification from '../../models/notification.model';
 import Transaction from '../../models/transactions/schema';
 import Item from '../../models/items/schema';
+import i18n from '../../config/i18n';
 
 export default class NotificationController {
 
@@ -11,14 +12,19 @@ export default class NotificationController {
 
     }
     public async scope(req: Request, res: Response, next: NextFunction) {
-        let results = [
-            { name: "Sales Orders", _id: 'salesorder' },
-            { name: "Invoices", _id: 'invoice' },
-            { name: "Customers", _id: 'customers' },
-            { name: "Vendors", _id: 'ventors' },
-            { name: "Inventory Items", _id: 'invitems' },
-            { name: "Kit Items", _id: 'kititem' },
+        const scopes = [
+            'salesorder',
+            'invoice',
+            'customers',
+            'ventors',
+            'invitems',
+            'kititem'
         ]
+        i18n.setLocale(req.locale || "en");
+        let results = scopes.map(s => {
+            return { name: i18n.__(`scope.${s}`), _id: s }
+        })
+
         const data = {
             docs: results,
         }
@@ -36,7 +42,7 @@ export default class NotificationController {
 
         let array = await Model.find(filters)
             .populate({ path: 'entity', select: 'name' })
-            .select({ name: 1, entity: 1 })
+            .select({ name: 1, entity: 1, date: 1 })
             .exec()
 
         if (array.length) results.push(...array)

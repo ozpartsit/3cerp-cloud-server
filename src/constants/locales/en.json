@@ -161,5 +161,13 @@
 	"DONT_MATCH_DICTIONARY": "DONT_MATCH_DICTIONARY",
 	"{\"errorOrigin\":\"BU-API\"}": "{\"errorOrigin\":\"BU-API\"}",
 	"validation.request.body.schema.required": "validation.request.body.schema.required",
-	"{\"errorCode\":\"\",\"errorOrigin\":\"BU-API\"}": "{\"errorCode\":\"\",\"errorOrigin\":\"BU-API\"}"
+	"{\"errorCode\":\"\",\"errorOrigin\":\"BU-API\"}": "{\"errorCode\":\"\",\"errorOrigin\":\"BU-API\"}",
+	"scope.salesorder": "scope.salesorder",
+	"scope.invoice": "scope.invoice",
+	"scope.customers": "scope.customers",
+	"scope.ventors": "scope.ventors",
+	"scope.invitems": "scope.invitems",
+	"scope.kititem": "scope.kititem",
+	"note.name": "note.name",
+	"note.description": "note.description"
 }
