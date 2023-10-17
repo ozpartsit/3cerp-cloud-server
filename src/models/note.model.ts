@@ -7,6 +7,8 @@ export interface INote extends IExtendedDocument {
     user: Schema.Types.ObjectId;
     name: string;
     description: string;
+    index: number;
+    pinned: boolean;
 }
 const options = {
     collection: "notes",
@@ -18,7 +20,9 @@ const schema = new Schema<INote>(
     {
         user: { type: Schema.Types.ObjectId },
         name: { type: String, input: "TextField" },
-        description: { type: String, input: "TextareaField" },
+        description: { type: String, defaultSelect: true, input: "TextareaField" },
+        index: { type: Number, defaultSelect: true },
+        pinned: { type: Boolean, default: false, defaultSelect: true },
     },
     options
 );

@@ -11,6 +11,7 @@ import Line, { ILine } from "./line.schema";
 export interface ITransaction extends IExtendedDocument {
   _id: Schema.Types.ObjectId;
   type: string;
+  date: Date,
   name?: string;
   number?: number;
   status?: string;

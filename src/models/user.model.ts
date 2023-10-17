@@ -3,7 +3,7 @@ import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 import Access, { IAccess } from "./access.model";
 import Preference, { IPreference } from "./preference.model";
-
+import Note from "./note.model";
 export interface IUser extends IExtendedDocument {
     _id: Schema.Types.ObjectId;
     account: Schema.Types.ObjectId;
@@ -103,6 +103,16 @@ schema.virtual("preference", {
     copyFields: ["account", "user"],
     model: Preference
 });
+schema.virtual("notebook", {
+    ref: "Note",
+    localField: "_id",
+    foreignField: "user",
+    justOne: false,
+    autopopulate: true,
+    //defaultSelect: true,
+    copyFields: ["account", "user"],
+    options: { sort: { index: 1 } },
+});
 
 schema.methods.initPreference = async function () {
 
@@ -123,6 +133,7 @@ schema.methods.initPreference = async function () {
 
 schema.post('save', function () {
     this.initPreference();
+    
 });
 
 schema.index({ name: 1 });

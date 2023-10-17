@@ -48,10 +48,9 @@ export default class controller {
                 })
                 .catch(function (error) {
                     let errorMsg = "Unknown Error";
-                    if (!Array.isArray(error.response.data)) errorMsg = error.response.data.errorCode;
-                    else errorMsg = error.response.data[0].errorCode;
+                    if (!Array.isArray(error.response.data)) errorMsg = error.response.data.errorMessage || error.response.data.errorCode;
+                    else errorMsg = error.response.data[0].errorMessage || error.response.data[0].errorCode;
                     if (!errorMsg) errorMsg = JSON.stringify(error.response.data);
-
                     throw new CustomError(errorMsg, 404);
 
                 });

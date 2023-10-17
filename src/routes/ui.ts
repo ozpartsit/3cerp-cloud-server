@@ -110,7 +110,10 @@ export default class Routes {
             this.Auth.authenticate.bind(this.Auth) as any,
             controller.add.bind(controller) as any
         );
-
+        this.Router.route(`${path}/update`).patch(
+            this.Auth.authenticate.bind(this.Auth) as any,
+            controller.massUpdate.bind(controller) as any
+        );
         this.Router.route(`${path}/:id/:mode?`)
             .get(
                 this.Auth.authenticate.bind(this.Auth) as any,

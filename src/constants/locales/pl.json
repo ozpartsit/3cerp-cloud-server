@@ -1,16 +1,13 @@
 {
-	"auth.no_token": "Brak tokena autoryzacyjnego, zaloguj się ponownie.",
-	"auth.user_not_exist": "Użytkownik nie istnieje.",
-	"auth.wrong_password": "Nieprawidłowe hasło.",
-	"auth.user_not_found": "Nie znaleziono użytkownika.",
-	"auth.reset_password": "Na podany email została wysłana wiadomość z instrukcją zmiany hasła.",
-	"auth.password_updated": "Hasło zostało zaktualizowane.",
-	"auth.failed_auth_token": "Token autoryzacyjny jest nieprawidłowy, zaloguj się ponownie.",
-	"salesorder.lines": "salesorder.lines",
-	"No recipients defined": "No recipients defined",
-	"CustomError": "CustomError",
-	"validation.request.body.schema.type": "validation.request.body.schema.type",
-	"[object Object]": "[object Object]",
-	"{\"errorOrigin\":\"BU-API\"}": "{\"errorOrigin\":\"BU-API\"}",
-	"{\"errorCode\":\"\",\"errorMessage\":\"Product 11 is not supported in the local Business Unit\",\"errorOrigin\":\"META-API\"}": "{\"errorCode\":\"\",\"errorMessage\":\"Product 11 is not supported in the local Business Unit\",\"errorOrigin\":\"META-API\"}"
+  "CustomError": "CustomError",
+  "No recipients defined": "No recipients defined",
+  "auth.failed_auth_token": "Token autoryzacyjny jest nieprawidłowy, zaloguj się ponownie.",
+  "auth.no_token": "Brak tokena autoryzacyjnego, zaloguj się ponownie.",
+  "auth.password_updated": "Hasło zostało zaktualizowane.",
+  "auth.reset_password": "Na podany email została wysłana wiadomość z instrukcją zmiany hasła.",
+  "auth.user_not_exist": "Użytkownik nie istnieje.",
+  "auth.user_not_found": "Nie znaleziono użytkownika.",
+  "auth.wrong_password": "Nieprawidłowe hasło.",
+  "salesorder.lines": "salesorder.lines",
+  "validation.request.body.schema.type": "validation.request.body.schema.type"
 }

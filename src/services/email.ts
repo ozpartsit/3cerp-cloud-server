@@ -88,7 +88,7 @@ export class Email {
 
   // System Templates
 
-  
+
   //resetPassword
   async resetPassword(to: string, resetToken: string, locale = "en") {
     let template = {
@@ -113,6 +113,24 @@ export class Email {
       to: to,
       subject: this.emaili18n.__('3C ERP Cloud | Thanks for Reaching Out!'),
       html: await this.render("default.ejs", { template: "contact_form.ejs", locale: locale }),
+      attachments: [
+        {
+          filename: 'header.png',
+          path: path.join(__dirname, 'templates', 'imgs', 'header.png'),
+          cid: 'header' // Wartość 'cid' musi pasować do src w tagu <img>
+        }
+      ]
+
+    }
+    return template;
+  }
+  //New User
+  async newUser(to: string, resetToken: string, locale = "en") {
+    let template = {
+      from: this.from,
+      to: to,
+      subject: this.emaili18n.__('3C ERP Cloud | Welcome to 3C ERP Cloud!'),
+      html: await this.render("default.ejs", { template: "new_user.ejs", link: resetToken, locale: locale }),
       attachments: [
         {
           filename: 'header.png',

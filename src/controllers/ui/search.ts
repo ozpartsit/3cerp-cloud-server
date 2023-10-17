@@ -42,10 +42,20 @@ export default class NotificationController {
 
         let array = await Model.find(filters)
             .populate({ path: 'entity', select: 'name' })
-            .select({ name: 1, entity: 1, date: 1 })
+            .select({ name: 1, type: 1, entity: 1, date: 1 })
             .exec()
 
-        if (array.length) results.push(...array)
+        array.forEach((e: any) => {
+            results.push({
+                name: e.name,
+                description: `${i18n.__(`type.${e.type}`)} ${e.entity ? "(" + e.entity.name + ")" : ""}`,
+                date: e.date ? new Date(e.date).toISOString().substr(0, 10) : null,
+                type: e.type,
+                resource: e.resource
+            })
+        })
+
+
         total += await Model.count(filters).exec();
 
 

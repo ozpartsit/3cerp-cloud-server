@@ -6,7 +6,7 @@ const options = { discriminatorKey: "type", collection: "classifications" };
 export interface ILink extends IFavorites {
     _id: Schema.Types.ObjectId
     index: number
-    link: string;
+    link: string
     category: Schema.Types.ObjectId
 }
 export interface ILinkModel extends Model<ILink>, IExtendedModel<ILink> { }

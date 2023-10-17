@@ -17,6 +17,7 @@ export interface IAccess extends IExtendedDocument {
     validatePassword(password: string): boolean;
     hashPassword(): any;
     resetPassword(locale?: string): any;
+    setPassword(locale?: string): any;
 }
 
 const SALT_WORK_FACTOR = 10;
@@ -60,6 +61,20 @@ schema.methods.resetPassword = async function (locale: string) {
     await Email.send(template);
 };
 
+schema.methods.setPassword = async function (locale: string) {
+    const tokenSecret: string = process.env.TOKEN_SECRET || "";
+    const resetToken = jwt.sign({ _id: this._id }, tokenSecret, {
+        expiresIn: "1h"
+    });
+    if (!locale) {
+        await this.populate('user', 'locale');
+        const user = this.user as unknown as IUser;
+        locale = user.locale || "en";
+    }
+    let template = await Email.newUser(this.email, resetToken, locale);
+    await Email.send(template);
+};
+
 schema.method("validatePassword", async function (newPassword: string) {
     return await bcrypt.compare(newPassword, this.password);
 });
@@ -67,6 +82,9 @@ schema.method("validatePassword", async function (newPassword: string) {
 schema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
     else this.password = await this.hashPassword();
+
+    //send email to gain access
+    this.setPassword()
     next();
 });
 

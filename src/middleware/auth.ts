@@ -109,7 +109,7 @@ export default class Auth {
         if (access) {
           const valide = await access.validatePassword(req.body.password);
           if (valide) {
-            User.findOne({ _id: access.user }).then(async (user) => {
+            await User.findOne({ _id: access.user }).then(async (user) => {
               if (user) {
                 if (!(user.roles || []).includes(req.body.role || user.role)) {
                   // użytkownik nie ma uprawnień do tej roli
@@ -312,17 +312,40 @@ export default class Auth {
 
       if (!req.body.email) {
         // email jest wymagany
-        throw new CustomError("auth.email_required", 404);
+        throw new CustomError("auth.email_required", 500);
       }
       let template = await Email.signUp(req.body.email, req.locale)
       await Email.send(template);
       // to do - dopisać tworzenie leada
       res.status(200).json({ status: "success", data: { message: req.__("auth.contact_form") } });
 
+      // temporary create new User
+      let existAccess = await Access.count({ email: req.body.email });
+      if (!existAccess) {
+        let user = await new User({
+          name: req.body.name,
+          firstName: req.body.name.split(" ")[0],
+          lastName: req.body.name.split(" ")[1],
+          email: req.body.email,
+          locale: req.locale,
+          department: "Accounting",
+          role: 'admin',
+          roles: ['admin'],
+          account: '64f4cc1c9842bd71489d1fa0'
+        }).save()
+
+        if (user) new Access({
+          user: user._id,
+          account: user.account,
+          email: user.email,
+          password: "tmp"
+        }).save()
+      }
     } catch (error) {
       return next(error);
     }
   }
+
 }
 
 function createTokenPair(account: string, user: string, role: string, tokenSecret: string) {

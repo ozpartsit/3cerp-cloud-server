@@ -97,6 +97,25 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+    public async massUpdate(req: Request, res: Response, next: NextFunction) {
+        let { recordtype } = req.params;
+        try {
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            let documents = req.body;
+            let savedDocuments: any = []
+            for (let update of documents) {
+                let { document, saved } = await this.model.updateDocument(update._id, "simple", update);
+                savedDocuments.push(saved)
+                if (!document) {
+                    savedDocuments.push(false)
+                }
+            }
+            res.json({ status: "success", data: { saved: savedDocuments } });
+
+        } catch (error) {
+            return next(error);
+        }
+    }
 
     public async delete(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
@@ -211,13 +230,14 @@ class GenericController<T extends IExtendedDocument> {
                     // -date = desc sort per date field
                     if (f[0] == "-") {
                         f = f.substring(1);
-                        o[f] = 1;
+                        o[f] = -1;
                     } else {
                         o[f] = 1;
                     }
                     return o;
                 }, {});
             }
+            console.log(options.sort)
             // search by keyword
             let search = (req.query.search || "").toString();
             if (search) {
@@ -234,9 +254,11 @@ class GenericController<T extends IExtendedDocument> {
 
             options.limit = parseInt((req.query.limit || 50).toString());
             options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
+            
             let result = await this.model.findDocuments(query, options);
             let total = await this.model.count(query);
-
+            let page = req.query.page || 1;
+            
             // get fields
             let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
             for (let index in result) {
@@ -260,7 +282,7 @@ class GenericController<T extends IExtendedDocument> {
                 docs: result,
                 totalDocs: total,
                 limit: options.limit,
-                page: options.skip,
+                page: page,
                 totalPages: Math.ceil(total / options.limit)
             }
 
