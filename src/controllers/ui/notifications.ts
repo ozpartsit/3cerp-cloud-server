@@ -14,9 +14,26 @@ export default class NotificationController {
             const total = await Model.count({ status: "unread" })
                 .exec()
             console.log('Temporary Notification Bot', total);
-            if (total < 20) {
+            if (total < 5) {
                 new Model({
-                    user:'64c3bd50c9de39e62091e373',
+                    user: '64c3bd50c9de39e62091e373',
+                    name: 'New Sales Order!',
+                    description: `Sales Order (SO#${Math.floor(Math.random() * 1000)}) Pending Approval`,
+                    date: new Date(),
+                    document: "63988d8db3ae32a894fd539e",
+                    ref: "SalesOrder"
+                }).save()
+            }
+        });
+        const job2 = schedule.scheduleJob('*/5 * * * *', async function () {
+
+            let Model = Notification.setAccount("64f4cc1c9842bd71489d1fa0");
+            const total = await Model.count({ status: "unread" })
+                .exec()
+            console.log('Temporary Notification Bot', total);
+            if (total < 5) {
+                new Model({
+                    user: '652e64fe7fe924dd7d85ef4c',
                     name: 'New Sales Order!',
                     description: `Sales Order (SO#${Math.floor(Math.random() * 1000)}) Pending Approval`,
                     date: new Date(),
@@ -29,10 +46,9 @@ export default class NotificationController {
 
     public async check(req: Request, res: Response, next: NextFunction) {
         // check new
+      
         let Model = Notification.setAccount(req.headers.account, req.headers.user);
         const total = await Model.count({ status: "unread" })
-            .exec()
-
         res.json({ status: "success", data: { total } });
     }
 

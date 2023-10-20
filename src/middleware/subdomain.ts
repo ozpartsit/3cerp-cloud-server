@@ -1,4 +1,4 @@
-import shop, { IShop } from "../models/shop.model";
+import shop, { IShop } from "../models/ecommerce/shop.model";
 import { Request, Response, NextFunction } from "express";
 export default function subdomain(subdomain: string, fn: any) {
     if (!subdomain || typeof subdomain !== "string") {

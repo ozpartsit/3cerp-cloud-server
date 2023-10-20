@@ -1,4 +1,4 @@
-import Website from "../models/shop.model";
+import Website from "../models/ecommerce/shop.model";
 import controller from "./genericController";
 import { Request, Response, NextFunction } from "express";
 import { Document, Model } from 'mongoose';

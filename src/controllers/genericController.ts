@@ -121,7 +121,7 @@ class GenericController<T extends IExtendedDocument> {
         let { recordtype, id } = req.params;
         try {// to do - do poprawy
             this.model = this.model.setAccount(req.headers.account, req.headers.user);
-            let document = this.model.deleteDocument(id);
+            let document = await this.model.deleteDocument(id);
             res.json({ status: "success", data: { document } });
         } catch (error) {
             return next(error);
@@ -237,7 +237,6 @@ class GenericController<T extends IExtendedDocument> {
                     return o;
                 }, {});
             }
-            console.log(options.sort)
             // search by keyword
             let search = (req.query.search || "").toString();
             if (search) {

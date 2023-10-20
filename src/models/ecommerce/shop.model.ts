@@ -1,6 +1,6 @@
 import { Schema, Model, model } from "mongoose";
-import { IExtendedDocument } from "../utilities/methods";
-import { IExtendedModel } from "../utilities/static";
+import { IExtendedDocument } from "../../utilities/methods";
+import { IExtendedModel } from "../../utilities/static";
 export interface IShop extends IExtendedDocument {
     _id: Schema.Types.ObjectId;
     name: string;
@@ -58,6 +58,17 @@ export const schema = new Schema<IShop>(
 schema.virtual('url').get(function (this: any) {
     return `https://${this.subdomain}.3cerp.cloud`;
 });
+
+// schema.virtual("pages", {
+//     ref: "Pages",
+//     localField: "_id",
+//     foreignField: "website",
+//     justOne: false,
+//     autopopulate: true,
+//     //defaultSelect: true,
+//     copyFields: ["account", "website"],
+//     //options: { sort: { category: 1 } },
+// });
 
 schema.index({ name: 1 });
 

@@ -9,12 +9,8 @@ export interface ICategory extends IFavorites {
 }
 export interface ICategoryModel extends Model<ICategory>, IExtendedModel<ICategory> { }
 
-export const schema = new Schema<ICategory>(
-    {
+export const schema = new Schema<ICategory>({}, options);
 
-    },
-    options
-);
 schema.virtual("links", {
     ref: "FavoriteLink",
     localField: "_id",

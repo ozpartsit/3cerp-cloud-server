@@ -47,6 +47,7 @@ export default class NotificationController {
 
         array.forEach((e: any) => {
             results.push({
+                _id: e._id,
                 name: e.name,
                 description: `${i18n.__(`type.${e.type}`)} ${e.entity ? "(" + e.entity.name + ")" : ""}`,
                 date: e.date ? new Date(e.date).toISOString().substr(0, 10) : null,

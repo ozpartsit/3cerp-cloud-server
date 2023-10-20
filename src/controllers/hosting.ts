@@ -5,7 +5,7 @@ import ejs from "ejs";
 import path from "path";
 import { I18n } from "i18n";
 import Item, { ItemTypes } from "../models/items/model";
-import Shop from "../models/shop.model";
+import Shop from "../models/ecommerce/shop.model";
 export default class controller {
   public async get(req: Request, res: Response, next: NextFunction) {
     //i18n

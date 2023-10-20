@@ -59,10 +59,14 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 
 function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema.Types.ObjectId, user?: Schema.Types.ObjectId): Model<IExtendedDocument> {
   if (account) {
-    if (this.modelName.includes(account.toString()))
+    // ustaw bazowy model
+    let baseModel = this.modelName.split("_")[0];
+    if (this.modelName == ((`${baseModel}_${account}_${user}`).toString())) {
       return models[`${this.modelName}`]
-    if (models[`${this.modelName}_${account}`])
-      return models[`${this.modelName}_${account}`]
+    }
+    if (models[`${baseModel}_${account}_${user}`]) {
+      return models[`${baseModel}_${account}_${user}`]
+    }
     else {
       let filters: any = { account: account };
       // ustawienie dla każdego dokumentu domyślnego account;
@@ -75,8 +79,9 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
       })
       this.schema.add(defaultAccount);
 
-      //ustawienie domyśłnego User na podstawie req
-      if (this.schema.paths.user) {
+      // ustawienie domyśłnego User na podstawie req
+      // jeżeli schemat zawiera user
+      if (this.schema.paths.user && user) {
         let defaultUser = new Schema({
           user: {
             type: Schema.Types.ObjectId,
@@ -105,7 +110,7 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
         if (this.account.toString() !== account.toString()) throw "wrong account";
       })
 
-      return model<IExtendedDocument>(`${this.modelName}_${account}`, this.schema, this.collection.collectionName);
+      return model<IExtendedDocument>(`${baseModel}_${account}_${user}`, this.schema, this.collection.collectionName);
     }
   } else {
     throw "account is requred"
@@ -227,8 +232,11 @@ export async function deleteDocument<T extends IExtendedDocument>(this: IExtende
     if (document) {
       document.deleted = true;
       document.recalcDocument();
-      cache.del(id);
+      // to do - do sprawdzenia
+      await document.validateVirtuals(true);
       await document.remove();
+      
+      cache.del(id);
       return { saved: true };
     } else {
       return { saved: false };

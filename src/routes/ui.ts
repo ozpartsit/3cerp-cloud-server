@@ -24,7 +24,6 @@ export default class Routes {
         //this.routerFavorites();
         //favorites
         Object.values(FavoritesTypes).forEach(favorite => {
-            console.log(`favorites`, favorite.modelName)
             this.routeUniversal(`favorites`, favorite.modelName, new Controller(favorite))
         })
         //Notes

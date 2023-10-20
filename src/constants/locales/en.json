@@ -1,9 +1,6 @@
 {
-  "Can't send mail - all recipients were rejected: 550 Unknown recipient": "Can't send mail - all recipients were rejected: 550 Unknown recipient",
-  "Cast to ObjectId failed for value \"null\" (type string) at path \"_id\" for model \"Preference_64f4cc1c9842bd71489d1fa0\"": "Cast to ObjectId failed for value \"null\" (type string) at path \"_id\" for model \"Preference_64f4cc1c9842bd71489d1fa0\"",
   "GB": "United Kingdom",
   "PL": "Poland",
-  "User validation failed: account: Path `account` is required.": "User validation failed: account: Path `account` is required.",
   "auth.access_granted": "auth.access_granted",
   "auth.contact_form": "auth.contact_form",
   "auth.email_required": "auth.email_required",
@@ -18,6 +15,7 @@
   "favoritecategory.description": "favoritecategory.description",
   "favoritecategory.links": "favoritecategory.links",
   "favoritecategory.name": "favoritecategory.name",
+  "favoritecategory.user": "favoritecategory.user",
   "favoritelink.category": "favoritelink.category",
   "favoritelink.description": "favoritelink.description",
   "favoritelink.link": "favoritelink.link",
@@ -26,6 +24,11 @@
   "folder_not_found": "folder_not_found",
   "note.description": "note.description",
   "note.name": "note.name",
-  "type.SalesOrder": "type.SalesOrder",
-  "type.undefined": "type.undefined"
+  "scope.customers": "Customers",
+  "scope.invitems": "Inventory",
+  "scope.invoice": "Invoices",
+  "scope.kititem": "Kits",
+  "scope.salesorder": "Sales Orders",
+  "scope.ventors": "Vendors",
+  "type.SalesOrder": "Sales Order"
 }

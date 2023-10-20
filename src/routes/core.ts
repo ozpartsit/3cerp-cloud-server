@@ -22,7 +22,7 @@ import { ItemTypes } from "../models/items/model";
 import { EntityTypes } from "../models/entities/model";
 //import { FavoritesTypes } from "../models/favorites/model";
 import Email from "../models/email.model";
-import Shop from "../models/shop.model";
+import Shop from "../models/ecommerce/shop.model";
 
 export default class Routes {
   public Router: express.Router = express.Router();

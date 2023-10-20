@@ -113,9 +113,19 @@ schema.virtual("notebook", {
     copyFields: ["account", "user"],
     options: { sort: { index: 1 } },
 });
+schema.virtual("favorites", {
+    ref: "Favorites",
+    localField: "_id",
+    foreignField: "user",
+    justOne: false,
+    autopopulate: true,
+    //defaultSelect: true,
+    copyFields: ["account", "user"],
+    options: { sort: { category: 1 } },
+});
+
 
 schema.methods.initPreference = async function () {
-
     let PreferenceModel = Preference.setAccount(this.account.toString(), this._id.toString());
     return await PreferenceModel.findById(this._id).then(async (res) => {
         //jeżeli folder w DB nie istnieje - dodaj
