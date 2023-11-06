@@ -89,11 +89,11 @@ export default class Routes {
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.fields.bind(controller) as any
     );
-    this.Router.route(`${path}/form`).get(
-      this.Auth.authenticate.bind(this.Auth) as any,
-      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
-      controller.form.bind(controller) as any
-    );
+    // this.Router.route(`${path}/form`).get(
+    //   this.Auth.authenticate.bind(this.Auth) as any,
+    //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+    //   controller.form.bind(controller) as any
+    // );
     this.Router.route(`${path}`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
@@ -128,6 +128,11 @@ export default class Routes {
         this.Auth.authenticate.bind(this.Auth) as any,
         this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
         controller.update.bind(controller) as any
+      )
+      .post(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+        controller.options.bind(controller) as any
       )
       .put(
         this.Auth.authenticate.bind(this.Auth) as any,

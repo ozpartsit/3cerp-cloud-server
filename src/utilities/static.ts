@@ -16,6 +16,7 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   getDocument: (id: string, mode: string) => Promise<T | null>;
   saveDocument: (id: string, data: Object) => Promise<any>;
   updateDocument: (id: string, mode: string, updates: updateBody) => any;
+  getOptions: (id: string, mode: string, field: any, page: number, keyword: string) => Promise<any>;
   deleteDocument: (id: string) => any;
   findDocuments: (query: Object, options: any) => any;
 
@@ -44,6 +45,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
   schema.statics.getDocument = getDocument;
   schema.statics.saveDocument = saveDocument;
   schema.statics.updateDocument = updateDocument;
+  schema.statics.getOptions = getOptions;
   schema.statics.deleteDocument = deleteDocument;
   schema.statics.findDocuments = findDocuments;
 
@@ -226,6 +228,27 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
   }
 }
 
+export async function getOptions<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, field: any, page: number, keyword: string) {
+  try {
+    let document: T | null | any | undefined = null;
+    if (mode === "advanced") {
+      document = cache.get<T | null>(id);
+    } else {
+      document = await this.loadDocument(id);
+    }
+
+    if (document) {
+
+      let { results, total } = await document.getOptions(field.field, field.subdoc, field.subdoc_id, field.deepdoc, field.deepdoc_id, page, keyword);
+
+      return { results: results, total: total };
+
+    } else return false;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function deleteDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string) {
   try {
     let document = await this.loadDocument(id);
@@ -235,7 +258,7 @@ export async function deleteDocument<T extends IExtendedDocument>(this: IExtende
       // to do - do sprawdzenia
       await document.validateVirtuals(true);
       await document.remove();
-      
+
       cache.del(id);
       return { saved: true };
     } else {

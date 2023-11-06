@@ -1,6 +1,5 @@
 {
   "CustomError": "CustomError",
-  "FavoriteLink_64f4cc1c9842bd71489d1fa0 validation failed: category: Path `category` is required.": "FavoriteLink_64f4cc1c9842bd71489d1fa0 validation failed: category: Path `category` is required.",
   "GB": "Wielka Brytania",
   "PL": "Polska",
   "auth.failed_auth_token": "Token autoryzacyjny jest nieprawidłowy, zaloguj się ponownie.",

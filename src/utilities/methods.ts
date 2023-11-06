@@ -1,4 +1,5 @@
 import setValue from "./methods/setValue";
+import getOptions from "./methods/getOptions";
 import changeLogs from "./methods/changeLogs";
 import virtualPopulate from "./methods/virtualPopulate";
 import autoPopulate from "./methods/autoPopulate";
@@ -15,7 +16,8 @@ export interface IExtendedDocument extends Document {
   deleted: boolean;
   resource: string;
   type: string;
-  setValue: (field: string, value: any, list: string, subrecord: string) => Promise<void>;
+  setValue: (field: string, value: any, subdoc: string, subdoc_id: string) => Promise<void>;
+  getOptions: (field: string, subdoc: string, subdoc_id: string, deepdoc: string, deepdoc_id: string, page: number , keyword: string) => Promise<any>;
   changeLogs: (document?: any, list?: string) => Promise<void>;
   virtualPopulate: () => Promise<void>;
   autoPopulate: () => Promise<Object>;
@@ -38,6 +40,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
 
   }
   schema.method('setValue', setValue);
+  schema.method('getOptions', getOptions);
   schema.method('changeLogs', changeLogs);
   schema.method('virtualPopulate', virtualPopulate);
   schema.method('autoPopulate', autoPopulate);

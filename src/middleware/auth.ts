@@ -64,7 +64,9 @@ export default class Auth {
         //to do - dodać weryfikacje 
 
         const check = (collection, recordtype, id, mode) => {
-          if (mode == "all") return false;
+          if (mode == "all") {
+            return false;
+          }
           else return true;
         }
 
@@ -76,11 +78,12 @@ export default class Auth {
           access = check(collection, recordtype, id, mode);
         }
 
-
         if (access) {
           next();
-        } else
+        } else {
           throw new CustomError("auth.access_denied", 401);
+        }
+
       } catch (error) {
         return next(error);
       }

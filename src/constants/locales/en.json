@@ -1,6 +1,8 @@
 {
+  "EUR": "Euro",
   "GB": "United Kingdom",
   "PL": "Poland",
+  "PLN": "Polish Zlote",
   "auth.access_granted": "auth.access_granted",
   "auth.contact_form": "auth.contact_form",
   "auth.email_required": "auth.email_required",
@@ -24,6 +26,7 @@
   "folder_not_found": "folder_not_found",
   "note.description": "note.description",
   "note.name": "note.name",
+  "pendingapproval": "pendingapproval",
   "scope.customers": "Customers",
   "scope.invitems": "Inventory",
   "scope.invoice": "Invoices",

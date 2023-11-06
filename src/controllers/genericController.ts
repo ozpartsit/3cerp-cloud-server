@@ -67,6 +67,31 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+
+    public async options(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, mode, id } = req.params;
+        try {
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+
+            let field = req.body;
+            let page = parseInt((req.query.page || 1).toString());
+            let keyword = (req.query.keyword||"").toString();
+            let { results, total } = await this.model.getOptions(id, mode, field, page, keyword);
+            const data = {
+                docs: results,
+                totalDocs: total,
+                limit: 25,
+                page: page,
+                totalPages: Math.ceil(total / 25)
+            }
+            res.json({ status: "success", data: data });
+
+
+        } catch (error) {
+            return next(error);
+        }
+    }
+
     public async update(req: Request, res: Response, next: NextFunction) {
         let { recordtype, mode, id } = req.params;
         try {
@@ -146,38 +171,38 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
-    public async form(req: Request, res: Response, next: NextFunction) {
-        let { recordtype } = req.params;
-        try {
-            let form = await this.model.getForm(req.locale);
-            if (form) {
-                let fields = await this.model.getFields(req.locale);
-                form.sections.forEach((section: any) => {
-                    if (section.table) {
-                        section.table = fields.find((f: any) => f.field == section.table) || null;
-                    }
-                    section.cols.forEach((col: any) => {
+    // public async form(req: Request, res: Response, next: NextFunction) {
+    //     let { recordtype } = req.params;
+    //     try {
+    //         let form = await this.model.getForm(req.locale);
+    //         if (form) {
+    //             let fields = await this.model.getFields(req.locale);
+    //             form.sections.forEach((section: any) => {
+    //                 if (section.table) {
+    //                     section.table = fields.find((f: any) => f.field == section.table) || null;
+    //                 }
+    //                 section.cols.forEach((col: any) => {
 
-                        if (col.rows) col.rows.forEach((row: any) => {
-                            if (row) row.forEach((field: any, index: any) => {
-                                row[index] = fields.find((f: any) => f.field == field) || null;
-                                if (row[index]) {
-                                    if (row[index].type != "EmbeddedField") delete row[index].fields;
-                                    delete row[index].selects;
-                                    delete row[index].ref;
-                                }
-                            })
-                        })
-                    })
-                })
-            }
+    //                     if (col.rows) col.rows.forEach((row: any) => {
+    //                         if (row) row.forEach((field: any, index: any) => {
+    //                             row[index] = fields.find((f: any) => f.field == field) || null;
+    //                             if (row[index]) {
+    //                                 if (row[index].type != "EmbeddedField") delete row[index].fields;
+    //                                 delete row[index].selects;
+    //                                 delete row[index].ref;
+    //                             }
+    //                         })
+    //                     })
+    //                 })
+    //             })
+    //         }
 
 
-            res.json(form);
-        } catch (error) {
-            return next(error);
-        }
-    }
+    //         res.json(form);
+    //     } catch (error) {
+    //         return next(error);
+    //     }
+    // }
     public async logs(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {
@@ -213,15 +238,21 @@ class GenericController<T extends IExtendedDocument> {
             if (filters) {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
             }
-            //query.ownerAccount = req.headers.owneraccount; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
+
             let select = (req.query.select || req.query.fields || "").toString();
             if (select) {
                 options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1 });
             } else {
-                // add default field to select
-                this.model.getSelect().forEach(field => {
-                    options.select[field] = 1;
-                })
+                // sprawdź preferencje użytkownika lub roli
+                if (false) {
+                    // szuka prefrenecji
+                } else {
+                    // add default field to select
+                    this.model.getSelect().forEach(field => {
+                        options.select[field] = 1;
+                    })
+                }
+
             }
             // Sort
             let sort = (req.query.sort || "").toString();
@@ -253,36 +284,30 @@ class GenericController<T extends IExtendedDocument> {
 
             options.limit = parseInt((req.query.limit || 50).toString());
             options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
-            
-            let result = await this.model.findDocuments(query, options);
+
+            //let result = await this.model.findDocuments(query, options);
             let total = await this.model.count(query);
             let page = req.query.page || 1;
-            
+
             // get fields
             let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
-            for (let index in result) {
-                result[index] = await result[index].constantTranslate(req.locale);
-
-            }
-            //to do - test przypisania do source.field
-
-            // result = result.map(line => {
-            //     let row = {};
-            //     for (const [key, value] of Object.entries(options.select)) {
-            //         console.log(key, value,line[key])
-            //         row[key] = line[key];
-            //     }
-            //     return row;
-            // })
-            // console.log(result)
 
             const data = {
-                //fields: fields,
-                docs: result,
                 totalDocs: total,
                 limit: options.limit,
-                page: page,
                 totalPages: Math.ceil(total / options.limit)
+            }
+            if (!req.query.count) {
+                let result = await this.model.findDocuments(query, options);
+                // get fields
+                let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
+                for (let index in result) {
+                    result[index] = await result[index].constantTranslate(req.locale);
+                }
+
+                data["docs"] = result;
+                data["page"] = page;
+
             }
 
             res.json({ status: "success", data: data });

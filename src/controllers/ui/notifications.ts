@@ -46,7 +46,7 @@ export default class NotificationController {
 
     public async check(req: Request, res: Response, next: NextFunction) {
         // check new
-      
+
         let Model = Notification.setAccount(req.headers.account, req.headers.user);
         const total = await Model.count({ status: "unread" })
         res.json({ status: "success", data: { total } });
@@ -61,8 +61,8 @@ export default class NotificationController {
             if (req.params.status === "archived") filters.status = "archived";
             if (["unread", "new"].includes(req.params.status)) filters.status = { $nin: ["archived", "read"] };
         }
-
-        const array = await Model.find(filters)
+        let skip =  parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * 25) || 0).toString());
+        const array = await Model.find(filters).skip(skip).limit(25)
             .populate({ path: 'document', select: 'name' })
             .exec()
         const total = await Model.count(filters).exec();
@@ -72,7 +72,7 @@ export default class NotificationController {
             totalDocs: total,
             limit: 25,
             page: 1,
-            totalPages: 1
+            totalPages:  Math.ceil(total / 25)
         }
         res.json({ status: "success", data });
 
