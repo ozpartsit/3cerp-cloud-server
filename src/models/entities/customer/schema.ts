@@ -14,6 +14,8 @@ export interface ICustomer extends IEntity {
   //accounting
   terms?: Schema.Types.ObjectId;
   paymentMethod?: Schema.Types.ObjectId;
+
+  salesRep?: Schema.Types.ObjectId;
 }
 
 export interface ICustomerModel extends Model<ICustomer>, IExtendedModel<ICustomer> { }
@@ -55,6 +57,12 @@ const schema = new Schema<ICustomer>(
     paymentMethod: {
       type: Schema.Types.ObjectId,
       ref: "PaymentMethod",
+      autopopulate: true,
+      input: "SelectField"
+    },
+    salesRep: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       autopopulate: true,
       input: "SelectField"
     },

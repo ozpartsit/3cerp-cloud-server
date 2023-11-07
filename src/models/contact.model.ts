@@ -14,7 +14,7 @@ export interface IContact extends IExtendedDocument {
   description?: string;
 }
 const options = {
-  collection: "contacts",
+  collection: "entities.contacts",
   type: "contact"
 };
 

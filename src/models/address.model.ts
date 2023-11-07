@@ -20,7 +20,7 @@ export interface IAddress extends IExtendedDocument {
   geoCode(geoCodeHint: string): any;
 }
 const options = {
-  collection: "addresses",
+  collection: "entities.addresses",
   type: "address"
 };
 
