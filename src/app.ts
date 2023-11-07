@@ -96,7 +96,7 @@ export class App3CERP {
     this.routesPublic.start(this.app);
     
     this.emitEvents.start(this.app);
-    //this.app.use(errorHandler);
+    this.app.use(errorHandler);
   }
 
   private dbConnect(): void {
