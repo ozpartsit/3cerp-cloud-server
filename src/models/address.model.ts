@@ -26,29 +26,35 @@ const options = {
 
 interface IAddressModel extends Model<IAddress>, IExtendedModel<IAddress> { }
 
+//schema to shere
+export const nestedSchema = {
+  name: { type: String, input: "TextField" },
+  addressee: { type: String, input: "TextField" },
+  address: { type: String, required: true, input: "TextField" },
+  address2: { type: String, input: "TextField" },
+  city: { type: String, required: true, input: "TextField" },
+  zip: { type: String, required: true, input: "TextField" },
+  country: {
+    type: String,
+    required: true,
+    constant: "countries"
+  },
+  phone: { type: String, input: "TextField" },
+  latitude: { type: String, input: "TextField" },
+  longitude: { type: String, input: "TextField" }
+}
+
 export const schema = new Schema<IAddress>(
   {
+    ...nestedSchema,
     entity: { type: Schema.Types.ObjectId, input: "SelectField" },
-    name: { type: String, input: "TextField" },
-    addressee: { type: String, input: "TextField" },
-    address: { type: String, required: true, input: "TextField" },
-    address2: { type: String, input: "TextField" },
-    city: { type: String, required: true, input: "TextField" },
-    zip: { type: String, required: true, input: "TextField" },
-    country: {
-      type: String,
-      required: true,
-      constant: "countries"
-    },
-    phone: { type: String, input: "TextField" },
     geoCodeHint: {
       type: String,
       get: (v: any) =>
         v ? `${v.address}, ${v.address2}, ${v.zip} ${v.city} ${v.country}` : '',
       input: "TextField"
     },
-    latitude: { type: String, input: "TextField" },
-    longitude: { type: String, input: "TextField" }
+
   },
   options
 );

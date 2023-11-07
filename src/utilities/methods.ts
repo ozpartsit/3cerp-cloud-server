@@ -16,8 +16,8 @@ export interface IExtendedDocument extends Document {
   deleted: boolean;
   resource: string;
   type: string;
-  setValue: (field: string, value: any, subdoc: string, subdoc_id: string) => Promise<void>;
-  getOptions: (field: string, subdoc: string, subdoc_id: string, deepdoc: string, deepdoc_id: string, page: number , keyword: string) => Promise<any>;
+  setValue: (field: string, value: any, subdoc: string | null, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null) => Promise<void>;
+  getOptions: (field: string, subdoc: string, subdoc_id: string, deepdoc: string, deepdoc_id: string, page: number, keyword: string) => Promise<any>;
   changeLogs: (document?: any, list?: string) => Promise<void>;
   virtualPopulate: () => Promise<void>;
   autoPopulate: () => Promise<Object>;

@@ -28,7 +28,7 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
           // assign temporarily this to parent key
           line.parent = this;
           // copy field value from parten document
-          (list.options.copyFields || []).forEach((field: string) => {
+          ([...(list.options.copyFields || []), "account"]).forEach((field: string) => {
             line[field] = this[field] ? this[field]._id : this[field];
           });
           // Validate or validate and save

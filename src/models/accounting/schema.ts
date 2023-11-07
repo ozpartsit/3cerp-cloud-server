@@ -12,8 +12,8 @@ interface IAccountingModel extends Model<IAccounting>, IExtendedModel<IAccountin
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const AccountingSchema = {
-    name: { type: String, input: "text" },
-    description: { type: String, input: "text" },
+    name: { type: String, input: "TextField" },
+    description: { type: String, input: "TextField" },
     type: {
         type: String,
         required: true,

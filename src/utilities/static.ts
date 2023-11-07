@@ -191,6 +191,8 @@ export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, 
 }
 
 interface updateBody {
+  deepdoc: string,
+  deepdoc_id: string,
   subdoc: string,
   subdoc_id: string,
   field: string,
@@ -210,7 +212,7 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
     if (document) {
       if (!Array.isArray(updates)) updates = [updates]; // array
       for (let update of updates) {
-        await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id);
+        await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id,update.deepdoc, update.deepdoc_id);
       }
 
       if (mode === "advanced") {

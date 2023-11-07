@@ -4,60 +4,56 @@ export default async function setValue<T extends IExtendedDocument>(
   this: T,
   field: string,
   value: any,
-  subdoc: string,
-  subdoc_id: string,
-  deepdoc: string,
-  deepdoc_id: string,
+  subdoc: string | null = null,
+  subdoc_id: string | null = null,
+  deepdoc: string | null = null,
+  deepdoc_id: string | null = null,
 ) {
   try {
-    let document: T;
+
+    let document: T | null = null;
+    let changed = false;
     if (subdoc) {
+
       let virtual: any = this.schema.virtuals[subdoc];
-      document = this[subdoc].find((element: any) => {
-        return element._id.toString() === subdoc_id;
-      });
-      if (deepdoc) {
-        subdoc = deepdoc;
-        if (!document) throw 'bład'
-        else {
-          let parent = document;
-          virtual = parent.schema.virtuals[subdoc];
-          document = parent[subdoc].find((element: any) => {
-            return element._id.toString() === deepdoc_id;
-          });
-        }
-      }
+      if (virtual && !virtual.options.justOne)
+        document = this[subdoc].find((element: any) => {
+          return element._id.toString() === subdoc_id;
+        });
+
       if (!document) {
         if (virtual) {
-          document = await new models[virtual.options.ref]();
+          document = await new models[virtual.options.ref]() as T;
           document.initLocal();
           if (virtual.options.justOne) {
             this[subdoc] = document;
           } else {
             this[subdoc].push(document);
           }
-
           this.validateVirtuals(false);
+          if (deepdoc) return document.setValue(field, value, deepdoc, deepdoc_id, null, null)
         } else {
-          console.log(this.schema.path(subdoc))
+          document = this;
+          document[subdoc][field] = value;
+          await document.populate(`${subdoc}.${field}`, "name displayname type _id");
+          changed = true;
         }
       }
     } else {
       document = this;
     }
 
-    // document.$locals.oldValue[field] = document[field];
-    // document.$locals.triggers.push({ type: "setValue", field: field, oldValue: document.$locals.oldValue[field] });
 
-
-    // to do - zmienić na metode setLocalTriggers()
-    document[field] = value;
-
-    //populate new field value
-    await document.populate(field, "name displayname type _id");
+    if (!changed) {
+      document[field] = value;
+      //populate new field value
+      await document.populate(field, "name displayname type _id");
+    }
+    //console.log(document)
     await document.validate();
 
   } catch (err) {
     return err;
   }
 }
+

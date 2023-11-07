@@ -12,8 +12,8 @@ interface IClassificationModel extends Model<IClassification>, IExtendedModel<IC
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const ClassificationSchema = {
-    name: { type: String, input: "text" },
-    description: { type: String, input: "text" },
+    name: { type: String, input: "TextField" },
+    description: { type: String, input: "TextField" },
     type: {
         type: String,
         required: true,

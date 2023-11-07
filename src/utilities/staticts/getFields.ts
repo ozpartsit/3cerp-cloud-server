@@ -1,7 +1,7 @@
 import { Schema, Model, Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
 import i18n from "../../config/i18n";
-export default function getFields<T extends IExtendedDocument>(this: Model<T>, local?: string, parent?: string) {
+export default function getFields<T extends IExtendedDocument>(this: Model<T>, local: string = "en", parent: string = "", subrecord: boolean = false) {
   let fields: any[] = [];
   let modelSchema = this.schema;
   let modelName = this.modelName.toLowerCase().split("_")[0]
@@ -20,11 +20,12 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
         name: i18n.__(`${modelName}.${key}`),
         ref: value.options.ref,
         //instance: schematype.instance,
-        fieldType: "Table"
+        fieldType: "Table",
+        subdoc: true,
       };
       if (value.options.ref) {
         let refModel: any = models[value.options.ref];
-        field.fields = refModel.getFields(local, key);
+        field.fields = refModel.getFields(local, key, true);
       }
       fields.push(field)
     }
@@ -64,19 +65,23 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
       } else {
         i18n.setLocale(local || "en");
         let field: any = {
-          field: parent ? `${parent}.${pathname}` : pathname,
+          field: pathname,
           name: i18n.__(`${modelName}.${pathname}`),
-          required: schematype.isRequired,
+          fieldType: schematype.options.input,
           ref: schematype.options.ref,
           resource: schematype.options.resource,
           constant: schematype.options.constant,
-          fieldType: schematype.options.input,
-          min: schematype.options.min,
-          max: schematype.options.max,
-          //select: schematype.options.select,
-          //selects: schematype.options.autopopulate ? schematype.options.autopopulate.select : "",
         }
-
+        if (!parent || subrecord || schematype._presplitPath.length > 1) {
+          Object.assign(field, {
+            subdoc: parent || (schematype._presplitPath.length > 1 ? schematype._presplitPath[0] : undefined),
+            // subdoc_id: subrecord ? true : false,
+            // subrecord: subrecord || schematype._presplitPath.length > 1,
+            required: schematype.isRequired,
+            min: schematype.options.min,
+            max: schematype.options.max,
+          })
+        }
         if (schematype.options.ref) {
           let refModel: any = models[schematype.options.ref];
           if (refModel) {

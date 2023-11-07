@@ -1,6 +1,7 @@
 import { Schema, Model } from "mongoose";
 import Entity, { IEntity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
+import { IAddress, nestedSchema } from "../../address.model";
 export interface ICustomer extends IEntity {
   status: string;
   //statistics
@@ -16,7 +17,11 @@ export interface ICustomer extends IEntity {
   paymentMethod?: Schema.Types.ObjectId;
 
   salesRep?: Schema.Types.ObjectId;
+
+  billingAddress?: IAddress
+  shippingAddress?: IAddress
 }
+
 
 export interface ICustomerModel extends Model<ICustomer>, IExtendedModel<ICustomer> { }
 
@@ -29,6 +34,9 @@ const schema = new Schema<ICustomer>(
       resource: 'constants',
       constant: 'customerstatus'
     },
+    //addresses
+    shippingAddress: nestedSchema,
+    billingAddress: nestedSchema,
     //statistics
     firstSalesDate: { type: Date },
     lastSalesDate: { type: Date },
