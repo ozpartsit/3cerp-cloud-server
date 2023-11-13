@@ -165,8 +165,8 @@ class GenericController<T extends IExtendedDocument> {
     public async fields(req: Request, res: Response, next: NextFunction) {
         let { recordtype } = req.params;
         try {
-            let fields = await this.model.getFields(req.locale)
-            res.json(fields);
+            let fields = await this.model.getFields(req.locale);
+            res.json({ status: "success", data: { fields } });
         } catch (error) {
             return next(error);
         }

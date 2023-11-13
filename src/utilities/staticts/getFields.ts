@@ -45,7 +45,8 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
           fieldType: `${schematype.instance}Field`,
           fields: []
         }
-        if (!parent) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
+     
+        if (!parent && schematype.schema) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
 
           let subfield = {
             field: `${pathname}.${key}`,
@@ -57,6 +58,8 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             fieldType: value.input,
             min: schematype.options.min,
             max: schematype.options.max,
+            hint: schematype.options.hint,
+            help: schematype.options.help,
           }
           if (value.input)
             field.fields.push(subfield)
@@ -78,6 +81,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             // subdoc_id: subrecord ? true : false,
             // subrecord: subrecord || schematype._presplitPath.length > 1,
             required: schematype.isRequired,
+            readonly: schematype.options.readonly,
             min: schematype.options.min,
             max: schematype.options.max,
           })

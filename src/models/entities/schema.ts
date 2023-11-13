@@ -28,11 +28,13 @@ const options = {
 };
 const schema = new Schema<IEntity>(
   {
-    email: { type: String, input: "TextField" },
+    email: { type: String, input: "TextField", validType: "email" },
     name: {
       type: String,
       required: true,
-      input: "TextField"
+      input: "TextField",
+      min: 3,
+      max: 34
     },
     type: {
       type: String,
@@ -43,9 +45,17 @@ const schema = new Schema<IEntity>(
       type: String,
       required: true,
       input: "SelectField",
-      constant: 'currencies'
+      constant: 'currencies',
+      hint: "Primary currency",
     },
-    taxNumber: { type: String, input: "TextField" },
+    taxNumber: {
+      type: String,
+      input: "TextField",
+      min: 10,
+      max: 14,
+      hint: "VAT registration number",
+      help: "Sometimes also known as a VAT registration number, this is the unique number that identifies a taxable person (business) or non-taxable legal entity that is registered for VAT."
+    },
     tax: {
       type: Number,
       default: 0,

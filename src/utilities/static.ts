@@ -212,7 +212,7 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
     if (document) {
       if (!Array.isArray(updates)) updates = [updates]; // array
       for (let update of updates) {
-        await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id,update.deepdoc, update.deepdoc_id);
+        await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id, update.deepdoc, update.deepdoc_id);
       }
 
       if (mode === "advanced") {
@@ -277,52 +277,53 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
     let { limit, select, sort, skip } = options;
     let populated: any = {};
 
-    for (const [key, value] of Object.entries(select)) {
-      // to do - poprawić
-      let fieldsSelect = { name: 1, resource: 1, type: 1 };
-      let fields = key.split('.');
-      if (fields.length > 1) {
-        // sprawdza typ pola
-        let field = docFields.find((field: any) => field.field == fields[0]);
-        field = field.fields.find((field: any) => field.field == key);
+    if (select)
+      for (const [key, value] of Object.entries(select)) {
+        // to do - poprawić
+        let fieldsSelect = { name: 1, resource: 1, type: 1 };
+        let fields = key.split('.');
+        if (fields.length > 1) {
+          // sprawdza typ pola
+          let field = docFields.find((field: any) => field.field == fields[0]);
+          field = field.fields.find((field: any) => field.field == key);
 
-        if (populated[fields[0]]) {
-          populated[fields[0]].select[fields[1]] = 1;
+          if (populated[fields[0]]) {
+            populated[fields[0]].select[fields[1]] = 1;
 
-          // jeżeli ref to dodaje do populate
-          if (field && field.ref) {
-            populated[fields[0]].populate.push({
-              path: fields[1],
-              select: 'name resource type'
-            })
-          }
-        } else {
-          fieldsSelect[fields[1]] = 1;
-          populated[fields[0]] = {
-            path: fields[0],
-            select: fieldsSelect,
-            populate: []
-          }
-          if (field && field.ref) {
-            populated[fields[0]].populate.push({
-              path: fields[1],
-              select: 'name resource type'
-            })
-          }
-        }
-        delete select[key];
-      } else {
-        let field = docFields.find((field: any) => field.field == fields[0]);
-        if (field && field.ref) {
-          if (!populated[fields[0]]) {
+            // jeżeli ref to dodaje do populate
+            if (field && field.ref) {
+              populated[fields[0]].populate.push({
+                path: fields[1],
+                select: 'name resource type'
+              })
+            }
+          } else {
+            fieldsSelect[fields[1]] = 1;
             populated[fields[0]] = {
               path: fields[0],
-              select: field.selects || fieldsSelect
+              select: fieldsSelect,
+              populate: []
+            }
+            if (field && field.ref) {
+              populated[fields[0]].populate.push({
+                path: fields[1],
+                select: 'name resource type'
+              })
+            }
+          }
+          delete select[key];
+        } else {
+          let field = docFields.find((field: any) => field.field == fields[0]);
+          if (field && field.ref) {
+            if (!populated[fields[0]]) {
+              populated[fields[0]] = {
+                path: fields[0],
+                select: field.selects || fieldsSelect
+              }
             }
           }
         }
       }
-    }
 
     let result = await this.find(query)
       .populate(Object.values(populated))

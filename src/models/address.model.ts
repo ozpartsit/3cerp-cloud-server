@@ -28,7 +28,7 @@ interface IAddressModel extends Model<IAddress>, IExtendedModel<IAddress> { }
 
 //schema to shere
 export const nestedSchema = {
-  name: { type: String, input: "TextField" },
+  name: { type: String, required: true, input: "TextField" },
   addressee: { type: String, input: "TextField" },
   address: { type: String, required: true, input: "TextField" },
   address2: { type: String, input: "TextField" },
@@ -39,9 +39,9 @@ export const nestedSchema = {
     required: true,
     constant: "countries"
   },
-  phone: { type: String, input: "TextField" },
-  latitude: { type: String, input: "TextField" },
-  longitude: { type: String, input: "TextField" }
+  phone: { type: String, required: true, input: "TextField" },
+  latitude: { type: String, input: "TextField", readonly: true },
+  longitude: { type: String, input: "TextField", readonly: true }
 }
 
 export const schema = new Schema<IAddress>(

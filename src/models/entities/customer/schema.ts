@@ -20,6 +20,12 @@ export interface ICustomer extends IEntity {
 
   billingAddress?: IAddress
   shippingAddress?: IAddress
+
+  //
+  website: {
+    type: String,
+    input: "TextField"
+  },
 }
 
 
@@ -38,10 +44,10 @@ const schema = new Schema<ICustomer>(
     shippingAddress: nestedSchema,
     billingAddress: nestedSchema,
     //statistics
-    firstSalesDate: { type: Date },
-    lastSalesDate: { type: Date },
-    firstOrderDate: { type: Date },
-    lastOrderDate: { type: Date },
+    firstSalesDate: { type: Date, input: 'DateType', readonly: true },
+    lastSalesDate: { type: Date, input: 'DateType', readonly: true },
+    firstOrderDate: { type: Date, input: 'DateType', readonly: true },
+    lastOrderDate: { type: Date, input: 'DateType', readonly: true },
     //classsifictaions
     group: {
       type: Schema.Types.ObjectId,
@@ -72,7 +78,9 @@ const schema = new Schema<ICustomer>(
       type: Schema.Types.ObjectId,
       ref: "User",
       autopopulate: true,
-      input: "SelectField"
+      input: "SelectField",
+      hint: "Sales Representative",
+      help:" A sales rep interacts directly with customers throughout all phases of the sales process."
     },
   },
   options
