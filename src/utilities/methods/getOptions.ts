@@ -8,50 +8,39 @@ import i18n from "../../config/i18n";
 export default async function getOptions<T extends IExtendedDocument>(
     this: T,
     field: string,
-    subdoc: string,
-    subdoc_id: string,
-    deepdoc: string,
-    deepdoc_id: string,
+    subdoc: string | null = null,
+    subdoc_id: string | null = null,
+    deepdoc: string | null = null,
+    deepdoc_id: string | null = null,
     page: number,
     keyword: string
 ) {
     try {
-        let document: T;
+        let document: T | null = null;
         if (subdoc) {
+
             let virtual: any = this.schema.virtuals[subdoc];
-            document = this[subdoc].find((element: any) => {
-                return element._id.toString() === subdoc_id;
-            });
-
-            if (deepdoc) {
-
-                subdoc = deepdoc;
-                if (!document) throw 'bład'
-                else {
-                    let parent = document;
-                    virtual = parent.schema.virtuals[subdoc];
-                    document = parent[subdoc].find((element: any) => {
-                        return element._id.toString() === deepdoc_id;
-                    });
-                }
-            }
+            if (virtual && !virtual.options.justOne)
+                document = this[subdoc].find((element: any) => {
+                    return element._id.toString() === subdoc_id;
+                });
 
             if (!document) {
                 if (virtual) {
-                    document = await new models[virtual.options.ref]();
+                    document = await new models[virtual.options.ref]() as T;
                     document.initLocal();
                     if (virtual.options.justOne) {
                         this[subdoc] = document;
                     } else {
                         this[subdoc].push(document);
                     }
-
                     this.validateVirtuals(false);
+                    if (deepdoc) return document.getOptions(field, deepdoc, deepdoc_id, null, null, page, keyword)
                 } else {
-                    console.log(this.schema.path(subdoc))
+                    document = this;
+                    field = `${subdoc}.${field}`;
                 }
             }
-
         } else {
             document = this;
         }
@@ -62,7 +51,6 @@ export default async function getOptions<T extends IExtendedDocument>(
 
         // Sprawdź typ pola "name"
         const fieldType = schema.path(field);
-
         if (fieldType) {
             let results: any = [];
             let total = 0;

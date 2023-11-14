@@ -9,6 +9,7 @@ export interface IEntity extends IExtendedDocument {
   name: string;
   type: string;
   email?: string;
+  phone?: string;
   locale?: string;
   currency?: string;
   taxNumber: string;
@@ -29,6 +30,7 @@ const options = {
 const schema = new Schema<IEntity>(
   {
     email: { type: String, input: "TextField", validType: "email" },
+    phone: { type: String, input: "TextField", validType: "phone" },
     name: {
       type: String,
       required: true,

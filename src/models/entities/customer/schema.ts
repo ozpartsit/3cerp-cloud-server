@@ -80,7 +80,13 @@ const schema = new Schema<ICustomer>(
       autopopulate: true,
       input: "SelectField",
       hint: "Sales Representative",
-      help:" A sales rep interacts directly with customers throughout all phases of the sales process."
+      help: " A sales rep interacts directly with customers throughout all phases of the sales process."
+    },
+
+    //
+    website: {
+      type: String,
+      input: "TextField",
     },
   },
   options

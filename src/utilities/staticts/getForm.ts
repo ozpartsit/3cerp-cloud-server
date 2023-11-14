@@ -7,21 +7,14 @@ export default function getForm<T extends IExtendedDocument>(this: Model<T>, loc
         sections: [
             {
                 name: i18n.__(`${this.modelName.toLowerCase()}.main`),
+                readonly: true,
                 cols: [
                     {
                         name: i18n.__(`${this.modelName.toLowerCase()}.billing`),
                         rows: [
-                            ["entity", "date"],
-                            ["billingAddress"],
-                            ["paymentMethod", "terms"]
-                        ]
-                    },
-                    {
-                        name: i18n.__(`${this.modelName.toLowerCase()}.shipping`),
-                        rows: [
-                            ["shippingAddress"],
-                            ["shippingMethod", "shippingCost"],
-                            ["deliveryTerms"]
+                            ["name", "email", "website"],
+                            ["phone", "category", "salesRep"],
+                            ["billingAddress", "shippingAddress"]
                         ]
                     },
                     {
@@ -31,41 +24,64 @@ export default function getForm<T extends IExtendedDocument>(this: Model<T>, loc
                 ]
             },
             {
-                name: i18n.__(`${this.modelName.toLowerCase()}.items`),
+                name: i18n.__(`${this.modelName.toLowerCase()}.general`),
                 cols: [],
-                table: "lines"
-            },
-            {
-                name: i18n.__(`${this.modelName.toLowerCase()}.others`),
-                cols: [
+                tabs: [
                     {
-                        name: i18n.__(`${this.modelName.toLowerCase()}.accounting`),
-                        rows: [
-                            ["company"],
-                            ["currency"],
-                            ["exchangeRate"],
-                            ["tax"],
-                            ["taxNumber"]
-                        ]
+                        name: i18n.__(`${this.modelName.toLowerCase()}.main`),
+                        tabs: [
+                            {
+                                name: i18n.__(`${this.modelName.toLowerCase()}.main`),
+                                cols: [
+                                    {
+                                        name: i18n.__(`${this.modelName.toLowerCase()}.billing`),
+                                        rows: [
+                                            ["name", "email", "website"],
+                                            ["phone", "category", "salesRep"],
+                                        ]
+                                    },
 
-                    },
-                    {
-                        name: i18n.__(`${this.modelName.toLowerCase()}.classification`),
-                        rows: [
-                            ["referenceNumber"],
-                            ["warehouse"]
-                            ["salesRep"],
-                            ["source"]
+                                ]
+                            },
+                            {
+                                name: i18n.__(`${this.modelName.toLowerCase()}.contact`),
+                                cols: []
+                            },
                         ]
                     },
                     {
-                        name: i18n.__(`${this.modelName.toLowerCase()}.comments`),
-                        rows: [
-                            ["memo"]
+                        name: i18n.__(`${this.modelName.toLowerCase()}.addressbook`),
+                        tabs: [
+                            {
+                                name: i18n.__(`${this.modelName.toLowerCase()}.defaultaddress`),
+                                cols: [
+                                    {
+                                        name: i18n.__(`${this.modelName.toLowerCase()}.billing`),
+                                        rows: [
+                                            ["billingAddress.name", "billingAddress.addressee"],
+                                            ["billingAddress.address", "billingAddress.address2"],
+                                            ["billingAddress.city", "billingAddress.zip", "billingAddress.country"],
+                                        ]
+                                    },
+                                    {
+                                        name: i18n.__(`${this.modelName.toLowerCase()}.shipping`),
+                                        rows: [
+                                            ["shippingAddress.name", "shippingAddress.addressee"],
+                                            ["shippingAddress.address", "shippingAddress.address2"],
+                                            ["shippingAddress.city", "shippingAddress.zip", "shippingAddress.country"],
+                                        ]
+                                    },
+                                ]
+                            },
+                            {
+                                name: i18n.__(`${this.modelName.toLowerCase()}.addressbook`),
+                                cols: []
+                            },
                         ]
-                    },
+                    }
                 ],
             },
+
         ]
     }
 

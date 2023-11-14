@@ -45,13 +45,14 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
           fieldType: `${schematype.instance}Field`,
           fields: []
         }
-     
+
         if (!parent && schematype.schema) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
 
           let subfield = {
             field: `${pathname}.${key}`,
             name: i18n.__(`${pathname}.${key}`),
             required: value.required,
+            readonly: schematype.options.readonly,
             ref: value.ref,
             resource: value.resource,
             constant: value.constant,
@@ -60,6 +61,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             max: schematype.options.max,
             hint: schematype.options.hint,
             help: schematype.options.help,
+            validType: schematype.options.validType,
           }
           if (value.input)
             field.fields.push(subfield)
@@ -84,6 +86,9 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             readonly: schematype.options.readonly,
             min: schematype.options.min,
             max: schematype.options.max,
+            hint: schematype.options.hint,
+            help: schematype.options.help,
+            validType: schematype.options.validType,
           })
         }
         if (schematype.options.ref) {
@@ -93,7 +98,21 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             if (!parent) field.fields = refModel.getFields(local, pathname);
           }
         }
-        if (field.type != "subrecords") fields.push(field);
+        if (schematype._presplitPath.length > 1) {
+          let parent = fields.find(f => f.field == schematype._presplitPath[0])
+          if (parent) parent.fields.push(field)
+          else {
+            fields.push({
+              field: schematype._presplitPath[0],
+              name: i18n.__(`${modelName}.${schematype._presplitPath[0]}`),
+              subdoc: true,
+              fields: [field]
+            })
+          }
+        } else {
+          fields.push(field)
+        }
+        //if (field.type != "subrecords") fields.push(field);
       }
     }
   }
