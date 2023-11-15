@@ -3,6 +3,8 @@ import Entity, { IEntity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import { IAddress, nestedSchema } from "../../address.model";
 export interface ICustomer extends IEntity {
+  firstName?: string;
+  lastName?: string;
   status: string;
   //statistics
   firstSalesDate?: Date;
@@ -15,6 +17,7 @@ export interface ICustomer extends IEntity {
   //accounting
   terms?: Schema.Types.ObjectId;
   paymentMethod?: Schema.Types.ObjectId;
+  entityType?: Schema.Types.ObjectId;
 
   salesRep?: Schema.Types.ObjectId;
 
@@ -34,12 +37,15 @@ export interface ICustomerModel extends Model<ICustomer>, IExtendedModel<ICustom
 const options = { discriminatorKey: "type", collection: "entities" };
 const schema = new Schema<ICustomer>(
   {
+    firstName: { type: String, input: "TextField" },
+    lastName: { type: String, input: "TextField" },
     status: {
       type: String,
       input: "select",
       resource: 'constants',
       constant: 'customerstatus'
     },
+    
     //addresses
     shippingAddress: nestedSchema,
     billingAddress: nestedSchema,
@@ -58,6 +64,12 @@ const schema = new Schema<ICustomer>(
     category: {
       type: Schema.Types.ObjectId,
       ref: "Category",
+      autopopulate: true,
+      input: "SelectField"
+    },
+    entityType: {
+      type: Schema.Types.ObjectId,
+      ref: "EntityType",
       autopopulate: true,
       input: "SelectField"
     },
@@ -92,6 +104,23 @@ const schema = new Schema<ICustomer>(
   options
 );
 
+schema.method("recalcDocument", async function () {
+
+  // set default addresses
+  const billingAddress = (this.addresses || []).find(address => address.billingAddress);
+  const shippingAddress = (this.addresses || []).find(address => address.shippingAddress);
+
+  Object.keys(nestedSchema).forEach(async (field) => {
+    if (billingAddress)
+      await this.setValue(field, billingAddress[field], "billingAddress", null, null, null);
+    else await this.setValue(field, "", "billingAddress", null, null, null);
+
+    if (shippingAddress)
+      await this.setValue(field, shippingAddress[field], "shippingAddress", null, null, null);
+    else await this.setValue(field, "", "shippingAddress", null, null, null);
+  })
+
+})
 
 const Customer: ICustomerModel = Entity.discriminator<
   ICustomer,

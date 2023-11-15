@@ -4,86 +4,143 @@ import i18n from "../../config/i18n";
 export default function getForm<T extends IExtendedDocument>(this: Model<T>, local: string, parent: string) {
 
     return {
-        sections: [
+        tabs: [
             {
+                value: 'main',
                 name: i18n.__(`${this.modelName.toLowerCase()}.main`),
-                readonly: true,
-                cols: [
+                editable: true,
+                sections: [
                     {
-                        name: i18n.__(`${this.modelName.toLowerCase()}.billing`),
-                        rows: [
-                            ["name", "email", "website"],
-                            ["phone", "category", "salesRep"],
-                            ["billingAddress", "shippingAddress"]
+                        value: 'general',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.general`),
+                        fields: [
+                            "name", "firstName", "lastName", "entityType", "email", "email2", "phone", "phone2", "website", "category", "group", "salesRep", "memo"
                         ]
                     },
                     {
-                        name: null,
-                        component: "GoogleMap"
-                    },
-                ]
-            },
-            {
-                name: i18n.__(`${this.modelName.toLowerCase()}.general`),
-                cols: [],
-                tabs: [
-                    {
-                        name: i18n.__(`${this.modelName.toLowerCase()}.main`),
-                        tabs: [
-                            {
-                                name: i18n.__(`${this.modelName.toLowerCase()}.main`),
-                                cols: [
-                                    {
-                                        name: i18n.__(`${this.modelName.toLowerCase()}.billing`),
-                                        rows: [
-                                            ["name", "email", "website"],
-                                            ["phone", "category", "salesRep"],
-                                        ]
-                                    },
-
-                                ]
-                            },
-                            {
-                                name: i18n.__(`${this.modelName.toLowerCase()}.contact`),
-                                cols: []
-                            },
-                        ]
-                    },
-                    {
-                        name: i18n.__(`${this.modelName.toLowerCase()}.addressbook`),
-                        tabs: [
-                            {
-                                name: i18n.__(`${this.modelName.toLowerCase()}.defaultaddress`),
-                                cols: [
-                                    {
-                                        name: i18n.__(`${this.modelName.toLowerCase()}.billing`),
-                                        rows: [
-                                            ["billingAddress.name", "billingAddress.addressee"],
-                                            ["billingAddress.address", "billingAddress.address2"],
-                                            ["billingAddress.city", "billingAddress.zip", "billingAddress.country"],
-                                        ]
-                                    },
-                                    {
-                                        name: i18n.__(`${this.modelName.toLowerCase()}.shipping`),
-                                        rows: [
-                                            ["shippingAddress.name", "shippingAddress.addressee"],
-                                            ["shippingAddress.address", "shippingAddress.address2"],
-                                            ["shippingAddress.city", "shippingAddress.zip", "shippingAddress.country"],
-                                        ]
-                                    },
-                                ]
-                            },
-                            {
-                                name: i18n.__(`${this.modelName.toLowerCase()}.addressbook`),
-                                cols: []
-                            },
+                        value: 'contacts',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.contacts`),
+                        fields: [
+                            "contacts"
                         ]
                     }
-                ],
-            },
+                ]
+            }, {
+                value: 'addresses',
+                name: i18n.__(`${this.modelName.toLowerCase()}.addresses`),
+                editable: true,
+                sections: [
+                    {
+                        value: 'billingAddress',
+                        //subdoc: 'billingAddress',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.billingAddress`),
+                        fields: [
+                            ["billingAddress"],
+                        ],
+                    },
+                    {
+                        value: 'shippingAddress',
+                        //subdoc: 'shippingAddress',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.shippingAddress`),
+                        fields: [
+                            ["shippingAddress"],
+                        ],
+                    },
+                    {
+                        value: 'addressbook',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.addressbook`),
+                        fields: [
+                            "addresses"
+                        ]
+                    }
+                ]
+            }, {
+                value: 'sales',
+                name: i18n.__(`${this.modelName.toLowerCase()}.sales`),
+                editable: false,
+                sections: [
+                    {
+                        value: 'openOrders',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.openorders`),
+                        component: "OpenOrders"
+                    },
+                    {
+                        value: 'relatedTransactions',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.relatedtransactions`),
+                        component: "RelatedTransactions"
+                    },
+                    // {
+                    //     value: 'priceLevels',
+                    //     name: i18n.__(`${this.modelName.toLowerCase()}.pricelevels`),
+                    //     fields: [
+                    //         "priceLevels"
+                    //     ]
+                    // }
+                ]
+            }, {
+                value: 'financial',
+                name: i18n.__(`${this.modelName.toLowerCase()}.financial`),
+                editable: true,
+                sections: [
+                    {
+                        value: 'accounting',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.accounting`),
+                        fields: [
+                            "tax", "taxNumber", "currency", "terms", "paymentMethod", "firstSalesDate", "lastSalesDate", "firstOrderDate", "lastOrderDate"
+                        ]
+                    },
+                    {
+                        value: 'statement',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.statement`),
+                        editable: true,
+                        component: 'statement'
+                    }
+                ]
+            }, {
+                value: 'analysis',
+                name: i18n.__(`${this.modelName.toLowerCase()}.analysis`),
+                editable: false,
+                sections: [
+                    {
+                        value: 'statistics',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.statistics`),
+                        component: 'CustomerStatistics'
+                    },
+                    {
+                        value: 'topitems',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.topitems`),
+                        component: 'CustomerTopItems'
+                    }
+                ]
+            }, {
+                value: 'communication',
+                name: i18n.__(`${this.modelName.toLowerCase()}.communication`),
+                editable: false,
+                sections: [
+                    {
+                        value: 'notes',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.notes`),
+                        component: 'Notes'
+                    },
+                    {
+                        value: 'emails',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.emails`),
+                        component: 'Emails'
+                    }
+                ]
+            }, {
+                value: 'systeminformation',
+                name: i18n.__(`${this.modelName.toLowerCase()}.systeminformation`),
+                editable: false,
+                sections: [
+                    {
+                        value: 'changelogs',
+                        name: i18n.__(`${this.modelName.toLowerCase()}.changelogs`),
+                        component: 'ChangeLogs'
+                    },
 
+                ]
+            }
         ]
     }
-
-
 }

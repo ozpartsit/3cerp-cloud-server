@@ -10,6 +10,8 @@ export interface IEntity extends IExtendedDocument {
   type: string;
   email?: string;
   phone?: string;
+  email2?: string;
+  phone2?: string;
   locale?: string;
   currency?: string;
   taxNumber: string;
@@ -18,6 +20,7 @@ export interface IEntity extends IExtendedDocument {
   contacts?: IContact[];
   addresses?: IAddress[];
 
+  memo?: string;
 }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +34,8 @@ const schema = new Schema<IEntity>(
   {
     email: { type: String, input: "TextField", validType: "email" },
     phone: { type: String, input: "TextField", validType: "phone" },
+    email2: { type: String, input: "TextField", validType: "email" },
+    phone2: { type: String, input: "TextField", validType: "phone" },
     name: {
       type: String,
       required: true,
@@ -62,7 +67,11 @@ const schema = new Schema<IEntity>(
       type: Number,
       default: 0,
       input: "PercentField"
-    }
+    },
+    memo: {
+      type: String,
+      input: "TextareaField",
+    },
   },
   options
 );

@@ -171,38 +171,36 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
-    // public async form(req: Request, res: Response, next: NextFunction) {
-    //     let { recordtype } = req.params;
-    //     try {
-    //         let form = await this.model.getForm(req.locale);
-    //         if (form) {
-    //             let fields = await this.model.getFields(req.locale);
-    //             form.sections.forEach((section: any) => {
-    //                 if (section.table) {
-    //                     section.table = fields.find((f: any) => f.field == section.table) || null;
-    //                 }
-    //                 section.cols.forEach((col: any) => {
+    public async form(req: Request, res: Response, next: NextFunction) {
+        let { recordtype } = req.params;
+        try {
+            let form = await this.model.getForm(req.locale);
+            if (form) {
+                let fields = await this.model.getFields(req.locale);
+                form.tabs.forEach((tab: any) => {
+        
+                    tab.sections.forEach((section: any) => {
 
-    //                     if (col.rows) col.rows.forEach((row: any) => {
-    //                         if (row) row.forEach((field: any, index: any) => {
-    //                             row[index] = fields.find((f: any) => f.field == field) || null;
-    //                             if (row[index]) {
-    //                                 if (row[index].type != "EmbeddedField") delete row[index].fields;
-    //                                 delete row[index].selects;
-    //                                 delete row[index].ref;
-    //                             }
-    //                         })
-    //                     })
-    //                 })
-    //             })
-    //         }
+                     
+                            if (section.fields) section.fields.forEach((field: any, index: any) => {
+                                section.fields[index] = fields.find((f: any) => f.field == field) || null;
+                                if (section.fields[index]) {
+                                    if (!["Table","NestedDocument"].includes(section.fields[index].fieldType)) delete section.fields[index].fields;
+                                    delete section.fields[index].selects;
+                                    delete section.fields[index].ref;
+                                }
+                            })
+                     
+                    })
+                })
+            }
 
 
-    //         res.json(form);
-    //     } catch (error) {
-    //         return next(error);
-    //     }
-    // }
+            res.json(form);
+        } catch (error) {
+            return next(error);
+        }
+    }
     public async logs(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {

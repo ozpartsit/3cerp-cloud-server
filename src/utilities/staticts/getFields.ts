@@ -70,7 +70,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
       } else {
         i18n.setLocale(local || "en");
         let field: any = {
-          field: pathname,
+          field: schematype._presplitPath.length > 1 ? schematype._presplitPath[1] : pathname,
           name: i18n.__(`${modelName}.${pathname}`),
           fieldType: schematype.options.input,
           ref: schematype.options.ref,
@@ -106,6 +106,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
               field: schematype._presplitPath[0],
               name: i18n.__(`${modelName}.${schematype._presplitPath[0]}`),
               subdoc: true,
+              fieldType: "NestedDocument",
               fields: [field]
             })
           }
