@@ -35,49 +35,57 @@ const options = {
 };
 const schema = new Schema<IItem>(
   {
-    name: { type: String, required: true, input: "TextField" },
-    description: { type: String, input: "TextField", default: "" },
+    name: { type: String, required: true, input: "Input", validType: "text" },
+    description: { type: String, input: "Input", validType: "text", default: "" },
     type: {
       type: String,
       required: true,
       enum: ItemTypes,
-      input: "SelectField"
+      input: "Select",
+      validType: "select"
     },
     priceGroup: {
       type: Schema.Types.ObjectId,
       ref: "Classification",
       autopopulate: true,
       required: false,
-      input: "SelectField"
+      input: "Select",
+      validType: "select"
     },
     images: {
       type: [Schema.Types.ObjectId],
       ref: "Storage",
       autopopulate: true,
-      input: "FileField"
+      input: "File",
+      validType: "images"
     },
     coo: {
       type: String,
-      input: "SelectField"
+      constant: "country",
+      input: "Select",
+      validType: "select"
     },
     barcode: {
       type: String,
-      input: "TextField"
+      input: "Input",
+      validType: "text"
     },
     weight: {
       type: Number,
-      input: "NumberField"
+      input: "Input",
+      validType: "number",
+      precision: 2
     },
     status: {
       type: String,
-
     },
     manufacturer: {
       type: String,
-      input: "TextField"
+      input: "Input",
+      validType: "text"
     },
-    firstSalesDate: { type: Date, input: "DateField" },
-    lastSalesDate: { type: Date, input: "DateField" },
+    firstSalesDate: { type: Date, input: "DatePicker", validType: "date", readonly: true },
+    lastSalesDate: { type: Date, input: "DatePicker", validType: "date", readonly: true },
   },
   options
 );

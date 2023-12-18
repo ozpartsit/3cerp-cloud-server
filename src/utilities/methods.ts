@@ -16,16 +16,19 @@ export interface IExtendedDocument extends Document {
   deleted: boolean;
   resource: string;
   type: string;
+  index?: number;
+  $locals: { triggers: any[] }
   setValue: (field: string, value: any, subdoc: string | null, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null) => Promise<void>;
-  getOptions: (field: string, subdoc: string, subdoc_id: string| null, deepdoc: string| null, deepdoc_id: string| null, page: number, keyword: string) => Promise<any>;
+  getOptions: (field: string, subdoc: string, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null, page: number, keyword: string) => Promise<any>;
   changeLogs: (document?: any, list?: string) => Promise<void>;
   virtualPopulate: () => Promise<void>;
   autoPopulate: () => Promise<Object>;
   constantTranslate: (local: string) => Object;
   validateVirtuals: (save: boolean) => Promise<[any]>;
   totalVirtuals: () => void;
-  addToVirtuals: () => void;
-  recalcDocument: () => void;
+  addToVirtuals: (virtual: string, newline: any, index?: number) => void;
+  recalcDocument: () => Promise<void>;
+  recalc: () => Promise<void>;
   saveDocument: () => Promise<any>;
   validateDocument: () => Promise<[any]>;
   initLocal: () => void;
@@ -35,9 +38,11 @@ export interface IExtendedDocument extends Document {
 
 export default function customMethodsPlugin<T extends IExtendedDocument>(schema: Schema<T>) {
   // apply method to pre
-  function recalcDocument(this: T) {
-    console.log("default recalc Record");
-
+  async function recalcDocument(this: T) {
+    console.log("default recalc Record", this.type);
+    if (this.recalc) {
+      await this.recalc()
+    }
   }
   schema.method('setValue', setValue);
   schema.method('getOptions', getOptions);
@@ -99,13 +104,13 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
 
   //add locals
   async function initLocal(this: T) {
-    this.$locals["oldValue"] = {};
     this.$locals["triggers"] = [];
   }
 
   schema.pre("save", function () {
     let model: any = this.constructor;
-    this.type = model.modelName.split("_")[0];
+    if (model.modelName)
+      this.type = model.modelName.split("_")[0];
   })
 
   schema.pre("init", initLocal)

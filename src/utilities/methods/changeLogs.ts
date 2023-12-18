@@ -3,7 +3,11 @@ import { Document, models } from 'mongoose';
 import { IExtendedDocument } from "../methods"
 export default async function changeLogs<T extends IExtendedDocument>(this: T, document?: any, subdoc?: string) {
   try {
-    //zmodyfikować by przed zapisaniem pobierało oryginalny obiekt i zapisywalo zmiany
+    //przywraca oznaczenie zmian
+    // Object.keys(this.$locals).forEach(path => {
+    //   this.markModified(path)
+    // })
+    
     if (this.isModified()) {
       let selects = this.directModifiedPaths();
       //get original document if exists (only changed fields)
@@ -24,8 +28,8 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
             })
             // ref dla modeli
             let ref = null;
-            if (this.schema.path(field) && this.schema.path(field).options.ref ) {
-              ref = this.schema.path(field).options.ref 
+            if (this.schema.path(field) && this.schema.path(field).options.ref) {
+              ref = this.schema.path(field).options.ref
             }
             this.depopulate();
 

@@ -1,7 +1,8 @@
 import { Schema, Model } from "mongoose";
 import Entity, { IEntity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
-import { IAddress, nestedSchema } from "../../address.model";
+import Address, { IAddress, nestedSchema } from "../../address.model";
+import form from "./form.json"
 export interface ICustomer extends IEntity {
   firstName?: string;
   lastName?: string;
@@ -11,24 +12,25 @@ export interface ICustomer extends IEntity {
   lastSalesDate?: Date;
   firstOrderDate?: Date;
   lastOrderDate?: Date;
+  lastActivity?: Date;
   //classsifictaions
-  group?: Schema.Types.ObjectId;
-  category?: Schema.Types.ObjectId;
+  group?: Schema.Types.ObjectId[];
+  category?: Schema.Types.ObjectId[];
   //accounting
   terms?: Schema.Types.ObjectId;
   paymentMethod?: Schema.Types.ObjectId;
   entityType?: Schema.Types.ObjectId;
-
+  creditLimit?: Number;
+  accountOnHold?: Boolean;
   salesRep?: Schema.Types.ObjectId;
 
   billingAddress?: IAddress
   shippingAddress?: IAddress
 
-  //
-  website: {
-    type: String,
-    input: "TextField"
-  },
+  //information
+  website?: String
+
+
 }
 
 
@@ -37,93 +39,147 @@ export interface ICustomerModel extends Model<ICustomer>, IExtendedModel<ICustom
 const options = { discriminatorKey: "type", collection: "entities" };
 const schema = new Schema<ICustomer>(
   {
-    firstName: { type: String, input: "TextField" },
-    lastName: { type: String, input: "TextField" },
+    firstName: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
+    lastName: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
     status: {
       type: String,
-      input: "select",
+      input: "Select",
+      validType:"select",
       resource: 'constants',
       constant: 'customerstatus'
     },
-    
+
     //addresses
-    shippingAddress: nestedSchema,
-    billingAddress: nestedSchema,
+    shippingAddress: { type: nestedSchema, validType: "address", virtualPath: "addresses" },
+    billingAddress: { type: nestedSchema, validType: "address", virtualPath: "addresses" },
     //statistics
-    firstSalesDate: { type: Date, input: 'DateType', readonly: true },
-    lastSalesDate: { type: Date, input: 'DateType', readonly: true },
-    firstOrderDate: { type: Date, input: 'DateType', readonly: true },
-    lastOrderDate: { type: Date, input: 'DateType', readonly: true },
+    firstSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
+    lastSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
+    firstOrderDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
+    lastOrderDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
+    lastActivity: { type: Date, input: 'DatePicker', validType: "date" },
     //classsifictaions
     group: {
-      type: Schema.Types.ObjectId,
+      type: [Schema.Types.ObjectId],
       ref: "Group",
       autopopulate: true,
-      input: "SelectField"
+      input: "Autocomplete"
     },
     category: {
-      type: Schema.Types.ObjectId,
+      type: [Schema.Types.ObjectId],
       ref: "Category",
       autopopulate: true,
-      input: "SelectField"
+      input: "Select",
+      validType:"select",
     },
     entityType: {
       type: Schema.Types.ObjectId,
       ref: "EntityType",
       autopopulate: true,
-      input: "SelectField"
+      input: "Select",
+      validType:"select",
     },
     //accounting
     terms: {
       type: Schema.Types.ObjectId,
       ref: "Terms",
       autopopulate: true,
-      input: "SelectField"
+      input: "Select",
+      validType:"select",
     },
     paymentMethod: {
       type: Schema.Types.ObjectId,
       ref: "PaymentMethod",
       autopopulate: true,
-      input: "SelectField"
+      input: "Select",
+      validType:"select",
+    },
+    creditLimit: {
+      type: Number,
+      input: "Input",
+      validType: "currency",
+      precision: 2
+    },
+    accountOnHold: {
+      type: Boolean,
+      input: "Switch",
+      validType: "switch",
+      default: false,
     },
     salesRep: {
       type: Schema.Types.ObjectId,
       ref: "User",
       autopopulate: true,
-      input: "SelectField",
+      input: "Select",
+      validType:"select",
       hint: "Sales Representative",
-      help: " A sales rep interacts directly with customers throughout all phases of the sales process."
+      help: "A sales rep interacts directly with customers throughout all phases of the sales process."
     },
 
-    //
+    //information
     website: {
       type: String,
-      input: "TextField",
+      input: "Input",
+      validType: "url",
     },
+
   },
   options
 );
 
-schema.method("recalcDocument", async function () {
 
-  // set default addresses
-  const billingAddress = (this.addresses || []).find(address => address.billingAddress);
-  const shippingAddress = (this.addresses || []).find(address => address.shippingAddress);
+schema.static("form", () => form)
 
-  Object.keys(nestedSchema).forEach(async (field) => {
-    if (billingAddress)
-      await this.setValue(field, billingAddress[field], "billingAddress", null, null, null);
-    else await this.setValue(field, "", "billingAddress", null, null, null);
+schema.method("recalc", async function () {
 
-    if (shippingAddress)
-      await this.setValue(field, shippingAddress[field], "shippingAddress", null, null, null);
-    else await this.setValue(field, "", "shippingAddress", null, null, null);
-  })
+  console.log("recalc", "customer")
+  if (this.$locals.triggers)
+    for (let trigger of this.$locals.triggers) {
+      this.$locals.triggers.shift();
+
+      if (trigger.subdoc == "billingAddress" && trigger.field == "_id") {
+        await updateAddress(this, "billingAddress")
+      }
+      if (trigger.subdoc == "shippingAddress" && trigger.field == "_id") {
+        await updateAddress(this, "shippingAddress")
+      }
+      // if (trigger.subdoc == "billingAddress") {
+      //   await updateDefaultAddress(this, "billingAddress")
+      // }
+      // if (trigger.subdoc == "shippingAddress") {
+      //   await updateDefaultAddress(this, "shippingAddress")
+      // }
+
+    }
 
 })
 
 const Customer: ICustomerModel = Entity.discriminator<
   ICustomer,
   ICustomerModel
->("Customer", schema);
+>("customer", schema);
 export default Customer;
+
+
+// aktualizuje dokument powiązany jako domyślny
+async function updateDefaultAddress(doc: ICustomer, type: string) {
+  const address = (doc.addresses || []).find(address => address[type]);
+  if (address) {
+    for (let field of Object.keys(nestedSchema)) {
+      await address.setValue(field, doc[type][field], null, null, null, null);
+    }
+  } else {
+    let defaultAddress = { ...doc[type] };
+    defaultAddress[type] = true;
+    await doc.addToVirtuals("addresses", defaultAddress);
+  }
+}
+async function updateAddress(doc: ICustomer, type: string) {
+  const address = (doc.addresses || []).find(address => doc[type] && doc[type]._id && address._id.toString() == doc[type]._id.toString());
+  //console.log(address)
+  if (address) {
+    for (let field of Object.keys(nestedSchema)) {
+      await doc.setValue(field, address[field], type, null, null, null);
+    }
+  }
+}

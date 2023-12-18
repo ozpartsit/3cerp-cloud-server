@@ -2,6 +2,8 @@ import { Schema, model, models, Model } from "mongoose";
 import Transaction, { ITransaction } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import LineSalesOrder, { ILineSalesOrder } from "./line.schema";
+import form from "./form.json"
+
 const lineModel = models.Line.discriminator("LineSalesOrder", LineSalesOrder);
 const options = { discriminatorKey: "type", collection: "transactions" };
 
@@ -16,18 +18,20 @@ export interface ISalesOrderModel extends Model<ISalesOrder>, IExtendedModel<ISa
 
 const schema = new Schema<ISalesOrder>(
   {
-    shippingCost: { type: Number, default: 0, input: "CurrencyField" },
+    shippingCost: { type: Number, default: 0, input: "Input", validType: "currency" },
     terms: {
       type: Schema.Types.ObjectId,
       ref: "Terms",
       autopopulate: true,
-      input: "SelectField"
+      input: "Select",
+      validType: "select"
     },
     paymentMethod: {
       type: Schema.Types.ObjectId,
       ref: "PaymentMethod",
       autopopulate: true,
-      input: "SelectField"
+      input: "Select",
+      validType: "select"
     },
   },
   options
@@ -47,8 +51,10 @@ schema.pre("validate", async function (next) {
   next();
 });
 
+schema.static("form", () => form)
+
 const SalesOrder: ISalesOrderModel = Transaction.discriminator<
   ISalesOrder,
   ISalesOrderModel
->("SalesOrder", schema);
+>("salesorder", schema);
 export default SalesOrder;

@@ -3,7 +3,7 @@ import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import printPDF from "../../utilities/pdf/pdf";
 import Entity, { IEntity } from "../entities/schema";
-import Address, { schema as AddressSchema } from "../address.model";
+import Address, { IAddress, nestedSchema } from "../address.model";
 import Line, { ILine } from "./line.schema";
 
 
@@ -28,6 +28,10 @@ export interface ITransaction extends IExtendedDocument {
   referenceNumber: string;
   memo: string;
 
+  billingAddress?: IAddress
+  shippingAddress?: IAddress
+
+
   recalc(): any;
   autoName(): any;
   pdf(): any;
@@ -36,60 +40,71 @@ interface ITransactionModel extends Model<ITransaction>, IExtendedModel<ITransac
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const TransactionSchema = {
-  name: { type: String, input: "TextField", set: (v: any) => v.toLowerCase() },
-  date: { type: Date, input: "DateField", required: true, defaultSelect: true },
+  name: { type: String, input: "Input", validType: "text", required: true },
+  date: { type: Date, input: "DatePicker", validType: "date", required: true, defaultSelect: true },
   company: {
     type: Schema.Types.ObjectId,
     ref: "Company",
     required: false,
     autopopulate: true,
-    input: "SelectField"
+    input: "Select",
+    validType: "select",
   },
   entity: {
     type: Schema.Types.ObjectId,
     ref: "Entity",
     required: true,
     autopopulate: true,
-    input: "SelectField",
+    input: "Autocomplete",
+    validType: "autocomplete",
     defaultSelect: true
   },
-  number: { type: Number, input: "IntField" },
+  number: { type: Number, input: "Input", validType: "number", readonly: true },
   quantity: {
     type: Number,
     default: 0,
-    input: "IntField",
-    total: "lines"
+    input: "Input",
+    validType: "number",
+    total: "lines",
+    readonly: true
   },
-  amount: { type: Number, default: 0, input: "CurrencyField", total: "lines", defaultSelect: true },
-  taxAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", defaultSelect: true },
-  grossAmount: { type: Number, default: 0, input: "CurrencyField", total: "lines", defaultSelect: true },
-  weight: { type: Number, default: 0, input: "NumberField" },
-  tax: {
+  amount: { type: Number, default: 0, input: "Input", validType: "currency", total: "lines", defaultSelect: true, readonly: true },
+  taxAmount: { type: Number, default: 0, input: "Input", validType: "currency", total: "lines", defaultSelect: true, readonly: true },
+  grossAmount: { type: Number, default: 0, input: "Input", validType: "currency", total: "lines", defaultSelect: true, readonly: true },
+  weight: { type: Number, default: 0, input: "Input", validType: "number", precision: 2, total: "lines", readonly: true },
+  taxRate: {
     type: Number,
     default: 0,
-    input: "PercentField"
+    input: "Input",
+    validType: "percent",
+    precision: 1,
+    min: 0
   },
   exchangeRate: {
     type: Number,
     required: true,
     default: 1,
-    input: "NumberField",
+    input: "Input",
+    validType: "number",
     precision: 4
   },
   currency: {
     type: String,
     required: true,
     default: "PLN",
-    input: "SelectField",
-    constant: 'currencies',
+    input: "Select",
+    constant: 'currency',
     defaultSelect: true
   },
   memo: {
     type: String,
-    input: "TextareaField"
+    input: "Textarea",
   },
-  billingAddress: AddressSchema,
-  shippingAddress: AddressSchema,
+
+  //addresses
+  shippingAddress: { type: nestedSchema, validType: "address", virtualPath: "addresses" },
+  billingAddress: { type: nestedSchema, validType: "address", virtualPath: "addresses" },
+
   type: {
     type: String,
     required: true,
@@ -97,10 +112,24 @@ const TransactionSchema = {
   status: {
     type: String,
     default: "pendingapproval",
-    constant: 'statuses',
+    constant: 'status',
   },
-  taxNumber: { type: String, input: "TextField" },
-  referenceNumber: { type: String, input: "TextField" },
+  taxNumber: {
+    type: String,
+    input: "Input",
+    validType: "text",
+    min: 10,
+    max: 14,
+    hint: "VAT registration number",
+    help: "Sometimes also known as a VAT registration number, this is the unique number that identifies a taxable person (business) or non-taxable legal entity that is registered for VAT."
+  },
+  referenceNumber: {
+    type: String,
+    input: "Input",
+    validType: "text",
+    hint: "Order Reference Number",
+    help: "Unique number that gets assigned to an order placed by the customer (online or offline)"
+  },
 };
 const options = {
   discriminatorKey: "type",

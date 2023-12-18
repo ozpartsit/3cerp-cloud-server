@@ -1,0 +1,93 @@
+{
+    "tabs": [
+        {
+            "value": "main",
+            "editable": true,
+            "sections": [
+                {
+                    "value": "general",
+                    "editable": true,
+                    "fields": [
+                        "name",
+                        "number",
+                        "referenceNumber",
+                        "entity",
+                        "date",
+                        "company",
+                        "memo",
+                        "lines",
+                        "shippingCost"
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "addresses",
+            "editable": true,
+            "sections": [
+                {
+                    "value": "billingAddress",
+                    "editable": true,
+                    "fields": [
+                        [
+                            "billingAddress"
+                        ]
+                    ]
+                },
+                {
+                    "value": "shippingAddress",
+                    "editable": true,
+                    "fields": [
+                        [
+                            "shippingAddress"
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "financial",
+            "editable": true,
+            "sections": [
+                {
+                    "value": "accounting",
+                    "editable": true,
+                    "fields": [
+                        "taxRate",
+                        "taxNumber",
+                        "currency",
+                        "terms",
+                        "paymentMethod"
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "communication",
+            "editable": false,
+            "sections": [
+                {
+                    "value": "notes",
+                    "editable": false,
+                    "component": "Notes"
+                },
+                {
+                    "value": "emails",
+                    "editable": false,
+                    "component": "Emails"
+                }
+            ]
+        },
+        {
+            "value": "systeminformation",
+            "editable": false,
+            "sections": [
+                {
+                    "value": "changelogs",
+                    "editable": false,
+                    "component": "ChangeLogs"
+                }
+            ]
+        }
+    ]
+}

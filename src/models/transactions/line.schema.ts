@@ -62,35 +62,72 @@ const schema = new Schema<ILine>(
       ref: "Item",
       required: true,
       autopopulate: { select: "name displayname type _id" },
-      input: "SelectField"
+      input: "Autocomplete",
+      validType: "autocomplete"
     },
     description: {
       type: String,
-      set: (v: any) => v.toLowerCase(),
-      input: "TextField"
+      input: "Input",
+      validType: "text"
     },
     price: {
       type: Number,
       default: 0,
-      input: "CurrencyField",
+      input: "Input",
+      validType: "currency",
+      precision: 2,
       set: (v: any) => roundToPrecision(v, 2)
     },
     quantity: {
       type: Number,
       default: 1,
-      input: "IntField",
-      min: 1
+      input: "Input",
+      validType: "number",
+      precision: 0,
+      min: 1,
+      set: (v: any) => roundToPrecision(v, 0)
     },
     multiplyquantity: {
       type: Number,
       default: 1,
-      input: "IntField"
+      input: "Input",
+      validType: "number",
+      precision: 0,
+      readonly: true
     },
-    amount: { type: Number, default: 0, input: "CurrencyField" },
-    taxAmount: { type: Number, default: 0, input: "CurrencyField" },
-    grossAmount: { type: Number, default: 0, input: "CurrencyField" },
-    weight: { type: Number, default: 0, input: "NumberField" },
-    deleted: { type: Boolean, default: false }
+    amount: {
+      type: Number,
+      default: 0,
+      input: "Input",
+      validType: "currency",
+      precision: 2,
+      set: (v: any) => roundToPrecision(v, 2)
+    },
+    taxAmount: {
+      type: Number,
+      default: 0,
+      input: "Input",
+      validType: "currency",
+      precision: 2,
+      set: (v: any) => roundToPrecision(v, 2)
+    },
+    grossAmount: {
+      type: Number,
+      default: 0,
+      input: "Input",
+      validType: "currency",
+      precision: 2,
+      set: (v: any) => roundToPrecision(v, 2)
+    },
+    weight: {
+      type: Number,
+      default: 0,
+      input: "Input",
+      validType: "number",
+      precision: 2,
+      set: (v: any) => roundToPrecision(v, 2)
+    },
+    deleted: { type: Boolean, input: "Switch", validType: "switch", default: false, readonly:true }
   },
   options
 );

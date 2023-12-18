@@ -5,7 +5,7 @@ import { IExtendedDocument } from "../utilities/methods";
 import Email from "../services/email";
 import Changelog from "../models/changelog.model";
 import CustomError from "../utilities/errors/customError";
-
+import Table from '../models/tablePreference.model';
 
 // Typ generyczny dla modelu Mongoose
 interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
@@ -36,9 +36,10 @@ class GenericController<T extends IExtendedDocument> {
 
     async get(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
+        let { field } = req.query;
         try {
             this.model = this.model.setAccount(req.headers.account, req.headers.user);
-            let document = await this.model.getDocument(id, mode);
+            let document = await this.model.getDocument(id, mode, (field || "").toString());
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
@@ -75,14 +76,16 @@ class GenericController<T extends IExtendedDocument> {
 
             let field = req.body;
             let page = parseInt((req.query.page || 1).toString());
-            let keyword = (req.query.keyword||"").toString();
+            let keyword = (req.query.keyword || "").toString();
+
             let { results, total } = await this.model.getOptions(id, mode, field, page, keyword);
+
             const data = {
                 docs: results,
                 totalDocs: total,
-                limit: 25,
+                limit: results.length == total ? total : 25,
                 page: page,
-                totalPages: Math.ceil(total / 25)
+                totalPages: results.length == total ? 1 : Math.ceil(total / 25)
             }
             res.json({ status: "success", data: data });
 
@@ -164,9 +167,21 @@ class GenericController<T extends IExtendedDocument> {
     }
     public async fields(req: Request, res: Response, next: NextFunction) {
         let { recordtype } = req.params;
+        let { table } = req.query;
+        let preference: any = undefined;
+        let selected: any = undefined;
         try {
             let fields = await this.model.getFields(req.locale);
-            res.json({ status: "success", data: { fields } });
+
+            if (table) {
+                await Table.setAccount(req.headers.account, req.headers.user).findOne({ table: table.toString() }).then(res => {
+                    if (res) {
+                        preference = res._id;
+                        selected = res.selected;
+                    }
+                })
+            }
+            res.json({ status: "success", data: { table, preference, selected, fields } });
         } catch (error) {
             return next(error);
         }
@@ -174,29 +189,10 @@ class GenericController<T extends IExtendedDocument> {
     public async form(req: Request, res: Response, next: NextFunction) {
         let { recordtype } = req.params;
         try {
+            this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let form = await this.model.getForm(req.locale);
-            if (form) {
-                let fields = await this.model.getFields(req.locale);
-                form.tabs.forEach((tab: any) => {
-        
-                    tab.sections.forEach((section: any) => {
 
-                     
-                            if (section.fields) section.fields.forEach((field: any, index: any) => {
-                                section.fields[index] = fields.find((f: any) => f.field == field) || null;
-                                if (section.fields[index]) {
-                                    if (!["Table","NestedDocument"].includes(section.fields[index].fieldType)) delete section.fields[index].fields;
-                                    delete section.fields[index].selects;
-                                    delete section.fields[index].ref;
-                                }
-                            })
-                     
-                    })
-                })
-            }
-
-
-            res.json(form);
+            res.json({ status: "success", data: { form } });
         } catch (error) {
             return next(error);
         }
@@ -269,7 +265,7 @@ class GenericController<T extends IExtendedDocument> {
             // search by keyword
             let search = (req.query.search || "").toString();
             if (search) {
-                query['name'] = { $regex: `,*${req.query.search}.*` }
+                query[(req.query.field || 'name').toString()] = { $regex: `${req.query.search}` }
             }
 
             // loop per query params
@@ -300,6 +296,8 @@ class GenericController<T extends IExtendedDocument> {
                 // get fields
                 let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
                 for (let index in result) {
+                   // console.log(result[index])
+                    result[index] = new this.model(result[index]);
                     result[index] = await result[index].constantTranslate(req.locale);
                 }
 

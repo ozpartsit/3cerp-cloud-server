@@ -14,11 +14,11 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
             this[list.path].sort((a: any, b: any) => a.index - b.index)
         }
         // justOne parse to Array;
-        let docs = this[list.path];
+        let docs: IExtendedDocument[] = this[list.path];
         if (list.options.justOne) docs = [this[list.path]];
 
         for (const [index, value] of docs.entries()) {
-          let line = value;
+          let line = value as IExtendedDocument;
           // set index - useful to sort
           if (!list.options.justOne) line.index = index;
           // if line is new init new document
@@ -26,13 +26,14 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
           // assign foreignField to documents from virtual field
           line[list.options.foreignField] = this[list.options.localField];
           // assign temporarily this to parent key
-          line.parent = this;
+          // line.parent = this;
           // copy field value from parten document
           ([...(list.options.copyFields || []), "account"]).forEach((field: string) => {
             line[field] = this[field] ? this[field]._id : this[field];
           });
           // Validate or validate and save
           try {
+            await line.recalcDocument();
             if (save) {
               // before save validate is automatic
               if (this.deleted) line.deleted = true;
@@ -46,7 +47,6 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
           } catch (err: any) {
             err._id = line._id;
             err.list = list.path;
-            console.log(err)
             errors.push(err);
           }
 

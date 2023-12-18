@@ -1,7 +1,10 @@
 
+import currency from "./currencies"
+import country from "./countries"
+
 export default {
-    countries: ["PL", "GB"],
+    country: country,
     frequency: ["firstDayOfMonth", "lastDayOfMonth"],
-    currencies: ["PLN", "EUR"],
+    currency: currency,
     trantypes: ["SalesOrder", "Invoice"]
 }

@@ -1850,7 +1850,7 @@ exports.schema = new mongoose_1.Schema({
     country: {
         type: String,
         required: true,
-        constant: "countries"
+        constant: "country"
     },
     phone: { type: String, input: "TextField" },
     geoCodeHint: {
@@ -2134,7 +2134,7 @@ const schema = new mongoose_1.Schema({
         type: String,
         required: true,
         input: "SelectField",
-        constant: 'currencies'
+        constant: 'currency'
     },
     taxNumber: { type: String, input: "TextField" },
     tax: {
@@ -2377,7 +2377,7 @@ const schema = new mongoose_1.Schema({
         enum: currencies_1.default,
         required: true,
         resource: 'constants',
-        constant: 'currencies'
+        constant: 'currency'
     },
     priceLevel: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -3056,7 +3056,7 @@ const TransactionSchema = {
         required: true,
         default: "PLN",
         input: "SelectField",
-        constant: 'currencies',
+        constant: 'currency',
     },
     memo: {
         type: String,

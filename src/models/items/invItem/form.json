@@ -1,0 +1,55 @@
+{
+    "tabs": [
+        {
+            "value": "main",
+            "editable": true,
+            "sections": [
+                {
+                    "value": "general",
+                    "editable": true,
+                    "fields": [
+                        "name",
+                        "description",
+                        "priceGroup",
+                        "images",
+                        "coo",
+                        "weight",
+                        "barcode",
+                        "manufacturer",
+                        "firstSalesDate",
+                        "lastSalesDate"
+                    ]
+                },
+                {
+                    "value": "prices",
+                    "editable": true,
+                    "fields": [
+                        "prices"
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "communication",
+            "editable": false,
+            "sections": [
+                {
+                    "value": "notes",
+                    "editable": false,
+                    "component": "Notes"
+                }
+            ]
+        },
+        {
+            "value": "systeminformation",
+            "editable": false,
+            "sections": [
+                {
+                    "value": "changelogs",
+                    "editable": false,
+                    "component": "ChangeLogs"
+                }
+            ]
+        }
+    ]
+}

@@ -22,13 +22,13 @@ interface IContactModel extends Model<IContact>, IExtendedModel<IContact> { }
 const schema = new Schema<IContact>(
   {
     entity: { type: Schema.Types.ObjectId },
-    name: { type: String, input: "TextField" },
-    firstName: { type: String, input: "TextField" },
-    lastName: { type: String, input: "TextField" },
-    email: { type: String, input: "TextField" },
-    phone: { type: String, input: "TextField" },
-    jobTitle: { type: String, input: "TextField" },
-    description: { type: String, input: "TextField" }
+    name: { type: String, input: "Input", validType: "text" },
+    firstName: { type: String, input: "Input", validType: "text" },
+    lastName: { type: String, input: "Input", validType: "text" },
+    email: { type: String, input: "Input", validType: "email" },
+    phone: { type: String, input: "Input", validType: "phone" },
+    jobTitle: { type: String, input: "Input", validType: "text" },
+    description: { type: String, input: "Input", validType: "text" }
   },
   options
 );

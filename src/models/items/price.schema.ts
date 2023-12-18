@@ -20,21 +20,37 @@ const schema = new Schema<IPrice>({
         type: Schema.Types.ObjectId,
         ref: "Item"
     },
-    price: { type: Number, default: 0, required: true },
-    moq: { type: Number, default: 1, required: true },
+    price: {
+        type: Number,
+        default: 0,
+        required: true,
+        input: "Input",
+        validType: "currency"
+    },
+    moq: {
+        type: Number,
+        default: 1,
+        required: true,
+        input: "Input",
+        validType: "number",
+        precision: 0
+    },
     currency: {
         type: String,
-        enum: Currencies,
         required: true,
-        resource: 'constants',
-        constant: 'currencies'
+        default: "PLN",
+        input: "Select",
+        constant: 'currency',
+        defaultSelect: true
     },
     priceLevel: {
         type: Schema.Types.ObjectId,
         ref: "Classification",
         autopopulate: true,
         required: false,
-    }
+        input: "Select",
+        validType: "select"
+    },
 
 }, options);
 

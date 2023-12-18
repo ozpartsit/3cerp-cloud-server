@@ -3,13 +3,7 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import path from "path";
 import i18n from "../config/i18n";
 
-import { getCountries } from "../constants/countries";
-import { getStates } from "../constants/states";
-import { getCurrencies } from "../constants/currencies";
-import { getPriceBasis } from "../constants/price.basis";
-import { getStatus } from "../constants/transaction.status";
-import { getCustomerStatus } from "../constants/customer.status";
-const constants = { countries: getCountries, states: getStates, currencies: getCurrencies, pricebasis: getPriceBasis, status: getStatus, customerstatus: getCustomerStatus };
+import constants from "../constants";
 export default class controller {
     public async get(req: Request, res: Response, next: NextFunction) {
 
@@ -17,15 +11,25 @@ export default class controller {
         i18n.configure({
             directory: path.resolve(__dirname, "../constants/locales")
         });
-
         try {
             let values = [];
-            if (constants[req.params.recordtype])
-                values = await constants[req.params.recordtype](req.query);
-            let result = values.map(value => {
-                return { _id: value, name: res.__(value) }
+            if (constants[req.params.recordtype]) values = constants[req.params.recordtype]
+            let result = values.map((value: any) => {
+                if (value._id) {
+                    return { ...value, name: res.__(`${req.params.recordtype}.${value._id}`) }
+                } else
+                    return { _id: value, name: res.__(`${req.params.recordtype}.${value}`) }
             })
-            res.json(result);
+            const data = {
+                docs: result,
+                page: 1,
+                totalDocs: result.length,
+                limit: result.length,
+                totalPages: 1
+            }
+
+
+            res.json({ status: "success", data: data });
         } catch (error) {
             console.log(error);
             return next(error);

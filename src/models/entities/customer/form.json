@@ -1,0 +1,155 @@
+{
+    "tabs": [
+        {
+            "value": "main",
+            "editable": true,
+            "sections": [
+                {
+                    "value": "general",
+                    "editable": true,
+                    "fields": [
+                        "name",
+                        "firstName",
+                        "lastName",
+                        "entityType",
+                        "email",
+                        "email2",
+                        "phone",
+                        "phone2",
+                        "website",
+                        "category",
+                        "group",
+                        "salesRep",
+                        "lastActivity",
+                        "memo"
+                    ]
+                },
+                {
+                    "value": "contacts",
+                    "editable": true,
+                    "fields": [
+                        "contacts"
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "addresses",
+            "editable": true,
+            "sections": [
+                {
+                    "value": "billingAddress",
+                    "editable": true,
+                    "fields": [
+                        [
+                            "billingAddress"
+                        ]
+                    ]
+                },
+                {
+                    "value": "shippingAddress",
+                    "editable": true,
+                    "fields": [
+                        [
+                            "shippingAddress"
+                        ]
+                    ]
+                },
+                {
+                    "value": "addressbook",
+                    "editable": true,
+                    "fields": [
+                        "addresses"
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "sales",
+            "editable": false,
+            "sections": [
+                {
+                    "value": "openOrders",
+                    "editable": false,
+                    "component": "OpenOrders"
+                },
+                {
+                    "value": "relatedTransactions",
+                    "editable": false,
+                    "component": "RelatedTransactions"
+                }
+            ]
+        },
+        {
+            "value": "financial",
+            "editable": true,
+            "sections": [
+                {
+                    "value": "accounting",
+                    "editable": true,
+                    "fields": [
+                        "accountOnHold",
+                        "taxRate",
+                        "taxNumber",
+                        "currency",
+                        "terms",
+                        "paymentMethod",
+                        "creditLimit",
+                        "firstSalesDate",
+                        "lastSalesDate",
+                        "firstOrderDate",
+                        "lastOrderDate"
+                    ]
+                },
+                {
+                    "value": "statement",
+                    "editable": false,
+                    "component": "statement"
+                }
+            ]
+        },
+        {
+            "value": "analysis",
+            "editable": false,
+            "sections": [
+                {
+                    "value": "statistics",
+                    "editable": false,
+                    "component": "CustomerStatistics"
+                },
+                {
+                    "value": "topitems",
+                    "editable": false,
+                    "component": "CustomerTopItems"
+                }
+            ]
+        },
+        {
+            "value": "communication",
+            "editable": false,
+            "sections": [
+                {
+                    "value": "notes",
+                    "editable": false,
+                    "component": "Notes"
+                },
+                {
+                    "value": "emails",
+                    "editable": false,
+                    "component": "Emails"
+                }
+            ]
+        },
+        {
+            "value": "systeminformation",
+            "editable": false,
+            "sections": [
+                {
+                    "value": "changelogs",
+                    "editable": false,
+                    "component": "ChangeLogs"
+                }
+            ]
+        }
+    ]
+}

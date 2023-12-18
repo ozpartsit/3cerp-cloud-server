@@ -12,8 +12,8 @@ export interface ILineSalesOrder extends ILine {
   etaMemo: string;
 }
 const schema = new Schema<ILineSalesOrder>({
-  eta: { type: Date },
-  etaMemo: { type: String },
+  eta: { type: Date, input: "DatePicker", validType: "date", required: true, },
+  etaMemo: { type: String, input: "Input", validType: "text" },
 }, options);
 
 schema.pre("validate", async function (next) {

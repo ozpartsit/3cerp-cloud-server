@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function addToVirtuals<T extends IExtendedDocument>(
   this: T,
@@ -7,10 +7,9 @@ export default async function addToVirtuals<T extends IExtendedDocument>(
   index: number
 ) {
   let list = this.schema.virtuals[virtual];
-  newline = new list.options.model(newline);
+  newline = new models[list.options.ref](newline);
   newline.initLocal();
   newline.index = index;
-  newline.parent = this;
   // copy field value from parten document
   (list.options.copyFields || []).forEach((field: string) => {
     newline[field] = this[field] ? this[field]._id : this[field];

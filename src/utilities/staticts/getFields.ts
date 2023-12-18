@@ -1,7 +1,7 @@
 import { Schema, Model, Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
 import i18n from "../../config/i18n";
-export default function getFields<T extends IExtendedDocument>(this: Model<T>, local: string = "en", parent: string = "", subrecord: boolean = false) {
+export default function getFields<T extends IExtendedDocument>(this: Model<T>, local: string = "en", parent: string = "", subrecord: boolean = false, table: boolean = true) {
   let fields: any[] = [];
   let modelSchema = this.schema;
   let modelName = this.modelName.toLowerCase().split("_")[0]
@@ -12,108 +12,157 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
   interface Virtuals {
     [key: string]: any;
   }
-  const virtuals: Virtuals = modelSchema.virtuals;
-  Object.entries(virtuals).forEach(([key, value]) => {
-    if (!parent && value && value.options.ref) {
-      let field: any = {
-        field: key,
-        name: i18n.__(`${modelName}.${key}`),
-        ref: value.options.ref,
-        //instance: schematype.instance,
-        fieldType: "Table",
-        subdoc: true,
-      };
-      if (value.options.ref) {
-        let refModel: any = models[value.options.ref];
-        field.fields = refModel.getFields(local, key, true);
+  if (table) {
+    const virtuals: Virtuals = modelSchema.virtuals;
+    Object.entries(virtuals).forEach(([key, value]) => {
+      if (!parent && value && value.options.ref) {
+        let field: any = {
+          field: key,
+          name: i18n.__(`${modelName}.${key}`),
+          ref: value.options.ref,
+          //instance: schematype.instance,
+          //fieldType: value.options.justOne ? "Autocomplete" : "Table",
+          control: value.options.justOne ? "Autocomplete" : "Table",
+          validType: value.options.validType || "table",
+          //array: !value.options.justOne,
+          multiple: !value.options.justOne,
+          //sortable: !!value.options.sortable,
+          removable: !!value.options.removable,
+          addable: !!value.options.addable,
+          //groupable: !!value.options.groupable,
+          expandable: false,
+          subdoc: true,
+        };
+        if (value.options.ref) {
+          let refModel: any = models[value.options.ref];
+          field.fields = refModel.getFields(local, key, true);
+        }
+        fields.push(field)
       }
-      fields.push(field)
-    }
-  });
+    });
+  }
   //modelSchema.eachPath(async (pathname: string, schematype: any) => {
   for (const [pathname, schematype] of Object.entries<any>(modelSchema.paths)) {
-
+    //if (schematype.options.validType) console.log(pathname, schematype.instance)
     if (
       schematype.options.input || schematype.options.ref ||
       ["Embedded", "Array"].includes(schematype.instance)
     ) {
+      //console.log(schematype)
       if (["Embedded", "Array"].includes(schematype.instance)) {
-        //console.log('sd', pathname,JSON.stringify(schematype));
+
         let field: any = {
           field: parent ? `${parent}.${pathname}` : pathname,
           name: i18n.__(`${modelName}.${pathname}`),
-          fieldType: `${schematype.instance}Field`,
-          fields: []
-        }
-
-        if (!parent && schematype.schema) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
-
-          let subfield = {
-            field: `${pathname}.${key}`,
-            name: i18n.__(`${pathname}.${key}`),
-            required: value.required,
-            readonly: schematype.options.readonly,
-            ref: value.ref,
-            resource: value.resource,
-            constant: value.constant,
-            fieldType: value.input,
-            min: schematype.options.min,
-            max: schematype.options.max,
-            hint: schematype.options.hint,
-            help: schematype.options.help,
-            validType: schematype.options.validType,
-          }
-          if (value.input)
-            field.fields.push(subfield)
-        }
-        fields.push(field);
-      } else {
-        i18n.setLocale(local || "en");
-        let field: any = {
-          field: schematype._presplitPath.length > 1 ? schematype._presplitPath[1] : pathname,
-          name: i18n.__(`${modelName}.${pathname}`),
-          fieldType: schematype.options.input,
+          //fieldType: schematype.instance == "Embedded" ? "DocumentNested" : schematype.options.input,
+          control: schematype.instance == "Embedded" ? "DocumentNested" : schematype.options.input,
+          subdoc: schematype.instance == "Embedded" ? true : false,
+          //array: !!schematype['$isMongooseArray'],
+          multiple: !!schematype['$isMongooseArray'],
           ref: schematype.options.ref,
           resource: schematype.options.resource,
           constant: schematype.options.constant,
-        }
-        if (!parent || subrecord || schematype._presplitPath.length > 1) {
-          Object.assign(field, {
-            subdoc: parent || (schematype._presplitPath.length > 1 ? schematype._presplitPath[0] : undefined),
-            // subdoc_id: subrecord ? true : false,
-            // subrecord: subrecord || schematype._presplitPath.length > 1,
-            required: schematype.isRequired,
-            readonly: schematype.options.readonly,
-            min: schematype.options.min,
-            max: schematype.options.max,
-            hint: schematype.options.hint,
-            help: schematype.options.help,
-            validType: schematype.options.validType,
-          })
+          validType: schematype.options.validType,
+          readonly: schematype.options.readonly,
+          fields: []
         }
         if (schematype.options.ref) {
           let refModel: any = models[schematype.options.ref];
           if (refModel) {
             field.resource = refModel.schema.options.collection;
-            if (!parent) field.fields = refModel.getFields(local, pathname);
+            field.type = schematype.options.ref.toLowerCase();
+            field.validType = "url"
           }
         }
-        if (schematype._presplitPath.length > 1) {
-          let parent = fields.find(f => f.field == schematype._presplitPath[0])
-          if (parent) parent.fields.push(field)
-          else {
-            fields.push({
-              field: schematype._presplitPath[0],
-              name: i18n.__(`${modelName}.${schematype._presplitPath[0]}`),
-              subdoc: true,
-              fieldType: "NestedDocument",
-              fields: [field]
+        if (!parent && schematype.schema) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
+          let subfield = {
+            field: key,
+            subdoc: pathname,
+            name: i18n.__(`${modelName}.${pathname}.${key}`),
+            required: value.required,
+            readonly: value.readonly,
+            ref: value.ref,
+            resource: value.resource,
+            constant: value.constant,
+            fieldType: value.input,
+            control: value.input,
+            min: value.min,
+            max: value.max,
+            hint: value.hint,
+            help: value.help,
+            validType: value.validType,
+            activator: value.input == "DatePicker" ? "Input" : undefined
+          }
+          if (schematype.options.ref) {
+            let refModel: any = models[schematype.options.ref];
+            if (refModel) {
+              field.resource = refModel.schema.options.collection;
+            }
+          }
+
+          if (value.input)
+            field.fields.push(subfield)
+        }
+        fields.push(field);
+      } else {
+        if (schematype.options.input) {
+          i18n.setLocale(local || "en");
+          let field: any = {
+            field: schematype._presplitPath.length > 1 ? schematype._presplitPath[1] : pathname,
+            name: i18n.__(`${modelName}.${pathname}`),
+            //fieldType: schematype.options.input,
+            control: schematype.options.input,
+            //array: !!schematype['$isMongooseArray'],
+            multiple: !!schematype['$isMongooseArray'],
+            ref: schematype.options.ref,
+            resource: schematype.options.resource,
+            constant: schematype.options.constant,
+            sortable: true,//schematype.options.sortable,
+            groupable: false
+          }
+          if (!parent || subrecord || schematype._presplitPath.length > 1) {
+            Object.assign(field, {
+              subdoc: parent || (schematype._presplitPath.length > 1 ? schematype._presplitPath[0] : undefined),
+              // subdoc_id: subrecord ? true : false,
+              // subrecord: subrecord || schematype._presplitPath.length > 1,
+              required: schematype.isRequired,
+              readonly: schematype.options.readonly,
+              min: schematype.options.min,
+              max: schematype.options.max,
+              hint: schematype.options.hint,
+              help: schematype.options.help,
+              validType: schematype.options.validType,
+              precision: schematype.options.precision,
+              activator: schematype.options.input == "DatePicker" ? "Input" : undefined
             })
           }
-        } else {
-          fields.push(field)
+          if (schematype.options.ref) {
+            let refModel: any = models[schematype.options.ref];
+            if (refModel) {
+              field.resource = refModel.schema.options.collection;
+              if (!parent) field.fields = refModel.getFields(local, pathname);
+            }
+          }
+          if (schematype._presplitPath.length > 1) {
+            let parent = fields.find(f => f.field == schematype._presplitPath[0])
+            if (parent) parent.fields.push(field)
+            else {
+              fields.push({
+                field: schematype._presplitPath[0],
+                name: i18n.__(`${modelName}.${schematype._presplitPath[0]}`),
+                subdoc: true,
+                //fieldType: "DocumentNested",
+                control: "DocumentNested",
+                //array: !!schematype['$isMongooseArray'],
+                multiple: !!schematype['$isMongooseArray'],
+                fields: [field]
+              })
+            }
+          } else {
+            fields.push(field)
+          }
+          //if (field.type != "subrecords") fields.push(field);
         }
-        //if (field.type != "subrecords") fields.push(field);
       }
     }
   }

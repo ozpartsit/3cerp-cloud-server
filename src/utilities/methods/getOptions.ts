@@ -82,15 +82,27 @@ export default async function getOptions<T extends IExtendedDocument>(
                     } else {
                         results = constants[fieldType.options.constant];
                     }
-                    if (keyword) {
-                        results = results.filter(c => c.include(keyword))
-                    }
-
-                    total = results.length;
+                  
+                    
                     // tłumaczenie
                     results = results.map((value: any) => {
-                        return { _id: value, name: i18n.__(value) }
+                        if (value._id) {
+                            return { ...value, name: i18n.__(`${fieldType.options.constant}.${value._id}`) }
+                        } else {
+                            return { _id: value, name: i18n.__(`${fieldType.options.constant}.${value}`) }
+                        }
                     })
+    
+                    if (keyword) {
+                        results = results.filter((c:any) => c.name.toLowerCase().includes(keyword.toLowerCase()))
+                    }
+               
+                    total = results.length;
+                    if (page) {
+                        let skip = ((page || 1) - 1) * 25;
+                        results = results.filter((item, index) => index >= skip && index < skip + 25)
+                    }
+            
                 }
             }
             return { results, total }

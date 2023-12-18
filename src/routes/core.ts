@@ -15,6 +15,7 @@ import AccountController from "../controllers/accounts";
 import Account from "../models/account.model";
 import User from "../models/user.model";
 import Preference from "../models/preference.model";
+import Table from "../models/tablePreference.model";
 
 import { StorageTypes } from "../models/storages/model";
 import { TransactionTypes } from "../models/transactions/model";
@@ -48,7 +49,8 @@ export default class Routes {
     this.routeUniversal("users", "user", new Controller(User))
     //Preferences
     this.routeUniversal("preferences", "preference", new Controller(Preference))
-
+    //Table Preferences
+    this.routeUniversal("preferences", "table", new Controller(Table))
     //Storage
     Object.values(StorageTypes).forEach(async (storage) => {
       this.routeUniversal(storage.collection.collectionName, storage.modelName, new Controller(storage))

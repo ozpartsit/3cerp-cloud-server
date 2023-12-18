@@ -11,11 +11,13 @@ import Account from "../models/account.model";
 export interface IExtendedModel<T extends Document> extends Model<T> {
   account: Schema.Types.ObjectId;
   type: string;
-  loadDocument: (id: string) => Promise<T | null>;
+  $locals: { triggers: any[] }
+  options: any;
+  loadDocument: (id: string, field?: string) => Promise<T | null>;
   addDocument: (mode: string, data: Object) => any;
-  getDocument: (id: string, mode: string) => Promise<T | null>;
+  getDocument: (id: string, mode: string, field?: string) => Promise<T | null>;
   saveDocument: (id: string, data: Object) => Promise<any>;
-  updateDocument: (id: string, mode: string, updates: updateBody) => any;
+  updateDocument: (id: string, mode: string, updates: updateBody | updateBody[]) => any;
   getOptions: (id: string, mode: string, field: any, page: number, keyword: string) => Promise<any>;
   deleteDocument: (id: string) => any;
   findDocuments: (query: Object, options: any) => any;
@@ -25,35 +27,44 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   getSelect(): any;
 
   setAccount(account: string | string[] | undefined, user?: string | string[] | undefined): this;
+  getAccount(): any
+  getUser(): any
+
+  form(): any;
+  defaultDocument(id: string): any
 }
 
 export default function customStaticsMethods<T extends IExtendedDocument>(schema: Schema<T, IExtendedModel<T>>) {
-  let account = new Schema({
-    account: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
-    type: {
-      type: String
-    }
-  })
-  schema.add(account);
-  schema.index({ account: 1 });
+  const options = (schema as any).options;
+  // to do - poprwić by ni ekorzystać z any
+  if (options.collection) {
+    let account = new Schema({
+      account: {
+        type: Schema.Types.ObjectId,
+        required: true,
+      },
+      type: {
+        type: String
+      }
+    })
+    schema.add(account);
+    schema.index({ account: 1 });
 
-  schema.statics.loadDocument = loadDocument;
-  schema.statics.addDocument = addDocument;
-  schema.statics.getDocument = getDocument;
-  schema.statics.saveDocument = saveDocument;
-  schema.statics.updateDocument = updateDocument;
-  schema.statics.getOptions = getOptions;
-  schema.statics.deleteDocument = deleteDocument;
-  schema.statics.findDocuments = findDocuments;
+    schema.statics.loadDocument = loadDocument;
+    schema.statics.addDocument = addDocument;
+    schema.statics.getDocument = getDocument;
+    schema.statics.saveDocument = saveDocument;
+    schema.statics.updateDocument = updateDocument;
+    schema.statics.getOptions = getOptions;
+    schema.statics.deleteDocument = deleteDocument;
+    schema.statics.findDocuments = findDocuments;
 
-  schema.statics.getFields = getFields;
-  schema.statics.getForm = getForm;
-  schema.statics.getSelect = getSelect;
-  schema.statics.setAccount = setAccount;
+    schema.statics.getFields = getFields;
 
+    schema.statics.getSelect = getSelect;
+    schema.statics.setAccount = setAccount;
+    schema.statics.getForm = getForm;
+  }
 }
 
 
@@ -111,6 +122,8 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
       this.schema.pre("save", function () {
         if (this.account.toString() !== account.toString()) throw "wrong account";
       })
+      this.schema.static('getAccount', () => account);
+      this.schema.static('getUser', () => user);
 
       return model<IExtendedDocument>(`${baseModel}_${account}_${user}`, this.schema, this.collection.collectionName);
     }
@@ -119,10 +132,12 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
   }
 }
 
-//loadDocument
-export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, id: string): Promise<T | null> {
+//loadDocuments
+export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, id: string, field: string = "_id"): Promise<T | null> {
   try {
-    let doc = await this.findById(id);
+    let query = {};
+    query[field] = id;
+    let doc = await this.findOne(query);
     if (doc) {
       await doc.virtualPopulate();
       await doc.validateVirtuals(false);
@@ -155,13 +170,18 @@ export async function addDocument<T extends IExtendedDocument>(this: IExtendedMo
 
 }
 
-export async function getDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string): Promise<T | null> {
+export async function getDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, field: string = "_id"): Promise<T | null> {
   try {
-    let document: T | null = await this.loadDocument(id);
+
+    let document: T | null = await this.loadDocument(id, field);
     if (document && document._id) {
       //const cacheID = new Types.ObjectId().toString();
       // to do - cacheID - jeżeli chcemy otwierać ten sam dokument w jedym momencie;
       if (mode === "advanced") cache.set(id, document);
+    } else {
+      if (!!this.defaultDocument) {
+        return this.defaultDocument(id)
+      }
     }
     return document;
   } catch (error) {
@@ -175,7 +195,6 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
 // jeżeli nie, zwraca null
 export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string, data: Object): Promise<any> {
   try {
-    console.log(id)
     let document = cache.get<T>(id);
     if (!document) {
       document = new this(data || {});
@@ -190,17 +209,17 @@ export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, 
   }
 }
 
-interface updateBody {
-  deepdoc: string,
-  deepdoc_id: string,
-  subdoc: string,
-  subdoc_id: string,
+export interface updateBody {
+  deepdoc?: string,
+  deepdoc_id?: string,
+  subdoc?: string,
+  subdoc_id?: string,
   field: string,
   value: any,
 
 }
 
-export async function updateDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, updates: updateBody | updateBody[]) {
+export async function updateDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, updates: updateBody[] | updateBody) {
   try {
     let document: T | null | any | undefined = null;
     if (mode === "advanced") {
@@ -324,7 +343,6 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
           }
         }
       }
-
     let result = await this.find(query)
       .populate(Object.values(populated))
       .sort(sort).skip(skip).limit(limit).select(select);

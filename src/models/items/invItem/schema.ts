@@ -3,6 +3,8 @@ import Item, { IItem } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import { IEntity } from "../../entities/schema";
 import Currencies from "../../../constants/currencies";
+import form from "./form.json"
+
 const options = { discriminatorKey: "type", collection: "items" };
 
 // interface IWarehouses {
@@ -120,6 +122,8 @@ const schema = new Schema<IInvItem>(
   },
   options
 );
+
+schema.static("form", () => form)
 
 const InvItem: IInvItemModel = Item.discriminator<IInvItem, IInvItemModel>(
   "InvItem",
