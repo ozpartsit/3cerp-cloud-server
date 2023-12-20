@@ -7,12 +7,14 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
     // Object.keys(this.$locals).forEach(path => {
     //   this.markModified(path)
     // })
-    
+
     if (this.isModified()) {
       let selects = this.directModifiedPaths();
       //get original document if exists (only changed fields)
       //console.log(this.type, this.constructor,selects)
+
       const constructor: any = this.constructor;
+      const createdBy = constructor.getUser();
       const type = constructor.modelName.split("_")[0];
       if (!this.isNew && this.type) {
         let originalDoc = await models[type].findById(this.id, selects);
@@ -43,7 +45,8 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
                   subdoc_id: subdoc ? this.id : null,
                   newValue: value,
                   oldValue: originalValue,
-                  ref: ref
+                  ref: ref,
+                  createdBy: createdBy
                 }
               );
               changeLog.save();

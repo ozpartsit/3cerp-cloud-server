@@ -52,7 +52,11 @@ const schema = new Schema<INotification>(
 schema.index({ name: 1 });
 
 const Notification: INotificationModel = model<INotification, INotificationModel>(
-    "Notification",
+    "notification",
     schema
 );
+Notification.init().then(function (Event) {
+    console.log('Notification Builded');
+})
+
 export default Notification;

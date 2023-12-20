@@ -12,6 +12,10 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   account: Schema.Types.ObjectId;
   type: string;
   $locals: { triggers: any[] }
+  urlComponent?: string;
+  uniqNumber?: number;
+
+  // deletedDate?: Date;
   options: any;
   loadDocument: (id: string, field?: string) => Promise<T | null>;
   addDocument: (mode: string, data: Object) => any;
@@ -35,6 +39,8 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
 }
 
 export default function customStaticsMethods<T extends IExtendedDocument>(schema: Schema<T, IExtendedModel<T>>) {
+  schema.set('timestamps', true);
+
   const options = (schema as any).options;
   // to do - poprwić by ni ekorzystać z any
   if (options.collection) {
@@ -45,7 +51,16 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       },
       type: {
         type: String
-      }
+      },
+      urlComponent: {
+        type: String
+      },
+      uniqNumber: {
+        type: Number
+      },
+      // deletedDate: {
+      //   type: Date
+      // }
     })
     schema.add(account);
     schema.index({ account: 1 });

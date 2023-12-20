@@ -39,7 +39,7 @@ export default async function setValue<T extends IExtendedDocument>(
             if (((value || "").toString() !== (document[field] || "").toString()))
               this.$locals.triggers.push({ type: "setValue", name: `setValue_${subdoc}.${field}`, field: field, subdoc: subdoc, oldValue: document[subdoc][field], value: value });
 
-            document[subdoc][field] = value;
+            if (field !== "_id") document[subdoc][field] = value;
             await document.populate(`${subdoc}.${field}`, "name displayname type _id");
             changed = true;
           }
@@ -54,7 +54,7 @@ export default async function setValue<T extends IExtendedDocument>(
         if (((value || "").toString() !== (document[field] || "").toString()))
           this.$locals.triggers.push({ type: "setValue", name: `setValue_${field}`, field: field, oldValue: document[field], value: value });
 
-        document[field] = value;
+        if (field !== "_id") document[field] = value;
         //populate new field value
         await document.populate(field, "name displayname type _id");
       }

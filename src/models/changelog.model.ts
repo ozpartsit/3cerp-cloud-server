@@ -13,6 +13,7 @@ export interface IChangelog extends IExtendedDocument {
     newValue: string | Date | Schema.Types.ObjectId;
     oldValue: string | Date | Schema.Types.ObjectId;
     ref: string
+    createdBy: Schema.Types.ObjectId
 }
 
 interface IChangelogModel extends Model<IChangelog>, IExtendedModel<IChangelog> { }
@@ -55,6 +56,10 @@ export const schema = new Schema<IChangelog>(
         ref: {
             type: String,
         },
+        createdBy: {
+            ref: "User",
+            type: Schema.Types.ObjectId,
+        }
     },
     {
         collection: "changelogs",

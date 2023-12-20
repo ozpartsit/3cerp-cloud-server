@@ -220,7 +220,64 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+    public async activities(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, id } = req.params;
+        try {
+            let query: any = { document: id, subdoc: { $exists: false }, field: { $in: ['name', 'status', 'email', 'memo'] } };
+            let results = await Changelog.find(query).sort({ _id: -1 })
+                .populate({ path: 'newValue', select: 'name' })
+                .populate({ path: 'oldValue', select: 'name' })
+                .populate({ path: 'createdBy', select: 'name' })
+                .exec();
+            // parse to plain result
+            let activities = results.map((line: any) => {
+                return {
+                    _id: line._id,
+                    type: "changeValue",
+                    name: `Change field "${line.field}"`,
+                    description: `${line.oldValue} -> ${line.newValue}`,
+                    // newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue,
+                    // oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue,
+                    time: new Date(line.createdAt),
+                    //field: line.field,
+                    //list: line.list,
+                    createdBy: line.createdBy ? line.createdBy.name : ""
+                }
+            })
 
+            activities.push({
+                _id: "email",
+                type: "sentEmail",
+                name: `Order confirmation email was sent: SO#1234`,
+                description: "www.shop.online",
+                time: getRandomDateFromLastWeek(),
+                createdBy: ""
+            })
+
+            activities.push({
+                _id: "payment",
+                type: "payment",
+                name: `Payment was processed on PayPal Express`,
+                description: "www.shop.online",
+                time: getRandomDateFromLastWeek(),
+                createdBy: ""
+            })
+
+            activities.push({
+                _id: "sales",
+                type: "sales",
+                name: `Customer placed this order on Online Store`,
+                description: "www.shop.online",
+                time: getRandomDateFromLastWeek(),
+                createdBy: ""
+            })
+
+            activities = sortByDate(activities, "time").reverse()
+            res.json({ status: "success", data: { activities } });
+        } catch (error) {
+            return next(error);
+        }
+    }
     public async find(req: Request, res: Response, next: NextFunction) {
 
         try {
@@ -296,7 +353,7 @@ class GenericController<T extends IExtendedDocument> {
                 // get fields
                 let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
                 for (let index in result) {
-                   // console.log(result[index])
+                    // console.log(result[index])
                     result[index] = new this.model(result[index]);
                     result[index] = await result[index].constantTranslate(req.locale);
                 }
@@ -314,3 +371,14 @@ class GenericController<T extends IExtendedDocument> {
 }
 
 export default GenericController;
+
+function getRandomDateFromLastWeek() {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
+
+    const randomDate = new Date(sevenDaysAgo.getTime() + Math.random() * (now.getTime() - sevenDaysAgo.getTime()));
+    return randomDate;
+}
+function sortByDate(array: any[], field: string = "date") {
+    return array.sort((a, b) => { return new Date(a[field]).getTime() - new Date(b[field]).getTime() });
+}

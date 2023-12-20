@@ -40,14 +40,14 @@ schema.virtual('fields').get(function (this: ITablePreference) {
     let model = Object.keys(models).find(model => model.toLowerCase() == sources[0].toLowerCase());
     if (model) {
         if (models[model]) {
-            let fields = (models[model] as any).getFields("en", "", false, false);
+            let fields = (models[model] as any).getFields("en", "", false, true);
             if (sources[1]) {
                 let subdoc = fields.find(f => f.field == sources[1])
                 if (subdoc)
                     return subdoc.fields;
-                else fields;
+                else fields.filter(field => field.control != "Table");
             }
-            return fields;
+            return fields.filter(field => field.control != "Table");
         }
     }
 

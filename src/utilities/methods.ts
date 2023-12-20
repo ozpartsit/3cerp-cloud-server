@@ -8,7 +8,7 @@ import validateVirtuals from "./methods/validateVirtuals";
 import totalVirtuals from "./methods/totalVirtuals";
 import addToVirtuals from "./methods/addToVirtuals";
 import cache from "../config/cache";
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, models } from "mongoose";
 import { IExtendedModel } from "../utilities//static";
 
 export interface IExtendedDocument extends Document {
@@ -17,6 +17,10 @@ export interface IExtendedDocument extends Document {
   resource: string;
   type: string;
   index?: number;
+  uniqNumber?: number;
+  name?: string;
+  shortName?: string;
+  urlComponent?: string;
   $locals: { triggers: any[] }
   setValue: (field: string, value: any, subdoc: string | null, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null) => Promise<void>;
   getOptions: (field: string, subdoc: string, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null, page: number, keyword: string) => Promise<any>;
@@ -107,10 +111,25 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
     this.$locals["triggers"] = [];
   }
 
-  schema.pre("save", function () {
+  schema.pre("save", async function (next) {
+    // ustawia typ na podstawie konstruktora/modelu
     let model: any = this.constructor;
-    if (model.modelName)
+    if (model.modelName) {
       this.type = model.modelName.split("_")[0];
+
+      if (this.isNew) {
+        const query: any = {
+          account: this.account
+        }
+        const count = await models[this.type].count(query);
+        this.uniqNumber = count + 1;
+      }
+
+      if (!this.urlComponent && this.name) {
+        this.urlComponent = `${this.uniqNumber}-${encodeURIComponentFn(this.shortName || this.name)}`
+      }
+    }
+    next()
   })
 
   schema.pre("init", initLocal)
@@ -135,4 +154,13 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
 
 }
 
+function encodeURIComponentFn(tekst) {
+  // Usuwanie diakrytyków i innych znaków specjalnych
+  let zakodowanyTekst = tekst.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+  // Zamiana spacji na '-'
+  zakodowanyTekst = zakodowanyTekst.replace(/ /g, '-');
+
+  // Kodowanie URI
+  return encodeURIComponent(zakodowanyTekst);
+}

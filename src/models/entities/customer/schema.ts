@@ -136,7 +136,6 @@ schema.method("recalc", async function () {
   if (this.$locals.triggers)
     for (let trigger of this.$locals.triggers) {
       this.$locals.triggers.shift();
-
       if (trigger.subdoc == "billingAddress" && trigger.field == "_id") {
         await updateAddress(this, "billingAddress")
       }

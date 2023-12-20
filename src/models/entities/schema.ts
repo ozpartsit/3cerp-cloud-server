@@ -117,6 +117,5 @@ const Entity: IEntityModel = model<IEntity, IEntityModel>(
 );
 Entity.init().then(function (Event) {
   console.log('Entity Builded');
-  Entity.updateMany({ type: "Customer" }, { $set: { type: "customer" } }).exec()
 })
 export default Entity;

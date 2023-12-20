@@ -21,7 +21,7 @@ export default class NotificationController {
                     description: `Sales Order (SO#${Math.floor(Math.random() * 1000)}) Pending Approval`,
                     date: new Date(),
                     document: "63988d8db3ae32a894fd539e",
-                    ref: "SalesOrder"
+                    ref: "salesorder"
                 }).save()
             }
         });
@@ -38,7 +38,7 @@ export default class NotificationController {
                     description: `Sales Order (SO#${Math.floor(Math.random() * 1000)}) Pending Approval`,
                     date: new Date(),
                     document: "63988d8db3ae32a894fd539e",
-                    ref: "SalesOrder"
+                    ref: "salesorder"
                 }).save()
             }
         });
