@@ -23,7 +23,7 @@ export interface IExtendedDocument extends Document {
   urlComponent?: string;
   $locals: { triggers: any[] }
   setValue: (field: string, value: any, subdoc: string | null, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null) => Promise<void>;
-  getOptions: (field: string, subdoc: string, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null, page: number, keyword: string) => Promise<any>;
+  getOptions: (field: string, subdoc: string, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null, page: number, keyword: string, mode: string | null) => Promise<any>;
   changeLogs: (document?: any, list?: string) => Promise<void>;
   virtualPopulate: () => Promise<void>;
   autoPopulate: () => Promise<Object>;

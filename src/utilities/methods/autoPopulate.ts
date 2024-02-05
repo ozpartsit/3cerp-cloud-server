@@ -2,21 +2,54 @@ import { Document } from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function autoPopulate<T extends IExtendedDocument>(this: T, local: string) {
   let paths: any[] = [];
+  //console.log("autoPopulate");
+  //console.log(this.schema.path('filters.value').options.refPath);
 
-  this.schema.eachPath(function process(pathname: string, schemaType: any) {
-    if (pathname === "_id") return;
-    if (schemaType.options.ref && schemaType.options.autopopulate) {
-      paths.push({
-        field: pathname,
-        select: schemaType.options.autopopulate.select || "name displayname type _id resource path "
-      });
+  for (const [pathname, schemaType] of Object.entries<any>(this.schema.paths)) {
+    if (["Embedded", "Array"].includes(schemaType.instance)) {
+      if ((schemaType.options.ref || schemaType.options.refPath) || schemaType.options.autopopulate) {
+       
+        if (schemaType.instance === "Array") {
+          if (this[pathname]) {
+            this[pathname].forEach((e, index) => {
+              if (e.value) {
+                paths.push({
+                  path: `${pathname}.${index}.value`,
+                  select: "name displayname type _id resource path deleted",
+                  model: e.ref,
+                  index: index
+                });
+              } else {
+                paths.push({
+                  path: pathname,
+                  select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted "
+                });
+              }
+
+            });
+          }
+        }
+      }
+    } else {
+      // if (pathname === "_id") return;
+      if ((schemaType.options.ref || schemaType.options.refPath) && schemaType.options.autopopulate) {
+        paths.push({
+          path: pathname,
+          select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted"
+        });
+      }
     }
-  });
+
+
+  }
+
   let Promises: any[] = [];
   for (let path of paths) {
-    if (this[path.field] && !this[path.field].type) // to do - poprawić
-      Promises.push(await this.populate(path.field, path.select));
+    //console.log("path", path,this[path.path] )
+    if ((this[path.path] && !this[path.path].type) || !this[path.path]) // to do - poprawić
+      Promises.push(await this.populate(path));
   }
+  //console.log("Promises1",Promises[0])
   await Promise.all(Promises);
 
   let doc = this.toObject();

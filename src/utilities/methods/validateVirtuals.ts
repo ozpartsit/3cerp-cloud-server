@@ -1,7 +1,7 @@
 import { Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function validateVirtuals<T extends IExtendedDocument>(this: T, save: boolean) {
-  console.log("validateVirtuals");
+  //console.log("validateVirtuals");
   let errors: any = [];
 
   const virtuals: any[] = Object.values(this.schema.virtuals);

@@ -32,12 +32,45 @@ export default function constantTranslate<T extends IExtendedDocument>(this: T, 
                 };
             }
         }
-        if (["Embedded"].includes(schemaType.instance)) {
+        if (["Embedded", "Array"].includes(schemaType.instance)) {
+            // uzupełnia pole value zgodnie z operatorem - przykład Table Preferences - filters
+            if (schemaType.instance == "Array") {
+                if (doc[pathname]) {
+                    doc[pathname].forEach(e => {
+                        if (e.value && e.constant) {
+                            if (Array.isArray(e.value)) {
+                                e.value = e.value.map(v => {
+                                    return { _id: v, name: i18n.__(`${e.constant}.${v}`) }
+                                })
+                            } else {
+                                e.value = {
+                                    _id: e.value, name: i18n.__(`${e.constant}.${e.value}`)
+                                };
+                            }
+                        }
+                    });
+                }
+
+            }
             if (schemaType.schema) for (const [key, value] of Object.entries<any>(schemaType.schema.tree)) {
+
                 if (value.constant) {
-                    if (doc[pathname] && doc[pathname][key]) doc[pathname][key] = {
-                        _id: doc[pathname][key], name: i18n.__(`${value.constant}.${doc[pathname][key]}`)
-                    };
+
+                    if (schemaType.instance == "Array") {
+                        doc[pathname].forEach(e => {
+                            //console.log(e, key, e[key])
+                            if (e[key]) e[key] = {
+                                _id: e[key], name: i18n.__(`${value.constant}.${e[key]}`)
+                            };
+                        });
+
+                    } else {
+                        if (doc[pathname] && doc[pathname][key]) doc[pathname][key] = {
+                            _id: doc[pathname][key], name: i18n.__(`${value.constant}.${doc[pathname][key]}`)
+                        };
+
+                    }
+
                 }
             }
         }

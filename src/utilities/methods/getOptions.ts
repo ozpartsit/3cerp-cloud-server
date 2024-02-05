@@ -13,7 +13,8 @@ export default async function getOptions<T extends IExtendedDocument>(
     deepdoc: string | null = null,
     deepdoc_id: string | null = null,
     page: number,
-    keyword: string
+    keyword: string,
+    mode: string | null = null,
 ) {
     try {
         let document: T | null = null;
@@ -35,7 +36,7 @@ export default async function getOptions<T extends IExtendedDocument>(
                         this[subdoc].push(document);
                     }
                     this.validateVirtuals(false);
-                    if (deepdoc) return document.getOptions(field, deepdoc, deepdoc_id, null, null, page, keyword)
+                    if (deepdoc) return document.getOptions(field, deepdoc, deepdoc_id, null, null, page, keyword, mode)
                 } else {
                     document = this;
                     field = `${subdoc}.${field}`;
@@ -54,55 +55,61 @@ export default async function getOptions<T extends IExtendedDocument>(
         if (fieldType) {
             let results: any = [];
             let total = 0;
-            if (fieldType.options.ref) {
-                let model = models[fieldType.options.ref] as IExtendedModel<T>;
+            let constant = fieldType.options.constant;
+            if (mode === "operator") {
+                constant = "operator";
+            } else {
+                if (fieldType.options.ref) {
+                    let model = models[fieldType.options.ref] as IExtendedModel<T>;
 
-                // query - dodać filtry 
-                let query = fieldType.options.filters || {};
-                if (keyword) query.name = { $regex: `.*${keyword}.*` }
+                    // query - dodać filtry 
+                    let query = fieldType.options.filters || {};
+                    if (keyword) query.name = { $regex: `.*${keyword}.*` }
 
-                total = await model.count(query);
-                let limit = 25;
-                let skip = ((page || 1) - 1) * 25;
-                results = await model.find(query).sort({ name: 1 }).skip(skip).limit(limit).select({ name: 1, description: 1, type: 1 });
-                //let results = model.findDocuments({},{})
+                    total = await model.count(query);
+                    let limit = 25;
+                    let skip = ((page || 1) - 1) * 25;
+                    results = await model.find(query).sort({ name: 1 }).skip(skip).limit(limit).select({ name: 1, description: 1, type: 1 });
+                    //let results = model.findDocuments({},{})
 
+                }
             }
 
-            if (fieldType.options.constant) {
+
+            if (constant) {
 
                 // i18n
                 // i18n.configure({
                 //     directory: path.resolve(__dirname, "../constants/locales")
                 // });
-                if (constants[fieldType.options.constant]) {
+                if (constants[constant]) {
                     if (fieldType.options.filters) {
                         // zastosowanie filtrów
-                        results = constants[fieldType.options.constant].filter((c: any) => fieldType.options.filters(this))
+                        results = constants[constant].filter((c: any) => fieldType.options.filters(this))
                     } else {
-                        results = constants[fieldType.options.constant];
+                        results = constants[constant];
                     }
-                  
-                    
+
+
                     // tłumaczenie
                     results = results.map((value: any) => {
                         if (value._id) {
-                            return { ...value, name: i18n.__(`${fieldType.options.constant}.${value._id}`) }
+                            return { ...value, name: i18n.__(`${constant}.${value._id}`) }
                         } else {
-                            return { _id: value, name: i18n.__(`${fieldType.options.constant}.${value}`) }
+                            return { _id: value, name: i18n.__(`${constant}.${value}`) }
                         }
                     })
-    
+
                     if (keyword) {
-                        results = results.filter((c:any) => c.name.toLowerCase().includes(keyword.toLowerCase()))
+                        results = results.filter((c: any) => c.name.toLowerCase().includes(keyword.toLowerCase()))
                     }
-               
+
                     total = results.length;
                     if (page) {
                         let skip = ((page || 1) - 1) * 25;
                         results = results.filter((item, index) => index >= skip && index < skip + 25)
                     }
-            
+
                 }
             }
             return { results, total }

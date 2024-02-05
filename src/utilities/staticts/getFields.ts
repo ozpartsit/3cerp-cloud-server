@@ -19,7 +19,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
         let field: any = {
           field: key,
           name: i18n.__(`${modelName}.${key}`),
-          ref: value.options.ref,
+          type: value.options.ref,
           //instance: schematype.instance,
           //fieldType: value.options.justOne ? "Autocomplete" : "Table",
           control: value.options.justOne ? "Autocomplete" : "Table",
@@ -59,7 +59,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
           subdoc: schematype.instance == "Embedded" ? true : false,
           //array: !!schematype['$isMongooseArray'],
           multiple: !!schematype['$isMongooseArray'],
-          ref: schematype.options.ref,
+          type: schematype.options.ref,
           resource: schematype.options.resource,
           constant: schematype.options.constant,
           validType: schematype.options.validType,
@@ -70,7 +70,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
           let refModel: any = models[schematype.options.ref];
           if (refModel) {
             field.resource = refModel.schema.options.collection;
-            field.type = schematype.options.ref.toLowerCase();
+            field.type = schematype.options.ref//.toLowerCase();
             field.validType = "url"
           }
         }
@@ -81,7 +81,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             name: i18n.__(`${modelName}.${pathname}.${key}`),
             required: value.required,
             readonly: value.readonly,
-            ref: value.ref,
+            type: value.ref,
             resource: value.resource,
             constant: value.constant,
             fieldType: value.input,
@@ -107,6 +107,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
       } else {
         if (schematype.options.input) {
           i18n.setLocale(local || "en");
+
           let field: any = {
             field: schematype._presplitPath.length > 1 ? schematype._presplitPath[1] : pathname,
             name: i18n.__(`${modelName}.${pathname}`),
@@ -114,7 +115,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             control: schematype.options.input,
             //array: !!schematype['$isMongooseArray'],
             multiple: !!schematype['$isMongooseArray'],
-            ref: schematype.options.ref,
+            type: schematype.options.ref,
             resource: schematype.options.resource,
             constant: schematype.options.constant,
             sortable: true,//schematype.options.sortable,
@@ -168,7 +169,18 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
   }
   //});
   //if (!parent) console.log(fields);
-  return fields;
+  return sortByFieldPresence(fields, "fields").reverse()
 }
 
+
+function sortByFieldPresence(arr, fieldName) {
+  return arr.sort((a, b) => {
+    // Sprawdza, czy obiekt a ma pole fieldName
+    const aHasField = a.hasOwnProperty(fieldName) ? 1 : 0;
+    // Sprawdza, czy obiekt b ma pole fieldName
+    const bHasField = b.hasOwnProperty(fieldName) ? 1 : 0;
+    // Sortuje tak, by obiekty z polem fieldName były pierwsze
+    return bHasField - aHasField;
+  });
+}
 

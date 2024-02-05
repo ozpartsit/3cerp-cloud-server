@@ -5,7 +5,7 @@ import { IExtendedDocument } from "../utilities/methods";
 import Email from "../services/email";
 import Changelog from "../models/changelog.model";
 import CustomError from "../utilities/errors/customError";
-import Table from '../models/tablePreference.model';
+import Table, { ITablePreference } from '../models/tablePreference.model';
 
 // Typ generyczny dla modelu Mongoose
 interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
@@ -39,7 +39,9 @@ class GenericController<T extends IExtendedDocument> {
         let { field } = req.query;
         try {
             this.model = this.model.setAccount(req.headers.account, req.headers.user);
-            let document = await this.model.getDocument(id, mode, (field || "").toString());
+
+            let document = await this.model.getDocument(id, mode, (field || "_id").toString());
+
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
@@ -79,7 +81,6 @@ class GenericController<T extends IExtendedDocument> {
             let keyword = (req.query.keyword || "").toString();
 
             let { results, total } = await this.model.getOptions(id, mode, field, page, keyword);
-
             const data = {
                 docs: results,
                 totalDocs: total,
@@ -97,6 +98,7 @@ class GenericController<T extends IExtendedDocument> {
 
     public async update(req: Request, res: Response, next: NextFunction) {
         let { recordtype, mode, id } = req.params;
+        let { field } = req.query;
         try {
             this.model = this.model.setAccount(req.headers.account, req.headers.user);
             // let document = null;
@@ -110,7 +112,7 @@ class GenericController<T extends IExtendedDocument> {
             //     document = await model.updateDocument(id, list, subrecord, field, value, save);
             // }
             let update = req.body;
-            let { document, saved } = await this.model.updateDocument(id, mode, update);
+            let { document, saved } = await this.model.updateDocument(id, mode, (field || "_id").toString(), update);
 
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
@@ -127,12 +129,13 @@ class GenericController<T extends IExtendedDocument> {
     }
     public async massUpdate(req: Request, res: Response, next: NextFunction) {
         let { recordtype } = req.params;
+        let { field } = req.query;
         try {
             this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let documents = req.body;
             let savedDocuments: any = []
             for (let update of documents) {
-                let { document, saved } = await this.model.updateDocument(update._id, "simple", update);
+                let { document, saved } = await this.model.updateDocument(update._id, "simple", (field || "").toString(), update);
                 savedDocuments.push(saved)
                 if (!document) {
                     savedDocuments.push(false)
@@ -215,7 +218,16 @@ class GenericController<T extends IExtendedDocument> {
                     list: line.list
                 }
             })
-            res.json({ status: "success", data: { changelogs } });
+            const data = {
+                docs: changelogs,
+                totalDocs: changelogs.length,
+                limit: changelogs.length,
+                page: 1,
+                totalPages: 1
+            }
+
+
+            res.json({ status: "success", data });
         } catch (error) {
             return next(error);
         }
@@ -234,8 +246,8 @@ class GenericController<T extends IExtendedDocument> {
                 return {
                     _id: line._id,
                     type: "changeValue",
-                    name: `Change field "${line.field}"`,
-                    description: `${line.oldValue} -> ${line.newValue}`,
+                    name: `Changed important data (${line.field})`,
+                    description: `${line.oldValue} to: ${line.newValue}`,
                     // newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue,
                     // oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue,
                     time: new Date(line.createdAt),
@@ -281,44 +293,82 @@ class GenericController<T extends IExtendedDocument> {
     public async find(req: Request, res: Response, next: NextFunction) {
 
         try {
+            // prefernecje tabeli przekazane w query
+            let { table } = req.query;
+            let preference: ITablePreference | null = null;
+            if (table) {
+                preference = await Table.setAccount(req.headers.account, req.headers.user).findOne({ table: table.toString() });
+            }
+
             this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let query: any = {};
 
             let options = { select: { name: 1, type: 1, resource: 1 }, sort: {}, limit: 50, skip: 0 };
+
+            // filters
             let filters = (req.query.filters || "").toString();
             if (filters) {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
-            }
+            } else {
+                if (preference && preference.filters) {
+                    // to do - opisać wszystkie operatory
+                    query = preference.filters.filter(f => f.value != undefined).reduce((t, f) => {
+                        t = {};
+                        let operator = "$eq";
+                        let value = {};
+                        if (Array.isArray(f.value)) {
+                            value[f.operator] = f.value
+                        }
+                        else {
+                            value[f.operator] = f.value
+                            //['$expr'][filter.operator] = [`$${filter.field}`, filter.value];
+                            //value = { $regex: `${f.value}.*`, $options: "i" }
+                        }
 
+                        t[f.field] = value;
+
+                        return t;
+                    }, {});
+                }
+            }
+            // selected
             let select = (req.query.select || req.query.fields || "").toString();
             if (select) {
-                options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1 });
+                options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, deleted: 1 });
             } else {
-                // sprawdź preferencje użytkownika lub roli
-                if (false) {
-                    // szuka prefrenecji
+                // sprawdź preferencje użytkownika
+                if (preference) {
+                    options.select = preference.selected.reduce((t, s) => { t[s] = 1; return t; }, { name: 1, type: 1, resource: 1, deleted: 1 });
                 } else {
                     // add default field to select
                     this.model.getSelect().forEach(field => {
                         options.select[field] = 1;
                     })
                 }
-
             }
+
             // Sort
             let sort = (req.query.sort || "").toString();
+            let sortArray: any = [];
             if (sort) {
-                options.sort = sort.split(",").reduce((o, f) => {
-                    // -date = desc sort per date field
-                    if (f[0] == "-") {
-                        f = f.substring(1);
-                        o[f] = -1;
-                    } else {
-                        o[f] = 1;
-                    }
-                    return o;
-                }, {});
+                sortArray = sort.split(",");
+            } else {
+                if (preference && preference.sortBy) {
+                    sortArray = preference.sortBy.map(s => s.order === "desc" ? `-${s.key}` : s.key);
+                }
             }
+            sortArray.reduce((o, f) => {
+                // -date = desc sort per date field
+                if (f[0] == "-") {
+                    f = f.substring(1);
+                    o[f] = -1;
+                } else {
+                    o[f] = 1;
+                }
+                return o;
+            }, {});
+
+
             // search by keyword
             let search = (req.query.search || "").toString();
             if (search) {
@@ -327,13 +377,15 @@ class GenericController<T extends IExtendedDocument> {
 
             // loop per query params
             for (const [key, value] of Object.entries(req.query)) {
-                if (["filters", "select", "fields", "search", "sort", "page", "limit"].includes(key))
-                    query[key] = { $eq: value }
+                // if (["filters", "select", "fields", "search", "sort", "page", "limit"].includes(key))
+                //     query[key] = { $eq: value }
                 // add verify field exists
             }
 
 
             options.limit = parseInt((req.query.limit || 50).toString());
+            if (preference && preference.itemsPerPage) options.limit = parseInt((preference.itemsPerPage || 50).toString());
+
             options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
 
             //let result = await this.model.findDocuments(query, options);
@@ -354,7 +406,7 @@ class GenericController<T extends IExtendedDocument> {
                 let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
                 for (let index in result) {
                     // console.log(result[index])
-                    result[index] = new this.model(result[index]);
+                    //result[index] = new this.model(result[index]);
                     result[index] = await result[index].constantTranslate(req.locale);
                 }
 

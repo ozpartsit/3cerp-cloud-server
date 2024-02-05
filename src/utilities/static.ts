@@ -21,7 +21,7 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   addDocument: (mode: string, data: Object) => any;
   getDocument: (id: string, mode: string, field?: string) => Promise<T | null>;
   saveDocument: (id: string, data: Object) => Promise<any>;
-  updateDocument: (id: string, mode: string, updates: updateBody | updateBody[]) => any;
+  updateDocument: (id: string, mode: string, field: string, updates: updateBody | updateBody[]) => any;
   getOptions: (id: string, mode: string, field: any, page: number, keyword: string) => Promise<any>;
   deleteDocument: (id: string) => any;
   findDocuments: (query: Object, options: any) => any;
@@ -151,7 +151,7 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
 export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, id: string, field: string = "_id"): Promise<T | null> {
   try {
     let query = {};
-    query[field] = id;
+    query[field || "_id"] = id;
     let doc = await this.findOne(query);
     if (doc) {
       await doc.virtualPopulate();
@@ -234,13 +234,13 @@ export interface updateBody {
 
 }
 
-export async function updateDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, updates: updateBody[] | updateBody) {
+export async function updateDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, field: string = "_id", updates: updateBody[] | updateBody) {
   try {
     let document: T | null | any | undefined = null;
     if (mode === "advanced") {
       document = cache.get<T | null>(id);
     } else {
-      document = await this.loadDocument(id);
+      document = await this.loadDocument(id, field);
     }
 
     if (document) {
@@ -267,15 +267,19 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
 export async function getOptions<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, field: any, page: number, keyword: string) {
   try {
     let document: T | null | any | undefined = null;
-    if (mode === "advanced") {
-      document = cache.get<T | null>(id);
+    if (id === "all") {
+      document = new this();
     } else {
-      document = await this.loadDocument(id);
+      if (mode === "advanced") {
+        document = cache.get<T | null>(id);
+      } else {
+        document = await this.loadDocument(id);
+      }
     }
 
     if (document) {
 
-      let { results, total } = await document.getOptions(field.field, field.subdoc, field.subdoc_id, field.deepdoc, field.deepdoc_id, page, keyword);
+      let { results, total } = await document.getOptions(field.field, field.subdoc, field.subdoc_id, field.deepdoc, field.deepdoc_id, page, keyword, mode);
 
       return { results: results, total: total };
 

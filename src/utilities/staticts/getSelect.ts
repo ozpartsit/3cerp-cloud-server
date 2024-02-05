@@ -32,7 +32,7 @@ export default function getSelect<T extends IExtendedDocument>(this: Model<T>, p
                 }
             } else {
                 if (schematype.options.ref) {
-                    console.log(schematype.options.ref)
+                    //console.log(schematype.options.ref)
                     let refModel: any = models[schematype.options.ref];
 
                     if (refModel) {

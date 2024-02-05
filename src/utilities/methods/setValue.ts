@@ -10,7 +10,7 @@ export default async function setValue<T extends IExtendedDocument>(
   deepdoc_id: string | null = null,
 ) {
   try {
-    console.log("setValue");
+    //console.log("setValue");
     let document: T | null = null;
     if (field) {
       let changed = false;

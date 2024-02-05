@@ -160,6 +160,7 @@ export default class Routes {
         this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
         controller.delete.bind(controller) as any
       );
+      
   }
 
   public routeConstants() {

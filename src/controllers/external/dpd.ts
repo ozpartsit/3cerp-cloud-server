@@ -29,7 +29,7 @@ export default class controller {
         // Pobierz aktualną datę i czas
         let now = new Date();
         // Dodaj jedną godzinę do aktualnej daty i czasu
-        now.setHours(now.getHours() + 11);
+        now.setHours(now.getHours() + 10);
         this.expires = now;
     }
     public async shipment(req: Request, res: Response, next: NextFunction) {
