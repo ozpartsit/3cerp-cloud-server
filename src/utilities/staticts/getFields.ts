@@ -119,6 +119,8 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             resource: schematype.options.resource,
             constant: schematype.options.constant,
             sortable: true,//schematype.options.sortable,
+            validType: schematype.options.validType,
+            activator: schematype.options.input == "DatePicker" ? "Input" : undefined,
             groupable: false
           }
           if (!parent || subrecord || schematype._presplitPath.length > 1) {

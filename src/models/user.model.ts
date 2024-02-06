@@ -36,47 +36,50 @@ const options = {
 const schema = new Schema<IUser>(
     {
         account: { type: Schema.Types.ObjectId, required: true },
-        email: { type: String, input: "TextField" },
+        email: { type: String, input: "Input", validType: "email" },
         name: {
             type: String,
             required: true,
-            input: "TextField"
+            input: "Input", validType: "text"
         },
         firstName: {
             type: String,
-            input: "TextField"
+            input: "Input", validType: "text"
         },
         lastName: {
             type: String,
-            input: "TextField"
+            input: "Input", validType: "text"
         },
         jobTitle: {
             type: String,
-            input: "TextField"
+            input: "Input", validType: "text"
         },
         avatar: {
             type: Schema.Types.ObjectId,
             ref: "Storage",
             autopopulate: true,
-            input: "FileField"
+            input: "Salect",
+            validType: "file"
         },
         department: {
             type: String,
-            input: "TextField"
+            input: "Input", validType: "text"
         },
         lastLoginDate: {
-            type: Date
+            type: Date,
+            input: "DatePicker", validType: "date"
         },
         lastAuthDate: {
-            type: Date
+            type: Date,
+            input: "DatePicker", validType: "date"
         },
         type: {
             type: String,
             required: true
         },
-        locale: { type: String, default: "en", input: "SelectField" },
-        role: { type: String, required: true, input: "TextField" },
-        roles: { type: [String], input: "SelectField" },
+        locale: { type: String, default: "en" },
+        role: { type: String, required: true },
+        roles: { type: [String] },
     },
     options
 );
@@ -143,7 +146,7 @@ schema.methods.initPreference = async function () {
 
 schema.post('save', function () {
     this.initPreference();
-    
+
 });
 
 schema.index({ name: 1 });
