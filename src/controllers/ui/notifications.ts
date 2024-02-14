@@ -11,7 +11,7 @@ export default class NotificationController {
         const job = schedule.scheduleJob('*/5 * * * *', async function () {
 
             let Model = Notification.setAccount("64f4cc1c9842bd71489d1fa0");
-            const total = await Model.count({ status: "unread" })
+            const total = await Model.countDocuments({ status: "unread" })
                 .exec()
             console.log('Temporary Notification Bot', total);
             if (total < 5) {
@@ -28,7 +28,7 @@ export default class NotificationController {
         const job2 = schedule.scheduleJob('*/5 * * * *', async function () {
 
             let Model = Notification.setAccount("64f4cc1c9842bd71489d1fa0");
-            const total = await Model.count({ status: "unread" })
+            const total = await Model.countDocuments({ status: "unread" })
                 .exec()
             console.log('Temporary Notification Bot', total);
             if (total < 5) {
@@ -48,7 +48,7 @@ export default class NotificationController {
         // check new
 
         let Model = Notification.setAccount(req.headers.account, req.headers.user);
-        const total = await Model.count({ status: "unread" })
+        const total = await Model.countDocuments({ status: "unread" })
         res.json({ status: "success", data: { total } });
     }
 
@@ -65,7 +65,7 @@ export default class NotificationController {
         const array = await Model.find(filters).skip(skip).limit(25)
             .populate({ path: 'document', select: 'name' })
             .exec()
-        const total = await Model.count(filters).exec();
+        const total = await Model.countDocuments(filters).exec();
 
         const data = {
             docs: array,

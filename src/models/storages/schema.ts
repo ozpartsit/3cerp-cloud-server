@@ -30,15 +30,16 @@ export const schema = new Schema<IStorage>({
 }, options);
 
 schema.statics.updateOrInsert = function (doc: IStorage) {
-    return this.updateOne(
-        { name: doc.name, path: doc.path },
-        doc,
-        { upsert: true },
-        (err: any, result: any) => {
-            if (err) throw err;
-            return result;
-        }
-    );
+    try {
+        return this.updateOne(
+            { name: doc.name, path: doc.path },
+            doc,
+            { upsert: true }
+        )
+    } catch (err) {
+        throw err;
+    }
+
 };
 
 schema.method("rename", async function (path: string) {
@@ -56,7 +57,7 @@ schema.method("deleteFile", async function () {
     let doc = this;
     fs.unlink(this.path, function (err: any) {
         if (err) throw err;
-        doc.delete();
+       // doc.delete(); - do sprawdzenia
         console.log("Successfully removed!");
     });
 });

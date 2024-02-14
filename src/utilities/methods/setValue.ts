@@ -1,7 +1,7 @@
 import { models, Document } from "mongoose";
 import { IExtendedDocument } from "../methods"
-export default async function setValue<T extends IExtendedDocument>(
-  this: T,
+export default async function setValue(
+  this: IExtendedDocument,
   field: string,
   value: any,
   subdoc: string | null = null,
@@ -10,13 +10,12 @@ export default async function setValue<T extends IExtendedDocument>(
   deepdoc_id: string | null = null,
 ) {
   try {
-    //console.log("setValue");
-    let document: T | null = null;
+    console.log("setValue");
+    let document: IExtendedDocument | null = null;
     if (field) {
       let changed = false;
       if (subdoc) {
-
-        let virtual: any = this.schema.virtuals[subdoc];
+        let virtual: any = this.schema.virtual(subdoc);
         if (virtual && !virtual.options.justOne)
           document = this[subdoc].find((element: any) => {
             return element._id.toString() === subdoc_id;
@@ -24,7 +23,7 @@ export default async function setValue<T extends IExtendedDocument>(
 
         if (!document) {
           if (virtual) {
-            document = await new models[virtual.options.ref]() as T;
+            document = await new models[virtual.options.ref]() as IExtendedDocument;
             document.initLocal();
             if (virtual.options.justOne) {
               this[subdoc] = document;

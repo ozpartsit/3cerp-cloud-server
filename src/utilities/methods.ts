@@ -26,7 +26,7 @@ export interface IExtendedDocument extends Document {
   getOptions: (field: string, subdoc: string, subdoc_id: string | null, deepdoc: string | null, deepdoc_id: string | null, page: number, keyword: string, mode: string | null) => Promise<any>;
   changeLogs: (document?: any, list?: string) => Promise<void>;
   virtualPopulate: () => Promise<void>;
-  autoPopulate: () => Promise<Object>;
+  autoPopulate: () => Promise<any>;
   constantTranslate: (local: string) => Object;
   validateVirtuals: (save: boolean) => Promise<[any]>;
   totalVirtuals: () => void;
@@ -36,6 +36,8 @@ export interface IExtendedDocument extends Document {
   saveDocument: () => Promise<any>;
   validateDocument: () => Promise<[any]>;
   initLocal: () => void;
+  getModel: () => any
+  getUser(): any
 }
 
 
@@ -43,8 +45,7 @@ export interface IExtendedDocument extends Document {
 export default function customMethodsPlugin<T extends IExtendedDocument>(schema: Schema<T>) {
   // apply method to pre
   async function recalcDocument(this: T) {
-    console.log("default recalc Record", this.type);
-    if (this.recalc) {
+    if (this.type && this.recalc) {
       await this.recalc()
     }
   }
@@ -58,7 +59,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
   schema.method('totalVirtuals', totalVirtuals);
   schema.method('addToVirtuals', addToVirtuals);
   schema.method('recalcDocument', recalcDocument);
-  schema.method('initLocal', initLocal);
+  schema.method('initLocal', initLocal); 
 
   schema.method('validateDocument', async function (this: T): Promise<[any]> {
     console.log("validateDocument");
@@ -81,7 +82,15 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
     return document;
   })
 
-
+  schema.method('getModel', function (this: T) {
+    let model: any = this.constructor;
+    return model;
+  })
+  schema.method('getUser', function (this: T) {
+    let model: any = this.getModel();
+    console.log(model)
+    return model.getUser();
+  })
 
   //triggers loop
   // async function actions(this: T, next: any) {
@@ -102,8 +111,10 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
 
   // add resource
   schema.virtual('resource').get(function (this: T) {
-    let resources = this.collection.name.split(".")
-    return resources[0];
+    if (this.collection) {
+      let resources = this.collection.name.split(".")
+      return resources[0];
+    }
   });
 
   //add locals
@@ -111,17 +122,19 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
     this.$locals["triggers"] = [];
   }
 
-  schema.pre("save", async function (next) {
-    // ustawia typ na podstawie konstruktora/modelu
-    let model: any = this.constructor;
-    if (model.modelName) {
-      this.type = model.modelName.split("_")[0];
 
+  schema.pre("save", async function (this: T, next) {
+    // ustawia typ na podstawie konstruktora/modelu
+
+    let model: any = this.getModel()
+    if (model.modelName) {
+      const type: any = model.modelName.split("_")[0] as String;
+      this.type = type;
       if (this.isNew) {
         const query: any = {
           account: this.account
         }
-        const count = await models[this.type].count(query);
+        const count = await models[type].countDocuments(query);
         this.uniqNumber = count + 1;
       }
 
@@ -133,6 +146,9 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
   })
 
   schema.pre("init", initLocal)
+
+
+
   // add Owner ID
   // schema.add({
   //   ownerAccount: {

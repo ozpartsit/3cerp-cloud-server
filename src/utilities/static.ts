@@ -14,6 +14,7 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   $locals: { triggers: any[] }
   urlComponent?: string;
   uniqNumber?: number;
+  deleted?: Boolean
 
   // deletedDate?: Date;
   options: any;
@@ -58,9 +59,9 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       uniqNumber: {
         type: Number
       },
-      // deletedDate: {
-      //   type: Date
-      // }
+      deleted: {
+        type: Boolean
+      }
     })
     schema.add(account);
     schema.index({ account: 1 });
@@ -126,21 +127,24 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
       this.schema.pre("find", function () {
         this.where(filters);
       })
-      this.schema.pre("count", function () {
+      // wczesniej count teraz countDocuments
+      this.schema.pre("countDocuments", function (next) {
         this.where(filters);
+        next(); // Kontynuuje do wykonania właściwej operacji countDocuments
       })
       this.schema.pre('findOne', function () {
         this.where(filters);
       });
 
       // weryfikowanie poprawności account
-      this.schema.pre("save", function () {
-        if (this.account.toString() !== account.toString()) throw "wrong account";
-      })
+      // this.schema.pre("save", function () {
+      //   if (this.account.toString() !== account.toString()) throw "wrong account";
+      // })
       this.schema.static('getAccount', () => account);
       this.schema.static('getUser', () => user);
 
-      return model<IExtendedDocument>(`${baseModel}_${account}_${user}`, this.schema, this.collection.collectionName);
+      
+      return model<IExtendedDocument>(`${baseModel}_${account}_${user}`, new Schema(this.schema), this.collection.collectionName);
     }
   } else {
     throw "account is requred"
@@ -297,7 +301,7 @@ export async function deleteDocument<T extends IExtendedDocument>(this: IExtende
       document.recalcDocument();
       // to do - do sprawdzenia
       await document.validateVirtuals(true);
-      await document.remove();
+      await document.deleteOne();
 
       cache.del(id);
       return { saved: true };

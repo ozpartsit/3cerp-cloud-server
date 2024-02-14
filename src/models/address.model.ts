@@ -26,7 +26,7 @@ export interface IAddress extends IExtendedDocument {
 }
 const options = {
   collection: "entities.addresses",
-  type: "address"
+  type: "address",
 };
 
 interface IAddressModel extends Model<IAddress>, IExtendedModel<IAddress> { }
@@ -54,7 +54,7 @@ export const nestedSchema = {
 export const schema = new Schema<IAddress>(
   {
     ...nestedSchema,
-    entity: { type: Schema.Types.ObjectId, input: "Select" },
+    entity: { type: Schema.Types.ObjectId },
     billingAddress: { type: Boolean, default: false, input: "Switch", validType: "switch" },
     shippingAddress: { type: Boolean, default: false, input: "Switch", validType: "switch" },
     geoCodeHint: {

@@ -1,6 +1,6 @@
 import { Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
-export default async function validateVirtuals<T extends IExtendedDocument>(this: T, save: boolean) {
+export default async function validateVirtuals(this: IExtendedDocument, save: boolean) {
   //console.log("validateVirtuals");
   let errors: any = [];
 
@@ -37,9 +37,10 @@ export default async function validateVirtuals<T extends IExtendedDocument>(this
             if (save) {
               // before save validate is automatic
               if (this.deleted) line.deleted = true;
-              await line.changeLogs(this.id, list.path);
-              if (line.deleted) await line.remove();
-              else await line.save();
+              await line.changeLogs(this, list.path);
+              //if (line.deleted) await line.deleteOne();
+              //else 
+              await line.save();
             } else {
               // Catch errors from validate all virtual list
               //await line.validate();

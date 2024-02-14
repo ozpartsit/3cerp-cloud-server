@@ -1,7 +1,7 @@
 import { Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
-export default async function addToVirtuals<T extends IExtendedDocument>(
-  this: T,
+export default async function addToVirtuals(
+  this: IExtendedDocument,
   virtual: string,
   newline: any,
   index: number

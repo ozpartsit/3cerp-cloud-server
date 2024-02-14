@@ -1,8 +1,8 @@
 import i18n from "../../config/i18n";
 import { IExtendedDocument } from "../methods"
-export default function constantTranslate<T extends IExtendedDocument>(this: T, local: string) {
+export default function constantTranslate(this: IExtendedDocument, local: string) {
 
-    let doc = this.toObject();
+    let doc = this.toObject({ getters: true, virtuals: true });
 
     // Virtuals
     const virtuals: any[] = Object.values(this.schema.virtuals);

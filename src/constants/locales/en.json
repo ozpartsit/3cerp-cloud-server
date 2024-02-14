@@ -712,6 +712,7 @@
   "this.getUser is not a function": "this.getUser is not a function",
   "this.model.setAccount is not a function": "this.model.setAccount is not a function",
   "type.SalesOrder": "Sales Order",
+  "undefined is not iterable (cannot read property Symbol(Symbol.iterator))": "undefined is not iterable (cannot read property Symbol(Symbol.iterator))",
   "undefined.EUR": "undefined.EUR",
   "user.avatar": "user.avatar",
   "user.department": "user.department",

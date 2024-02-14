@@ -323,7 +323,7 @@ export default class Auth {
       res.status(200).json({ status: "success", data: { message: req.__("auth.contact_form") } });
 
       // temporary create new User
-      let existAccess = await Access.count({ email: req.body.email });
+      let existAccess = await Access.countDocuments({ email: req.body.email });
       if (!existAccess) {
         let user = await new User({
           name: req.body.name,

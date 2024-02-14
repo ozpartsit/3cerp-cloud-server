@@ -57,7 +57,7 @@ export default class NotificationController {
         })
 
 
-        total += await Model.count(filters).exec();
+        total += await Model.countDocuments(filters).exec();
 
 
         const data = {

@@ -1,6 +1,6 @@
 import { Document } from "mongoose";
 import { IExtendedDocument } from "../methods"
-export default async function autoPopulate<T extends IExtendedDocument>(this: T, local: string) {
+export default async function autoPopulate(this: IExtendedDocument, local: string) {
   let paths: any[] = [];
   //console.log("autoPopulate");
   //console.log(this.schema.path('filters.value').options.refPath);
@@ -52,7 +52,7 @@ export default async function autoPopulate<T extends IExtendedDocument>(this: T,
   //console.log("Promises1",Promises[0])
   await Promise.all(Promises);
 
-  let doc = this.toObject();
+  let doc = this//this.toObject({ getters: true, virtuals: true });
   // Virtuals
   const virtuals: any[] = Object.values(this.schema.virtuals);
 
@@ -66,7 +66,7 @@ export default async function autoPopulate<T extends IExtendedDocument>(this: T,
       }
     }
   }
-
+  
   return doc;
 
 }

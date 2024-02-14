@@ -49,6 +49,8 @@ class GenericController<T extends IExtendedDocument> {
                 await document.autoPopulate();
                 let docObject = document.constantTranslate(req.locale);
                 res.json({ status: "success", data: { document: docObject, mode: mode === "advanced" ? mode : "simple" } });
+
+
             }
         } catch (error) {
             return next(error);
@@ -113,10 +115,10 @@ class GenericController<T extends IExtendedDocument> {
             // }
             let update = req.body;
             let { document, saved } = await this.model.updateDocument(id, mode, (field || "_id").toString(), update);
-
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
+                
                 //populate response document
                 await document.autoPopulate();
                 document = document.constantTranslate(req.locale);
@@ -389,7 +391,7 @@ class GenericController<T extends IExtendedDocument> {
             options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
 
             //let result = await this.model.findDocuments(query, options);
-            let total = await this.model.count(query);
+            let total = await this.model.countDocuments(query);
             let page = req.query.page || 1;
 
             // get fields

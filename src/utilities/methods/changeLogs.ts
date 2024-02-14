@@ -1,7 +1,8 @@
 import Changelog from "../../models/changelog.model";
 import { Document, models } from 'mongoose';
 import { IExtendedDocument } from "../methods"
-export default async function changeLogs<T extends IExtendedDocument>(this: T, document?: any, subdoc?: string) {
+import { IExtendedModel } from "../static"
+export default async function changeLogs(this: IExtendedDocument, document?: IExtendedDocument, subdoc?: string) {
   try {
     //przywraca oznaczenie zmian
     // Object.keys(this.$locals).forEach(path => {
@@ -13,16 +14,19 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
       //get original document if exists (only changed fields)
       //console.log(this.type, this.constructor,selects)
 
-      const constructor: any = this.constructor;
-      const createdBy = constructor.getUser();
-      const type = constructor.modelName.split("_")[0];
-      if (!this.isNew && this.type) {
-        let originalDoc = await models[type].findById(this.id, selects);
+      const model: any = this.getModel();
+      console.log("chage log model", model)
+
+      if (model && !this.isNew) {
+        const createdBy = document && document.getUser ? document.getUser() : this.getUser();
+        console.log(createdBy)
+        let originalDoc = model.findById(this.id, selects);
         if (originalDoc) {
           selects.forEach((field: string) => {
             // przypisanie wartości
             let value = this;
             let originalValue = originalDoc;
+
             // przypisanie wartości dla nested
             field.split(".").forEach(f => {
               originalValue = originalValue[f];
@@ -60,6 +64,6 @@ export default async function changeLogs<T extends IExtendedDocument>(this: T, d
       }
     }
   } catch (err) {
-    console.log(err)
+    console.log("changeLogs", err)
   }
 }

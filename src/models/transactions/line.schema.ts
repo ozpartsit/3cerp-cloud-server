@@ -19,10 +19,11 @@ export interface ILine {
   quantity: number;
   multiplyquantity?: number;
   weight: number;
-  price?: number;
+  price: number;
   amount: number;
   grossAmount: number;
   taxAmount: number;
+  taxRate: number;
   deleted: boolean;
   populate(field: string): any;
   depopulate(): any;
@@ -111,6 +112,14 @@ const schema = new Schema<ILine>(
       precision: 2,
       set: (v: any) => roundToPrecision(v, 2)
     },
+    taxRate: {
+      type: Number,
+      default: 0,
+      input: "Input",
+      validType: "percent",
+      precision: 2,
+      set: (v: any) => roundToPrecision(v, 2)
+    },
     grossAmount: {
       type: Number,
       default: 0,
@@ -127,14 +136,20 @@ const schema = new Schema<ILine>(
       precision: 2,
       set: (v: any) => roundToPrecision(v, 2)
     },
-    deleted: { type: Boolean, input: "Switch", validType: "switch", default: false, readonly:true }
+    deleted: {
+      type: Boolean,
+      input: "Switch",
+      validType: "switch",
+      default: false,
+      readonly: true
+    }
   },
   options
 );
 
 schema.method("components", async function () {
   await this.populate("item");
-  if (this.item && this.item.type === "KitItem") this.item.getComponents();
+  //if (this.item && this.item.type === "KitItem") this.item.getComponents(); - do poprawy
 });
 
 schema.method("actions", async function (trigger) {
@@ -164,6 +179,8 @@ schema.pre("validate", async function (next) {
   this.taxRate = 0.23;
   this.taxAmount = roundToPrecision(this.amount * this.taxRate, 2);
   this.grossAmount = roundToPrecision(this.amount + this.taxAmount, 2);
+
+
 
   next();
 });

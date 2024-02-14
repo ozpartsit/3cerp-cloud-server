@@ -5,8 +5,8 @@ import constants from "../../constants";
 import path from "path";
 import i18n from "../../config/i18n";
 
-export default async function getOptions<T extends IExtendedDocument>(
-    this: T,
+export default async function getOptions(
+    this: IExtendedDocument,
     field: string,
     subdoc: string | null = null,
     subdoc_id: string | null = null,
@@ -17,7 +17,7 @@ export default async function getOptions<T extends IExtendedDocument>(
     mode: string | null = null,
 ) {
     try {
-        let document: T | null = null;
+        let document: IExtendedDocument | null = null;
         if (subdoc) {
 
             let virtual: any = this.schema.virtuals[subdoc];
@@ -28,7 +28,7 @@ export default async function getOptions<T extends IExtendedDocument>(
 
             if (!document) {
                 if (virtual) {
-                    document = await new models[virtual.options.ref]() as T;
+                    document = await new models[virtual.options.ref]() as IExtendedDocument;
                     document.initLocal();
                     if (virtual.options.justOne) {
                         this[subdoc] = document;
@@ -60,13 +60,13 @@ export default async function getOptions<T extends IExtendedDocument>(
                 constant = "operator";
             } else {
                 if (fieldType.options.ref) {
-                    let model = models[fieldType.options.ref] as IExtendedModel<T>;
+                    let model = models[fieldType.options.ref];
 
                     // query - dodać filtry 
                     let query = fieldType.options.filters || {};
                     if (keyword) query.name = { $regex: `.*${keyword}.*` }
 
-                    total = await model.count(query);
+                    total = await model.countDocuments(query);
                     let limit = 25;
                     let skip = ((page || 1) - 1) * 25;
                     results = await model.find(query).sort({ name: 1 }).skip(skip).limit(limit).select({ name: 1, description: 1, type: 1 });
