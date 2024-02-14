@@ -249,7 +249,17 @@ blockquote:before { content: "\f10d"; font-family:"capacity-bold"; font-size: 38
 /*======================================================================
   5. Header
 ========================================================================*/
-.top-bar { color:#fff; font-size:16px; background-color:#d30a0c; min-height: 100px; }
+
+
+/*======================================================================
+  test zmiennych
+========================================================================*/
+:root {
+  --main-bg-color: #9e0709;
+}
+
+
+.top-bar { color:#fff; font-size:16px; background-color:var(--main-bg-color); min-height: 100px; }
 .top-bar .container-fluid { padding-top: 20px; padding-bottom: 20px; }
 .top-bar i { font-size:23px; vertical-align: middle; padding-left: 0 !important; }
 .top-bar a { color:#fff; }

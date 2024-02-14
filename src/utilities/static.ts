@@ -329,7 +329,7 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
             populated[fields[0]].select[fields[1]] = 1;
 
             // jeżeli ref to dodaje do populate
-            if (field && field.ref) {
+            if (field && field.type) {
               populated[fields[0]].populate.push({
                 path: fields[1],
                 select: 'name resource type'
@@ -342,7 +342,7 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
               select: fieldsSelect,
               populate: []
             }
-            if (field && field.ref) {
+            if (field && field.type) {
               populated[fields[0]].populate.push({
                 path: fields[1],
                 select: 'name resource type'
@@ -352,7 +352,7 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
           delete select[key];
         } else {
           let field = docFields.find((field: any) => field.field == fields[0]);
-          if (field && field.ref) {
+          if (field && field.type) {
             if (!populated[fields[0]]) {
               populated[fields[0]] = {
                 path: fields[0],

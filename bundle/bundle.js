@@ -4518,7 +4518,7 @@ function findDocuments(query, options) {
                 }
                 else {
                     let field = docFields.find((field) => field.field == fields[0]);
-                    if (field && field.ref) {
+                    if (field && field.type) {
                         if (!populated[fields[0]]) {
                             populated[fields[0]] = {
                                 path: fields[0],
