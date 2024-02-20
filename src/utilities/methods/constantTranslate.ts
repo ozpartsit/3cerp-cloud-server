@@ -35,7 +35,7 @@ export default function constantTranslate(this: IExtendedDocument, local: string
         if (["Embedded", "Array"].includes(schemaType.instance)) {
             // uzupełnia pole value zgodnie z operatorem - przykład Table Preferences - filters
             if (schemaType.instance == "Array") {
-                if (doc[pathname]) {
+                if (doc[pathname] && Array.isArray(doc[pathname])) {
                     doc[pathname].forEach(e => {
                         if (e.value && e.constant) {
                             if (Array.isArray(e.value)) {
@@ -53,10 +53,8 @@ export default function constantTranslate(this: IExtendedDocument, local: string
 
             }
             if (schemaType.schema) for (const [key, value] of Object.entries<any>(schemaType.schema.tree)) {
-
                 if (value.constant) {
-
-                    if (schemaType.instance == "Array") {
+                    if (schemaType.instance == "Array" && Array.isArray(doc[pathname])) {
                         doc[pathname].forEach(e => {
                             //console.log(e, key, e[key])
                             if (e[key]) e[key] = {
@@ -70,8 +68,24 @@ export default function constantTranslate(this: IExtendedDocument, local: string
                         };
 
                     }
-
                 }
+                if (doc[pathname] && Array.isArray(doc[pathname])) doc[pathname].forEach((element, index) => {
+                    if (Array.isArray(element[key])) {
+                        element[key].forEach((e, index2) => {
+                            if (e.value && e.constant) {
+                                if (Array.isArray(e.value)) {
+                                    e.value = e.value.map(v => {
+                                        return { _id: v, name: i18n.__(`${e.constant}.${v}`) }
+                                    })
+                                } else {
+                                    e.value = {
+                                        _id: e.value, name: i18n.__(`${e.constant}.${e.value}`)
+                                    };
+                                }
+                            }
+                        })
+                    }
+                })
             }
         }
     }

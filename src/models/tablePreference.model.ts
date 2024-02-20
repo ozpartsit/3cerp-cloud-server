@@ -10,7 +10,10 @@ interface IFilter {
     value?: any | any[];
     ref?: string;
     constant?: string;
-
+}
+interface IFilterGroup {
+    filters: IFilter[];
+    operator: string;
 }
 interface ISortBy {
     key: string;
@@ -26,9 +29,12 @@ export interface ITablePreference extends IExtendedDocument {
     sortBy?: ISortBy[];
     groupBy?: string[];
     itemsPerPage?: number;
-    filters?: IFilter[];
+    filters?: IFilterGroup[];
     _someFunction(): any
 }
+
+// filter
+
 
 
 
@@ -56,23 +62,34 @@ const schema = new Schema<ITablePreference>(
         filters: {
             autopopulate: true,
             type: [{
-                field: {
-                    type: String,
-                },
                 operator: {
                     type: String,
                     required: true,
                     input: "Select",
-                    constant: 'operator',
+                    default: '$and',
                 },
-                value: { type: Schema.Types.Mixed, refPath: 'ref', autopopulate: true },
-                ref: {
-                    type: String,
-                },
-                constant: {
-                    type: String,
-                },
+                filters: {
+                    type: [{
+                        field: {
+                            type: String,
+                        },
+                        operator: {
+                            type: String,
+                            required: true,
+                            input: "Select",
+                            constant: 'operator',
+                        },
+                        value: { type: Schema.Types.Mixed, refPath: 'ref', autopopulate: true },
+                        ref: {
+                            type: String,
+                        },
+                        constant: {
+                            type: String,
+                        },
+                    }]
+                }
             }]
+
         },
     },
     options
@@ -80,16 +97,17 @@ const schema = new Schema<ITablePreference>(
 
 schema.pre('save', async function () {
     if (this.filters) {
-        this.filters.forEach(f => {
+        this.filters.forEach(fg => {
             //to do - do poprawienia
-            if (f.value) {
-                if (Array.isArray(f.value)) {
-                    f.value = f.value.map(v => v._id ? v._id : v)
-                } else {
-                    if (f.value._id) f.value = f.value._id;
+            fg.filters.forEach(f => {
+                if (f.value) {
+                    if (Array.isArray(f.value)) {
+                        f.value = f.value.map(v => v._id ? v._id : v)
+                    } else {
+                        if (f.value._id) f.value = f.value._id;
+                    }
                 }
-
-            }
+            })
         })
     }
 });

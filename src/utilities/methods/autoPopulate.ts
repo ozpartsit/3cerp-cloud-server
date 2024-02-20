@@ -8,7 +8,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
   for (const [pathname, schemaType] of Object.entries<any>(this.schema.paths)) {
     if (["Embedded", "Array"].includes(schemaType.instance)) {
       if ((schemaType.options.ref || schemaType.options.refPath) || schemaType.options.autopopulate) {
-       
+
         if (schemaType.instance === "Array") {
           if (this[pathname]) {
             this[pathname].forEach((e, index) => {
@@ -25,8 +25,34 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
                   select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted "
                 });
               }
-
             });
+            if (schemaType.schema) for (const [key, value] of Object.entries<any>(schemaType.schema.tree)) {
+
+              this[pathname].forEach((element, index) => {
+                if (Array.isArray(element[key])) {
+                 
+                  element[key].forEach((e, index2) => {
+                    if (e.value) {
+                      paths.push({
+                        path: `${pathname}.${index}.${key}.${index2}.value`,
+                        select: "name displayname type _id resource path deleted",
+                        model: e.ref,
+                        index: index
+                      });
+                    } else {
+                      paths.push({
+                        path: pathname,
+                        select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted "
+                      });
+                    }
+                  });
+                }
+              })
+
+
+
+
+            }
           }
         }
       }
@@ -66,7 +92,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
       }
     }
   }
-  
+
   return doc;
 
 }

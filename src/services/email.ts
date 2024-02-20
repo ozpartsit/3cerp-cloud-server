@@ -7,8 +7,8 @@ import ejs from "ejs";
 import path from "path";
 import { I18n } from "i18n";
 import { IAccess } from "../models/access.model";
-
-
+import File from "../models/storages/file/schema";
+import EmailSent from "../models/emailSent.model";
 
 export class Email {
   private transporter: any;
@@ -74,7 +74,43 @@ export class Email {
   }
   // to do - dodać interfejs i możliwość tablicy
   public async send(email: any = {}) {
-    return await this.transporter.sendMail(email)
+
+    let config: any = {
+      from: this.from,
+      to: email.to,
+      subject: email.subject,
+      text: email.text,
+      attachments: []
+    }
+    if (email.email) {
+      config.from = `${email.email.name} <${email.email.name}>`
+    }
+    if (email.attachments) {
+      if (!Array.isArray(email.attachments)) email.attachments = [email.attachments]
+
+      for (let attachement of email.attachments) {
+        let storageFile = await File.findById(attachement);
+
+        if (storageFile) {
+          let storagePath = path.posix.resolve("storage");
+          let file = {
+            filename: storageFile.name,
+            path: path.join(storagePath, storageFile.path),
+          }
+          config.attachments.push(file)
+        }
+      }
+    }
+    try {
+      let EmailModel = EmailSent.setAccount(email.account, email.user);
+      let test = new EmailModel(email)
+      test.save()
+    } catch (err) {
+      console.log(err)
+    }
+
+
+    return await this.transporter.sendMail(config)
     //   , (error: any, info: any) => {
     //   if (error) {
     //     throw error;

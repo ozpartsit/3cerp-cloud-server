@@ -157,6 +157,13 @@ const Customer: ICustomerModel = Entity.discriminator<
   ICustomer,
   ICustomerModel
 >("customer", schema);
+
+// copy
+Entity.discriminator<
+  ICustomer,
+  ICustomerModel
+>("Customer", schema);
+
 export default Customer;
 
 

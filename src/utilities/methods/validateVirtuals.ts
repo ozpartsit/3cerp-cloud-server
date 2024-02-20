@@ -38,9 +38,8 @@ export default async function validateVirtuals(this: IExtendedDocument, save: bo
               // before save validate is automatic
               if (this.deleted) line.deleted = true;
               await line.changeLogs(this, list.path);
-              //if (line.deleted) await line.deleteOne();
-              //else 
-              await line.save();
+              if (line.deleted) await line.deleteOne();
+              else await line.save();
             } else {
               // Catch errors from validate all virtual list
               //await line.validate();

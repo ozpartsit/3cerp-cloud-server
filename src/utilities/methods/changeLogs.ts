@@ -19,14 +19,13 @@ export default async function changeLogs(this: IExtendedDocument, document?: IEx
 
       if (model && !this.isNew) {
         const createdBy = document && document.getUser ? document.getUser() : this.getUser();
-        console.log(createdBy)
-        let originalDoc = model.findById(this.id, selects);
+
+        let originalDoc = await model.findById(this.id, selects);
         if (originalDoc) {
           selects.forEach((field: string) => {
             // przypisanie wartości
             let value = this;
             let originalValue = originalDoc;
-
             // przypisanie wartości dla nested
             field.split(".").forEach(f => {
               originalValue = originalValue[f];

@@ -25,6 +25,7 @@ import { ClassificationTypes } from "../models/classifications/model";
 import { AccountingTypes } from "../models/accounting/model";
 //import { FavoritesTypes } from "../models/favorites/model";
 import Email from "../models/email.model";
+import EmailSent from "../models/emailSent.model";
 import Shop from "../models/ecommerce/shop.model";
 
 export default class Routes {
@@ -85,6 +86,8 @@ export default class Routes {
     // })
     // Emails
     this.routeUniversal("emails", "email", this.emailController);
+    // Emails Sent
+    this.routeUniversal("emails", "emailsent", new Controller(EmailSent));
     // website
     this.routeUniversal("websites", "webshop", this.websiteController)
     // constatns
@@ -105,6 +108,11 @@ export default class Routes {
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.form.bind(controller) as any
+    );
+    this.Router.route(`${path}/send`).post(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.send.bind(controller) as any
     );
     this.Router.route(`${path}`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
@@ -128,6 +136,11 @@ export default class Routes {
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.logs.bind(controller) as any
+    );
+    this.Router.route(`${path}/:id/send`).post(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.send.bind(controller) as any
     );
     this.Router.route(`${path}/:id/activities`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
@@ -160,7 +173,7 @@ export default class Routes {
         this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
         controller.delete.bind(controller) as any
       );
-      
+
   }
 
   public routeConstants() {

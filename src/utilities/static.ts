@@ -99,11 +99,12 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
     else {
       let filters: any = { account: account };
       // ustawienie dla każdego dokumentu domyślnego account;
+      
       let defaultAccount = new Schema({
         account: {
           type: Schema.Types.ObjectId,
           required: true,
-          default: account
+          default: user
         }
       })
       this.schema.add(defaultAccount);
@@ -115,7 +116,9 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
           user: {
             type: Schema.Types.ObjectId,
             required: true,
-            default: user
+            default: user,
+            ref: "User",
+            autopopulate: true,
           }
         })
         this.schema.add(defaultUser);
