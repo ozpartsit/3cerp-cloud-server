@@ -2,10 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { Document, Model, Types, modelNames } from 'mongoose';
 import { IExtendedModel } from "../utilities/static";
 import { IExtendedDocument } from "../utilities/methods";
-import Email from "../services/email";
+import EmailService from "../services/email";
 import Changelog from "../models/changelog.model";
 import CustomError from "../utilities/errors/customError";
 import Table, { ITablePreference } from '../models/tablePreference.model';
+import Email from '../models/email.model';
 
 // Typ generyczny dla modelu Mongoose
 interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
@@ -118,7 +119,7 @@ class GenericController<T extends IExtendedDocument> {
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
-                
+
                 //populate response document
                 await document.autoPopulate();
                 document = document.constantTranslate(req.locale);
@@ -163,8 +164,22 @@ class GenericController<T extends IExtendedDocument> {
     public async send(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         let config = req.body;
+
+        config.account = req.headers.account;
+        config.user = req.headers.user;
+
         try {
-            let status = await Email.send(config);
+            if (id) {
+                let type = this.model.modelName.split("_")[0]
+                if (type == "Email") {
+                    config.email = await this.model.findById(id)
+                } else {
+                    config.ref = type;
+                    config.document = id;
+                    config.email = await Email.findById(config.email)
+                }
+            }
+            let status = await EmailService.send(config);
             res.json(status);
         } catch (error) {
             return next(error);
@@ -206,15 +221,25 @@ class GenericController<T extends IExtendedDocument> {
         let { recordtype, id } = req.params;
         try {
             let query: any = { document: id };
-            let results = await Changelog.find(query)
+
+            // parse to plain result
+            let options = { sort: { _id: -1 }, limit: 50, skip: 0 };
+            options.limit = parseInt((req.query.limit || 50).toString());
+            options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
+
+            let total = await Changelog.countDocuments(query);
+            let page = req.query.page || 1;
+
+
+            let results = await Changelog.find(query, null, options)
                 .populate({ path: 'newValue', select: 'name' })
                 .populate({ path: 'oldValue', select: 'name' })
                 .exec();
-            // parse to plain result
+
             let changelogs = results.map((line: any) => {
                 return {
-                    newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue,
-                    oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue,
+                    newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue && Array.isArray(line.newValue) ? line.newValue.map(l => l.name || l).join(", ") : line.newValue,
+                    oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue && Array.isArray(line.oldValue) ? line.oldValue.map(l => l.name || l).join(", ") : line.oldValue,
                     date: new Date(line.createdAt).toISOString().substr(0, 10),
                     field: line.field,
                     list: line.list
@@ -222,10 +247,10 @@ class GenericController<T extends IExtendedDocument> {
             })
             const data = {
                 docs: changelogs,
-                totalDocs: changelogs.length,
-                limit: changelogs.length,
-                page: 1,
-                totalPages: 1
+                totalDocs: total,
+                limit: options.limit,
+                page: page,
+                totalPages: Math.ceil(total / options.limit)
             }
 
 
@@ -313,24 +338,31 @@ class GenericController<T extends IExtendedDocument> {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
             } else {
                 if (preference && preference.filters) {
+                    query = { $and: [] }
                     // to do - opisać wszystkie operatory
-                    query = preference.filters.filter(f => f.value != undefined).reduce((t, f) => {
-                        t = {};
-                        let operator = "$eq";
-                        let value = {};
-                        if (Array.isArray(f.value)) {
-                            value[f.operator] = f.value
-                        }
-                        else {
-                            value[f.operator] = f.value
-                            //['$expr'][filter.operator] = [`$${filter.field}`, filter.value];
-                            //value = { $regex: `${f.value}.*`, $options: "i" }
-                        }
+                    preference.filters.forEach(fg => {
+                        let filterGroup: any = {};
+                        filterGroup[fg.operator] = [];
+                        filterGroup[fg.operator] = fg.filters.filter(f => f.value != undefined).reduce((t: any, f) => {
+                            let filter = {}
+                            let value = {};
+                            if (Array.isArray(f.value)) {
+                                value[f.operator] = f.value
+                            }
+                            else {
+                                value[f.operator] = f.value
+                                //['$expr'][filter.operator] = [`$${filter.field}`, filter.value];
+                                //value = { $regex: `${f.value}.*`, $options: "i" }
+                            }
+                            filter[f.field] = value;
+                            t.push(filter)
+                            // console.log(filter)
+                            return t;
+                        }, []);
 
-                        t[f.field] = value;
+                        query.$and.push(filterGroup)
+                    })
 
-                        return t;
-                    }, {});
                 }
             }
             // selected

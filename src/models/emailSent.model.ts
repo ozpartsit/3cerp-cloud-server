@@ -23,8 +23,6 @@ export const schema = new Schema<IEmailSent>(
     {
         user: {
             type: Schema.Types.ObjectId,
-            ref: "User",
-            autopopulate: true,
         },
         type: {
             type: String,
@@ -34,6 +32,7 @@ export const schema = new Schema<IEmailSent>(
         document: {
             type: Schema.Types.ObjectId,
             refPath: "ref",
+            autopopulate: true,
         },
         ref: {
             type: String,

@@ -117,8 +117,6 @@ function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema
             type: Schema.Types.ObjectId,
             required: true,
             default: user,
-            ref: "User",
-            autopopulate: true,
           }
         })
         this.schema.add(defaultUser);
@@ -369,6 +367,7 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
           }
         }
       }
+
     let result = await this.find(query)
       .populate(Object.values(populated))
       .sort(sort).skip(skip).limit(limit).select(select);

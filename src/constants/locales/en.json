@@ -1,4 +1,7 @@
 {
+  "An empty sub-projection is not a valid value. Found empty object at path": "An empty sub-projection is not a valid value. Found empty object at path",
+  "Cannot do exclusion on field skip in inclusion projection": "Cannot do exclusion on field skip in inclusion projection",
+  "Cannot read properties of undefined (reading 'field')": "Cannot read properties of undefined (reading 'field')",
   "Cannot read properties of undefined (reading 'forEach')": "Cannot read properties of undefined (reading 'forEach')",
   "Cannot read properties of undefined (reading 'type')": "Cannot read properties of undefined (reading 'type')",
   "Cast to ObjectId failed for value \"EUR\" (type string) at path \"_id\" for model \"Group\"": "Cast to ObjectId failed for value \"EUR\" (type string) at path \"_id\" for model \"Group\"",
@@ -6,6 +9,8 @@
   "Cast to string failed for value \"[ 'EUR', 'DZD' ]\" (type Array) at path \"currency\" for model \"customer_64f4cc1c9842bd71489d1fa0_64c3bd50c9de39e62091e373\"": "Cast to string failed for value \"[ 'EUR', 'DZD' ]\" (type Array) at path \"currency\" for model \"customer_64f4cc1c9842bd71489d1fa0_64c3bd50c9de39e62091e373\"",
   "Cast to string failed for value \"{\n  field: 'currency',\n  value: [\n    { _id: 'EUR', name: 'Euro' },\n    { _id: 'DZD', name: 'Algerian dinar' },\n    { _id: 'USD', name: 'US dollar' }\n  ]\n}\" (type Object) at path \"currency\" for model \"customer_64f4cc1c9842bd71489d1fa0_64c3bd50c9de39e62091e373\"": "Cast to string failed for value \"{\n  field: 'currency',\n  value: [\n    { _id: 'EUR', name: 'Euro' },\n    { _id: 'DZD', name: 'Algerian dinar' },\n    { _id: 'USD', name: 'US dollar' }\n  ]\n}\" (type Object) at path \"currency\" for model \"customer_64f4cc1c9842bd71489d1fa0_64c3bd50c9de39e62091e373\"",
   "Cast to string failed for value \"{ field: 'currency', value: [ { _id: 'EUR', name: 'Euro' } ] }\" (type Object) at path \"currency\" for model \"customer_64f4cc1c9842bd71489d1fa0_64c3bd50c9de39e62091e373\"": "Cast to string failed for value \"{ field: 'currency', value: [ { _id: 'EUR', name: 'Euro' } ] }\" (type Object) at path \"currency\" for model \"customer_64f4cc1c9842bd71489d1fa0_64c3bd50c9de39e62091e373\"",
+  "Cast to string failed for value \"{ undefined: 'PL' }\" (type Object) at path \"country\" for model \"customer_64f4cc1c9842bd71489d1fa0_64c3bd50c9de39e62091e373\"": "Cast to string failed for value \"{ undefined: 'PL' }\" (type Object) at path \"country\" for model \"customer_64f4cc1c9842bd71489d1fa0_64c3bd50c9de39e62091e373\"",
+  "No recipients defined": "No recipients defined",
   "address.address": "Address",
   "address.address2": "Address",
   "address.addressee": "Addressee",

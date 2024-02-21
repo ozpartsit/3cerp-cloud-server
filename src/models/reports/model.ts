@@ -97,7 +97,7 @@ schema.method("getResults", async function () {
     //console.log(populated)
     let data = await model("Transaction").find(query)
         .populate(Object.values(populated))
-        .sort(sort)
+        //.sort(sort)
         .select(select);
 
     results = data.map((line: any) => {
