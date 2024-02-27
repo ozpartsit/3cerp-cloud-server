@@ -39,19 +39,26 @@ export default async function getOptions(
                     if (deepdoc) return document.getOptions(field, deepdoc, deepdoc_id, null, null, page, keyword, mode)
                 } else {
                     document = this;
-                    field = `${subdoc}.${field}`;
+                    const fieldType = this.schema.path(subdoc);
+                    if (fieldType && fieldType.options.ref) {
+                     
+                        document = new models[fieldType.options.ref]()
+                        if (!document) document = this;
+                    } else
+                        field = `${subdoc}.${field}`;
                 }
             }
         } else {
             document = this;
         }
 
-
         // Pobierz definicję schematu (schema) modelu 
         const schema = document.schema;
 
         // Sprawdź typ pola "name"
         const fieldType = schema.path(field);
+
+        //console.log(schema.paths)
         if (fieldType) {
             let results: any = [];
             let total = 0;

@@ -5,6 +5,7 @@
   "Cannot do exclusion on field skip in inclusion projection": "Cannot do exclusion on field skip in inclusion projection",
   "Cannot read properties of undefined (reading 'field')": "Cannot read properties of undefined (reading 'field')",
   "Cannot read properties of undefined (reading 'forEach')": "Cannot read properties of undefined (reading 'forEach')",
+  "Cannot read properties of undefined (reading 'length')": "Cannot read properties of undefined (reading 'length')",
   "Cannot read properties of undefined (reading 'type')": "Cannot read properties of undefined (reading 'type')",
   "Cast to ObjectId failed for value \"EUR\" (type string) at path \"_id\" for model \"Group\"": "Cast to ObjectId failed for value \"EUR\" (type string) at path \"_id\" for model \"Group\"",
   "Cast to ObjectId failed for value \"{ _id: 'EUR', name: 'Euro' }\" (type Object) at path \"_id\" for model \"Group\"": "Cast to ObjectId failed for value \"{ _id: 'EUR', name: 'Euro' }\" (type Object) at path \"_id\" for model \"Group\"",
