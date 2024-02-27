@@ -29,6 +29,8 @@
   "item.prices": "item.prices",
   "note.description": "note.description",
   "note.name": "note.name",
+  "operator.$and": "&",
+  "operator.$or": "Lub",
   "scope.customers": "Klienci",
   "scope.invitems": "Towary",
   "scope.invoice": "Faktury",

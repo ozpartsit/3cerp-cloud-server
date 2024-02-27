@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Document, Model, Types, modelNames } from 'mongoose';
+import { Document, models, Types, modelNames } from 'mongoose';
 import { IExtendedModel } from "../utilities/static";
 import { IExtendedDocument } from "../utilities/methods";
 import EmailService from "../services/email";
@@ -234,15 +234,47 @@ class GenericController<T extends IExtendedDocument> {
             let results = await Changelog.find(query, null, options)
                 .populate({ path: 'newValue', select: 'name' })
                 .populate({ path: 'oldValue', select: 'name' })
+                .populate({ path: 'createdBy', select: 'name' })
                 .exec();
 
             let changelogs = results.map((line: any) => {
+                let field;
+                let subdoc;
+
+
+                //let refModel: any = models[line.ref]
+                let docFields = this.model.getFields();
+
+                docFields.forEach((docField: any) => {
+                    if (line.subdoc) {
+                        if (docField.field == line.subdoc) {
+                            subdoc = (({ field, name }) => ({ field, name }))(docField);
+                            docField.fields.find((subfield: any) => {
+                                if (subfield.field == line.field) {
+                                    field = subfield;
+                                    return true
+                                }
+                            })
+                        }
+                    } else {
+                        if (docField.field == line.field) {
+                            field = docField;
+                            return true
+                        }
+                    }
+                });
+                // to do - to poprawy
+                if (field)
+                    field = (({ field, name, validType, control, resource, type, multiple }) => ({ field, name, validType, control, resource, type, multiple }))(field);
+
+
                 return {
                     newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue && Array.isArray(line.newValue) ? line.newValue.map(l => l.name || l).join(", ") : line.newValue,
                     oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue && Array.isArray(line.oldValue) ? line.oldValue.map(l => l.name || l).join(", ") : line.oldValue,
+                    createdBy: line.createdBy ? line.createdBy.name : null,
                     date: new Date(line.createdAt).toISOString().substr(0, 10),
-                    field: line.field,
-                    list: line.list
+                    field: field,
+                    subdoc: subdoc
                 }
             })
             const data = {
@@ -337,10 +369,10 @@ class GenericController<T extends IExtendedDocument> {
             if (filters) {
                 query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
             } else {
-                if (preference && preference.filters) {
+                if (preference && preference.filters && preference.filters.length) {
                     query = { $and: [] }
                     // to do - opisać wszystkie operatory
-                    preference.filters.forEach(fg => {
+                    preference.filters.filter(fg => fg.filters.length).forEach(fg => {
                         let filterGroup: any = {};
                         filterGroup[fg.operator] = [];
                         filterGroup[fg.operator] = fg.filters.filter(f => f.value != undefined).reduce((t: any, f) => {
@@ -365,6 +397,8 @@ class GenericController<T extends IExtendedDocument> {
 
                 }
             }
+            if (!query.$and.length) query = {}
+
             // selected
             let select = (req.query.select || req.query.fields || "").toString();
             if (select) {

@@ -111,6 +111,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
           let field: any = {
             field: schematype._presplitPath.length > 1 ? schematype._presplitPath[1] : pathname,
             name: i18n.__(`${modelName}.${pathname}`),
+            subdoc: parent ? parent : false,
             //fieldType: schematype.options.input,
             control: schematype.options.input,
             //array: !!schematype['$isMongooseArray'],

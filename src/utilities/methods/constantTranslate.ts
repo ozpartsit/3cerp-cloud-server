@@ -48,6 +48,9 @@ export default function constantTranslate(this: IExtendedDocument, local: string
                                 };
                             }
                         }
+                        if (e.operator) e.operator = {
+                            _id: e.operator, name: i18n.__(`operator.${e.operator}`)
+                        };
                     });
                 }
 
@@ -83,6 +86,9 @@ export default function constantTranslate(this: IExtendedDocument, local: string
                                     };
                                 }
                             }
+                            if (e.operator) e.operator = {
+                                _id: e.operator, name: i18n.__(`operator.${e.operator}`)
+                            };
                         })
                     }
                 })

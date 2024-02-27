@@ -1,5 +1,7 @@
 {
+  "$and/$or/$nor must be a nonempty array": "$and/$or/$nor must be a nonempty array",
   "An empty sub-projection is not a valid value. Found empty object at path": "An empty sub-projection is not a valid value. Found empty object at path",
+  "Cannot destructure property 'field' of 'undefined' as it is undefined.": "Cannot destructure property 'field' of 'undefined' as it is undefined.",
   "Cannot do exclusion on field skip in inclusion projection": "Cannot do exclusion on field skip in inclusion projection",
   "Cannot read properties of undefined (reading 'field')": "Cannot read properties of undefined (reading 'field')",
   "Cannot read properties of undefined (reading 'forEach')": "Cannot read properties of undefined (reading 'forEach')",
@@ -613,6 +615,7 @@
   "linesalesorder.weight": "Weight",
   "note.description": "Description",
   "note.name": "Name",
+  "operator.$and": "AND",
   "operator.$eq": "Equal",
   "operator.$gt": "Greater than",
   "operator.$gte": "Greater than or equal",
@@ -621,6 +624,7 @@
   "operator.$lte": "Less than or equal",
   "operator.$ne": "Not equal",
   "operator.$nin": "Not include",
+  "operator.$or": "OR",
   "operator.E": "operator.E",
   "operator.EU": "operator.EU",
   "operator.EUR": "operator.EUR",

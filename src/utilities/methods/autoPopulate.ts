@@ -48,10 +48,6 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
                   });
                 }
               })
-
-
-
-
             }
           }
         }
