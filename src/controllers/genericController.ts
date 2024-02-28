@@ -221,16 +221,23 @@ class GenericController<T extends IExtendedDocument> {
         let { recordtype, id } = req.params;
         try {
             let query: any = { document: id };
+            let total = 0;
+            let page: number = Number(req.query.page || 1);
+            let limit: number = Number(req.query.limit || 50)
 
             // parse to plain result
-            let options = { sort: { _id: -1 }, limit: 50, skip: 0 };
-            options.limit = parseInt((req.query.limit || 50).toString());
-            options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
+            let options = { sort: { _id: -1 }, limit: 0, skip: 0 };
 
-            let total = await Changelog.countDocuments(query);
-            let page = req.query.page || 1;
+            // search by keyword
+            let search = (req.query.search || "").toString();
+            if (!search) {
+                total = await Changelog.countDocuments(query);
+                options.limit = limit;
+                options.skip = parseInt((req.query.skip || ((page - 1) * limit) || 0).toString());
+            }
 
 
+  
             let results = await Changelog.find(query, null, options)
                 .populate({ path: 'newValue', select: 'name' })
                 .populate({ path: 'oldValue', select: 'name' })
@@ -277,12 +284,27 @@ class GenericController<T extends IExtendedDocument> {
                     subdoc: subdoc
                 }
             })
+
+
+            if (search) {
+                changelogs = changelogs.filter(log => {
+                    if (log.newValue && log.newValue.toString().includes(search)) return true;
+                    if (log.oldValue && log.oldValue.toString().includes(search)) return true;
+                    if (log.createdBy && log.createdBy.toString().includes(search)) return true;
+                    if (log.date && log.date.toString().includes(search)) return true;
+                    if (log.field && log.field.name.toString().includes(search)) return true;
+                    return false;
+                })
+                total = changelogs.length;
+                let skip = ((page || 1) - 1) * limit;
+                changelogs = changelogs.filter((item, index) => index >= skip && index < skip + limit)
+            }
             const data = {
                 docs: changelogs,
                 totalDocs: total,
-                limit: options.limit,
+                limit: limit,
                 page: page,
-                totalPages: Math.ceil(total / options.limit)
+                totalPages: Math.ceil(total / limit)
             }
 
 
@@ -397,7 +419,7 @@ class GenericController<T extends IExtendedDocument> {
 
                 }
             }
-            if (!query.$and.length) query = {}
+            if (query && query.$and && !query.$and.length) query = {}
 
             // selected
             let select = (req.query.select || req.query.fields || "").toString();
