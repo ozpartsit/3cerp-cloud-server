@@ -3,6 +3,7 @@ import { IExtendedDocument } from "../methods"
 import i18n from "../../config/i18n";
 import { IExtendedModel } from "../static";
 //import TablePreference from "../../models/tablePreference.model";
+import asyncLocalStorage from "../../middleware/asyncLocalStorage";
 import Customer from "../../models/entities/customer/schema";
 export default async function getForm<T extends IExtendedDocument>(this: IExtendedModel<T>, locale: string, parent: string) {
     let modelName = this.modelName.toLowerCase().split("_")[0];
@@ -22,14 +23,20 @@ export default async function getForm<T extends IExtendedDocument>(this: IExtend
                 if (section.fields) for (let [index, field] of section.fields.entries()) {
                     section.fields[index] = fields.find((f: any) => f.field == field) || null;
                     if (section.fields[index]) {
-                        if (!["Table", "NestedDocument","DocumentNested"].includes(section.fields[index].control)) delete section.fields[index].fields;
+                        if (!["Table", "NestedDocument", "DocumentNested"].includes(section.fields[index].control)) delete section.fields[index].fields;
                         delete section.fields[index].selects;
                         delete section.fields[index].ref;
                         if (["Table"].includes(section.fields[index].control)) {
                             section.fields[index].table = `${modelName}.${section.fields[index].field}`;
                             //sprawdzam czy istnieją preferencje:
-                            const headers = await models["Table"].findOne({ account: this.getAccount(), user: this.getUser(), table: `${modelName}.${section.fields[index].field}` }).exec()
-                           //console.log(headers,{ account: this.getAccount(), user: this.getUser(), table: `${modelName}.${section.fields[index].field}` })
+                            let filters = { table: `${modelName}.${section.fields[index].field}` }
+                            let tmpStorage = asyncLocalStorage.getStore();
+                            if (tmpStorage) {
+                                filters["account"] = tmpStorage.account;
+                                filters["user"] = tmpStorage.user;
+                            }
+                            const headers = await models["Table"].findOne(filters).exec()
+
                             if (headers) {
                                 section.fields[index].preference = headers._id;
                                 section.fields[index].selected = headers.selected.filter(field => section.fields[index].fields.find((f: any) => f.field == field))

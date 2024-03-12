@@ -8,6 +8,7 @@ import validateVirtuals from "./methods/validateVirtuals";
 import totalVirtuals from "./methods/totalVirtuals";
 import addToVirtuals from "./methods/addToVirtuals";
 import cache from "../config/cache";
+import asyncLocalStorage from "../middleware/asyncLocalStorage";
 import mongoose, { Schema, Document, models } from "mongoose";
 import { IExtendedModel } from "../utilities//static";
 
@@ -59,7 +60,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
   schema.method('totalVirtuals', totalVirtuals);
   schema.method('addToVirtuals', addToVirtuals);
   schema.method('recalcDocument', recalcDocument);
-  schema.method('initLocal', initLocal); 
+  schema.method('initLocal', initLocal);
 
   schema.method('validateDocument', async function (this: T): Promise<[any]> {
     console.log("validateDocument");
@@ -87,9 +88,9 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
     return model;
   })
   schema.method('getUser', function (this: T) {
-    let model: any = this.getModel();
-    console.log(model)
-    return model.getUser();
+    let tmpStorage = asyncLocalStorage.getStore();
+    if (tmpStorage) return tmpStorage.user;
+    else null;
   })
 
   //triggers loop

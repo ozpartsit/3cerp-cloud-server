@@ -18,7 +18,7 @@ const options = {
 interface INoteModel extends Model<INote>, IExtendedModel<INote> { }
 const schema = new Schema<INote>(
     {
-        user: { type: Schema.Types.ObjectId },
+        user: { type: Schema.Types.ObjectId, required: true },
         name: { type: String, input: "TextField" },
         description: { type: String, defaultSelect: true, input: "TextareaField" },
         index: { type: Number, defaultSelect: true },

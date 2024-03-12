@@ -37,10 +37,10 @@ export default class NotificationController {
         // find
 
         // transactions
-        let Model = Transaction.setAccount(req.headers.account);
-        const filters: any = { inactived: false };
+        //let Model = Transaction.setAccount(req.headers.account);
+        const filters: any = { inactived: false, account: req.headers.account};
 
-        let array = await Model.find(filters)
+        let array = await Transaction.find(filters)
             .populate({ path: 'entity', select: 'name' })
             .select({ name: 1, type: 1, entity: 1, date: 1 })
             .exec()
@@ -57,7 +57,7 @@ export default class NotificationController {
         })
 
 
-        total += await Model.countDocuments(filters).exec();
+        total += await Transaction.countDocuments(filters).exec();
 
 
         const data = {

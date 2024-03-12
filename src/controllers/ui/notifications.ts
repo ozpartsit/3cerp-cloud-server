@@ -10,12 +10,12 @@ export default class NotificationController {
         // temporary schedule
         const job = schedule.scheduleJob('*/5 * * * *', async function () {
 
-            let Model = Notification.setAccount("64f4cc1c9842bd71489d1fa0");
-            const total = await Model.countDocuments({ status: "unread" })
+            const total = await Notification.countDocuments({ status: "unread", user: '64c3bd50c9de39e62091e373' })
                 .exec()
             console.log('Temporary Notification Bot', total);
             if (total < 5) {
-                new Model({
+                new Notification({
+                    account: '64f4cc1c9842bd71489d1fa0',
                     user: '64c3bd50c9de39e62091e373',
                     name: 'New Sales Order!',
                     description: `Sales Order (SO#${Math.floor(Math.random() * 1000)}) Pending Approval`,
@@ -27,12 +27,12 @@ export default class NotificationController {
         });
         const job2 = schedule.scheduleJob('*/5 * * * *', async function () {
 
-            let Model = Notification.setAccount("64f4cc1c9842bd71489d1fa0");
-            const total = await Model.countDocuments({ status: "unread" })
+            const total = await Notification.countDocuments({ status: "unread", user: '652e64fe7fe924dd7d85ef4c' })
                 .exec()
             console.log('Temporary Notification Bot', total);
             if (total < 5) {
-                new Model({
+                new Notification({
+                    account: '64f4cc1c9842bd71489d1fa0',
                     user: '652e64fe7fe924dd7d85ef4c',
                     name: 'New Sales Order!',
                     description: `Sales Order (SO#${Math.floor(Math.random() * 1000)}) Pending Approval`,
@@ -47,40 +47,40 @@ export default class NotificationController {
     public async check(req: Request, res: Response, next: NextFunction) {
         // check new
 
-        let Model = Notification.setAccount(req.headers.account, req.headers.user);
-        const total = await Model.countDocuments({ status: "unread" })
+        //let Model = Notification.setAccount(req.headers.account, req.headers.user);
+        const total = await Notification.countDocuments({ status: "unread", account: req.headers.account, user: req.headers.user })
         res.json({ status: "success", data: { total } });
     }
 
     public async find(req: Request, res: Response, next: NextFunction) {
         // find
-        let Model = Notification.setAccount(req.headers.account, req.headers.user);
-        const filters: any = { status: { $nin: ["archived"] } };
+        //let Model = Notification.setAccount(req.headers.account, req.headers.user);
+        const filters: any = { status: { $nin: ["archived"] }, account: req.headers.account, user: req.headers.user };
 
         if (req.params.status) {
             if (req.params.status === "archived") filters.status = "archived";
             if (["unread", "new"].includes(req.params.status)) filters.status = { $nin: ["archived", "read"] };
         }
-        let skip =  parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * 25) || 0).toString());
-        const array = await Model.find(filters).skip(skip).limit(25)
+        let skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * 25) || 0).toString());
+        const array = await Notification.find(filters).sort({ _id: -1 }).skip(skip).limit(25)
             .populate({ path: 'document', select: 'name' })
             .exec()
-        const total = await Model.countDocuments(filters).exec();
+        const total = await Notification.countDocuments(filters).exec();
 
         const data = {
             docs: array,
             totalDocs: total,
             limit: 25,
             page: 1,
-            totalPages:  Math.ceil(total / 25)
+            totalPages: Math.ceil(total / 25)
         }
         res.json({ status: "success", data });
 
     }
     public async get(req: Request, res: Response, next: NextFunction) {
 
-        let Model = Notification.setAccount(req.headers.account, req.headers.user);
-        const document = await Model.findById(req.params.id)
+        //let Model = Notification.setAccount(req.headers.account, req.headers.user);
+        const document = await Notification.findById(req.params.id)
             .populate({ path: 'document', select: 'name' })
             .exec();
         if (document) {
@@ -91,11 +91,11 @@ export default class NotificationController {
 
     }
     public async archive(req: Request, res: Response, next: NextFunction) {
-        let Model = Notification.setAccount(req.headers.account, req.headers.user);
+        //let Model = Notification.setAccount(req.headers.account, req.headers.user);
         if (req.params.id == "all") {
-            await Model.updateMany({}, { $set: { status: "archived" } });
+            await Notification.updateMany({}, { $set: { status: "archived" } });
         } else {
-            const document = await Model.findById(req.params.id)
+            const document = await Notification.findById(req.params.id)
                 .populate({ path: 'document', select: 'name' })
                 .exec();
             if (document) {
@@ -107,11 +107,11 @@ export default class NotificationController {
     }
     //delete
     public async delete(req: Request, res: Response, next: NextFunction) {
-        let Model = Notification.setAccount(req.headers.account, req.headers.user);
+        //let Model = Notification.setAccount(req.headers.account, req.headers.user);
         if (req.params.id == "all") {
-            await Model.deleteMany({}, { $set: { status: "archived" } });
+            await Notification.deleteMany({}, { $set: { status: "archived" } });
         } else {
-            const document = await Model.findByIdAndDelete(req.params.id).exec();
+            const document = await Notification.findByIdAndDelete(req.params.id).exec();
             res.json({ status: "success", data: { document } });
         }
     }

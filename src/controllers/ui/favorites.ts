@@ -13,7 +13,12 @@ export default class FavoritesController<T extends IExtendedDocument & IFavorite
     constructor(model: IModel<T>) {
         super(model);
     }
-
+    public async find(req: Request, res: Response, next: NextFunction) {
+        //dla category dodajemy selecty
+        let type = this.model.modelName.split("_")[0];
+        if (type && type == "FavoriteCategory") req.query.select = "links,links.link"
+        await super.find(req, res, next);
+    }
 
 }
 

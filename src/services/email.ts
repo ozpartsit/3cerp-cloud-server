@@ -102,11 +102,13 @@ export class Email {
       }
     }
     try {
-      let EmailModel = EmailSent.setAccount(email.account, email.user);
-      let test = new EmailModel(email)
-      test.save()
+
+      // let EmailModel = EmailSent.setAccount(email.account, email.user);
+      let test = new EmailSent(email);
+      await test.save()
     } catch (err) {
       console.log(err)
+      throw err;
     }
 
 

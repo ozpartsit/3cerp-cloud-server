@@ -7,6 +7,7 @@ import Changelog from "../models/changelog.model";
 import CustomError from "../utilities/errors/customError";
 import Table, { ITablePreference } from '../models/tablePreference.model';
 import Email from '../models/email.model';
+import { FavoritesTypes } from '../models/favorites/model'
 
 // Typ generyczny dla modelu Mongoose
 interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
@@ -22,8 +23,10 @@ class GenericController<T extends IExtendedDocument> {
     public async add(req: Request, res: Response, next: NextFunction) {
         let { mode } = req.params;
         try {
-            //req.body.account = req.headers.account; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            if (!req.body.document) req.body.document = {}
+            req.body.document.account = req.headers.account; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
+            if (this.model.userRequired()) req.body.document.user = req.headers.user;
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let { document, saved } = await this.model.addDocument(mode, req.body.document);
             //populate response document
             await document.autoPopulate();
@@ -39,7 +42,7 @@ class GenericController<T extends IExtendedDocument> {
         let { recordtype, id, mode } = req.params;
         let { field } = req.query;
         try {
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
 
             let document = await this.model.getDocument(id, mode, (field || "_id").toString());
 
@@ -61,7 +64,7 @@ class GenericController<T extends IExtendedDocument> {
     public async save(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let { document_id, saved } = await this.model.saveDocument(id, req.body.document);
             if (!document_id) {
                 throw new CustomError("doc_not_found", 404);
@@ -73,25 +76,83 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+    async favorite(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, id, mode } = req.params;
+        let { field } = req.query;
+        try {
+            let linkModel = FavoritesTypes.link;//.setAccount(req.headers.account, req.headers.user);
+            let categoryModel = FavoritesTypes.category;//.setAccount(req.headers.account, req.headers.user);
+            let document = await linkModel.getDocument(id, "simple", "document");
 
+            if (req.method == "GET") {
+                res.json({ status: "success", data: { document: document } });
+            } else {
+                if (req.method == "DELETE") {
+                    if (!document) throw new CustomError("doc_not_found", 404);
+
+                    document = await linkModel.deleteDocument(document._id.toString());
+                    res.json({ status: "success", data: { document } });
+                } else {
+                    if (document) {
+                        res.json({ status: "success", data: { document, saved: true } });
+                    }
+                    else {
+                        let type = this.model.modelName.split("_")[0];
+                        let category = await categoryModel.findOne({ name: type });
+                        if (!category) {
+                            let object = {
+                                name: type,
+                                account: req.headers.account,
+                                user: req.headers.user
+                            }
+
+                            let { document, saved } = await categoryModel.addDocument("simple", object);
+                            category = document;
+                        }
+                        let object = {
+                            document: id,
+                            documentType: type,
+                            link: req.body.document ? req.body.document.link : "tu cos będzie",
+                            name: req.body.document ? req.body.document.name : "tu cos będzie",
+                            category: category,
+                            account: req.headers.account,
+                            user: req.headers.user
+                        }
+
+                        let { document, saved } = await linkModel.addDocument("simple", object);
+                        res.json({ status: "success", data: { document, saved } });
+                    }
+
+                }
+            }
+
+        } catch (error) {
+            return next(error);
+        }
+    }
     public async options(req: Request, res: Response, next: NextFunction) {
         let { recordtype, mode, id } = req.params;
         try {
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
 
             let field = req.body;
             let page = parseInt((req.query.page || 1).toString());
             let keyword = (req.query.keyword || "").toString();
 
             let { results, total } = await this.model.getOptions(id, mode, field, page, keyword);
-            const data = {
-                docs: results,
-                totalDocs: total,
-                limit: results.length == total ? total : 25,
-                page: page,
-                totalPages: results.length == total ? 1 : Math.ceil(total / 25)
+            if (results) {
+                const data = {
+                    docs: results,
+                    totalDocs: total,
+                    limit: results.length == total ? total : 25,
+                    page: page,
+                    totalPages: results.length == total ? 1 : Math.ceil(total / 25)
+                }
+                res.json({ status: "success", data: data });
+            } else {
+                throw new CustomError("doc_not_found", 404);
             }
-            res.json({ status: "success", data: data });
+
 
 
         } catch (error) {
@@ -103,7 +164,7 @@ class GenericController<T extends IExtendedDocument> {
         let { recordtype, mode, id } = req.params;
         let { field } = req.query;
         try {
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             // let document = null;
             // if (Array.isArray(req.body)) { // to do - może upateDocument zmienić by przyjomwał cały obiek body?
             //     for (let update of req.body) {
@@ -134,7 +195,7 @@ class GenericController<T extends IExtendedDocument> {
         let { recordtype } = req.params;
         let { field } = req.query;
         try {
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let documents = req.body;
             let savedDocuments: any = []
             for (let update of documents) {
@@ -154,7 +215,7 @@ class GenericController<T extends IExtendedDocument> {
     public async delete(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {// to do - do poprawy
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let document = await this.model.deleteDocument(id);
             res.json({ status: "success", data: { document } });
         } catch (error) {
@@ -194,7 +255,7 @@ class GenericController<T extends IExtendedDocument> {
             let fields = await this.model.getFields(req.locale);
 
             if (table) {
-                await Table.setAccount(req.headers.account, req.headers.user).findOne({ table: table.toString() }).then(res => {
+                await Table.findOne({ table: table.toString(), user: req.headers.user }).then(res => {
                     if (res) {
                         preference = res._id;
                         selected = res.selected;
@@ -209,7 +270,7 @@ class GenericController<T extends IExtendedDocument> {
     public async form(req: Request, res: Response, next: NextFunction) {
         let { recordtype } = req.params;
         try {
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let form = await this.model.getForm(req.locale);
 
             res.json({ status: "success", data: { form } });
@@ -237,7 +298,7 @@ class GenericController<T extends IExtendedDocument> {
             }
 
 
-  
+
             let results = await Changelog.find(query, null, options)
                 .populate({ path: 'newValue', select: 'name' })
                 .populate({ path: 'oldValue', select: 'name' })
@@ -274,10 +335,9 @@ class GenericController<T extends IExtendedDocument> {
                 if (field)
                     field = (({ field, name, validType, control, resource, type, multiple }) => ({ field, name, validType, control, resource, type, multiple }))(field);
 
-
                 return {
-                    newValue: line.newValue && line.newValue.name ? line.newValue.name : line.newValue && Array.isArray(line.newValue) ? line.newValue.map(l => l.name || l).join(", ") : line.newValue,
-                    oldValue: line.oldValue && line.oldValue.name ? line.oldValue.name : line.oldValue && Array.isArray(line.oldValue) ? line.oldValue.map(l => l.name || l).join(", ") : line.oldValue,
+                    newValue: line.newValue,
+                    oldValue: line.oldValue,
                     createdBy: line.createdBy ? line.createdBy.name : null,
                     date: new Date(line.createdAt).toISOString().substr(0, 10),
                     field: field,
@@ -288,6 +348,7 @@ class GenericController<T extends IExtendedDocument> {
 
             if (search) {
                 changelogs = changelogs.filter(log => {
+                    if (!log.field) return false;
                     if (log.newValue && log.newValue.toString().includes(search)) return true;
                     if (log.oldValue && log.oldValue.toString().includes(search)) return true;
                     if (log.createdBy && log.createdBy.toString().includes(search)) return true;
@@ -371,17 +432,18 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+
     public async find(req: Request, res: Response, next: NextFunction) {
 
         try {
+
             // prefernecje tabeli przekazane w query
             let { table } = req.query;
             let preference: ITablePreference | null = null;
             if (table) {
-                preference = await Table.setAccount(req.headers.account, req.headers.user).findOne({ table: table.toString() });
+                preference = await Table.findOne({ table: table.toString(), user: req.headers.user });
             }
-
-            this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            //this.s = this.model.setAccount(req.headers.account, req.headers.user);
             let query: any = {};
 
             let options = { select: { name: 1, type: 1, resource: 1 }, sort: {}, limit: 50, skip: 0 };
@@ -462,7 +524,10 @@ class GenericController<T extends IExtendedDocument> {
             // search by keyword
             let search = (req.query.search || "").toString();
             if (search) {
-                query[(req.query.field || 'name').toString()] = { $regex: `${req.query.search}` }
+                if (req.query.field && (req.query.field == "_id" || req.query.field == "id"))
+                    query["_id"] = req.query.search;
+                else
+                    query[(req.query.field || 'name').toString()] = { $regex: `${req.query.search}` }
             }
 
             // loop per query params

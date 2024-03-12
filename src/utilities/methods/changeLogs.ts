@@ -2,6 +2,7 @@ import Changelog from "../../models/changelog.model";
 import { Document, models } from 'mongoose';
 import { IExtendedDocument } from "../methods"
 import { IExtendedModel } from "../static"
+import asyncLocalStorage from "../../middleware/asyncLocalStorage";
 export default async function changeLogs(this: IExtendedDocument, document?: IExtendedDocument, subdoc?: string) {
   try {
     //przywraca oznaczenie zmian
@@ -18,7 +19,11 @@ export default async function changeLogs(this: IExtendedDocument, document?: IEx
       console.log("chage log model", model)
 
       if (model && !this.isNew) {
-        const createdBy = document && document.getUser ? document.getUser() : this.getUser();
+        // pobieranie i ustawianie createdBy na podstawie aktualnegor requesta
+        let tmpStorage = asyncLocalStorage.getStore();
+        let createdBy = null;
+        if (tmpStorage) createdBy = tmpStorage.user;
+
 
         let originalDoc = await model.findById(this.id, selects);
         if (originalDoc) {

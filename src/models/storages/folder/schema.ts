@@ -9,7 +9,7 @@ export interface IFolder extends IStorage {
 }
 export interface IFolderModel extends Model<IFolder>, IExtendedModel<IFolder> { }
 
-const options = { discriminatorKey: "type", collection: "storages" };
+const options = { discriminatorKey: "type", collection: "storage" };
 const schema = new Schema<IFolder>({}, options);
 
 schema.virtual("files", {

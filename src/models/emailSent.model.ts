@@ -10,12 +10,12 @@ export interface IEmailSent extends IExtendedDocument {
     document?: Schema.Types.ObjectId;
     user: Schema.Types.ObjectId;
     ref?: string;
-    to: string;
-    cc: string;
-    bcc: string;
+    to: string | [string];
+    cc?: string | [string];
+    bcc?: string | [string];
     subject: string;
-    text: string;
-    attachments: [IFile]
+    text?: string;
+    attachments?: [IFile]
 }
 interface IEmailSentModel extends Model<IEmailSent>, IExtendedModel<IEmailSent> { }
 
@@ -46,24 +46,27 @@ export const schema = new Schema<IEmailSent>(
 
         },
         to: {
-            type: String,
-            input: "text"
+            type: [String],
+            input: "text",
+            set: (v: any) => !Array.isArray(v) ? [v] : v
         },
         cc: {
-            type: String,
-            input: "text"
+            type: [String],
+            input: "text",
+            set: (v: any) => !Array.isArray(v) ? [v] : v
         },
         bcc: {
-            type: String,
-            input: "text"
+            type: [String],
+            input: "text",
+            set: (v: any) => !Array.isArray(v) ? [v] : v
         },
         subject: {
             type: String,
-            input: "text"
+            input: "text",
         },
         text: {
             type: String,
-            input: "text"
+            input: "text",
         },
         attachments: {
             type: [Schema.Types.ObjectId],

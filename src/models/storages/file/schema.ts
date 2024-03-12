@@ -12,7 +12,7 @@ export interface IFile extends IStorage {
 }
 export interface IFileModel extends Model<IFile>, IExtendedModel<IFile> { }
 
-const options = { discriminatorKey: "type", collection: "storages", };
+const options = { discriminatorKey: "type", collection: "storage" };
 const schema = new Schema<IFile>({
     //size: { type: Number, set: (v: any) => getFileSize(this.path) },
     mime: { type: String },

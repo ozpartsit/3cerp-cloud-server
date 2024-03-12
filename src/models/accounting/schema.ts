@@ -13,7 +13,7 @@ interface IAccountingModel extends Model<IAccounting>, IExtendedModel<IAccountin
 
 const AccountingSchema = {
     name: { type: String, input: "Input", validType: "text" },
-    description: { type: String, input: "Input", validType: "email" },
+    description: { type: String, input: "Input", validType: "text" },
     type: {
         type: String,
         required: true,

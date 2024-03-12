@@ -23,7 +23,7 @@ import { ItemTypes } from "../models/items/model";
 import { EntityTypes } from "../models/entities/model";
 import { ClassificationTypes } from "../models/classifications/model";
 import { AccountingTypes } from "../models/accounting/model";
-//import { FavoritesTypes } from "../models/favorites/model";
+import { FavoritesTypes } from "../models/favorites/model";
 import Email from "../models/email.model";
 import EmailSent from "../models/emailSent.model";
 import Shop from "../models/ecommerce/shop.model";
@@ -80,10 +80,10 @@ export default class Routes {
       this.routeUniversal(accounting.collection.collectionName, accounting.modelName, new Controller(accounting))
     })
     //favorites
-    // Object.values(FavoritesTypes).forEach(favorite => {
-    //   console.log(`ui/favorites`,favorite.modelName)
-    //   this.routeUniversal(`ui/favorites`, favorite.modelName, new Controller(favorite))
-    // })
+    Object.values(FavoritesTypes).forEach(favorite => {
+      console.log(`favorites`,favorite.modelName)
+      this.routeUniversal(`favorites`, favorite.modelName, new Controller(favorite))
+    })
     // Emails
     this.routeUniversal("emails", "email", this.emailController);
     // Emails Sent
@@ -147,6 +147,22 @@ export default class Routes {
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.activities.bind(controller) as any
     );
+    this.Router.route(`${path}/:id/favorite`)
+      .get(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+        controller.favorite.bind(controller) as any
+      )
+      .post(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+        controller.favorite.bind(controller) as any
+      )
+      .delete(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+        controller.favorite.bind(controller) as any
+      );
     this.Router.route(`${path}/:id/:mode?`)
       .get(
         this.Auth.authenticate.bind(this.Auth) as any,

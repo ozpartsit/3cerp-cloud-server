@@ -6,8 +6,10 @@ const options = { discriminatorKey: "type", collection: "classifications" };
 export interface ILink extends IFavorites {
     _id: Schema.Types.ObjectId
     index: number
-    link: string
+    link?: string
     category: Schema.Types.ObjectId
+    document?: Schema.Types.ObjectId;
+    documentType?: string;
 }
 export interface ILinkModel extends Model<ILink>, IExtendedModel<ILink> { }
 
@@ -16,7 +18,7 @@ export const schema = new Schema<ILink>(
         index: { type: Number, defaultSelect: true },
         link: {
             type: String,
-            required: true,
+            required: false,
             input: "TextField",
             defaultSelect: true,
         },
@@ -27,6 +29,15 @@ export const schema = new Schema<ILink>(
             defaultSelect: true,
             input: "SelectField",
             copy: "_id"
+        },
+        document: {
+            type: Schema.Types.ObjectId,
+            refPath: "documentType",
+            autopopulate: true,
+        },
+        documentType: {
+            type: String,
+            input: "text"
         },
     },
     options

@@ -4,6 +4,7 @@ import getFields from "./staticts/getFields";
 import getForm from "./staticts/getForm";
 import getSelect from "./staticts/getSelect";
 import { IExtendedDocument } from "../utilities/methods";
+import asyncLocalStorage from "../middleware/asyncLocalStorage";
 import Account from "../models/account.model";
 
 
@@ -31,12 +32,13 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   getForm(locale: string): any;
   getSelect(): any;
 
-  setAccount(account: string | string[] | undefined, user?: string | string[] | undefined): this;
-  getAccount(): any
-  getUser(): any
+  // setAccount(account: string | string[] | undefined, user?: string | string[] | undefined): this;
+  // getAccount(): any
+  userRequired(): boolean
 
   form(): any;
   defaultDocument(id: string): any
+  //getLocalStorage(): any
 }
 
 export default function customStaticsMethods<T extends IExtendedDocument>(schema: Schema<T, IExtendedModel<T>>) {
@@ -60,11 +62,66 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
         type: Number
       },
       deleted: {
-        type: Boolean
+        type: Boolean,
+        input: "Switch",
+        validType: "switch",
       }
     })
     schema.add(account);
     schema.index({ account: 1 });
+
+
+    // restrykcje do dokumentów konta:
+
+    // Dodaanie filtrów do wszytstkich queries
+    schema.pre("find", function (next) {
+      let tmpStorage = asyncLocalStorage.getStore();
+      let filters = {}
+
+      const model = this.model.modelName;
+      if (tmpStorage && model && models[model] && models[model].schema.paths && models[model].schema.paths.user) {
+        filters["user"] = tmpStorage.user;
+      }
+      if (tmpStorage && tmpStorage.account)
+        filters["account"] = tmpStorage.account;
+
+      this.where(filters);
+      next();
+    })
+    // wczesniej count teraz countDocuments
+    schema.pre("countDocuments", function (next) {
+      let tmpStorage = asyncLocalStorage.getStore();
+      let filters = {}
+
+      const model = this.model.modelName;
+      if (tmpStorage && model && models[model] && models[model].schema.paths && models[model].schema.paths.user) {
+        filters["user"] = tmpStorage.user;
+      }
+      if (tmpStorage && tmpStorage.account)
+        filters["account"] = tmpStorage.account;
+
+      this.where(filters);
+      next(); // Kontynuuje do wykonania właściwej operacji countDocuments
+    })
+    schema.pre('findOne', function (next) {
+      let tmpStorage = asyncLocalStorage.getStore();
+      let filters = {}
+
+      const model = this.model.modelName;
+
+      if (tmpStorage && model && models[model] && models[model].schema.paths && models[model].schema.paths.user) {
+        filters["user"] = tmpStorage.user;
+      }
+      if (tmpStorage && tmpStorage.account)
+        filters["account"] = tmpStorage.account;
+
+      this.where(filters);
+      next();
+    });
+
+
+
+
 
     schema.statics.loadDocument = loadDocument;
     schema.statics.addDocument = addDocument;
@@ -78,79 +135,97 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
     schema.statics.getFields = getFields;
 
     schema.statics.getSelect = getSelect;
-    schema.statics.setAccount = setAccount;
+    //schema.statics.setAccount = setAccount;
     schema.statics.getForm = getForm;
+
+    schema.statics.userRequired = userRequired
   }
 }
 
+
+function userRequired<T extends IExtendedDocument>(this: Model<T>) {
+  return !!this.schema.paths.user;
+}
 
 //setCollection
 
-function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema.Types.ObjectId, user?: Schema.Types.ObjectId): Model<IExtendedDocument> {
-  if (account) {
-    // ustaw bazowy model
-    let baseModel = this.modelName.split("_")[0];
-    if (this.modelName == ((`${baseModel}_${account}_${user}`).toString())) {
-      return models[`${this.modelName}`]
-    }
-    if (models[`${baseModel}_${account}_${user}`]) {
-      return models[`${baseModel}_${account}_${user}`]
-    }
-    else {
-      let filters: any = { account: account };
-      // ustawienie dla każdego dokumentu domyślnego account;
-      
-      let defaultAccount = new Schema({
-        account: {
-          type: Schema.Types.ObjectId,
-          required: true,
-          default: user
-        }
-      })
-      this.schema.add(defaultAccount);
+// function setAccount<T extends IExtendedDocument>(this: Model<T>, account: Schema.Types.ObjectId, user?: Schema.Types.ObjectId): Model<IExtendedDocument> {
+//   if (account) {
+//     // ustaw bazowy model
+//     let baseModel = this.modelName.split("_")[0];
+//     if (this.modelName == ((`${baseModel}_${account}_${user}`).toString())) {
+//       return models[`${this.modelName}`]
+//     }
 
-      // ustawienie domyśłnego User na podstawie req
-      // jeżeli schemat zawiera user
-      if (this.schema.paths.user && user) {
-        let defaultUser = new Schema({
-          user: {
-            type: Schema.Types.ObjectId,
-            required: true,
-            default: user,
-          }
-        })
-        this.schema.add(defaultUser);
-        filters.user = user;
-      }
+//     let baseModelModel = models[`${baseModel}`];
+
+//     if (models[`${baseModel}_${account}_${user}`]) {
+//       return models[`${baseModel}_${account}_${user}`]
+//     }
+//     else {
+//       let filters: any = { account: account };
+//       // ustawienie dla każdego dokumentu domyślnego account;
+
+//       let defaultAccount = new Schema({
+//         account: {
+//           type: Schema.Types.ObjectId,
+//           required: true,
+//           default: account
+//         }
+//       })
+//       this.schema.add(defaultAccount);
+
+//       // ustawienie domyśłnego User na podstawie req
+//       // jeżeli schemat zawiera user
+//       if (this.schema.paths.user && user) {
+//         let defaultUser = new Schema({
+//           user: {
+//             type: Schema.Types.ObjectId,
+//             required: true,
+//             default: user,
+//           }
+//         })
+//         this.schema.add(defaultUser);
+//         filters.user = user;
+//       }
 
 
-      // Dodaanie filtrów do wszytstkich queries
-      this.schema.pre("find", function () {
-        this.where(filters);
-      })
-      // wczesniej count teraz countDocuments
-      this.schema.pre("countDocuments", function (next) {
-        this.where(filters);
-        next(); // Kontynuuje do wykonania właściwej operacji countDocuments
-      })
-      this.schema.pre('findOne', function () {
-        this.where(filters);
-      });
+//       // Dodaanie filtrów do wszytstkich queries
+//       this.schema.pre("find", function () {
+//         this.where(filters);
+//       })
+//       // wczesniej count teraz countDocuments
+//       this.schema.pre("countDocuments", function (next) {
+//         this.where(filters);
+//         next(); // Kontynuuje do wykonania właściwej operacji countDocuments
+//       })
+//       this.schema.pre('findOne', function () {
+//         this.where(filters);
+//       });
 
-      // weryfikowanie poprawności account
-      // this.schema.pre("save", function () {
-      //   if (this.account.toString() !== account.toString()) throw "wrong account";
-      // })
-      this.schema.static('getAccount', () => account);
-      this.schema.static('getUser', () => user);
+//       // weryfikowanie poprawności account
+//       // this.schema.pre("save", function () {
+//       //   if (this.account.toString() !== account.toString()) throw "wrong account";
+//       // })
+//       this.schema.static('getAccount', () => account);
+//       this.schema.static('getUser', () => user);
 
-      
-      return model<IExtendedDocument>(`${baseModel}_${account}_${user}`, new Schema(this.schema), this.collection.collectionName);
-    }
-  } else {
-    throw "account is requred"
-  }
-}
+
+//       const isDiscriminatorModel = (model) => {
+//         return Boolean(model.schema.discriminatorMapping && !model.schema.discriminatorMapping.isRoot);
+//       };
+//       console.log(isDiscriminatorModel(baseModelModel), baseModelModel.baseModelName)
+//       if (isDiscriminatorModel(baseModelModel) && baseModelModel.baseModelName) {
+//         console.log("asdasd", baseModelModel.baseModelName)
+//         return models[baseModelModel.baseModelName].discriminator<IExtendedDocument>(`${baseModel}_${account}_${user}`, this.schema, this.collection.collectionName);
+//       }
+
+//       else return model<IExtendedDocument>(`${baseModel}_${account}_${user}`, new Schema(this.schema), this.collection.collectionName);
+//     }
+//   } else {
+//     throw "account is requred"
+//   }
+// }
 
 //loadDocuments
 export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, id: string, field: string = "_id"): Promise<T | null> {
@@ -303,7 +378,6 @@ export async function deleteDocument<T extends IExtendedDocument>(this: IExtende
       // to do - do sprawdzenia
       await document.validateVirtuals(true);
       await document.deleteOne();
-
       cache.del(id);
       return { saved: true };
     } else {
@@ -367,7 +441,6 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
           }
         }
       }
-
     let result = await this.find(query)
       .populate(Object.values(populated))
       .sort(sort).skip(skip).limit(limit).select(select);

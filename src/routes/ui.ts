@@ -6,6 +6,7 @@ import Controller from "../controllers/genericController";
 import NotificationController from "../controllers/ui/notifications";
 import SearchController from "../controllers/ui/search";
 import NotesController from "../controllers/ui/notes";
+import FavoritesController from "../controllers/ui/favorites";
 import { FavoritesTypes } from "../models/favorites/model";
 import Note from "../models/note.model";
 export default class Routes {
@@ -24,7 +25,7 @@ export default class Routes {
         //this.routerFavorites();
         //favorites
         Object.values(FavoritesTypes).forEach(favorite => {
-            this.routeUniversal(`favorites`, favorite.modelName, new Controller(favorite))
+            this.routeUniversal(`favorites`, favorite.modelName, new FavoritesController(favorite))
         })
         //Notes
         this.routeUniversal(`notes`, Note.modelName, new Controller(Note))

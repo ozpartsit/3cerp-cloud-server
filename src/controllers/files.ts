@@ -27,11 +27,11 @@ export default class FileController<T extends IExtendedDocument> extends control
         let files: any[] = Array.isArray(req.files.files) ? req.files.files : [req.files.files];
 
         let uploadedFiles: IFile[] = [];
-        let folderModel = Folder.setAccount(req.headers.account, req.headers.user);
-        let folder = await folderModel.findOne().exec();
+        //let folderModel = Folder.setAccount(req.headers.account, req.headers.user);
+        let folder = await Folder.findOne({ account: req.headers.account }).exec();
 
         if (req.body && req.body.folder) {
-          folder = await folderModel.findById(req.body.folder).exec()
+          folder = await Folder.findById(req.body.folder).exec()
           if (!folder) {
             throw new CustomError("folder_not_found", 404);
           }
@@ -49,14 +49,15 @@ export default class FileController<T extends IExtendedDocument> extends control
           const filePath = path.posix.join(folder.path, encodeURI(file.name));
           file.mv(path.posix.join(this.storagePath, filePath));
 
-          let FileModel = await File.setAccount(req.headers.account, req.headers.user);
-          let doc = new FileModel({
+          //let FileModel = await File.setAccount(req.headers.account, req.headers.user);
+          let doc = new File({
             name: file.name,
             type: "File",
             folderPath: folder.path,
             folder: folder,
             path: filePath,
             urlcomponent: filePath,
+            account: req.headers.account
           });
 
           let newFile = await doc.save();

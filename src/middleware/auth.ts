@@ -6,6 +6,7 @@ import Email from "../services/email";
 import CustomError from "../utilities/errors/customError";
 import i18n from "../config/i18n";
 import Preference from "../models/preference.model";
+import asyncLocalStorage from "./asyncLocalStorage";
 interface Response extends express.Response {
   user: string | jwt.JwtPayload;
 }
@@ -35,6 +36,15 @@ export default class Auth {
               req.headers.user = value.user;
               req.headers.role = value.role;
               req.headers.account = value.account;
+
+
+              // zapisywanie w local req storage
+              const userData = {
+                user: value.user,
+                account: value.account
+              };
+              asyncLocalStorage.enterWith(userData)
+
               // aktualizacja daty ostatniego authenticate
               User.findByIdAndUpdate(value.user, { $set: { lastAuthDate: new Date() } }).exec();
             }

@@ -129,14 +129,15 @@ schema.virtual("favorites", {
 
 
 schema.methods.initPreference = async function () {
-    let PreferenceModel = Preference.setAccount(this.account.toString(), this._id.toString());
-    return await PreferenceModel.findById(this._id).then(async (res) => {
+    //let PreferenceModel = Preference.setAccount(this.account.toString(), this._id.toString());
+    return await Preference.findById(this._id).then(async (res) => {
         //jeżeli folder w DB nie istnieje - dodaj
         if (!res) {
-            return await new PreferenceModel({
+            return await new Preference({
                 _id: this._id,
                 user: this._id,
                 type: "Preference",
+                account: this.account
             }).save();
         } else {
             return res;
