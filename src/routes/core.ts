@@ -49,7 +49,7 @@ export default class Routes {
     //Users
     this.routeUniversal("users", "user", new Controller(User))
     //Preferences
-    this.routeUniversal("preferences", "preference", new Controller(Preference))
+    this.routeUniversal("preferences", "user", new Controller(Preference))
     //Table Preferences
     this.routeUniversal("preferences", "table", new Controller(Table))
     //Storage
@@ -119,7 +119,11 @@ export default class Routes {
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.find.bind(controller) as any
     );
-
+    this.Router.route(`${path}/operator`).post(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.options.bind(controller) as any
+    );
     this.Router.route(`${path}/new/:mode?`).post(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,

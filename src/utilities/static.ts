@@ -291,14 +291,21 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
 export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string, data: Object): Promise<any> {
   try {
     let document = cache.get<T>(id);
-    if (!document) {
-      document = new this(data || {});
+    console.log(document, id)
+    // if (!document && data) {
+    //   // do usunięcia
+    //   document = new this(data || {});
+    // } else {
+    //   return null;
+    //   // to do - sprawdzić różnice 
+    // }
+    if (document) {
+      await document.saveDocument();
+      return { document_id: id, saved: true };
     } else {
-      // to do - sprawdzić różnice 
+      return { document_id: null, saved: false };
     }
 
-    await document.saveDocument();
-    return { document_id: id, saved: true };
   } catch (error) {
     throw error;
   }

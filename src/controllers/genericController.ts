@@ -139,6 +139,10 @@ class GenericController<T extends IExtendedDocument> {
             let page = parseInt((req.query.page || 1).toString());
             let keyword = (req.query.keyword || "").toString();
 
+            if (!id && !mode) {
+                id = "all";
+                mode = "operator";
+            }
             let { results, total } = await this.model.getOptions(id, mode, field, page, keyword);
             if (results) {
                 const data = {
@@ -152,8 +156,6 @@ class GenericController<T extends IExtendedDocument> {
             } else {
                 throw new CustomError("doc_not_found", 404);
             }
-
-
 
         } catch (error) {
             return next(error);
@@ -524,8 +526,8 @@ class GenericController<T extends IExtendedDocument> {
             // search by keyword
             let search = (req.query.search || "").toString();
             if (search) {
-                if (req.query.field && (req.query.field == "_id" || req.query.field == "id"))
-                    query["_id"] = req.query.search;
+                if (req.query.field && (req.query.field == "_id" || req.query.field == "document"))
+                    query[req.query.field] = req.query.search;
                 else
                     query[(req.query.field || 'name').toString()] = { $regex: `${req.query.search}` }
             }

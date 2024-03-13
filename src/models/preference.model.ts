@@ -46,7 +46,7 @@ const schema = new Schema<IPreference>(
 schema.index({ name: 1 });
 
 const Preference: IPreferenceModel = model<IPreference, IPreferenceModel>(
-    "Preference",
+    "UserPreference",
     schema
 );
 export default Preference;
