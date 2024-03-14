@@ -111,7 +111,7 @@ const schema = new Schema<ICustomer>(
       ref: "User",
       autopopulate: true,
       input: "Select",
-      validType:"select",
+      validType:"url",
       hint: "Sales Representative",
       help: "A sales rep interacts directly with customers throughout all phases of the sales process."
     },

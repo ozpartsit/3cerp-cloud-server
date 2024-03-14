@@ -37,7 +37,7 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   userRequired(): boolean
 
   form(): any;
-  defaultDocument(id: string): any
+  //defaultDocument(id: string): any
   //getLocalStorage(): any
 }
 
@@ -246,6 +246,7 @@ export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, 
 //API
 export async function addDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, mode: string, data: Object) {
   try {
+    console.log(this)
     let document = new this(data || {})//await this.create(data || {});
 
     document.initLocal();
@@ -268,15 +269,18 @@ export async function addDocument<T extends IExtendedDocument>(this: IExtendedMo
 export async function getDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, field: string = "_id"): Promise<T | null> {
   try {
 
-    let document: T | null = await this.loadDocument(id, field);
+    let document: T | null | undefined = await this.loadDocument(id, field);
     if (document && document._id) {
       //const cacheID = new Types.ObjectId().toString();
       // to do - cacheID - jeżeli chcemy otwierać ten sam dokument w jedym momencie;
       if (mode === "advanced") cache.set(id, document);
     } else {
-      if (!!this.defaultDocument) {
-        return this.defaultDocument(id)
+      if (mode === "advanced") {
+        document = cache.get<T>(id) || null;
       }
+      // if (!!this.defaultDocument) {
+      //   return this.defaultDocument(id)
+      // }
     }
     return document;
   } catch (error) {

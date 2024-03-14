@@ -1,4 +1,4 @@
-import { Schema, Model, model } from "mongoose";
+import { Schema, Model, model, mongo } from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import ItemTypes from "../../constants/item.types";
@@ -104,4 +104,9 @@ schema.method("getPrice", async function (line: any) {
 });
 
 const Item: IItemModel = model<IItem, IItemModel>("Item", schema);
+
+Item.init().then(function (Event) {
+  console.log('Item Builded');
+  // Item.updateMany({ }, { $set: { account: new mongo.ObjectId('64f4cc1c9842bd71489d1fa0') } }).exec()
+})
 export default Item;

@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function autoPopulate(this: IExtendedDocument, local: string) {
   let paths: any[] = [];
@@ -30,7 +30,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
 
               this[pathname].forEach((element, index) => {
                 if (Array.isArray(element[key])) {
-                 
+
                   element[key].forEach((e, index2) => {
                     if (e.value) {
                       paths.push({
@@ -82,6 +82,10 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
     if (list.options.ref && list.options.autopopulate) {
       if (Array.isArray(this[list.path])) {
         for (let index in doc[list.path]) {
+          if (!doc[list.path][index].schema) {
+            delete doc[list.path][index]._id
+            doc[list.path][index] = new models[list.options.ref](doc[list.path][index])
+          }
           doc[list.path][index] = this[list.path][index].autoPopulate()
         }
         doc[list.path] = await Promise.all(doc[list.path])

@@ -60,7 +60,35 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+    async copy(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, id, mode } = req.params;
+        let { field } = req.query;
+        try {
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
+            let sourceDocument = await this.model.getDocument(id, "simple", (field || "_id").toString());
 
+            if (!sourceDocument) {
+                throw new CustomError("doc_not_found", 404);
+            } else {
+
+                if (this.model.userRequired()) sourceDocument["user"] = req.headers.user;
+                sourceDocument = sourceDocument.toObject();
+                delete sourceDocument._id;
+                let { document, saved } = await this.model.addDocument("advanced", sourceDocument);
+
+                //validateVirtuals
+                await document.validateVirtuals();
+                //populate response document
+                await document.autoPopulate();
+                let docObject = document.constantTranslate(req.locale);
+                res.json({ status: "success", data: { document: docObject, service: "copy" } });
+
+
+            }
+        } catch (error) {
+            return next(error);
+        }
+    }
     public async save(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {

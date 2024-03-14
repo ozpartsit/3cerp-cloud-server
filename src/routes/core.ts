@@ -151,6 +151,11 @@ export default class Routes {
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.activities.bind(controller) as any
     );
+    this.Router.route(`${path}/:id/copy`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.copy.bind(controller) as any
+    );
     this.Router.route(`${path}/:id/favorite`)
       .get(
         this.Auth.authenticate.bind(this.Auth) as any,
