@@ -475,7 +475,6 @@ class GenericController<T extends IExtendedDocument> {
             }
             //this.s = this.model.setAccount(req.headers.account, req.headers.user);
             let query: any = {};
-
             let options = { select: { name: 1, type: 1, resource: 1 }, sort: {}, limit: 50, skip: 0 };
 
             // filters
@@ -539,7 +538,7 @@ class GenericController<T extends IExtendedDocument> {
                     sortArray = preference.sortBy.map(s => s.order === "desc" ? `-${s.key}` : s.key);
                 }
             }
-            sortArray.reduce((o, f) => {
+            options.sort = sortArray.reduce((o, f) => {
                 // -date = desc sort per date field
                 if (f[0] == "-") {
                     f = f.substring(1);

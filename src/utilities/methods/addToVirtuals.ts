@@ -14,6 +14,6 @@ export default async function addToVirtuals(
   (list.options.copyFields || []).forEach((field: string) => {
     newline[field] = this[field] ? this[field]._id : this[field];
   });
-  this[virtual].splice(index, 0, newline);
+  //this[virtual].splice(index, 0, newline);
   await this.validateVirtuals(false)
 }

@@ -21,30 +21,30 @@ export default function getSelect<T extends IExtendedDocument>(this: Model<T>, p
     // });
 
     for (const [pathname, schematype] of Object.entries<any>(modelSchema.paths)) {
-       // console.log(pathname,schematype.options.ref)
-       //if(schematype.options.defaultSelect) {
-            fields.push(schematype.path)
-            if (["Embedded", "Array"].includes(schematype.instance)) {
+        // console.log(pathname,schematype.options.ref)
+        //if(schematype.options.defaultSelect) {
+        fields.push(schematype.path)
+        if (["Embedded", "Array"].includes(schematype.instance)) {
 
-                if (!parent && schematype.schema) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
-                    if (schematype.options.defaultSelect)
-                        fields.push(`${pathname}.${key}`)
-                }
-            } else {
-                if (schematype.options.ref) {
-                    //console.log(schematype.options.ref)
-                    let refModel: any = models[schematype.options.ref];
-
-                    if (refModel) {
-                        schematype.options.resource = refModel.schema.options.collection;
-                        refModel.getSelect(pathname).forEach(f => {
-                            fields.push(f)
-                        });
-                    }
-                }
-
+            if (!parent && schematype.schema) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
+                if (schematype.options.defaultSelect)
+                    fields.push(`${pathname}.${key}`)
             }
-    //    }
+        } else {
+            if (schematype.options.ref && !parent) {
+                //console.log(schematype.options.ref)
+                let refModel: any = models[schematype.options.ref];
+
+                if (refModel) {
+                    schematype.options.resource = refModel.schema.options.collection;
+                    refModel.getSelect(pathname, pathname).forEach(f => {
+                        fields.push(f)
+                    });
+                }
+            }
+
+        }
+        //    }
     }
     fields = [...new Set(fields)];
     //console.log(fields)

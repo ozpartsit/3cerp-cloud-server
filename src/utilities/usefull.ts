@@ -16,3 +16,14 @@ export function getFileSize(filename: string) {
   var fileSizeInBytes = stats.size;
   return fileSizeInBytes;
 }
+
+export function encodeURIComponentFn(tekst) {
+  // Usuwanie diakrytyków i innych znaków specjalnych
+  let zakodowanyTekst = tekst.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  // Zamiana spacji na '-'
+  zakodowanyTekst = zakodowanyTekst.replace(/ /g, '-');
+
+  // Kodowanie URI
+  return encodeURIComponent(zakodowanyTekst);
+}

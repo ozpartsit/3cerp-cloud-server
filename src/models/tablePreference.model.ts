@@ -150,23 +150,28 @@ schema.methods._someFunction = function () {
     if (this.filters) {
         let sources = this.table.split(".");
         let model = Object.keys(models).find(model => model.toLowerCase() == sources[0].toLowerCase());
-        if (model) {
-            for (let filter of this.filters) {
-                let fields = (models[model] as any).getFields("en", "", false, true);
-                if (sources[1]) {
-                    let subdoc = fields.find(f => f.field == sources[1])
-                    if (subdoc)
-                        fields = subdoc.fields;
-                    else fields.filter(field => field.control != "Table");
-                }
-                fields = fields.filter(field => field.control != "Table");
-                let field = fields.find(f => f.field == filter.field);
-                if (field) {
-                    filter.constant = field.constant;
-                    filter.ref = field.type;
-                    //filter.field = { _id: field.field }
-                }
 
+        if (model) {
+            for (let filterGroup of this.filters) {
+                for (let filter of filterGroup.filters) {
+                    let fields = (models[model] as any).getFields("en", "", false, true);
+                    if (sources[1]) {
+                        let subdoc = fields.find(f => f.field == sources[1])
+                        if (subdoc)
+                            fields = subdoc.fields;
+                        else fields.filter(field => field.control != "Table");
+                    }
+
+                    fields = fields.filter(field => field.control != "Table");
+
+                    let field = fields.find(f => f.field == filter.field);
+
+                    if (field) {
+                        filter.constant = field.constant;
+                        filter.ref = field.type;
+                        //filter.field = { _id: field.field }
+                    }
+                }
             }
         }
 

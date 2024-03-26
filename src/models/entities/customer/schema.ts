@@ -50,8 +50,8 @@ const schema = new Schema<ICustomer>(
     },
 
     //addresses
-    shippingAddress: { type: nestedSchema, validType: "address", virtualPath: "addresses" },
-    billingAddress: { type: nestedSchema, validType: "address", virtualPath: "addresses" },
+    shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+    billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
     //statistics
     firstSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
     lastSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
@@ -136,12 +136,12 @@ schema.method("recalc", async function () {
   if (this.$locals.triggers)
     for (let trigger of this.$locals.triggers) {
       this.$locals.triggers.shift();
-      if (trigger.subdoc == "billingAddress" && trigger.field == "_id") {
-        await updateAddress(this, "billingAddress")
-      }
-      if (trigger.subdoc == "shippingAddress" && trigger.field == "_id") {
-        await updateAddress(this, "shippingAddress")
-      }
+      // if (trigger.subdoc == "billingAddress" && trigger.field == "_id") {
+      //   await updateAddress(this, "billingAddress")
+      // }
+      // if (trigger.subdoc == "shippingAddress" && trigger.field == "_id") {
+      //   await updateAddress(this, "shippingAddress")
+      // }
       // if (trigger.subdoc == "billingAddress") {
       //   await updateDefaultAddress(this, "billingAddress")
       // }

@@ -5,6 +5,7 @@ import Storage, { IStorage } from "../models/storages/schema";
 import File, { IFile } from "../models/storages/file/schema";
 import Folder, { IFolder } from "../models/storages/folder/schema";
 import { Types } from 'mongoose';
+import { encodeURIComponentFn } from "../utilities/usefull";
 export default class StorageStructure {
   //resolve storage path of directory
   public storagePath: string = path.posix.resolve("storage");
@@ -38,7 +39,7 @@ export default class StorageStructure {
     fs.readdir(dirPath, (err, files) => {
       files.forEach(async (file: string) => {
         let folder = parent ? parent.path : encodeURI("storage");
-        const filePath = path.posix.join(folder, encodeURI(file));
+        const filePath = path.posix.join(folder, encodeURIComponentFn(file));
 
 
         if (fs.lstatSync(path.posix.join(dirPath, file)).isDirectory()) {
@@ -50,7 +51,6 @@ export default class StorageStructure {
             let doc = {
               name: file,
               path: filePath,
-              urlcomponent: filePath,
               type: "File",
               folderPath: folder,
               folder: parent
@@ -68,7 +68,9 @@ export default class StorageStructure {
   private async mapFolders() {
     let folders = await Storage.find({ type: "Folder" }).exec();
     folders.forEach((folder: IStorage) => {
-      this.makeDir(folder.path);
+      
+      const folderPath = path.posix.join(this.storagePath, folder.path);
+      this.makeDir(folderPath);
     })
   }
 

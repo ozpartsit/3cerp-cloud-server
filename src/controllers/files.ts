@@ -17,6 +17,13 @@ export default class FileController<T extends IExtendedDocument> extends control
   constructor(model: IModel<T>) {
     super(model);
   }
+
+  public async files(req: Request, res: Response, next: NextFunction) {
+    let { id, } = req.params;
+    req.query.filters = `folder=${id}`;
+    super.find(req, res, next);
+  }
+
   public async upload(req: Request, res: Response, next: NextFunction) {
     // todo
     try {

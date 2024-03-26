@@ -246,7 +246,6 @@ export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, 
 //API
 export async function addDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, mode: string, data: Object) {
   try {
-    console.log(this)
     let document = new this(data || {})//await this.create(data || {});
 
     document.initLocal();
@@ -295,7 +294,6 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
 export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string, data: Object): Promise<any> {
   try {
     let document = cache.get<T>(id);
-    console.log(document, id)
     // if (!document && data) {
     //   // do usunięcia
     //   document = new this(data || {});

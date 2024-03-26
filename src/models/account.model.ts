@@ -81,7 +81,8 @@ schema.methods.initStorage = async function () {
                 name: this.id,
                 type: "Folder",
                 path: encodeURI(this.id),
-                urlcomponent: encodeURI(this.id)
+                urlcomponent: encodeURI(this.id),
+                root: true
             }).save();
         } else {
             return res;

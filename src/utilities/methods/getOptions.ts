@@ -30,10 +30,12 @@ export default async function getOptions(
                 if (virtual) {
                     document = await new models[virtual.options.ref]() as IExtendedDocument;
                     document.initLocal();
-                    if (virtual.options.justOne) {
-                        this[subdoc] = document;
-                    } else {
-                        this[subdoc].push(document);
+                    if (subdoc_id) {
+                        if (virtual.options.justOne) {
+                            this[subdoc] = document;
+                        } else {
+                            this[subdoc].push(document);
+                        }
                     }
                     this.validateVirtuals(false);
                     if (deepdoc) return document.getOptions(field, deepdoc, deepdoc_id, null, null, page, keyword, mode)
@@ -41,7 +43,7 @@ export default async function getOptions(
                     document = this;
                     const fieldType = this.schema.path(subdoc);
                     if (fieldType && fieldType.options.ref) {
-                     
+
                         document = new models[fieldType.options.ref]()
                         if (!document) document = this;
                     } else

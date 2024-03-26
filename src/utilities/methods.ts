@@ -10,7 +10,8 @@ import addToVirtuals from "./methods/addToVirtuals";
 import cache from "../config/cache";
 import asyncLocalStorage from "../middleware/asyncLocalStorage";
 import mongoose, { Schema, Document, models } from "mongoose";
-import { IExtendedModel } from "../utilities//static";
+import { IExtendedModel } from "../utilities/static";
+import { encodeURIComponentFn } from "./usefull"
 
 export interface IExtendedDocument extends Document {
   account: Schema.Types.ObjectId;
@@ -171,13 +172,3 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
 
 }
 
-function encodeURIComponentFn(tekst) {
-  // Usuwanie diakrytyków i innych znaków specjalnych
-  let zakodowanyTekst = tekst.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-  // Zamiana spacji na '-'
-  zakodowanyTekst = zakodowanyTekst.replace(/ /g, '-');
-
-  // Kodowanie URI
-  return encodeURIComponent(zakodowanyTekst);
-}

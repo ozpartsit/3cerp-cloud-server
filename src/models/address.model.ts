@@ -111,7 +111,7 @@ schema.pre("save", async function (next) {
 // })
 
 schema.methods.recalc = async function () {
-  for (let trigger of this.$locals.triggers) {
+  if (this.$locals.triggers) for (let trigger of this.$locals.triggers) {
     // if (trigger.type == "setValue") {
     //   if (this.shippingAddress) await updateDefaultAddress(this, trigger.field, "shippingAddress")
     //   if (this.billingAddress) await updateDefaultAddress(this, trigger.field, "billingAddress")

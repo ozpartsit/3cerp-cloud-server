@@ -22,7 +22,10 @@ export default async function validateVirtuals(this: IExtendedDocument, save: bo
           // set index - useful to sort
           if (!list.options.justOne) line.index = index;
           // if line is new init new document
-          if (!line.schema) line = new models[list.options.ref](line);
+          if (!line.schema) {
+            if(this.isNew) delete line._id; // delete id if copy document - to do - zastanowić sie czy nie dodać warunku
+            line = new models[list.options.ref](line);
+          }
           // assign foreignField to documents from virtual field
           line[list.options.foreignField] = this[list.options.localField];
           // assign temporarily this to parent key

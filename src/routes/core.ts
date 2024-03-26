@@ -52,12 +52,16 @@ export default class Routes {
     this.routeUniversal("preferences", "user", new Controller(Preference))
     //Table Preferences
     this.routeUniversal("preferences", "table", new Controller(Table))
+
+    //Upload
+    this.routeUpload(new FilesController(StorageTypes.folder))
+    //files
+    this.routeFiles(new FilesController(StorageTypes.file))
     //Storage
     Object.values(StorageTypes).forEach(async (storage) => {
       this.routeUniversal(storage.collection.collectionName, storage.modelName, new Controller(storage))
     })
-    //Upload
-    this.routeFiles(new FilesController(StorageTypes.folder))
+
 
     //Transactions
     Object.values(TransactionTypes).forEach(transaction => {
@@ -81,7 +85,7 @@ export default class Routes {
     })
     //favorites
     Object.values(FavoritesTypes).forEach(favorite => {
-      console.log(`favorites`,favorite.modelName)
+      console.log(`favorites`, favorite.modelName)
       this.routeUniversal(`favorites`, favorite.modelName, new Controller(favorite))
     })
     // Emails
@@ -209,11 +213,17 @@ export default class Routes {
   }
   public routeFiles(controller) {
     // Files
+    this.Router.route("/storage/folder/:id/files").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      controller.files.bind(controller) as any
+    );
+  }
+  public routeUpload(controller) {
+    // Upload
     this.Router.route("/storage/upload").post(
       this.Auth.authenticate.bind(this.Auth) as any,
       controller.upload.bind(controller) as any
     );
   }
-
 }
 

@@ -80,6 +80,7 @@ export class Email {
       to: email.to,
       subject: email.subject,
       text: email.text,
+      html: email.text,
       attachments: []
     }
     if (email.email) {
