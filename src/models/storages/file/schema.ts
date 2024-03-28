@@ -3,19 +3,24 @@ import Storage, { IStorage } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import { getFileSize } from "../../../utilities/usefull";
 import mime from "mime-types";
-
+import path from "path";
 export interface IFile extends IStorage {
     size?: number;
-    mime: string;
 }
 export interface IFileModel extends Model<IFile>, IExtendedModel<IFile> { }
 
 const options = { discriminatorKey: "type", collection: "storage" };
 const schema = new Schema<IFile>({
     //size: { type: Number, set: (v: any) => getFileSize(this.path) },
-    mime: { type: String },
 
 }, options);
+
+
+schema.virtual('fullPath').get(function () {
+    if (this.path)
+        return path.posix.join(process.env.APP_DOMAIN || "", "storage", this.path);
+    else return undefined;
+});
 
 // Pre-hook wykonujący się przed zapisaniem dokumentu do bazy danych
 schema.pre('save', function (next) {

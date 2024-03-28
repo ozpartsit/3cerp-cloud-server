@@ -56,7 +56,7 @@ export default class Routes {
     //Upload
     this.routeUpload(new FilesController(StorageTypes.folder))
     //files
-    this.routeFiles(new FilesController(StorageTypes.file))
+    this.routeFiles(new FilesController(StorageTypes.storage))
     //Storage
     Object.values(StorageTypes).forEach(async (storage) => {
       this.routeUniversal(storage.collection.collectionName, storage.modelName, new Controller(storage))
@@ -214,6 +214,11 @@ export default class Routes {
   public routeFiles(controller) {
     // Files
     this.Router.route("/storage/folder/:id/files").get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      controller.files.bind(controller) as any
+    );
+    // Files root
+    this.Router.route("/storage/folder/files").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       controller.files.bind(controller) as any
     );

@@ -14,6 +14,7 @@ export interface IAccount extends IExtendedDocument {
     dbName: string;
     dbPass: string;
     dbHost: string;
+    storageRoot?: Schema.Types.ObjectId;
     initStorage(): Promise<IFolder & { _id: any; }>
 }
 
@@ -31,6 +32,7 @@ const schema = new Schema<IAccount>(
             required: true,
             input: "TextField"
         },
+        storageRoot: { type: Schema.Types.ObjectId, ref: "Folder" },
         email: { type: String, input: "TextField" },
         name: {
             type: String,
@@ -90,12 +92,25 @@ schema.methods.initStorage = async function () {
     })
 };
 
-schema.post('save', function () {
-    this.initStorage();
+schema.post('save', async function () {
+    const root = await this.initStorage();
+    if (root) {
+        await this.$model().updateOne({ _id: this._id }, { $set: { storageRoot: root._id } })
+    }
+
 });
 
 const Account: IAccountModel = model<IAccount, IAccountModel>(
     "Account",
     schema
 );
+
+
+Account.init().then(function (Event) {
+    console.log('Account Builded');
+    // Account.findById('64f4cc1c9842bd71489d1fa0').then(res => {
+    //     if (res) res.save()
+    // })
+})
+
 export default Account;

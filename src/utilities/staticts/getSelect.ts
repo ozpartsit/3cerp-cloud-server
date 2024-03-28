@@ -1,7 +1,7 @@
 import { Schema, Model, Document, models } from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default function getSelect<T extends IExtendedDocument>(this: Model<T>, parent?: string) {
-    let fields: string[] = ["name", "type", "resource"];
+    let fields: string[] = ["name", "type", "resource", "path", "mime"];
     let modelSchema = this.schema;
 
     // to do - dodac tylko justOne
@@ -22,8 +22,9 @@ export default function getSelect<T extends IExtendedDocument>(this: Model<T>, p
 
     for (const [pathname, schematype] of Object.entries<any>(modelSchema.paths)) {
         // console.log(pathname,schematype.options.ref)
-        //if(schematype.options.defaultSelect) {
-        fields.push(schematype.path)
+        if (schematype.options.defaultSelect) {
+            fields.push(schematype.path)
+        }
         if (["Embedded", "Array"].includes(schematype.instance)) {
 
             if (!parent && schematype.schema) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
@@ -47,7 +48,6 @@ export default function getSelect<T extends IExtendedDocument>(this: Model<T>, p
         //    }
     }
     fields = [...new Set(fields)];
-    //console.log(fields)
     return fields;
 }
 

@@ -46,7 +46,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 
   const options = (schema as any).options;
   // to do - poprwić by ni ekorzystać z any
-  if (options.collection) {
+  if (options.collection && options.collection !== "accounts") {
     let account = new Schema({
       account: {
         type: Schema.Types.ObjectId,
@@ -450,6 +450,7 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
           }
         }
       }
+
     let result = await this.find(query)
       .populate(Object.values(populated))
       .sort(sort).skip(skip).limit(limit).select(select);

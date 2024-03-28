@@ -19,7 +19,11 @@ export default class FileController<T extends IExtendedDocument> extends control
   }
 
   public async files(req: Request, res: Response, next: NextFunction) {
-    let { id, } = req.params;
+    let { id } = req.params;
+    if (!id || id == "root") {
+      let account = await Account.findById(req.headers.account)
+      if (account && account.storageRoot) id = account.storageRoot.toString();
+    }
     req.query.filters = `folder=${id}`;
     super.find(req, res, next);
   }

@@ -577,17 +577,18 @@ class GenericController<T extends IExtendedDocument> {
             let page = req.query.page || 1;
 
             // get fields
-            let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
+            //let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
 
             const data = {
                 totalDocs: total,
                 limit: options.limit,
                 totalPages: Math.ceil(total / options.limit)
             }
+
             if (!req.query.count) {
                 let result = await this.model.findDocuments(query, options);
                 // get fields
-                let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
+                //let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
                 for (let index in result) {
                     // console.log(result[index])
                     //result[index] = new this.model(result[index]);

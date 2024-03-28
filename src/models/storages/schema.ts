@@ -15,8 +15,9 @@ export interface IStorage extends IExtendedDocument {
     folderPath: string;
     folder: Schema.Types.ObjectId;
     oldPath?: string;
+    mime: string;
 }
-interface IStorageModel extends Model<IStorage>, IExtendedModel<IStorage> {
+export interface IStorageModel extends Model<IStorage>, IExtendedModel<IStorage> {
     deleteFile(path: string): any;
     updateOrInsert(doc: IStorage): any;
 }
@@ -26,13 +27,14 @@ const options = {
     toObject: { virtuals: true }
 };
 export const schema = new Schema<IStorage>({
-    name: { type: String, required: true, },
+    name: { type: String, required: true },
     type: { type: String, required: true },
-    path: { type: String, required: true, },
+    path: { type: String, required: true, defaultSelect: true },
     url: { type: String, },
     folderPath: { type: String },
-    folder: { type: Schema.Types.ObjectId, ref: 'Folder' },
+    folder: { type: Schema.Types.ObjectId, ref: 'Folder', autopopulate: true },
     oldPath: { type: String },
+    mime: { type: String, defaultSelect: true },
 }, options);
 
 schema.statics.updateOrInsert = function (doc: IStorage) {
