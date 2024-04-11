@@ -36,42 +36,49 @@ export const schema = new Schema<IEmailSent>(
         },
         ref: {
             type: String,
-            input: "text"
+            input: "text",
         },
         email: {
             type: Schema.Types.ObjectId,
             ref: "Email",
             autopopulate: true,
-            input: "select"
+            input: "select",
+            defaultSelect: true,
 
         },
         to: {
             type: [String],
             input: "text",
-            set: (v: any) => !Array.isArray(v) ? [v] : v
+            set: (v: any) => !Array.isArray(v) ? [v] : v,
+            defaultSelect: true,
         },
         cc: {
             type: [String],
             input: "text",
-            set: (v: any) => !Array.isArray(v) ? [v] : v
+            set: (v: any) => !Array.isArray(v) ? [v] : v,
+            defaultSelect: true,
         },
         bcc: {
             type: [String],
             input: "text",
-            set: (v: any) => !Array.isArray(v) ? [v] : v
+            set: (v: any) => !Array.isArray(v) ? [v] : v,
+            defaultSelect: true,
         },
         subject: {
             type: String,
             input: "text",
+            defaultSelect: true,
         },
         text: {
             type: String,
             input: "text",
+            defaultSelect: true,
         },
         attachments: {
             type: [Schema.Types.ObjectId],
             ref: "File",
             autopopulate: true,
+            defaultSelect: true,
         }
     },
     {

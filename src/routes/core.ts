@@ -140,6 +140,12 @@ export default class Routes {
         controller.pdf.bind(controller) as any
       );
 
+      this.Router.route(`${path}/:id/data/:table/:mode?`).get(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+        controller.table.bind(controller) as any
+      );
+
     this.Router.route(`${path}/:id/logs`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
@@ -216,6 +222,11 @@ export default class Routes {
     this.Router.route("/storage/folder/:id/files").get(
       this.Auth.authenticate.bind(this.Auth) as any,
       controller.files.bind(controller) as any
+    );
+    // Update
+    this.Router.route("/storage/file/:id/:mode?").patch(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      controller.update.bind(controller) as any
     );
     // Files root
     this.Router.route("/storage/folder/files").get(

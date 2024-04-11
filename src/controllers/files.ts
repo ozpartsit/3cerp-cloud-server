@@ -17,6 +17,20 @@ export default class FileController<T extends IExtendedDocument> extends control
   constructor(model: IModel<T>) {
     super(model);
   }
+  public async update(req: Request, res: Response, next: NextFunction) {
+    let update = req.body;
+    if (!Array.isArray(update)) update = [update];
+
+    for (let u of update) {
+      if (u.value == "root") {
+        let account = await Account.findById(req.headers.account)
+        if (account && account.storageRoot) u.value = account.storageRoot.toString();
+      }
+    }
+
+
+    super.update(req, res, next);
+  }
 
   public async files(req: Request, res: Response, next: NextFunction) {
     let { id } = req.params;
@@ -24,7 +38,12 @@ export default class FileController<T extends IExtendedDocument> extends control
       let account = await Account.findById(req.headers.account)
       if (account && account.storageRoot) id = account.storageRoot.toString();
     }
+    if (id) {
+      req.body.folder = await Folder.getDocument(id, "simple")
+    }
+
     req.query.filters = `folder=${id}`;
+    req.query.sort = `-type`;
     super.find(req, res, next);
   }
 

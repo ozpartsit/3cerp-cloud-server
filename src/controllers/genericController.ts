@@ -60,6 +60,146 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+
+    async table(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, id, mode, table } = req.params;
+        //let { field, page } = req.query;
+        try {
+            //this.model = this.model.setAccount(req.headers.account, req.headers.user);
+
+            let document = await this.model.getDocument(id, mode, ("_id").toString());
+
+            if (!document) {
+                throw new CustomError("doc_not_found", 404);
+            } else {
+                //populate response document
+                await document.autoPopulate();
+                let docObject = document.constantTranslate(req.locale);
+                let results = docObject[table];
+                let total = results.length;
+
+
+                let preference: ITablePreference | null = null;
+                if (table) {
+                    preference = await Table.findOne({ table: table.toString(), user: req.headers.user });
+                }
+                //this.s = this.model.setAccount(req.headers.account, req.headers.user);
+                let query: any = {};
+                let options = { select: { name: 1, type: 1, resource: 1 }, sort: {}, limit: 50, skip: 0 };
+
+                // filters
+                let filters = (req.query.filters || "").toString();
+                if (filters) {
+                    query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+                } else {
+                    if (preference && preference.filters && preference.filters.length) {
+                        query = { $and: [] }
+                        // to do - opisać wszystkie operatory
+                        preference.filters.filter(fg => fg.filters.length).forEach(fg => {
+                            let filterGroup: any = {};
+                            filterGroup[fg.operator] = [];
+                            filterGroup[fg.operator] = fg.filters.filter(f => f.value != undefined).reduce((t: any, f) => {
+                                let filter = {}
+                                let value = {};
+                                if (Array.isArray(f.value)) {
+                                    value[f.operator] = f.value
+                                }
+                                else {
+                                    value[f.operator] = f.value
+                                    //['$expr'][filter.operator] = [`$${filter.field}`, filter.value];
+                                    //value = { $regex: `${f.value}.*`, $options: "i" }
+                                }
+                                filter[f.field] = value;
+                                t.push(filter)
+                                // console.log(filter)
+                                return t;
+                            }, []);
+
+                            query.$and.push(filterGroup)
+                        })
+
+                    }
+                }
+                if (query && query.$and && !query.$and.length) query = {}
+
+                // selected
+                let select = (req.query.select || req.query.fields || "").toString();
+                if (select) {
+                    options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, deleted: 1 });
+                } else {
+                    // sprawdź preferencje użytkownika
+                    if (preference) {
+                        options.select = preference.selected.reduce((t, s) => { t[s] = 1; return t; }, { name: 1, type: 1, resource: 1, deleted: 1 });
+                    } else {
+                        // add default field to select
+                        this.model.getSelect().forEach(field => {
+                            options.select[field] = 1;
+                        })
+                    }
+                }
+
+                // Sort
+                let sort = (req.query.sort || "").toString();
+
+                let sortArray: any = [];
+                if (sort) {
+                    sortArray = sort.split(",");
+                } else {
+                    if (preference && preference.sortBy) {
+                        sortArray = preference.sortBy.map(s => s.order === "desc" ? `-${s.key}` : s.key);
+                    }
+                }
+                options.sort = sortArray.reduce((o, f) => {
+                    // -date = desc sort per date field
+                    if (f[0] == "-") {
+                        f = f.substring(1);
+                        o[f] = -1;
+                    } else {
+                        o[f] = 1;
+                    }
+                    return o;
+                }, {});
+
+
+                // search by keyword
+                let search = (req.query.search || "").toString();
+                if (search) {
+                    if (req.query.field && (req.query.field == "_id" || req.query.field == "document"))
+                        query[req.query.field] = req.query.search;
+                    else
+                        query[(req.query.field || 'name').toString()] = { $regex: `${req.query.search}` }
+                }
+
+
+                options.limit = parseInt((req.query.limit || 50).toString());
+                if (preference && preference.itemsPerPage) options.limit = parseInt((preference.itemsPerPage || 50).toString());
+
+                let page = Number(req.query.page || 1);
+
+
+                const data = {
+                    totalDocs: total,
+                    limit: options.limit,
+                    totalPages: Math.ceil(total / options.limit)
+                }
+
+                let skip = ((page || 1) - 1) * 25;
+                results = results.filter((item, index) => index >= skip && index < skip + 25)
+
+                if (!req.query.count) {
+                    data["docs"] = results;
+                    data["page"] = page;
+                }
+
+                res.json({ status: "success", data: data });
+
+
+            }
+        } catch (error) {
+            return next(error);
+        }
+    }
+
     async copy(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id, mode } = req.params;
         let { field } = req.query;
@@ -370,6 +510,7 @@ class GenericController<T extends IExtendedDocument> {
                     oldValue: line.oldValue,
                     createdBy: line.createdBy ? line.createdBy.name : null,
                     date: new Date(line.createdAt).toISOString().substr(0, 10),
+                    createdAt: line.createdAt,
                     field: field,
                     subdoc: subdoc
                 }
@@ -530,6 +671,7 @@ class GenericController<T extends IExtendedDocument> {
 
             // Sort
             let sort = (req.query.sort || "").toString();
+
             let sortArray: any = [];
             if (sort) {
                 sortArray = sort.split(",");
@@ -597,6 +739,13 @@ class GenericController<T extends IExtendedDocument> {
 
                 data["docs"] = result;
                 data["page"] = page;
+
+                // przekazanie dodatkowych wartości do odpowiedzi
+                if (req.body) {
+                    for (const [key, value] of Object.entries(req.body)) {
+                        data[key] = value;
+                    }
+                }
 
             }
 
