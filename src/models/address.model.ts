@@ -1,8 +1,8 @@
 import { Schema, Model, model } from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel, updateBody } from "../utilities/static";
+import { geocode } from "../utilities/usefull";
 
-import axios from "axios";
 import Entity from "./entities/schema";
 export interface IAddress extends IExtendedDocument {
   _id: Schema.Types.ObjectId;
@@ -66,19 +66,7 @@ export const schema = new Schema<IAddress>(
   },
   options
 );
-schema.method("geoCode", async function (geoCodeHint: string) {
-  try {
-    const response = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURI(geoCodeHint)}&key=${process.env.GOOGLE_API_KEY}`
-    );
-    return {
-      latitude: response.data.results[0].geometry.location.lat,
-      longitude: response.data.results[0].geometry.location.lng
-    };
-  } catch (err) {
-    return {};
-  }
-});
+schema.method("geoCode", async (geoCodeHint) => geocode(geoCodeHint));
 
 //Przed zapisaniem aktualizuje wpsółrzędne
 schema.pre("save", async function (next) {

@@ -12,30 +12,35 @@ export default class controller {
 
     }
     public async login() {
-        this.token = await axios.post('https://api.dpdgroup.com/shipping/v1/login', {}, {
-            headers: {
-                "X-DPD-LOGIN": "5003301",
-                "X-DPD-PASSWORD": "EaaQLb4UhKAATuwb",
-                "X-DPD-BUCODE": "021"
-            }
-        })
-            .then(function (response) {
-                return response.headers["x-dpd-token"];
+        try {
+            this.token = await axios.post('https://api.dpdgroup.com/shipping/v1/login', {}, {
+                headers: {
+                    "X-DPD-LOGIN": "5003301",
+                    "X-DPD-PASSWORD": "EaaQLb4UhKAATuwb",
+                    "X-DPD-BUCODE": "021"
+                }
             })
-            .catch(function (error) {
-                throw error
-            });
+                .then(function (response) {
+                    return response.headers["x-dpd-token"];
+                })
+                .catch(function (error) {
+                    throw error
+                });
 
-        // Pobierz aktualną datę i czas
-        let now = new Date();
-        // Dodaj jedną godzinę do aktualnej daty i czasu
-        now.setHours(now.getHours() + 10);
-        this.expires = now;
+            // Pobierz aktualną datę i czas
+            let now = new Date();
+            // Dodaj jedną godzinę do aktualnej daty i czasu
+            now.setHours(now.getHours() + 10);
+            this.expires = now;
+        } catch (error) {
+            console.log(error)
+        }
+
     }
     public async shipment(req: Request, res: Response, next: NextFunction) {
         // odswieżenie tokena
-        if (new Date() > this.expires) await this.login();
         try {
+            if (new Date() > this.expires) await this.login();
             let queries = formatQueryParams(req.query);
             await axios.post(`https://api.dpdgroup.com/shipping/v1/shipment?${queries}`, req.body, {
                 headers: {

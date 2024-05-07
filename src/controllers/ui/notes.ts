@@ -13,6 +13,13 @@ export default class NotesController<T extends IExtendedDocument & INote> extend
     constructor(model: IModel<T>) {
         super(model);
     }
+    
+    async find(req: Request, res: Response, next: NextFunction) {
+
+        if (!req.query.sort) req.query.sort = "-pinned,id"
+        await super.find(req, res, next);
+
+    }
 
 
 }

@@ -21,6 +21,10 @@ export interface IItem extends IExtendedDocument {
   manufacturer: string;
   firstSalesDate: Date;
   lastSalesDate: Date;
+
+  //classsifictaions
+  group?: Schema.Types.ObjectId[];
+  category?: Schema.Types.ObjectId[];
   getPrice(): any;
 }
 interface IItemModel extends Model<IItem>, IExtendedModel<IItem> { }
@@ -86,6 +90,21 @@ const schema = new Schema<IItem>(
     },
     firstSalesDate: { type: Date, input: "DatePicker", validType: "date", readonly: true },
     lastSalesDate: { type: Date, input: "DatePicker", validType: "date", readonly: true },
+
+    //classsifictaions
+    group: {
+      type: [Schema.Types.ObjectId],
+      ref: "Group",
+      autopopulate: true,
+      input: "Autocomplete"
+    },
+    category: {
+      type: [Schema.Types.ObjectId],
+      ref: "Category",
+      autopopulate: true,
+      input: "Select",
+      validType: "select",
+    },
   },
   options
 );

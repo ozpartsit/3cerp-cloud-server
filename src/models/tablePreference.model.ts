@@ -117,7 +117,6 @@ schema.pre('save', async function () {
 schema.virtual('fields').get(function (this: ITablePreference) {
     let sources = this.table.split(".");
     let model = Object.keys(models).find(model => model.toLowerCase() == sources[0].toLowerCase());
-
     // Uzupełnienie Ref i Constatnt
     this._someFunction()
 

@@ -4,6 +4,7 @@ import CustomError from "../../utilities/errors/customError";
 import Notification from '../../models/notification.model';
 import Transaction from '../../models/transactions/schema';
 import Item from '../../models/items/schema';
+import Entity from '../../models/entities/schema';
 import i18n from '../../config/i18n';
 
 export default class NotificationController {
@@ -31,19 +32,34 @@ export default class NotificationController {
         res.json({ status: "success", data });
     }
     public async find(req: Request, res: Response, next: NextFunction) {
-
+        let { keyword, resource } = req.query;
         const results: any = [];
         let total = 0;
         // find
 
         // transactions
         //let Model = Transaction.setAccount(req.headers.account);
-        const filters: any = { inactived: false, account: req.headers.account};
+        const filters: any = { account: req.headers.account, name: { $regex: keyword, $options: 'i' } };
 
-        let array = await Transaction.find(filters)
+        let transactionsArray = Transaction.find(filters)
             .populate({ path: 'entity', select: 'name' })
             .select({ name: 1, type: 1, entity: 1, date: 1 })
             .exec()
+
+        let itemsArray = Item.find(filters)
+            .populate({ path: 'entity', select: 'name' })
+            .select({ name: 1, type: 1 })
+            .exec()
+
+        let entityArray = Entity.find(filters)
+            .populate({ path: 'entity', select: 'name' })
+            .select({ name: 1, type: 1 })
+            .exec()
+
+
+
+        let array = await Promise.all([transactionsArray, itemsArray, entityArray]).then(res => res.flat())
+
 
         array.forEach((e: any) => {
             results.push({

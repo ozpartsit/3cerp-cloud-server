@@ -7,21 +7,40 @@
                 {
                     "value": "general",
                     "editable": true,
-                    "fields": [
-                        "name",
-                        "firstName",
-                        "lastName",
-                        "entityType",
-                        "email",
-                        "email2",
-                        "phone",
-                        "phone2",
-                        "website",
-                        "category",
-                        "group",
-                        "salesRep",
-                        "lastActivity",
-                        "memo"
+                    "columns": [
+                        {
+                            "value": "name",
+                            "fields": [
+                                "name",
+                                "firstName",
+                                "lastName"
+                            ]
+                        },
+                        {
+                            "value": "information",
+                            "fields": [
+                                "website",
+                                "memo",
+                                "lastActivity"
+                            ]
+                        },
+                        {
+                            "value": "communication",
+                            "fields": [
+                                "email",
+                                "email2",
+                                "phone",
+                                "phone2"
+                            ]
+                        },
+                        {
+                            "value": "classification",
+                            "fields": [
+                                "category",
+                                "group",
+                                "salesRep"
+                            ]
+                        }
                     ]
                 },
                 {
@@ -87,18 +106,33 @@
                 {
                     "value": "accounting",
                     "editable": true,
-                    "fields": [
-                        "accountOnHold",
-                        "taxRate",
-                        "taxNumber",
-                        "currency",
-                        "terms",
-                        "paymentMethod",
-                        "creditLimit",
-                        "firstSalesDate",
-                        "lastSalesDate",
-                        "firstOrderDate",
-                        "lastOrderDate"
+                    "columns": [
+                        {
+                            "value": "",
+                            "fields": [
+                                "accountOnHold",
+                                "taxRate",
+                                "taxNumber"
+                            ]
+                        },
+                        {
+                            "value": "",
+                            "fields": [
+                                "currency",
+                                "terms",
+                                "paymentMethod",
+                                "creditLimit"
+                            ]
+                        },
+                        {
+                            "value": "",
+                            "fields": [
+                                "firstSalesDate",
+                                "lastSalesDate",
+                                "firstOrderDate",
+                                "lastOrderDate"
+                            ]
+                        }
                     ]
                 },
                 {

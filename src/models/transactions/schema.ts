@@ -5,7 +5,7 @@ import printPDF from "../../utilities/pdf/pdf";
 import Entity, { IEntity } from "../entities/schema";
 import Address, { IAddress, nestedSchema } from "../address.model";
 import Line, { ILine } from "./line.schema";
-
+import { geocode } from "../../utilities/usefull";
 
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface ITransaction extends IExtendedDocument {
@@ -31,6 +31,11 @@ export interface ITransaction extends IExtendedDocument {
   billingAddress?: IAddress
   shippingAddress?: IAddress
 
+  //classsifictaions
+  group?: Schema.Types.ObjectId[];
+  category?: Schema.Types.ObjectId[];
+
+  salesRep?: Schema.Types.ObjectId;
 
   recalc(): any;
   autoName(): any;
@@ -40,7 +45,7 @@ interface ITransactionModel extends Model<ITransaction>, IExtendedModel<ITransac
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const TransactionSchema = {
-  name: { type: String, input: "Input", validType: "text", required: true },
+  name: { type: String, input: "Input", validType: "text" },
   date: { type: Date, input: "DatePicker", validType: "date", required: true, defaultSelect: true },
   company: {
     type: Schema.Types.ObjectId,
@@ -102,8 +107,8 @@ const TransactionSchema = {
   },
 
   //addresses
-  shippingAddress: { type: nestedSchema, validType: "address", virtualPath: "addresses" },
-  billingAddress: { type: nestedSchema, validType: "address", virtualPath: "addresses" },
+  shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+  billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
 
   type: {
     type: String,
@@ -130,6 +135,31 @@ const TransactionSchema = {
     hint: "Order Reference Number",
     help: "Unique number that gets assigned to an order placed by the customer (online or offline)"
   },
+
+  //classsifictaions
+  group: {
+    type: [Schema.Types.ObjectId],
+    ref: "Group",
+    autopopulate: true,
+    input: "Autocomplete"
+  },
+  category: {
+    type: [Schema.Types.ObjectId],
+    ref: "Category",
+    autopopulate: true,
+    input: "Select",
+    validType: "select",
+  },
+
+  salesRep: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    autopopulate: true,
+    input: "Select",
+    validType: "url",
+    hint: "Sales Representative",
+    help: "A sales rep interacts directly with customers throughout all phases of the sales process."
+  },
 };
 const options = {
   discriminatorKey: "type",
@@ -153,7 +183,8 @@ schema.method("pdf", async function () {
 });
 schema.method("autoName", async function () {
   // set new transaction name (prefix+number+sufix)
-  if (!this.number) {
+
+  if (!this.name) {
     //console.log(this);
     let temp = await this.populate("company");
     //console.log(temp);
@@ -168,8 +199,8 @@ schema.method("autoName", async function () {
     //   }`;
     //   this.company.incNumber(this.type);
     // } else throw new Error("Record Type is undefined in Company record");
-    this.number = 7;
-    this.name = "SO#7";
+
+    this.name = `SO#${this.number}`;
   }
 });
 schema.method("findRelations", async function () {
@@ -182,6 +213,35 @@ schema.pre("validate", async function (next) {
   next();
 });
 schema.pre("save", async function (next) {
+
+  //billing
+  if (this.billingAddress) {
+    if (!this.billingAddress.latitude || !this.billingAddress.longitude || this.isModified("billingAddress.zip") || this.isModified("billingAddress.city") || this.isModified("billingAddress.country")) {
+      let geoCodeHint = `${this.billingAddress.zip} ${this.billingAddress.city} ${this.billingAddress.country}`;
+      const coordinate = await geocode(geoCodeHint || "");
+      if (coordinate && coordinate.latitude && coordinate.longitude) {
+        this.billingAddress.latitude = coordinate.latitude;
+        this.billingAddress.longitude = coordinate.longitude;
+      }
+    }
+  }
+
+  //shipping
+  if (this.shippingAddress) {
+    if (!this.shippingAddress.latitude || !this.shippingAddress.longitude || this.isModified("shippingAddress.zip") || this.isModified("shippingAddress.city") || this.isModified("shippingAddress.country")) {
+      let geoCodeHint = `${this.shippingAddress.zip} ${this.shippingAddress.city} ${this.shippingAddress.country}`;
+      const coordinate = await geocode(geoCodeHint || "");
+      if (coordinate && coordinate.latitude && coordinate.longitude) {
+        this.shippingAddress.latitude = coordinate.latitude;
+        this.shippingAddress.longitude = coordinate.longitude;
+      }
+    }
+  }
+
+
+
+
+
   await this.autoName();
 });
 

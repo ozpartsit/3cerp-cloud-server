@@ -7,16 +7,37 @@
                 {
                     "value": "general",
                     "editable": true,
-                    "fields": [
-                        "name",
-                        "number",
-                        "referenceNumber",
-                        "entity",
-                        "date",
-                        "company",
-                        "memo",
-                        "lines",
-                        "shippingCost"
+                    "columns": [
+                        {
+                            "value": "main",
+                            "fields": [
+                                "entity",
+                                "date",
+                                "referenceNumber"
+                            ]
+                        },
+                        {
+                            "value": "classification",
+                            "fields": [
+                                "company",
+                                "group",
+                                "category",
+                                "salesRep"
+                            ]
+                        },
+                        {
+                            "value": "other",
+                            "fields": [
+                                "memo",
+                                "shippingCost"
+                            ]
+                        },
+                        {
+                            "value": "lines",
+                            "fields": [
+                                "lines"
+                            ]
+                        }
                     ]
                 }
             ]

@@ -9,6 +9,9 @@ export interface INote extends IExtendedDocument {
     description: string;
     index: number;
     pinned: boolean;
+    document?: Schema.Types.ObjectId;
+    documentType?: string;
+    tags?: Schema.Types.ObjectId[];
 }
 const options = {
     collection: "notes",
@@ -18,11 +21,26 @@ const options = {
 interface INoteModel extends Model<INote>, IExtendedModel<INote> { }
 const schema = new Schema<INote>(
     {
-        user: { type: Schema.Types.ObjectId, required: true },
+        user: { type: Schema.Types.ObjectId, required: true, defaultSelect: true },
         name: { type: String, input: "TextField" },
         description: { type: String, defaultSelect: true, input: "TextareaField" },
         index: { type: Number, defaultSelect: true },
         pinned: { type: Boolean, default: false, defaultSelect: true },
+        document: {
+            type: Schema.Types.ObjectId,
+            refPath: "documentType",
+            autopopulate: true,
+        },
+        documentType: {
+            type: String,
+            input: "text"
+        },
+        tags: {
+            type: [Schema.Types.ObjectId],
+            ref: "Tag",
+            autopopulate: true,
+            input: "Autocomplete"
+        },
     },
     options
 );

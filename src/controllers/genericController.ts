@@ -45,7 +45,6 @@ class GenericController<T extends IExtendedDocument> {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
 
             let document = await this.model.getDocument(id, mode, (field || "_id").toString());
-
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
@@ -81,7 +80,7 @@ class GenericController<T extends IExtendedDocument> {
 
                 let preference: ITablePreference | null = null;
                 if (table) {
-                    preference = await Table.findOne({ table: table.toString(), user: req.headers.user });
+                    preference = await Table.findOne({ table: `${this.model.modelName}.${table.toString()}`, user: req.headers.user });
                 }
                 //this.s = this.model.setAccount(req.headers.account, req.headers.user);
                 let query: any = {};
@@ -163,12 +162,28 @@ class GenericController<T extends IExtendedDocument> {
 
                 // search by keyword
                 let search = (req.query.search || "").toString();
+                // if (search) {
+                //     if (req.query.field && (req.query.field == "_id" || req.query.field == "document"))
+                //         query[req.query.field] = req.query.search;
+                //     else
+                //         query[(req.query.field || 'name').toString()] = { $regex: `${req.query.search}` }
+                // }
+
+
                 if (search) {
-                    if (req.query.field && (req.query.field == "_id" || req.query.field == "document"))
-                        query[req.query.field] = req.query.search;
-                    else
-                        query[(req.query.field || 'name').toString()] = { $regex: `${req.query.search}` }
+                    results = results.filter(row => {
+                        let status = false;
+                        Object.keys(options.select).forEach(s => {
+                            //to do - ignorować niektóe pola jak type czy resource
+                            if (row[s] && JSON.stringify(row[s]).toString().includes(search)) status = true
+                        })
+                        return status;
+
+                    })
+                    total = results.length;
+
                 }
+
 
 
                 options.limit = parseInt((req.query.limit || 50).toString());
@@ -244,60 +259,60 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
-    async favorite(req: Request, res: Response, next: NextFunction) {
-        let { recordtype, id, mode } = req.params;
-        let { field } = req.query;
-        try {
-            let linkModel = FavoritesTypes.link;//.setAccount(req.headers.account, req.headers.user);
-            let categoryModel = FavoritesTypes.category;//.setAccount(req.headers.account, req.headers.user);
-            let document = await linkModel.getDocument(id, "simple", "document");
+    // async favorite(req: Request, res: Response, next: NextFunction) {
+    //     let { recordtype, id, mode } = req.params;
+    //     let { field } = req.query;
+    //     try {
+    //         let linkModel = FavoritesTypes.link;//.setAccount(req.headers.account, req.headers.user);
+    //         let categoryModel = FavoritesTypes.category;//.setAccount(req.headers.account, req.headers.user);
+    //         let document = await linkModel.getDocument(id, "simple", "document");
 
-            if (req.method == "GET") {
-                res.json({ status: "success", data: { document: document } });
-            } else {
-                if (req.method == "DELETE") {
-                    if (!document) throw new CustomError("doc_not_found", 404);
+    //         if (req.method == "GET") {
+    //             res.json({ status: "success", data: { document: document } });
+    //         } else {
+    //             if (req.method == "DELETE") {
+    //                 if (!document) throw new CustomError("doc_not_found", 404);
 
-                    document = await linkModel.deleteDocument(document._id.toString());
-                    res.json({ status: "success", data: { document } });
-                } else {
-                    if (document) {
-                        res.json({ status: "success", data: { document, saved: true } });
-                    }
-                    else {
-                        let type = this.model.modelName.split("_")[0];
-                        let category = await categoryModel.findOne({ name: type });
-                        if (!category) {
-                            let object = {
-                                name: type,
-                                account: req.headers.account,
-                                user: req.headers.user
-                            }
+    //                 document = await linkModel.deleteDocument(document._id.toString());
+    //                 res.json({ status: "success", data: { document } });
+    //             } else {
+    //                 if (document) {
+    //                     res.json({ status: "success", data: { document, saved: true } });
+    //                 }
+    //                 else {
+    //                     let type = this.model.modelName.split("_")[0];
+    //                     let category = await categoryModel.findOne({ name: type });
+    //                     if (!category) {
+    //                         let object = {
+    //                             name: type,
+    //                             account: req.headers.account,
+    //                             user: req.headers.user
+    //                         }
 
-                            let { document, saved } = await categoryModel.addDocument("simple", object);
-                            category = document;
-                        }
-                        let object = {
-                            document: id,
-                            documentType: type,
-                            link: req.body.document ? req.body.document.link : "tu cos będzie",
-                            name: req.body.document ? req.body.document.name : "tu cos będzie",
-                            category: category,
-                            account: req.headers.account,
-                            user: req.headers.user
-                        }
+    //                         let { document, saved } = await categoryModel.addDocument("simple", object);
+    //                         category = document;
+    //                     }
+    //                     let object = {
+    //                         document: id,
+    //                         documentType: type,
+    //                         link: req.body.document ? req.body.document.link : "tu cos będzie",
+    //                         name: req.body.document ? req.body.document.name : "tu cos będzie",
+    //                         category: category,
+    //                         account: req.headers.account,
+    //                         user: req.headers.user
+    //                     }
 
-                        let { document, saved } = await linkModel.addDocument("simple", object);
-                        res.json({ status: "success", data: { document, saved } });
-                    }
+    //                     let { document, saved } = await linkModel.addDocument("simple", object);
+    //                     res.json({ status: "success", data: { document, saved } });
+    //                 }
 
-                }
-            }
+    //             }
+    //         }
 
-        } catch (error) {
-            return next(error);
-        }
-    }
+    //     } catch (error) {
+    //         return next(error);
+    //     }
+    // }
     public async options(req: Request, res: Response, next: NextFunction) {
         let { recordtype, mode, id } = req.params;
         try {
@@ -545,6 +560,31 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+
+
+    public async transactions(req: Request, res: Response, next: NextFunction) {
+        let preference: ITablePreference | null = null;
+        let table = `transaction.${this.model.modelName}.related`
+        preference = await Table.findOne({ table: "relatedtransactions", user: req.headers.user });
+        if (!preference) preference = await new Table({ table: table, user: req.headers.user, account: req.headers.account }).save();
+
+
+
+        const data = {
+            docs: [],
+            totalDocs: 0,
+            limit: 15,
+            page: 1,
+            totalPages: 1,
+            table: "table",
+            preference: preference
+        }
+
+        res.json({ status: "success", data });
+
+    }
+
+
     public async activities(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
         try {
@@ -609,10 +649,11 @@ class GenericController<T extends IExtendedDocument> {
         try {
 
             // prefernecje tabeli przekazane w query
-            let { table } = req.query;
+            let { table, document } = req.query;
             let preference: ITablePreference | null = null;
             if (table) {
                 preference = await Table.findOne({ table: table.toString(), user: req.headers.user });
+                if (!preference) preference = await new Table({ table: table.toString(), user: req.headers.user, account: req.headers.account }).save();
             }
             //this.s = this.model.setAccount(req.headers.account, req.headers.user);
             let query: any = {};
@@ -668,6 +709,12 @@ class GenericController<T extends IExtendedDocument> {
                     })
                 }
             }
+            //Query document
+            if (document) {
+                query.document = document;
+            }
+
+
 
             // Sort
             let sort = (req.query.sort || "").toString();
@@ -739,6 +786,11 @@ class GenericController<T extends IExtendedDocument> {
 
                 data["docs"] = result;
                 data["page"] = page;
+
+                if (table && preference) {
+                    data["table"] = table;
+                    data["preference"] = preference
+                }
 
                 // przekazanie dodatkowych wartości do odpowiedzi
                 if (req.body) {

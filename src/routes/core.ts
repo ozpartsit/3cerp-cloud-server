@@ -151,6 +151,11 @@ export default class Routes {
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.logs.bind(controller) as any
     );
+    this.Router.route(`${path}/:id/transactions`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.transactions.bind(controller) as any
+    );
     this.Router.route(`${path}/:id/send`).post(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
@@ -167,21 +172,21 @@ export default class Routes {
       controller.copy.bind(controller) as any
     );
     this.Router.route(`${path}/:id/favorite`)
-      .get(
-        this.Auth.authenticate.bind(this.Auth) as any,
-        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
-        controller.favorite.bind(controller) as any
-      )
-      .post(
-        this.Auth.authenticate.bind(this.Auth) as any,
-        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
-        controller.favorite.bind(controller) as any
-      )
-      .delete(
-        this.Auth.authenticate.bind(this.Auth) as any,
-        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
-        controller.favorite.bind(controller) as any
-      );
+      // .get(
+      //   this.Auth.authenticate.bind(this.Auth) as any,
+      //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      //   controller.favorite.bind(controller) as any
+      // )
+      // .post(
+      //   this.Auth.authenticate.bind(this.Auth) as any,
+      //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      //   controller.favorite.bind(controller) as any
+      // )
+      // .delete(
+      //   this.Auth.authenticate.bind(this.Auth) as any,
+      //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      //   controller.favorite.bind(controller) as any
+      // );
     this.Router.route(`${path}/:id/:mode?`)
       .get(
         this.Auth.authenticate.bind(this.Auth) as any,

@@ -1,4 +1,5 @@
 import fs from "fs";
+import axios from "axios";
 // Round a Number to n Decimal Places
 // examples: roundToPrecision(1.005,2) result=1.01
 // examples: roundToPrecision(1.004,2) result=1.00
@@ -26,4 +27,18 @@ export function encodeURIComponentFn(tekst) {
 
   // Kodowanie URI
   return encodeURIComponent(zakodowanyTekst);
+}
+
+export async function geocode(geoCodeHint: string) {
+  try {
+    const response = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURI(geoCodeHint)}&key=${process.env.GOOGLE_API_KEY}`
+    );
+    return {
+      latitude: response.data.results[0].geometry.location.lat,
+      longitude: response.data.results[0].geometry.location.lng
+    };
+  } catch (err) {
+    return {};
+  }
 }

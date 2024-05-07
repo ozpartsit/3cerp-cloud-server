@@ -12,7 +12,7 @@ export interface ILineSalesOrder extends ILine {
   etaMemo: string;
 }
 const schema = new Schema<ILineSalesOrder>({
-  eta: { type: Date, input: "DatePicker", validType: "date", required: true, },
+  eta: { type: Date, input: "DatePicker", validType: "date", required: false, },
   etaMemo: { type: String, input: "Input", validType: "text" },
 }, options);
 
