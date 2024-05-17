@@ -1,15 +1,15 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Favorites, { IFavorites } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 const options = { discriminatorKey: "type", collection: "classifications" };
 
 export interface ICategory extends IFavorites {
-    _id: Schema.Types.ObjectId
+    _id: mongoose.Schema.Types.ObjectId
 
 }
-export interface ICategoryModel extends Model<ICategory>, IExtendedModel<ICategory> { }
+export interface ICategoryModel extends mongoose.Model<ICategory>, IExtendedModel<ICategory> { }
 
-export const schema = new Schema<ICategory>({}, options);
+export const schema = new mongoose.Schema<ICategory>({}, options);
 
 schema.virtual("links", {
     ref: "FavoriteLink",

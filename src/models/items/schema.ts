@@ -1,4 +1,4 @@
-import { Schema, Model, model, mongo } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import ItemTypes from "../../constants/item.types";
@@ -7,13 +7,13 @@ import Price, { IPrice } from "./price.schema";
 //import Countries from "../../constants/countries";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface IItem extends IExtendedDocument {
-  _id: Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
   name: string;
   type: string;
   description?: string;
   prices: IPrice[];
-  priceGroup: Schema.Types.ObjectId;
-  images: Schema.Types.ObjectId[];
+  priceGroup: mongoose.Schema.Types.ObjectId;
+  images: mongoose.Schema.Types.ObjectId[];
   coo: string;
   weight: number;
   barcode: string;
@@ -23,11 +23,11 @@ export interface IItem extends IExtendedDocument {
   lastSalesDate: Date;
 
   //classsifictaions
-  group?: Schema.Types.ObjectId[];
-  category?: Schema.Types.ObjectId[];
+  group?: mongoose.Schema.Types.ObjectId[];
+  category?: mongoose.Schema.Types.ObjectId[];
   getPrice(): any;
 }
-interface IItemModel extends Model<IItem>, IExtendedModel<IItem> { }
+interface IItemModel extends mongoose.Model<IItem>, IExtendedModel<IItem> { }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
@@ -37,7 +37,7 @@ const options = {
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 };
-const schema = new Schema<IItem>(
+const schema = new mongoose.Schema<IItem>(
   {
     name: { type: String, required: true, input: "Input", validType: "text" },
     description: { type: String, input: "Input", validType: "text", default: "" },
@@ -49,7 +49,7 @@ const schema = new Schema<IItem>(
       validType: "select"
     },
     priceGroup: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Classification",
       autopopulate: true,
       required: false,
@@ -57,7 +57,7 @@ const schema = new Schema<IItem>(
       validType: "select"
     },
     images: {
-      type: [Schema.Types.ObjectId],
+      type: [mongoose.Schema.Types.ObjectId],
       ref: "Storage",
       autopopulate: true,
       input: "File",
@@ -93,13 +93,13 @@ const schema = new Schema<IItem>(
 
     //classsifictaions
     group: {
-      type: [Schema.Types.ObjectId],
+      type: [mongoose.Schema.Types.ObjectId],
       ref: "Group",
       autopopulate: true,
       input: "Autocomplete"
     },
     category: {
-      type: [Schema.Types.ObjectId],
+      type: [mongoose.Schema.Types.ObjectId],
       ref: "Category",
       autopopulate: true,
       input: "Select",
@@ -122,7 +122,7 @@ schema.method("getPrice", async function (line: any) {
   else return 1.99;
 });
 
-const Item: IItemModel = model<IItem, IItemModel>("Item", schema);
+const Item: IItemModel = mongoose.model<IItem, IItemModel>("Item", schema);
 
 Item.init().then(function (Event) {
   console.log('Item Builded');

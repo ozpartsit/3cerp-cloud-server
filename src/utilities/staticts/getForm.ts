@@ -1,4 +1,4 @@
-import { Schema, Model, Document, models } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../methods"
 import i18n from "../../config/i18n";
 import { IExtendedModel } from "../static";
@@ -15,30 +15,34 @@ export default async function getForm<T extends IExtendedDocument>(this: IExtend
 
         for (let tab of form.tabs) {
             if (tab.value) tab.name = i18n.__(`${modelName.toLowerCase()}.${tab.value}`);
+            if (tab.sections)
+                for (let section of tab.sections) {
+                    if (section.value) section.name = i18n.__(`${modelName.toLowerCase()}.${section.value}`);
 
-            for (let section of tab.sections) {
-                if (section.value) section.name = i18n.__(`${modelName.toLowerCase()}.${section.value}`);
 
+                    if (section.fields) await fieldsFill(modelName, section, fields)
 
-                if (section.fields) await fieldsFill(modelName, section, fields)
-
-                if (section.columns) {
-                    for (let column of section.columns) {
-                        if (column.value) column.name = i18n.__(`${modelName.toLowerCase()}.${column.value}`);
-                        if (column.fields) await fieldsFill(modelName, column, fields)
+                    if (section.columns) {
+                        for (let column of section.columns) {
+                            if (column.value) column.name = i18n.__(`${modelName.toLowerCase()}.${column.value}`);
+                            if (column.fields) await fieldsFill(modelName, column, fields, section.subdoc)
+                        }
                     }
-                }
 
-            }
+                }
         }
         return form;
     } else return null;
 
 }
 
-async function fieldsFill(modelName, section, fields) {
+async function fieldsFill(modelName, section, fields, subdoc?) {
     if (section.fields) for (let [index, field] of section.fields.entries()) {
-        section.fields[index] = fields.find((f: any) => f.field == field) || null;
+        if (subdoc) {
+            section.fields[index] = fields.find((f: any) => f.field == subdoc) || null;
+            if (section.fields[index] && section.fields[index].fields) section.fields[index] = section.fields[index].fields.find((f: any) => f.field == field) || null;
+        }
+        else section.fields[index] = fields.find((f: any) => f.field == field) || null;
         if (section.fields[index]) {
             if (!["Table", "NestedDocument", "DocumentNested"].includes(section.fields[index].control)) delete section.fields[index].fields;
             delete section.fields[index].selects;
@@ -47,12 +51,12 @@ async function fieldsFill(modelName, section, fields) {
                 section.fields[index].table = `${modelName}.${section.fields[index].field}`;
                 //sprawdzam czy istnieją preferencje:
                 let filters = { table: `${modelName}.${section.fields[index].field}` }
-                let tmpStorage = asyncLocalStorage.getStore();
+                let tmpStorage: any = asyncLocalStorage.getStore();
                 if (tmpStorage) {
                     filters["account"] = tmpStorage.account;
                     filters["user"] = tmpStorage.user;
                 }
-                const headers = await models["Table"].findOne(filters).exec()
+                const headers = await mongoose.models["Table"].findOne(filters).exec()
 
                 if (headers) {
                     section.fields[index].preference = headers._id;

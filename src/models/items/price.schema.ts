@@ -1,4 +1,4 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IItem } from "./schema";
 import { IExtendedModel } from "../../utilities/static";
 import { IExtendedDocument } from "../../utilities/methods";
@@ -13,11 +13,11 @@ export interface IPrice extends IExtendedDocument {
     moq: number;
     priceLevel: IPriceLevel;
 }
-export interface IPriceModel extends Model<IPrice>, IExtendedModel<IPrice> { }
+export interface IPriceModel extends mongoose.Model<IPrice>, IExtendedModel<IPrice> { }
 
-const schema = new Schema<IPrice>({
+const schema = new mongoose.Schema<IPrice>({
     item: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Item"
     },
     price: {
@@ -44,7 +44,7 @@ const schema = new Schema<IPrice>({
         defaultSelect: true
     },
     priceLevel: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Classification",
         autopopulate: true,
         required: false,
@@ -54,7 +54,7 @@ const schema = new Schema<IPrice>({
 
 }, options);
 
-const Price: IPriceModel = model<IPrice, IPriceModel>(
+const Price: IPriceModel = mongoose.model<IPrice, IPriceModel>(
     "Price",
     schema
 );

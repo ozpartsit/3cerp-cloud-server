@@ -1,14 +1,14 @@
-import { Schema, Model, model, mongo } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 
 export interface IClassification extends IExtendedDocument {
-    _id: Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
     type: string;
     name: string;
     description: string;
 }
-interface IClassificationModel extends Model<IClassification>, IExtendedModel<IClassification> { }
+interface IClassificationModel extends mongoose.Model<IClassification>, IExtendedModel<IClassification> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const ClassificationSchema = {
@@ -25,8 +25,8 @@ const options = {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
-const schema = new Schema<IClassification>(ClassificationSchema, options);
-const Classification: IClassificationModel = model<IClassification, IClassificationModel>(
+const schema = new mongoose.Schema<IClassification>(ClassificationSchema, options);
+const Classification: IClassificationModel = mongoose.model<IClassification, IClassificationModel>(
     "Classification",
     schema
 );

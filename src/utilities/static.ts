@@ -1,4 +1,4 @@
-import { Schema, Model, Document, Types, model, models } from "mongoose";
+import * as mongoose from "mongoose";
 import cache from "../config/cache";
 import getFields from "./staticts/getFields";
 import getForm from "./staticts/getForm";
@@ -9,8 +9,8 @@ import Account from "../models/account.model";
 
 
 // interfejs rozszeżający model o uniwersalne metody
-export interface IExtendedModel<T extends Document> extends Model<T> {
-  account: Schema.Types.ObjectId;
+export interface IExtendedModel<T extends mongoose.Document> extends mongoose.Model<T> {
+  account: mongoose.Schema.Types.ObjectId;
   type: string;
   $locals: { triggers: any[] }
   urlComponent?: string;
@@ -21,7 +21,7 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   options: any;
   loadDocument: (id: string, field?: string) => Promise<T | null>;
   addDocument: (mode: string, data: Object) => any;
-  getDocument: (id: string, mode: string, field?: string) => Promise<T | null>;
+  getDocument: (id: string, mode: string, reload?: boolean, field?: string) => Promise<T | null>;
   saveDocument: (id: string, data: Object) => Promise<any>;
   updateDocument: (id: string, mode: string, field: string, updates: updateBody | updateBody[]) => any;
   getOptions: (id: string, mode: string, field: any, page: number, keyword: string) => Promise<any>;
@@ -41,15 +41,15 @@ export interface IExtendedModel<T extends Document> extends Model<T> {
   //getLocalStorage(): any
 }
 
-export default function customStaticsMethods<T extends IExtendedDocument>(schema: Schema<T, IExtendedModel<T>>) {
+export default function customStaticsMethods<T extends IExtendedDocument>(schema: mongoose.Schema<T, IExtendedModel<T>>) {
   schema.set('timestamps', true);
 
   const options = (schema as any).options;
   // to do - poprwić by ni ekorzystać z any
   if (options.collection && options.collection !== "accounts") {
-    let account = new Schema({
+    let account = new mongoose.Schema({
       account: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
       },
       type: {
@@ -75,11 +75,11 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 
     // Dodaanie filtrów do wszytstkich queries
     schema.pre("find", function (next) {
-      let tmpStorage = asyncLocalStorage.getStore();
+      let tmpStorage: any = asyncLocalStorage.getStore();
       let filters = {}
 
       const model = this.model.modelName;
-      if (tmpStorage && model && models[model] && models[model].schema.paths && models[model].schema.paths.user) {
+      if (tmpStorage && model && mongoose.models[model] && mongoose.models[model].schema.paths && mongoose.models[model].schema.paths.user) {
         filters["user"] = tmpStorage.user;
       }
       if (tmpStorage && tmpStorage.account)
@@ -90,11 +90,11 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
     })
     // wczesniej count teraz countDocuments
     schema.pre("countDocuments", function (next) {
-      let tmpStorage = asyncLocalStorage.getStore();
+      let tmpStorage: any = asyncLocalStorage.getStore();
       let filters = {}
 
       const model = this.model.modelName;
-      if (tmpStorage && model && models[model] && models[model].schema.paths && models[model].schema.paths.user) {
+      if (tmpStorage && model && mongoose.models[model] && mongoose.models[model].schema.paths && mongoose.models[model].schema.paths.user) {
         filters["user"] = tmpStorage.user;
       }
       if (tmpStorage && tmpStorage.account)
@@ -104,12 +104,12 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       next(); // Kontynuuje do wykonania właściwej operacji countDocuments
     })
     schema.pre('findOne', function (next) {
-      let tmpStorage = asyncLocalStorage.getStore();
+      let tmpStorage: any = asyncLocalStorage.getStore();
       let filters = {}
 
       const model = this.model.modelName;
 
-      if (tmpStorage && model && models[model] && models[model].schema.paths && models[model].schema.paths.user) {
+      if (tmpStorage && model && mongoose.models[model] && mongoose.models[model].schema.paths && mongoose.models[model].schema.paths.user) {
         filters["user"] = tmpStorage.user;
       }
       if (tmpStorage && tmpStorage.account)
@@ -143,7 +143,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
 }
 
 
-function userRequired<T extends IExtendedDocument>(this: Model<T>) {
+function userRequired<T extends IExtendedDocument>(this: mongoose.Model<T>) {
   return !!this.schema.paths.user;
 }
 
@@ -154,13 +154,13 @@ function userRequired<T extends IExtendedDocument>(this: Model<T>) {
 //     // ustaw bazowy model
 //     let baseModel = this.modelName.split("_")[0];
 //     if (this.modelName == ((`${baseModel}_${account}_${user}`).toString())) {
-//       return models[`${this.modelName}`]
+//       return mongoose.models[`${this.modelName}`]
 //     }
 
-//     let baseModelModel = models[`${baseModel}`];
+//     let baseModelModel = mongoose.models[`${baseModel}`];
 
-//     if (models[`${baseModel}_${account}_${user}`]) {
-//       return models[`${baseModel}_${account}_${user}`]
+//     if (mongoose.models[`${baseModel}_${account}_${user}`]) {
+//       return mongoose.models[`${baseModel}_${account}_${user}`]
 //     }
 //     else {
 //       let filters: any = { account: account };
@@ -217,7 +217,7 @@ function userRequired<T extends IExtendedDocument>(this: Model<T>) {
 //       console.log(isDiscriminatorModel(baseModelModel), baseModelModel.baseModelName)
 //       if (isDiscriminatorModel(baseModelModel) && baseModelModel.baseModelName) {
 //         console.log("asdasd", baseModelModel.baseModelName)
-//         return models[baseModelModel.baseModelName].discriminator<IExtendedDocument>(`${baseModel}_${account}_${user}`, this.schema, this.collection.collectionName);
+//         return mongoose.models[baseModelModel.baseModelName].discriminator<IExtendedDocument>(`${baseModel}_${account}_${user}`, this.schema, this.collection.collectionName);
 //       }
 
 //       else return model<IExtendedDocument>(`${baseModel}_${account}_${user}`, new Schema(this.schema), this.collection.collectionName);
@@ -228,7 +228,7 @@ function userRequired<T extends IExtendedDocument>(this: Model<T>) {
 // }
 
 //loadDocuments
-export async function loadDocument<T extends IExtendedDocument>(this: Model<T>, id: string, field: string = "_id"): Promise<T | null> {
+export async function loadDocument<T extends IExtendedDocument>(this: mongoose.Model<T>, id: string, field: string = "_id"): Promise<T | null> {
   try {
     let query = {};
     query[field || "_id"] = id;
@@ -265,10 +265,9 @@ export async function addDocument<T extends IExtendedDocument>(this: IExtendedMo
 
 }
 
-export async function getDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, field: string = "_id"): Promise<T | null> {
+export async function getDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, id: string, mode: string, reload: boolean = true, field: string = "_id"): Promise<T | null> {
   try {
-
-    let document: T | null | undefined = await this.loadDocument(id, field);
+    let document: T | null | undefined = reload || mode != "advanced" ? await this.loadDocument(id, field) : null;
     if (document && document._id) {
       //const cacheID = new Types.ObjectId().toString();
       // to do - cacheID - jeżeli chcemy otwierać ten sam dokument w jedym momencie;
@@ -291,7 +290,7 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
 // najpierw sprawdza czy jest w cachu
 // jeżeli tak, zapisuje aktyywny stan i zwraca identyfikator
 // jeżeli nie, zwraca null
-export async function saveDocument<T extends IExtendedDocument>(this: Model<T>, id: string, data: Object): Promise<any> {
+export async function saveDocument<T extends IExtendedDocument>(this: mongoose.Model<T>, id: string, data: Object): Promise<any> {
   try {
     let document = cache.get<T>(id);
     // if (!document && data) {
@@ -403,10 +402,13 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
     let { limit, select, sort, skip } = options;
     let populated: any = {};
 
+    let fieldsSelect = { name: 1, resource: 1, type: 1, color: 1, mime: 1, createdAt: 1 };
+    select = { ...select, ...fieldsSelect }
+
     if (select)
       for (const [key, value] of Object.entries(select)) {
         // to do - poprawić
-        let fieldsSelect = { name: 1, resource: 1, type: 1 };
+
         let fields = key.split('.');
         if (fields.length > 1) {
           // sprawdza typ pola
@@ -440,11 +442,12 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
           delete select[key];
         } else {
           let field = docFields.find((field: any) => field.field == fields[0]);
+
           if (field && field.type) {
             if (!populated[fields[0]]) {
               populated[fields[0]] = {
                 path: fields[0],
-                select: field.selects || fieldsSelect
+                select: { ...field.selects, ...fieldsSelect }
               }
             }
           }

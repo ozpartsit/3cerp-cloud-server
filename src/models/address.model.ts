@@ -1,12 +1,12 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel, updateBody } from "../utilities/static";
 import { geocode } from "../utilities/usefull";
 
 import Entity from "./entities/schema";
 export interface IAddress extends IExtendedDocument {
-  _id: Schema.Types.ObjectId;
-  entity?: Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
+  entity?: mongoose.Schema.Types.ObjectId;
   name?: string;
   addressee?: string;
   address: string;
@@ -29,7 +29,7 @@ const options = {
   type: "address",
 };
 
-interface IAddressModel extends Model<IAddress>, IExtendedModel<IAddress> { }
+interface IAddressModel extends mongoose.Model<IAddress>, IExtendedModel<IAddress> { }
 
 //schema to shere
 export const nestedSchema = {
@@ -51,10 +51,10 @@ export const nestedSchema = {
   longitude: { type: String, input: "Input", readonly: true, validType: "number" }
 }
 
-export const schema = new Schema<IAddress>(
+export const schema = new mongoose.Schema<IAddress>(
   {
     ...nestedSchema,
-    entity: { type: Schema.Types.ObjectId },
+    entity: { type: mongoose.Schema.Types.ObjectId },
     billingAddress: { type: Boolean, default: false, input: "Switch", validType: "switch" },
     shippingAddress: { type: Boolean, default: false, input: "Switch", validType: "switch" },
     geoCodeHint: {
@@ -108,7 +108,7 @@ schema.methods.recalc = async function () {
   }
 }
 
-const Address: IAddressModel = model<IAddress, IAddressModel>("Address", schema);
+const Address: IAddressModel = mongoose.model<IAddress, IAddressModel>("Address", schema);
 export default Address;
 
 //aktualizuje domyśne adresy w głownym dokumencie
@@ -119,3 +119,5 @@ async function updateDefaultAddress(doc, change, type) {
   })
 
 }
+
+// dodać form

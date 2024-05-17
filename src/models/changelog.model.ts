@@ -1,27 +1,27 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 //import { Changelog as ChangelogClass } from "../shared/recordtype";
 export interface IChangelog extends IExtendedDocument {
-    _id: Schema.Types.ObjectId;
-    document: Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
+    document: mongoose.Schema.Types.ObjectId;
     type: string;
-    entity: Schema.Types.ObjectId;
+    entity: mongoose.Schema.Types.ObjectId;
     field: string;
     subdoc: string;
-    subdoc_id: Schema.Types.ObjectId;
-    newValue: string | Date | Schema.Types.ObjectId;
-    oldValue: string | Date | Schema.Types.ObjectId;
+    subdoc_id: mongoose.Schema.Types.ObjectId;
+    newValue: string | Date | mongoose.Schema.Types.ObjectId;
+    oldValue: string | Date | mongoose.Schema.Types.ObjectId;
     ref: string
-    createdBy: Schema.Types.ObjectId
+    createdBy: mongoose.Schema.Types.ObjectId
 }
 
-interface IChangelogModel extends Model<IChangelog>, IExtendedModel<IChangelog> { }
+interface IChangelogModel extends mongoose.Model<IChangelog>, IExtendedModel<IChangelog> { }
 
-export const schema = new Schema<IChangelog>(
+export const schema = new mongoose.Schema<IChangelog>(
     {
         document: {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             required: true,
         },
         type: {
@@ -30,7 +30,7 @@ export const schema = new Schema<IChangelog>(
             default: "Changelog"
         },
         entity: {
-            type: Schema.Types.ObjectId
+            type: mongoose.Schema.Types.ObjectId
         },
         field: {
             type: String,
@@ -40,25 +40,25 @@ export const schema = new Schema<IChangelog>(
             type: String,
         },
         subdoc_id: {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
 
         },
         newValue: {
             refPath: 'ref',
             autopopulate: true,
-            type: Schema.Types.Mixed,
+            type: mongoose.Schema.Types.Mixed,
         },
         oldValue: {
             refPath: 'ref',
             autopopulate: true,
-            type: Schema.Types.Mixed,
+            type: mongoose.Schema.Types.Mixed,
         },
         ref: {
             type: String,
         },
         createdBy: {
             ref: "User",
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
         }
     },
     {
@@ -71,7 +71,7 @@ export const schema = new Schema<IChangelog>(
 schema.index({ name: 1 });
 schema.index({ document: 1 });
 
-const Changelog: IChangelogModel = model<IChangelog, IChangelogModel>("Changelog", schema);
+const Changelog: IChangelogModel = mongoose.model<IChangelog, IChangelogModel>("Changelog", schema);
 Changelog.init().then(function (Event) {
     console.log('Changelog Builded');
 })

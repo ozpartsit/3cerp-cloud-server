@@ -1,4 +1,4 @@
-import { model, Model, Schema } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedModel } from "../../utilities/static";
 import { IExtendedDocument } from "../../utilities/methods";
 import fs from "fs";
@@ -13,11 +13,11 @@ export interface IStorage extends IExtendedDocument {
     path: string;
     url?: string;
     folderPath: string;
-    folder: Schema.Types.ObjectId;
+    folder: mongoose.Schema.Types.ObjectId;
     oldPath?: string;
     mime: string;
 }
-export interface IStorageModel extends Model<IStorage>, IExtendedModel<IStorage> {
+export interface IStorageModel extends mongoose.Model<IStorage>, IExtendedModel<IStorage> {
     deleteFile(path: string): any;
     updateOrInsert(doc: IStorage): any;
 }
@@ -26,13 +26,13 @@ const options = {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
-export const schema = new Schema<IStorage>({
+export const schema = new mongoose.Schema<IStorage>({
     name: { type: String, required: true },
     type: { type: String, required: true },
     path: { type: String, required: true, defaultSelect: true },
     url: { type: String, },
     folderPath: { type: String },
-    folder: { type: Schema.Types.ObjectId, ref: 'Folder', autopopulate: true },
+    folder: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', autopopulate: true },
     oldPath: { type: String },
     mime: { type: String, defaultSelect: true },
 }, options);
@@ -104,5 +104,5 @@ schema.method("deleteFile", async function () {
 });
 
 
-const Storage: IStorageModel = model<IStorage, IStorageModel>("Storage", schema);
+const Storage: IStorageModel = mongoose.model<IStorage, IStorageModel>("Storage", schema);
 export default Storage;

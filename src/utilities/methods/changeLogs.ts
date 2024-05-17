@@ -20,7 +20,7 @@ export default async function changeLogs(this: IExtendedDocument, document?: IEx
 
       if (model && !this.isNew) {
         // pobieranie i ustawianie createdBy na podstawie aktualnegor requesta
-        let tmpStorage = asyncLocalStorage.getStore();
+        let tmpStorage: any = asyncLocalStorage.getStore();
         let createdBy = null;
         if (tmpStorage) createdBy = tmpStorage.user;
 

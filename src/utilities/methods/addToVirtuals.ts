@@ -1,4 +1,4 @@
-import { Document, models } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function addToVirtuals(
   this: IExtendedDocument,
@@ -7,7 +7,7 @@ export default async function addToVirtuals(
   index: number
 ) {
   let list = this.schema.virtuals[virtual];
-  newline = new models[list.options.ref](newline);
+  newline = new mongoose.models[list.options.ref](newline);
   newline.initLocal();
   newline.index = index;
   // copy field value from parten document

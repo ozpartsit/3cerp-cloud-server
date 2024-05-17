@@ -1,6 +1,10 @@
 import i18n from "i18n";
-import path from "path";
+import path, { dirname } from "path";
 import fs from 'fs'
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 i18n.configure({
   locales: ["en", "pl"],
@@ -26,7 +30,7 @@ function sortLocales() {
         const translations = JSON.parse(data);
 
         // Posortuj klucze
-        const sortedTranslations = {};
+        const sortedTranslations: any = {};
         Object.keys(translations).sort().forEach(key => {
           sortedTranslations[key] = translations[key];
         });

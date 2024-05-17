@@ -1,4 +1,4 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import printPDF from "../../utilities/pdf/pdf";
@@ -9,7 +9,7 @@ import { geocode } from "../../utilities/usefull";
 
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface ITransaction extends IExtendedDocument {
-  _id: Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
   type: string;
   date: Date,
   name?: string;
@@ -32,23 +32,23 @@ export interface ITransaction extends IExtendedDocument {
   shippingAddress?: IAddress
 
   //classsifictaions
-  group?: Schema.Types.ObjectId[];
-  category?: Schema.Types.ObjectId[];
+  group?: mongoose.Schema.Types.ObjectId[];
+  category?: mongoose.Schema.Types.ObjectId[];
 
-  salesRep?: Schema.Types.ObjectId;
+  salesRep?: mongoose.Schema.Types.ObjectId;
 
   recalc(): any;
   autoName(): any;
   pdf(): any;
 }
-interface ITransactionModel extends Model<ITransaction>, IExtendedModel<ITransaction> { }
+interface ITransactionModel extends mongoose.Model<ITransaction>, IExtendedModel<ITransaction> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const TransactionSchema = {
   name: { type: String, input: "Input", validType: "text" },
   date: { type: Date, input: "DatePicker", validType: "date", required: true, defaultSelect: true },
   company: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Company",
     required: false,
     autopopulate: true,
@@ -56,7 +56,7 @@ const TransactionSchema = {
     validType: "select",
   },
   entity: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Entity",
     required: true,
     autopopulate: true,
@@ -138,13 +138,13 @@ const TransactionSchema = {
 
   //classsifictaions
   group: {
-    type: [Schema.Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "Group",
     autopopulate: true,
     input: "Autocomplete"
   },
   category: {
-    type: [Schema.Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "Category",
     autopopulate: true,
     input: "Select",
@@ -152,7 +152,7 @@ const TransactionSchema = {
   },
 
   salesRep: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     autopopulate: true,
     input: "Select",
@@ -167,7 +167,7 @@ const options = {
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 };
-const schema = new Schema<ITransaction>(TransactionSchema, options);
+const schema = new mongoose.Schema<ITransaction>(TransactionSchema, options);
 schema.virtual("lines", {
   ref: "Line",
   localField: "_id",
@@ -204,7 +204,7 @@ schema.method("autoName", async function () {
   }
 });
 schema.method("findRelations", async function () {
-  return model("Transaction").find({ type: this.type }, (err, transactions) => {
+  return mongoose.model("Transaction").find({ type: this.type }, (err, transactions) => {
   });
 });
 
@@ -245,7 +245,7 @@ schema.pre("save", async function (next) {
   await this.autoName();
 });
 
-const Transaction: ITransactionModel = model<ITransaction, ITransactionModel>(
+const Transaction: ITransactionModel = mongoose.model<ITransaction, ITransactionModel>(
   "Transaction",
   schema
 );

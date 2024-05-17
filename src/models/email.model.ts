@@ -1,18 +1,18 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 export interface IEmail extends IExtendedDocument {
-    _id: Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
     name: string;
     type: string;
     description: string;
     domain: string;
-    entity: Schema.Types.ObjectId;
+    entity: mongoose.Schema.Types.ObjectId;
     dkim: string;
 }
-interface IEmailModel extends Model<IEmail>, IExtendedModel<IEmail> { }
+interface IEmailModel extends mongoose.Model<IEmail>, IExtendedModel<IEmail> { }
 
-export const schema = new Schema<IEmail>(
+export const schema = new mongoose.Schema<IEmail>(
     {
         name: {
             type: String,
@@ -34,7 +34,7 @@ export const schema = new Schema<IEmail>(
             input: "text"
         },
         entity: {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: "Entity",
             autopopulate: true,
             input: "select"
@@ -54,6 +54,6 @@ export const schema = new Schema<IEmail>(
 
 schema.index({ name: 1 });
 
-const Email: IEmailModel = model<IEmail, IEmailModel>("Email", schema);
+const Email: IEmailModel = mongoose.model<IEmail, IEmailModel>("Email", schema);
 export default Email;
 

@@ -1,4 +1,4 @@
-import { Schema, model, Model, models } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 
@@ -20,9 +20,9 @@ interface ISortBy {
     order: string;
 }
 export interface ITablePreference extends IExtendedDocument {
-    _id: Schema.Types.ObjectId;
-    user: Schema.Types.ObjectId;
-    account: Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
+    user: mongoose.Schema.Types.ObjectId;
+    account: mongoose.Schema.Types.ObjectId;
     type: string;
     table: string;
     selected: string[];
@@ -39,16 +39,16 @@ export interface ITablePreference extends IExtendedDocument {
 
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
-interface ITablePreferenceModel extends Model<ITablePreference>, IExtendedModel<ITablePreference> { }
+interface ITablePreferenceModel extends mongoose.Model<ITablePreference>, IExtendedModel<ITablePreference> { }
 
 const options = {
     discriminatorKey: "type", collection: "preferences", toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
-const schema = new Schema<ITablePreference>(
+const schema = new mongoose.Schema<ITablePreference>(
     {
-        account: { type: Schema.Types.ObjectId, required: true },
-        user: { type: Schema.Types.ObjectId, required: true },
+        account: { type: mongoose.Schema.Types.ObjectId, required: true },
+        user: { type: mongoose.Schema.Types.ObjectId, required: true },
         table: { type: String },
         selected: { type: [String] },
         sortBy: {
@@ -79,7 +79,7 @@ const schema = new Schema<ITablePreference>(
                             input: "Select",
                             constant: 'operator',
                         },
-                        value: { type: Schema.Types.Mixed, refPath: 'ref', autopopulate: true },
+                        value: { type: mongoose.Schema.Types.Mixed, refPath: 'ref', autopopulate: true },
                         ref: {
                             type: String,
                         },
@@ -116,15 +116,15 @@ schema.pre('save', async function () {
 
 schema.virtual('fields').get(function (this: ITablePreference) {
     let sources = this.table.split(".");
-    let model = Object.keys(models).find(model => model.toLowerCase() == sources[0].toLowerCase());
+    let model = Object.keys(mongoose.models).find(model => model.toLowerCase() == sources[0].toLowerCase());
     // Uzupełnienie Ref i Constatnt
     this._someFunction()
 
 
     if (model) {
-        if (models[model]) {
+        if (mongoose.models[model]) {
             //console.log(models[model].collection.name)
-            let fields = (models[model] as any).getFields("en", "", false, true);
+            let fields = (mongoose.models[model] as any).getFields("en", "", false, true);
             if (sources[1]) {
                 let subdoc = fields.find(f => f.field == sources[1])
                 if (subdoc)
@@ -148,12 +148,12 @@ schema.statics.defaultDocument = function (table) {
 schema.methods._someFunction = function () {
     if (this.filters) {
         let sources = this.table.split(".");
-        let model = Object.keys(models).find(model => model.toLowerCase() == sources[0].toLowerCase());
+        let model = Object.keys(mongoose.models).find(model => model.toLowerCase() == sources[0].toLowerCase());
 
         if (model) {
             for (let filterGroup of this.filters) {
                 for (let filter of filterGroup.filters) {
-                    let fields = (models[model] as any).getFields("en", "", false, true);
+                    let fields = (mongoose.models[model] as any).getFields("en", "", false, true);
                     if (sources[1]) {
                         let subdoc = fields.find(f => f.field == sources[1])
                         if (subdoc)
@@ -180,7 +180,7 @@ schema.methods._someFunction = function () {
 
 schema.index({ name: 1 });
 
-const Table: ITablePreferenceModel = model<ITablePreference, ITablePreferenceModel>(
+const Table: ITablePreferenceModel = mongoose.model<ITablePreference, ITablePreferenceModel>(
     "Table",
     schema
 );

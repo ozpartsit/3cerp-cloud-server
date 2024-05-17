@@ -1,4 +1,4 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Classification, { IClassification } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import Account from "../../account.model"
@@ -7,11 +7,11 @@ const options = { discriminatorKey: "type", collection: "classifications" };
 export interface ITag extends IClassification {
     color: string;
 }
-export interface ITagModel extends Model<ITag>, IExtendedModel<ITag> { }
+export interface ITagModel extends mongoose.Model<ITag>, IExtendedModel<ITag> { }
 
-export const schema = new Schema<ITag>(
+export const schema = new mongoose.Schema<ITag>(
     {
-        color: { type: String, input: "Input", validType: "colorPicker", defaultSelect: true },
+        color: { type: String, input: "ColorPicker", validType: "colorPicker", defaultSelect: true },
     },
     options
 );

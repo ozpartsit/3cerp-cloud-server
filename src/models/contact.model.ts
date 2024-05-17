@@ -1,10 +1,10 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 
 export interface IContact extends IExtendedDocument {
-  _id: Schema.Types.ObjectId;
-  entity: Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
+  entity: mongoose.Schema.Types.ObjectId;
   name: string;
   firstName?: string;
   lastName?: string;
@@ -18,10 +18,10 @@ const options = {
   type: "contact"
 };
 
-interface IContactModel extends Model<IContact>, IExtendedModel<IContact> { }
-const schema = new Schema<IContact>(
+interface IContactModel extends mongoose.Model<IContact>, IExtendedModel<IContact> { }
+const schema = new mongoose.Schema<IContact>(
   {
-    entity: { type: Schema.Types.ObjectId },
+    entity: { type: mongoose.Schema.Types.ObjectId },
     name: { type: String, input: "Input", validType: "text" },
     firstName: { type: String, input: "Input", validType: "text" },
     lastName: { type: String, input: "Input", validType: "text" },
@@ -33,6 +33,6 @@ const schema = new Schema<IContact>(
   options
 );
 
-const Contact: IContactModel = model<IContact, IContactModel>("Contact", schema);
+const Contact: IContactModel = mongoose.model<IContact, IContactModel>("Contact", schema);
 export default Contact;
 

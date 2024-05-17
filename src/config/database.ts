@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
-import Static from "../utilities/static";
-import Methods from "../utilities/methods";
+import Static from "../utilities/static.js";
+import Methods from "../utilities/methods.js";
 mongoose.plugin(mongoosePaginate);
 mongoose.plugin(Methods);
 mongoose.plugin(Static);

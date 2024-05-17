@@ -1,9 +1,9 @@
-import { Schema, Document, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Item, { IItem } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import { IEntity } from "../../entities/schema";
 import Currencies from "../../../constants/currencies";
-import form from "./form.json"
+import form from "./form"
 
 const options = { discriminatorKey: "type", collection: "items" };
 
@@ -81,9 +81,9 @@ export interface IInvItem extends IItem {
   firstPurchaseDate?: Date;
   lastPurchaseDate?: Date;
 }
-export interface IInvItemModel extends Model<IInvItem>, IExtendedModel<IInvItem> { }
+export interface IInvItemModel extends mongoose.Model<IInvItem>, IExtendedModel<IInvItem> { }
 
-const schema = new Schema<IInvItem>(
+const schema = new mongoose.Schema<IInvItem>(
   {
     //statistics
     firstReceiptDate: { type: Date },

@@ -1,17 +1,26 @@
 import i18n from "../../config/i18n";
 import { IExtendedDocument } from "../methods"
-export default function constantTranslate(this: IExtendedDocument, local: string) {
+export default function constantTranslate(this: IExtendedDocument, local: string, returnVirtuals: boolean) {
 
     let doc = this.toObject({ getters: true, virtuals: true });
 
     // Virtuals
     const virtuals: any[] = Object.values(this.schema.virtuals);
     for (let list of virtuals) {
+
         if (list.options.ref && list.options.autopopulate) {
+
             if (Array.isArray(this[list.path])) {
-                for (let index in doc[list.path]) {
-                    doc[list.path][index] = this[list.path][index].constantTranslate(local);
+
+                // zwracamy pustą tablicę - dane pobierane asynchronicznie
+                if (!returnVirtuals)
+                    doc[list.path] = [];
+                else {
+                    for (let index in doc[list.path]) {
+                        doc[list.path][index] = this[list.path][index].constantTranslate(local);
+                    }
                 }
+
 
             }
         }

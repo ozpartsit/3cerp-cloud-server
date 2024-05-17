@@ -1,33 +1,34 @@
-import { Schema, model, models, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import Transaction, { ITransaction } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import LineSalesOrder, { ILineSalesOrder } from "./line.schema";
-import form from "./form.json"
+import Line from "../line.schema.js";
+import form from "./form"
 
-const lineModel = models.Line.discriminator("LineSalesOrder", LineSalesOrder);
+const lineModel = Line.discriminator("LineSalesOrder", LineSalesOrder);
 const options = { discriminatorKey: "type", collection: "transactions" };
 
 export interface ISalesOrder extends ITransaction {
   shippingCost: number;
   //accounting
-  terms?: Schema.Types.ObjectId;
-  paymentMethod?: Schema.Types.ObjectId;
+  terms?: mongoose.Schema.Types.ObjectId;
+  paymentMethod?: mongoose.Schema.Types.ObjectId;
   lines: ILineSalesOrder[];
 }
-export interface ISalesOrderModel extends Model<ISalesOrder>, IExtendedModel<ISalesOrder> { }
+export interface ISalesOrderModel extends mongoose.Model<ISalesOrder>, IExtendedModel<ISalesOrder> { }
 
-const schema = new Schema<ISalesOrder>(
+const schema = new mongoose.Schema<ISalesOrder>(
   {
     shippingCost: { type: Number, default: 0, input: "Input", validType: "currency" },
     terms: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Terms",
       autopopulate: true,
       input: "Select",
       validType: "select"
     },
     paymentMethod: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "PaymentMethod",
       autopopulate: true,
       input: "Select",

@@ -1,12 +1,12 @@
-import { Schema, model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IItem } from "../items/schema";
 import { ITransaction } from "./schema";
 import TranLineTypes from "../../constants/transaction.lines.types";
 import { roundToPrecision } from "../../utilities/usefull";
 import { setItem, setQuantity } from "./line.actions";
-import { Error } from "mongoose";
+
 export interface ILine {
-  _id: Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
   parent?: any;
   index: number;
   type: string;
@@ -14,7 +14,7 @@ export interface ILine {
   entity: ITransaction["entity"];
   account: ITransaction["account"];
   item: IItem;
-  kit: Schema.Types.ObjectId;
+  kit: mongoose.Schema.Types.ObjectId;
   description: string;
   quantity: number;
   multiplyquantity?: number;
@@ -37,21 +37,21 @@ const options = {
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 };
-const schema = new Schema<ILine>(
+const schema = new mongoose.Schema<ILine>(
   {
     index: {
       type: Number
     },
     transaction: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Transaction"
     },
     kit: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Line"
     },
-    entity: { type: Schema.Types.ObjectId, copy: "transaction" },
-    account: { type: Schema.Types.ObjectId, copy: "transaction" },
+    entity: { type: mongoose.Schema.Types.ObjectId, copy: "transaction" },
+    account: { type: mongoose.Schema.Types.ObjectId, copy: "transaction" },
     type: {
       type: String,
       //required: true,
@@ -59,7 +59,7 @@ const schema = new Schema<ILine>(
       enum: TranLineTypes
     },
     item: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Item",
       required: true,
       autopopulate: { select: "name displayname type _id" },
@@ -188,5 +188,5 @@ schema.pre("validate", async function (next) {
 
 schema.index({ transaction: 1 });
 
-const Line = model<ILine>("Line", schema);
+const Line = mongoose.model<ILine>("Line", schema);
 export default Line;

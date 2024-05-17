@@ -1,4 +1,4 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Classification, { IClassification } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 const options = { discriminatorKey: "type", collection: "classifications" };
@@ -6,9 +6,9 @@ const options = { discriminatorKey: "type", collection: "classifications" };
 export interface IGroup extends IClassification {
 
 }
-export interface IGroupModel extends Model<IGroup>, IExtendedModel<IGroup> { }
+export interface IGroupModel extends mongoose.Model<IGroup>, IExtendedModel<IGroup> { }
 
-export const schema = new Schema<IGroup>(
+export const schema = new mongoose.Schema<IGroup>(
     {},
     options
 );

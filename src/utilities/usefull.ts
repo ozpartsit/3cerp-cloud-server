@@ -18,7 +18,7 @@ export function getFileSize(filename: string) {
   return fileSizeInBytes;
 }
 
-export function encodeURIComponentFn(tekst) {
+export function encodeURIComponentFn(tekst: string) {
   // Usuwanie diakrytyków i innych znaków specjalnych
   let zakodowanyTekst = tekst.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 

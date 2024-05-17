@@ -1,4 +1,4 @@
-import { Schema, Model, model, PopulatedDoc } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 import User, { IUser } from "../models/user.model";
@@ -7,9 +7,9 @@ import Email from "../services/email";
 import jwt from "jsonwebtoken";
 export interface IAccess extends IExtendedDocument {
 
-    _id: Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
     user: IUser["_id"];
-    account: Schema.Types.ObjectId;
+    account: mongoose.Schema.Types.ObjectId;
     password: string;
     email: string;
     active: boolean;
@@ -27,12 +27,12 @@ const options = {
     type: "access"
 };
 
-interface IAccessModel extends Model<IAccess>, IExtendedModel<IAccess> { }
+interface IAccessModel extends mongoose.Model<IAccess>, IExtendedModel<IAccess> { }
 
-const schema = new Schema<IAccess>(
+const schema = new mongoose.Schema<IAccess>(
     {
-        user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-        account: { type: Schema.Types.ObjectId, required: true },
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        account: { type: mongoose.Schema.Types.ObjectId, required: true },
         password: { type: String, input: "PasswordField", required: true },
         email: { type: String, input: "TextField", required: true },
         active: { type: Boolean, input: "SwitchField" },
@@ -88,5 +88,5 @@ schema.pre("save", async function (next) {
     next();
 });
 
-const Access: IAccessModel = model<IAccess, IAccessModel>("Access", schema);
+const Access: IAccessModel = mongoose.model<IAccess, IAccessModel>("Access", schema);
 export default Access;

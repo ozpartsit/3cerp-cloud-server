@@ -30,7 +30,7 @@ export default class controller {
             // Pobierz aktualną datę i czas
             let now = new Date();
             // Dodaj jedną godzinę do aktualnej daty i czasu
-            now.setHours(now.getHours() + 10);
+            now.setHours(now.getHours() + 8);
             this.expires = now;
         } catch (error) {
             console.log(error)
@@ -40,7 +40,7 @@ export default class controller {
     public async shipment(req: Request, res: Response, next: NextFunction) {
         // odswieżenie tokena
         try {
-            if (new Date() > this.expires) await this.login();
+            if (this.token || new Date() > this.expires) await this.login();
             let queries = formatQueryParams(req.query);
             await axios.post(`https://api.dpdgroup.com/shipping/v1/shipment?${queries}`, req.body, {
                 headers: {

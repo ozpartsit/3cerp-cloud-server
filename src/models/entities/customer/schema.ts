@@ -1,8 +1,8 @@
-import { Schema, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import Entity, { IEntity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import Address, { IAddress, nestedSchema } from "../../address.model";
-import form from "./form.json"
+import form from "./form"
 export interface ICustomer extends IEntity {
   firstName?: string;
   lastName?: string;
@@ -14,15 +14,15 @@ export interface ICustomer extends IEntity {
   lastOrderDate?: Date;
   lastActivity?: Date;
   //classsifictaions
-  group?: Schema.Types.ObjectId[];
-  category?: Schema.Types.ObjectId[];
+  group?: mongoose.Schema.Types.ObjectId[];
+  category?: mongoose.Schema.Types.ObjectId[];
   //accounting
-  terms?: Schema.Types.ObjectId;
-  paymentMethod?: Schema.Types.ObjectId;
-  entityType?: Schema.Types.ObjectId;
+  terms?: mongoose.Schema.Types.ObjectId;
+  paymentMethod?: mongoose.Schema.Types.ObjectId;
+  entityType?: mongoose.Schema.Types.ObjectId;
   creditLimit?: Number;
   accountOnHold?: Boolean;
-  salesRep?: Schema.Types.ObjectId;
+  salesRep?: mongoose.Schema.Types.ObjectId;
 
   billingAddress?: IAddress
   shippingAddress?: IAddress
@@ -34,10 +34,10 @@ export interface ICustomer extends IEntity {
 }
 
 
-export interface ICustomerModel extends Model<ICustomer>, IExtendedModel<ICustomer> { }
+export interface ICustomerModel extends mongoose.Model<ICustomer>, IExtendedModel<ICustomer> { }
 
 const options = { discriminatorKey: "type", collection: "entities" };
-const schema = new Schema<ICustomer>(
+const schema = new mongoose.Schema<ICustomer>(
   {
     firstName: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
     lastName: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
@@ -60,20 +60,20 @@ const schema = new Schema<ICustomer>(
     lastActivity: { type: Date, input: 'DatePicker', validType: "date" },
     //classsifictaions
     group: {
-      type: [Schema.Types.ObjectId],
+      type: [mongoose.Schema.Types.ObjectId],
       ref: "Group",
       autopopulate: true,
       input: "Autocomplete"
     },
     category: {
-      type: [Schema.Types.ObjectId],
+      type: [mongoose.Schema.Types.ObjectId],
       ref: "Category",
       autopopulate: true,
       input: "Select",
       validType:"select",
     },
     entityType: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "EntityType",
       autopopulate: true,
       input: "Select",
@@ -81,14 +81,14 @@ const schema = new Schema<ICustomer>(
     },
     //accounting
     terms: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Terms",
       autopopulate: true,
       input: "Select",
       validType:"select",
     },
     paymentMethod: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "PaymentMethod",
       autopopulate: true,
       input: "Select",
@@ -107,7 +107,7 @@ const schema = new Schema<ICustomer>(
       default: false,
     },
     salesRep: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       autopopulate: true,
       input: "Select",

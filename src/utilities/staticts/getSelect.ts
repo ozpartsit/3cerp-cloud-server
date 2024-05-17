@@ -1,6 +1,6 @@
-import { Schema, Model, Document, models } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../methods"
-export default function getSelect<T extends IExtendedDocument>(this: Model<T>, parent?: string) {
+export default function getSelect<T extends IExtendedDocument>(this: mongoose.Model<T>, parent?: string) {
     let fields: string[] = ["name", "type", "resource", "path", "mime"];
     let modelSchema = this.schema;
 
@@ -34,11 +34,11 @@ export default function getSelect<T extends IExtendedDocument>(this: Model<T>, p
         } else {
             if (schematype.options.ref && !parent) {
                 //console.log(schematype.options.ref)
-                let refModel: any = models[schematype.options.ref];
+                let refModel: any = mongoose.models[schematype.options.ref];
 
                 if (refModel) {
                     schematype.options.resource = refModel.schema.options.collection;
-                    refModel.getSelect(pathname, pathname).forEach(f => {
+                    refModel.getSelect(pathname, pathname).forEach((f: any) => {
                         fields.push(f)
                     });
                 }

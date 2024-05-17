@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 
-import path from "path";
+import path, {dirname} from "path";
 import i18n from "../config/i18n";
 
-import constants from "../constants";
+import constants from "../constants/index.js";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 export default class controller {
     public async get(req: Request, res: Response, next: NextFunction) {
 

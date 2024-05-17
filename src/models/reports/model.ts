@@ -1,4 +1,4 @@
-import { Schema, Model, model, models } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import i18n from "../../config/i18n";
@@ -10,9 +10,9 @@ export interface IReport extends IExtendedDocument {
     filters: any[];
     getResults(): any;
 }
-interface IReportModel extends Model<IReport>, IExtendedModel<IReport> { }
+interface IReportModel extends mongoose.Model<IReport>, IExtendedModel<IReport> { }
 
-export const schema = new Schema<IReport>(
+export const schema = new mongoose.Schema<IReport>(
     {
         name: {
             type: String,
@@ -95,7 +95,7 @@ schema.method("getResults", async function () {
     //.populate(populated)
     //.sort(sort).skip(skip).limit(limit).select(select);
     //console.log(populated)
-    let data = await model("Transaction").find(query)
+    let data = await mongoose.model("Transaction").find(query)
         .populate(Object.values(populated))
         //.sort(sort)
         .select(select);
@@ -125,6 +125,6 @@ schema.method("getResults", async function () {
 
 schema.index({ name: 1 });
 
-const Report: IReportModel = model<IReport, IReportModel>("Report", schema);
+const Report: IReportModel = mongoose.model<IReport, IReportModel>("Report", schema);
 export default Report;
 

@@ -1,4 +1,3 @@
-import { Document } from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function totalVirtuals(this: IExtendedDocument) {
   // Sum selected fields

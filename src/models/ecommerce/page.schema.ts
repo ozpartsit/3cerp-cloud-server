@@ -2,16 +2,16 @@ import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 
-export interface IAccounting extends IExtendedDocument {
+export interface IPage extends IExtendedDocument {
     _id: mongoose.Schema.Types.ObjectId;
     type: string;
     name: string;
     description: string;
 }
-interface IAccountingModel extends mongoose.Model<IAccounting>, IExtendedModel<IAccounting> { }
+interface IPageModel extends mongoose.Model<IPage>, IExtendedModel<IPage> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
-const AccountingSchema = {
+const PageSchema = {
     name: { type: String, input: "Input", validType: "text" },
     description: { type: String, input: "Input", validType: "text" },
     type: {
@@ -21,13 +21,17 @@ const AccountingSchema = {
 }
 const options = {
     discriminatorKey: "type",
-    collection: "accounting",
+    collection: "websites.pages",
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
-const schema = new mongoose.Schema<IAccounting>(AccountingSchema, options);
-const Accounting: IAccountingModel = mongoose.model<IAccounting, IAccountingModel>(
-    "Accounting",
+const schema = new mongoose.Schema<IPage>(PageSchema, options);
+const Page: IPageModel = mongoose.model<IPage, IPageModel>(
+    "Page",
     schema
 );
-export default Accounting;
+Page.init().then(function (Event) {
+    console.log('Page Builded');
+    //Page.updateMany({}, { $set: { account: new mongo.ObjectId('64f4cc1c9842bd71489d1fa0') } }).exec()
+})
+export default Page;

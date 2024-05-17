@@ -1,4 +1,4 @@
-import { Schema, model, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 import Access, { IAccess } from "./access.model";
@@ -14,25 +14,25 @@ export interface IAccount extends IExtendedDocument {
     dbName: string;
     dbPass: string;
     dbHost: string;
-    storageRoot?: Schema.Types.ObjectId;
+    storageRoot?: mongoose.Schema.Types.ObjectId;
     initStorage(): Promise<IFolder & { _id: any; }>
 }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
-interface IAccountModel extends Model<IAccount>, IExtendedModel<IAccount> { }
+interface IAccountModel extends mongoose.Model<IAccount>, IExtendedModel<IAccount> { }
 
 const options = {
     discriminatorKey: "type", collection: "accounts", toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
-const schema = new Schema<IAccount>(
+const schema = new mongoose.Schema<IAccount>(
     {
         id: {
             type: String,
             required: true,
             input: "TextField"
         },
-        storageRoot: { type: Schema.Types.ObjectId, ref: "Folder" },
+        storageRoot: { type: mongoose.Schema.Types.ObjectId, ref: "Folder" },
         email: { type: String, input: "TextField" },
         name: {
             type: String,
@@ -100,7 +100,7 @@ schema.post('save', async function () {
 
 });
 
-const Account: IAccountModel = model<IAccount, IAccountModel>(
+const Account: IAccountModel = mongoose.model<IAccount, IAccountModel>(
     "Account",
     schema
 );

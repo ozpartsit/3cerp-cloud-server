@@ -1,15 +1,15 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Classification, { IClassification } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 const options = { discriminatorKey: "type", collection: "classifications" };
 
 export interface IPriceGroup extends IClassification {
-    _id: Schema.Types.ObjectId,
+    _id: mongoose.Schema.Types.ObjectId,
     name: string
 }
-export interface IPriceGroupModel extends Model<IPriceGroup>, IExtendedModel<IPriceGroup> {}
+export interface IPriceGroupModel extends mongoose.Model<IPriceGroup>, IExtendedModel<IPriceGroup> {}
 
-export const schema = new Schema<IPriceGroup>(
+export const schema = new mongoose.Schema<IPriceGroup>(
     {
         name: {
             type: String,

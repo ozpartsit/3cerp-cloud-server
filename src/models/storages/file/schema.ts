@@ -1,4 +1,4 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Storage, { IStorage } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import { getFileSize } from "../../../utilities/usefull";
@@ -7,10 +7,10 @@ import path from "path";
 export interface IFile extends IStorage {
     size?: number;
 }
-export interface IFileModel extends Model<IFile>, IExtendedModel<IFile> { }
+export interface IFileModel extends mongoose.Model<IFile>, IExtendedModel<IFile> { }
 
 const options = { discriminatorKey: "type", collection: "storage" };
-const schema = new Schema<IFile>({
+const schema = new mongoose.Schema<IFile>({
     //size: { type: Number, set: (v: any) => getFileSize(this.path) },
 
 }, options);

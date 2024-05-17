@@ -1,3 +1,4 @@
+import * as mongoose from "mongoose";
 import setValue from "./methods/setValue";
 import getOptions from "./methods/getOptions";
 import changeLogs from "./methods/changeLogs";
@@ -9,12 +10,11 @@ import totalVirtuals from "./methods/totalVirtuals";
 import addToVirtuals from "./methods/addToVirtuals";
 import cache from "../config/cache";
 import asyncLocalStorage from "../middleware/asyncLocalStorage";
-import mongoose, { Schema, Document, models } from "mongoose";
 import { IExtendedModel } from "../utilities/static";
 import { encodeURIComponentFn } from "./usefull"
 
-export interface IExtendedDocument extends Document {
-  account: Schema.Types.ObjectId;
+export interface IExtendedDocument extends mongoose.Document {
+  account: mongoose.Schema.Types.ObjectId;
   deleted: boolean;
   resource: string;
   type: string;
@@ -29,7 +29,7 @@ export interface IExtendedDocument extends Document {
   changeLogs: (document?: any, list?: string) => Promise<void>;
   virtualPopulate: () => Promise<void>;
   autoPopulate: () => Promise<any>;
-  constantTranslate: (local: string) => Object;
+  constantTranslate: (local: string, returnVirtuals?: boolean) => Object;
   validateVirtuals: (save: boolean) => Promise<[any]>;
   totalVirtuals: () => void;
   addToVirtuals: (virtual: string, newline: any, index?: number) => void;
@@ -44,7 +44,7 @@ export interface IExtendedDocument extends Document {
 
 
 
-export default function customMethodsPlugin<T extends IExtendedDocument>(schema: Schema<T>) {
+export default function customMethodsPlugin<T extends IExtendedDocument>(schema: mongoose.Schema<T>) {
   // apply method to pre
   async function recalcDocument(this: T) {
     if (this.type && this.recalc) {
@@ -89,7 +89,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
     return model;
   })
   schema.method('getUser', function (this: T) {
-    let tmpStorage = asyncLocalStorage.getStore();
+    let tmpStorage: any = asyncLocalStorage.getStore();
     if (tmpStorage) return tmpStorage.user;
     else null;
   })
@@ -136,7 +136,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
         const query: any = {
           account: this.account
         }
-        const count = await models[type].countDocuments(query);
+        const count = await mongoose.models[type].countDocuments(query);
         this.uniqNumber = count + 1;
       }
 

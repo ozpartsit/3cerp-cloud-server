@@ -1,4 +1,4 @@
-import { Document, models } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function validateVirtuals(this: IExtendedDocument, save: boolean) {
   //console.log("validateVirtuals");
@@ -24,7 +24,7 @@ export default async function validateVirtuals(this: IExtendedDocument, save: bo
           // if line is new init new document
           if (!line.schema) {
             if(this.isNew) delete line._id; // delete id if copy document - to do - zastanowić sie czy nie dodać warunku
-            line = new models[list.options.ref](line);
+            line = new mongoose.models[list.options.ref](line);
           }
           // assign foreignField to documents from virtual field
           line[list.options.foreignField] = this[list.options.localField];

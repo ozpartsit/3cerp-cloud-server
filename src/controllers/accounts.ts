@@ -37,7 +37,7 @@ export default class AccountController<T extends IExtendedDocument> extends cont
             child.stdin.end();
 
             // Obsługujemy wyniki działania procesu
-            child.stdout.on('data', (data) => {
+            child.stdout.on('data', (data: any) => {
                 //console.log('Standard Output:', data.toString());
                 const regex = /(?<=:\s)(.*?)(?=\n)/gm;
                 let match;
@@ -52,11 +52,11 @@ export default class AccountController<T extends IExtendedDocument> extends cont
                 account.save();
             });
 
-            child.stderr.on('data', (data) => {
+            child.stderr.on('data', (data: any) => {
                 console.error('Standard Error:', data.toString());
             });
 
-            child.on('close', (code) => {
+            child.on('close', (code: any) => {
                 console.log('Proces zakończony z kodem:', code);
             });
 

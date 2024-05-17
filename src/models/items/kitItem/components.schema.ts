@@ -1,7 +1,7 @@
-import { Schema } from "mongoose";
+import * as mongoose from "mongoose";
 import { IItem } from "../schema";
 export interface IComponent {
-  _id: Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
   item: IItem["_id"];
   component: IItem;
   description: string;
@@ -12,11 +12,11 @@ const options = {
   discriminatorKey: "item",
   collection: "items.components"
 };
-const schema = new Schema<IComponent>(
+const schema = new mongoose.Schema<IComponent>(
   {
-    item: { type: Schema.Types.ObjectId },
+    item: { type: mongoose.Schema.Types.ObjectId },
     component: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Item",
       required: true,
       autopopulate: { select: "name displayname type _id" },

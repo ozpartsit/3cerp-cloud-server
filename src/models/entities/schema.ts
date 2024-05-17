@@ -1,11 +1,11 @@
-import { Schema, model, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import Contact, { IContact } from "../contact.model";
 import Address, { IAddress } from "../address.model";
 
 export interface IEntity extends IExtendedDocument {
-  _id: Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
   name: string;
   type: string;
   email?: string;
@@ -24,13 +24,13 @@ export interface IEntity extends IExtendedDocument {
 }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
-interface IEntityModel extends Model<IEntity>, IExtendedModel<IEntity> { }
+interface IEntityModel extends mongoose.Model<IEntity>, IExtendedModel<IEntity> { }
 
 const options = {
   discriminatorKey: "type", collection: "entities", toJSON: { virtuals: true },
   toObject: { virtuals: true }
 };
-const schema = new Schema<IEntity>(
+const schema = new mongoose.Schema<IEntity>(
   {
     email: { type: String, input: "Input", validType: "email", min: 3, max: 256 },
     phone: { type: String, input: "Input", validType: "phone", min: 6, max: 15 },
@@ -111,7 +111,7 @@ schema.virtual("contacts", {
 
 schema.index({ name: 1 });
 
-const Entity: IEntityModel = model<IEntity, IEntityModel>(
+const Entity: IEntityModel = mongoose.model<IEntity, IEntityModel>(
   "Entity",
   schema
 );

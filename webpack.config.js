@@ -11,5 +11,13 @@ module.exports = {
   },
   optimization: {
     minimize: false // enabling this reduces file size and readability
+  },
+  module: {
+    rules: [
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
+      }
+    ]
   }
 };

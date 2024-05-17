@@ -6,6 +6,7 @@ import EmailService from "../services/email";
 import Changelog from "../models/changelog.model";
 import CustomError from "../utilities/errors/customError";
 import Table, { ITablePreference } from '../models/tablePreference.model';
+import Transactions from '../models/transactions/schema';
 import Email from '../models/email.model';
 import { FavoritesTypes } from '../models/favorites/model'
 
@@ -44,7 +45,7 @@ class GenericController<T extends IExtendedDocument> {
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
 
-            let document = await this.model.getDocument(id, mode, (field || "_id").toString());
+            let document = await this.model.getDocument(id, mode, true, (field || "_id").toString());
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
@@ -65,22 +66,23 @@ class GenericController<T extends IExtendedDocument> {
         //let { field, page } = req.query;
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
-
-            let document = await this.model.getDocument(id, mode, ("_id").toString());
+            let document = await this.model.getDocument(id, mode, false, ("_id").toString());
 
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
                 //populate response document
                 await document.autoPopulate();
-                let docObject = document.constantTranslate(req.locale);
+                let docObject: any = document.constantTranslate(req.locale, true);
                 let results = docObject[table];
                 let total = results.length;
 
 
                 let preference: ITablePreference | null = null;
                 if (table) {
-                    preference = await Table.findOne({ table: `${this.model.modelName}.${table.toString()}`, user: req.headers.user });
+                    table = `${this.model.modelName}.${table.toString()}`;
+                    preference = await Table.findOne({ table: table, user: req.headers.user });
+                    if (!preference) preference = await new Table({ table: table.toString(), user: req.headers.user, account: req.headers.account }).save();
                 }
                 //this.s = this.model.setAccount(req.headers.account, req.headers.user);
                 let query: any = {};
@@ -89,7 +91,7 @@ class GenericController<T extends IExtendedDocument> {
                 // filters
                 let filters = (req.query.filters || "").toString();
                 if (filters) {
-                    query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+                    query = filters.split(",").reduce((o: any, f: any) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
                 } else {
                     if (preference && preference.filters && preference.filters.length) {
                         query = { $and: [] }
@@ -98,8 +100,8 @@ class GenericController<T extends IExtendedDocument> {
                             let filterGroup: any = {};
                             filterGroup[fg.operator] = [];
                             filterGroup[fg.operator] = fg.filters.filter(f => f.value != undefined).reduce((t: any, f) => {
-                                let filter = {}
-                                let value = {};
+                                let filter: any = {}
+                                let value: any = {};
                                 if (Array.isArray(f.value)) {
                                     value[f.operator] = f.value
                                 }
@@ -124,14 +126,14 @@ class GenericController<T extends IExtendedDocument> {
                 // selected
                 let select = (req.query.select || req.query.fields || "").toString();
                 if (select) {
-                    options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, deleted: 1 });
+                    options.select = select.split(",").reduce((o: any, f: any) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, deleted: 1 });
                 } else {
                     // sprawdź preferencje użytkownika
                     if (preference) {
-                        options.select = preference.selected.reduce((t, s) => { t[s] = 1; return t; }, { name: 1, type: 1, resource: 1, deleted: 1 });
+                        options.select = preference.selected.reduce((t: any, s: any) => { t[s] = 1; return t; }, { name: 1, type: 1, resource: 1, deleted: 1 });
                     } else {
                         // add default field to select
-                        this.model.getSelect().forEach(field => {
+                        this.model.getSelect().forEach((field: any) => {
                             options.select[field] = 1;
                         })
                     }
@@ -148,7 +150,7 @@ class GenericController<T extends IExtendedDocument> {
                         sortArray = preference.sortBy.map(s => s.order === "desc" ? `-${s.key}` : s.key);
                     }
                 }
-                options.sort = sortArray.reduce((o, f) => {
+                options.sort = sortArray.reduce((o: any, f: any) => {
                     // -date = desc sort per date field
                     if (f[0] == "-") {
                         f = f.substring(1);
@@ -171,7 +173,7 @@ class GenericController<T extends IExtendedDocument> {
 
 
                 if (search) {
-                    results = results.filter(row => {
+                    results = results.filter((row: any) => {
                         let status = false;
                         Object.keys(options.select).forEach(s => {
                             //to do - ignorować niektóe pola jak type czy resource
@@ -192,20 +194,26 @@ class GenericController<T extends IExtendedDocument> {
                 let page = Number(req.query.page || 1);
 
 
-                const data = {
+                const data: any = {
                     totalDocs: total,
                     limit: options.limit,
                     totalPages: Math.ceil(total / options.limit)
                 }
 
                 let skip = ((page || 1) - 1) * 25;
-                results = results.filter((item, index) => index >= skip && index < skip + 25)
+                results = results.filter((item: any, index: any) => index >= skip && index < skip + 25)
 
                 if (!req.query.count) {
                     data["docs"] = results;
                     data["page"] = page;
                 }
 
+                if (table) {
+                    data["table"] = table;
+                }
+                if (preference) {
+                    data["preference"] = preference._id;
+                }
                 res.json({ status: "success", data: data });
 
 
@@ -220,7 +228,7 @@ class GenericController<T extends IExtendedDocument> {
         let { field } = req.query;
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
-            let sourceDocument = await this.model.getDocument(id, "simple", (field || "_id").toString());
+            let sourceDocument = await this.model.getDocument(id, "simple", true, (field || "_id").toString());
 
             if (!sourceDocument) {
                 throw new CustomError("doc_not_found", 404);
@@ -259,60 +267,7 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
-    // async favorite(req: Request, res: Response, next: NextFunction) {
-    //     let { recordtype, id, mode } = req.params;
-    //     let { field } = req.query;
-    //     try {
-    //         let linkModel = FavoritesTypes.link;//.setAccount(req.headers.account, req.headers.user);
-    //         let categoryModel = FavoritesTypes.category;//.setAccount(req.headers.account, req.headers.user);
-    //         let document = await linkModel.getDocument(id, "simple", "document");
 
-    //         if (req.method == "GET") {
-    //             res.json({ status: "success", data: { document: document } });
-    //         } else {
-    //             if (req.method == "DELETE") {
-    //                 if (!document) throw new CustomError("doc_not_found", 404);
-
-    //                 document = await linkModel.deleteDocument(document._id.toString());
-    //                 res.json({ status: "success", data: { document } });
-    //             } else {
-    //                 if (document) {
-    //                     res.json({ status: "success", data: { document, saved: true } });
-    //                 }
-    //                 else {
-    //                     let type = this.model.modelName.split("_")[0];
-    //                     let category = await categoryModel.findOne({ name: type });
-    //                     if (!category) {
-    //                         let object = {
-    //                             name: type,
-    //                             account: req.headers.account,
-    //                             user: req.headers.user
-    //                         }
-
-    //                         let { document, saved } = await categoryModel.addDocument("simple", object);
-    //                         category = document;
-    //                     }
-    //                     let object = {
-    //                         document: id,
-    //                         documentType: type,
-    //                         link: req.body.document ? req.body.document.link : "tu cos będzie",
-    //                         name: req.body.document ? req.body.document.name : "tu cos będzie",
-    //                         category: category,
-    //                         account: req.headers.account,
-    //                         user: req.headers.user
-    //                     }
-
-    //                     let { document, saved } = await linkModel.addDocument("simple", object);
-    //                     res.json({ status: "success", data: { document, saved } });
-    //                 }
-
-    //             }
-    //         }
-
-    //     } catch (error) {
-    //         return next(error);
-    //     }
-    // }
     public async options(req: Request, res: Response, next: NextFunction) {
         let { recordtype, mode, id } = req.params;
         try {
@@ -362,14 +317,22 @@ class GenericController<T extends IExtendedDocument> {
             // }
             let update = req.body;
             let { document, saved } = await this.model.updateDocument(id, mode, (field || "_id").toString(), update);
+
+
+            let newSubDoc;
+            if (update.field == "_id" && update.value == "new") {
+                if (update.subdoc) {
+                    newSubDoc = document[update.subdoc][document[update.subdoc].length - 1]._id;
+                }
+            }
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
 
                 //populate response document
                 await document.autoPopulate();
-                document = document.constantTranslate(req.locale);
-                res.json({ status: "success", data: { document, saved } });
+                document = document.constantTranslate(req.locale, true);
+                res.json({ status: "success", data: { document, saved, newSubDoc } });
             }
 
         } catch (error) {
@@ -563,22 +526,14 @@ class GenericController<T extends IExtendedDocument> {
 
 
     public async transactions(req: Request, res: Response, next: NextFunction) {
-        let preference: ITablePreference | null = null;
-        let table = `transaction.${this.model.modelName}.related`
-        preference = await Table.findOne({ table: "relatedtransactions", user: req.headers.user });
-        if (!preference) preference = await new Table({ table: table, user: req.headers.user, account: req.headers.account }).save();
+        //let preference: ITablePreference | null = null;
+        //let { config, table } = req.params;
+        //table = config || table || `transaction.${this.model.modelName}.related`
+        //preference = await Table.findOne({ table: "relatedtransactions", user: req.headers.user });
+        //if (!preference) preference = await new Table({ table: table, user: req.headers.user, account: req.headers.account }).save();
+        req.query.table = `transaction.${this.model.modelName}.related`
 
-
-
-        const data = {
-            docs: [],
-            totalDocs: 0,
-            limit: 15,
-            page: 1,
-            totalPages: 1,
-            table: "table",
-            preference: preference
-        }
+        const data = await findResult(req, Transactions);
 
         res.json({ status: "success", data });
 
@@ -647,159 +602,7 @@ class GenericController<T extends IExtendedDocument> {
     public async find(req: Request, res: Response, next: NextFunction) {
 
         try {
-
-            // prefernecje tabeli przekazane w query
-            let { table, document } = req.query;
-            let preference: ITablePreference | null = null;
-            if (table) {
-                preference = await Table.findOne({ table: table.toString(), user: req.headers.user });
-                if (!preference) preference = await new Table({ table: table.toString(), user: req.headers.user, account: req.headers.account }).save();
-            }
-            //this.s = this.model.setAccount(req.headers.account, req.headers.user);
-            let query: any = {};
-            let options = { select: { name: 1, type: 1, resource: 1 }, sort: {}, limit: 50, skip: 0 };
-
-            // filters
-            let filters = (req.query.filters || "").toString();
-            if (filters) {
-                query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
-            } else {
-                if (preference && preference.filters && preference.filters.length) {
-                    query = { $and: [] }
-                    // to do - opisać wszystkie operatory
-                    preference.filters.filter(fg => fg.filters.length).forEach(fg => {
-                        let filterGroup: any = {};
-                        filterGroup[fg.operator] = [];
-                        filterGroup[fg.operator] = fg.filters.filter(f => f.value != undefined).reduce((t: any, f) => {
-                            let filter = {}
-                            let value = {};
-                            if (Array.isArray(f.value)) {
-                                value[f.operator] = f.value
-                            }
-                            else {
-                                value[f.operator] = f.value
-                                //['$expr'][filter.operator] = [`$${filter.field}`, filter.value];
-                                //value = { $regex: `${f.value}.*`, $options: "i" }
-                            }
-                            filter[f.field] = value;
-                            t.push(filter)
-                            // console.log(filter)
-                            return t;
-                        }, []);
-
-                        query.$and.push(filterGroup)
-                    })
-
-                }
-            }
-            if (query && query.$and && !query.$and.length) query = {}
-
-            // selected
-            let select = (req.query.select || req.query.fields || "").toString();
-            if (select) {
-                options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, deleted: 1 });
-            } else {
-                // sprawdź preferencje użytkownika
-                if (preference) {
-                    options.select = preference.selected.reduce((t, s) => { t[s] = 1; return t; }, { name: 1, type: 1, resource: 1, deleted: 1 });
-                } else {
-                    // add default field to select
-                    this.model.getSelect().forEach(field => {
-                        options.select[field] = 1;
-                    })
-                }
-            }
-            //Query document
-            if (document) {
-                query.document = document;
-            }
-
-
-
-            // Sort
-            let sort = (req.query.sort || "").toString();
-
-            let sortArray: any = [];
-            if (sort) {
-                sortArray = sort.split(",");
-            } else {
-                if (preference && preference.sortBy) {
-                    sortArray = preference.sortBy.map(s => s.order === "desc" ? `-${s.key}` : s.key);
-                }
-            }
-            options.sort = sortArray.reduce((o, f) => {
-                // -date = desc sort per date field
-                if (f[0] == "-") {
-                    f = f.substring(1);
-                    o[f] = -1;
-                } else {
-                    o[f] = 1;
-                }
-                return o;
-            }, {});
-
-
-            // search by keyword
-            let search = (req.query.search || "").toString();
-            if (search) {
-                if (req.query.field && (req.query.field == "_id" || req.query.field == "document"))
-                    query[req.query.field] = req.query.search;
-                else
-                    query[(req.query.field || 'name').toString()] = { $regex: `${req.query.search}` }
-            }
-
-            // loop per query params
-            for (const [key, value] of Object.entries(req.query)) {
-                // if (["filters", "select", "fields", "search", "sort", "page", "limit"].includes(key))
-                //     query[key] = { $eq: value }
-                // add verify field exists
-            }
-
-
-            options.limit = parseInt((req.query.limit || 50).toString());
-            if (preference && preference.itemsPerPage) options.limit = parseInt((preference.itemsPerPage || 50).toString());
-
-            options.skip = parseInt((req.query.skip || ((Number(req.query.page || 1) - 1) * options.limit) || 0).toString());
-
-            //let result = await this.model.findDocuments(query, options);
-            let total = await this.model.countDocuments(query);
-            let page = req.query.page || 1;
-
-            // get fields
-            //let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
-
-            const data = {
-                totalDocs: total,
-                limit: options.limit,
-                totalPages: Math.ceil(total / options.limit)
-            }
-
-            if (!req.query.count) {
-                let result = await this.model.findDocuments(query, options);
-                // get fields
-                //let fields = this.model.getFields(req.locale).filter((field: any) => options.select[field.field])
-                for (let index in result) {
-                    // console.log(result[index])
-                    //result[index] = new this.model(result[index]);
-                    result[index] = await result[index].constantTranslate(req.locale);
-                }
-
-                data["docs"] = result;
-                data["page"] = page;
-
-                if (table && preference) {
-                    data["table"] = table;
-                    data["preference"] = preference
-                }
-
-                // przekazanie dodatkowych wartości do odpowiedzi
-                if (req.body) {
-                    for (const [key, value] of Object.entries(req.body)) {
-                        data[key] = value;
-                    }
-                }
-
-            }
+            const data = await findResult(req, this.model)
 
             res.json({ status: "success", data: data });
         } catch (error) {
@@ -819,4 +622,162 @@ function getRandomDateFromLastWeek() {
 }
 function sortByDate(array: any[], field: string = "date") {
     return array.sort((a, b) => { return new Date(a[field]).getTime() - new Date(b[field]).getTime() });
+}
+
+async function findResult<T extends IExtendedDocument>(req: Request, model: IExtendedModel<T>) {
+
+    try {
+
+        // ustawienia tabeli przekazane w query
+        let { table } = req.query;
+
+
+        // sprawdzenie zapisanej preferencej gdy podane jest query "table" (identyfikator tabeli)
+        let preference: ITablePreference | null = null;
+        if (table) {
+            preference = await Table.findOne({ table: table.toString(), user: req.headers.user });
+            if (!preference) preference = await new Table({ table: table.toString(), user: req.headers.user, account: req.headers.account }).save();
+        }
+
+        // inicjowanie obiektu query, options - filtr do findDocuments
+        let query: any = {}; // to do - dopsiać interfejs
+        let options = { select: { name: 1, type: 1, resource: 1 }, sort: {}, limit: 50, skip: 0 };
+
+
+
+        ///////////////////////// filters ////////////////////////////////////
+        let { filters } = req.query;
+        if (filters) {
+            query = filters.toString().split(",").reduce((o: any, f: any) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+        } else {
+            if (preference && preference.filters && preference.filters.length) {
+                query = { $and: [] }
+                // to do - opisać wszystkie operatory
+                preference.filters.filter(fg => fg.filters.length).forEach(fg => {
+                    let filterGroup: any = {};
+                    filterGroup[fg.operator] = [];
+                    filterGroup[fg.operator] = fg.filters.filter(f => f.value != undefined).reduce((t: any, f) => {
+                        let filter: any = {}
+                        let value: any = {};
+                        if (Array.isArray(f.value)) {
+                            value[f.operator] = f.value
+                        }
+                        else {
+                            value[f.operator] = f.value
+                            //['$expr'][filter.operator] = [`$${filter.field}`, filter.value];
+                            //value = { $regex: `${f.value}.*`, $options: "i" }
+                        }
+                        filter[f.field] = value;
+                        t.push(filter)
+                        return t;
+                    }, []);
+
+                    query.$and.push(filterGroup)
+                })
+
+            }
+        }
+        if (query && query.$and && !query.$and.length) query = {};
+
+        //Query document
+        let { document } = req.query;
+        if (document) {
+            query.document = document;
+        }
+
+
+        //////////////////////// selected ////////////////////////////////////////////
+        let select = (req.query.select || req.query.fields || "").toString();
+        if (select) {
+            options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, deleted: 1 });
+        } else {
+            // sprawdź preferencje użytkownika
+            if (preference) {
+                options.select = preference.selected.reduce((t, s) => { t[s] = 1; return t; }, { name: 1, type: 1, resource: 1, deleted: 1 });
+            } else {
+                // dodaj domyślne pola
+                model.getSelect().forEach(field => {
+                    options.select[field] = 1;
+                })
+            }
+        }
+
+        ////////////////////////// Sort ///////////////////////////////////
+        let { sort } = req.query;
+        let sortArray: string[] = [];
+        if (sort) {
+            sortArray = sort.toString().split(",");
+        } else {
+            if (preference && preference.sortBy) {
+                sortArray = preference.sortBy.map(s => s.order === "desc" ? `-${s.key}` : s.key);
+            }
+        }
+
+        options.sort = sortArray.reduce((o, f) => {
+            // -date = desc sort per date field
+            if (f[0] === "-") {
+                f = f.substring(1);
+                o[f] = -1;
+            } else {
+                o[f] = 1;
+            }
+            return o;
+        }, {});
+
+
+        ////////////////////// search by keyword //////////////////////////////////
+        let { search, field } = req.query;
+
+        if (search) {
+            if (field && (field == "_id" || field == "document"))
+                query[field] = search;
+            else
+                query[(field || 'name').toString()] = { $regex: `${search}` }
+        }
+
+
+        /////////////////// Limit i Skip /////////////////////////////////////////////
+        let { limit, page, skip } = req.query;
+        options.limit = parseInt((limit || 50).toString());
+        if (preference && preference.itemsPerPage) options.limit = parseInt((preference.itemsPerPage || 50).toString());
+        options.skip = parseInt((skip || ((Number(page || 1) - 1) * options.limit) || 0).toString());
+
+        ////////////// Estmate Count ///////////////////
+        let total = await model.countDocuments(query);
+
+
+        const data: any = {
+            totalDocs: total,
+            limit: options.limit,
+            totalPages: Math.ceil(total / options.limit)
+        }
+        let { count } = req.query;
+        if (!count) {
+            let result = await model.findDocuments(query, options);
+            for (let index in result) {
+                result[index] = await result[index].constantTranslate(req.locale);
+            }
+
+            data["docs"] = result;
+            data["page"] = page;
+
+            if (table) {
+                data["table"] = table;
+            }
+            if (preference) {
+                data["preference"] = preference._id;
+            }
+
+            // przekazanie dodatkowych wartości do odpowiedzi
+            if (req.body) {
+                for (const [key, value] of Object.entries(req.body)) {
+                    data[key] = value;
+                }
+            }
+        }
+        return data;
+
+    } catch (error) {
+        throw error
+    }
 }

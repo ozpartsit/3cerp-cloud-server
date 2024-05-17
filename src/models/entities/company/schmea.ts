@@ -1,14 +1,14 @@
-import { Schema, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import Entity, { IEntity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 export interface ICompany extends IEntity {
 
 }
 
-export interface ICompanyModel extends Model<ICompany>, IExtendedModel<ICompany> { }
+export interface ICompanyModel extends mongoose.Model<ICompany>, IExtendedModel<ICompany> { }
 
 const options = { discriminatorKey: "type", collection: "entities" };
-const schema = new Schema<ICompany>(
+const schema = new mongoose.Schema<ICompany>(
     {
 
     },

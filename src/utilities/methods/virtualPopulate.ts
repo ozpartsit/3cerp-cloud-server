@@ -1,4 +1,3 @@
-import { Document } from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function virtualPopulate(this: IExtendedDocument) {
   const virtuals: any[] = Object.values(this.schema.virtuals);

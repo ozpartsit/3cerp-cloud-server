@@ -1,37 +1,82 @@
+// {
+//   "compilerOptions": {
+//     "outDir": "dist",
+//     "module": "commonjs", // classic format that Node.js understands
+//     "esModuleInterop": true, // allow imports of modules in ES format
+//     "skipLibCheck": true, // only check types we refer to from our code
+//     "forceConsistentCasingInFileNames": true, // prevents cross-OS problems
+//     "resolveJsonModule": true, // enable import of JSON files
+//     "lib": [
+//       "es6",
+//       "dom"
+//     ], // use JavaScript API ES6
+//     "target": "es6", // compile to ES6
+//     "jsx": "react-jsx", // compile JSX to React.createElement statements for SSR
+//     "allowJs": true, // allow import of JS modules
+//     // enable strict type checking
+//     "strict": true,
+//     "strictNullChecks": true,
+//     "noImplicitAny": false,
+//     "noFallthroughCasesInSwitch": true,
+//     "noImplicitReturns": false,
+//     "noUnusedParameters": false,
+//     "noUnusedLocals": false,
+//     "allowSyntheticDefaultImports": true,
+//     "typeRoots": [
+//       "./node_modules/@types",
+//       "./src/@types"
+//     ],
+//   },
+//   "include": [
+//     "src/**/*.ts",
+//     "src/**/*.json"
+//   ],
+//   "exclude": [
+//     "node_modules"
+//   ]
+// }
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "outDir": "dist",
-    "module": "commonjs", // classic format that Node.js understands
-    "esModuleInterop": true, // allow imports of modules in ES format
-    "skipLibCheck": true, // only check types we refer to from our code
-    "forceConsistentCasingInFileNames": true, // prevents cross-OS problems
-    "resolveJsonModule": true, // enable import of JSON files
-    "lib": [
-      "es6",
-      "dom"
-    ], // use JavaScript API ES6
-    "target": "es6", // compile to ES6
-    "jsx": "react-jsx", // compile JSX to React.createElement statements for SSR
+    "outDir": "dist", // Folder, do którego trafia skompilowany kod
+    "target": "ES2020", // Skompilowany kod JavaScript będzie zgodny z ES2020
+    "module": "esnext", // Użyj najnowszego standardu modułów ES
+    "moduleResolution": "node", // Użyj rozdzielczości modułów Node.js     
+    "rootDir": "./src", // Główny katalog, gdzie znajduje się kod źródłowy
+    "baseUrl": ".", // Bazowa ścieżka do rozwiązywania modułów
+    "paths": { // Alias ścieżek
+      "*": [
+        "node_modules/*"
+      ]
+    },
+    "esModuleInterop": true, // Umożliwia importowanie modułów CJS jako domyślnych
+    "allowSyntheticDefaultImports": true, // Pozwala na importy domyślne z modułów bez domyślnego eksportu
+    "strict": true, // Włącza wszystkie opcje ścisłego typowania
+    "skipLibCheck": true, // Pomija sprawdzanie typów w plikach deklaracji
     "allowJs": true, // allow import of JS modules
     // enable strict type checking
-    "strict": true,
+    "resolveJsonModule": true,
     "strictNullChecks": true,
     "noImplicitAny": false,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": false,
     "noUnusedParameters": false,
     "noUnusedLocals": false,
-    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     "typeRoots": [
       "./node_modules/@types",
       "./src/@types"
     ],
   },
-  "include": [
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": [ // Wskaźnik do plików, które mają być uwzględnione w procesie kompilacji
     "src/**/*.ts",
     "src/**/*.json"
-  ],
-  "exclude": [
+, "src/app.js"  ],
+  "exclude": [ // Wyklucza folder node_modules z procesu kompilacji
     "node_modules"
   ]
 }

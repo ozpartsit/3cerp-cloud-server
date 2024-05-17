@@ -1,7 +1,7 @@
-import { Schema, Model, Document, models } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../methods"
 import i18n from "../../config/i18n";
-export default function getFields<T extends IExtendedDocument>(this: Model<T>, local: string = "en", parent: string = "", subrecord: boolean = false, table: boolean = true) {
+export default function getFields<T extends IExtendedDocument>(this: mongoose.Model<T>, local: string = "en", parent: string = "", subrecord: boolean = false, table: boolean = true) {
   let fields: any[] = [];
   let modelSchema = this.schema;
   let modelName = this.modelName.toLowerCase().split("_")[0]
@@ -34,7 +34,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
           subdoc: true,
         };
         if (value.options.ref) {
-          let refModel: any = models[value.options.ref];
+          let refModel: any = mongoose.models[value.options.ref];
           field.fields = refModel.getFields(local, key, true);
         }
         fields.push(field)
@@ -67,7 +67,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
           fields: []
         }
         if (schematype.options.ref) {
-          let refModel: any = models[schematype.options.ref];
+          let refModel: any = mongoose.models[schematype.options.ref];
           if (refModel) {
             field.resource = refModel.schema.options.collection;
             field.type = schematype.options.ref//.toLowerCase();
@@ -94,7 +94,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             activator: value.input == "DatePicker" ? "Input" : undefined
           }
           if (schematype.options.ref) {
-            let refModel: any = models[schematype.options.ref];
+            let refModel: any = mongoose.models[schematype.options.ref];
             if (refModel) {
               field.resource = refModel.schema.options.collection;
             }
@@ -141,7 +141,7 @@ export default function getFields<T extends IExtendedDocument>(this: Model<T>, l
             })
           }
           if (schematype.options.ref) {
-            let refModel: any = models[schematype.options.ref];
+            let refModel: any = mongoose.models[schematype.options.ref];
             if (refModel) {
               field.resource = refModel.schema.options.collection;
               if (!parent) field.fields = refModel.getFields(local, pathname);

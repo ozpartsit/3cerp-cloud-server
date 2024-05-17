@@ -1,16 +1,16 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Classification, { IClassification } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 const options = { discriminatorKey: "type", collection: "classifications" };
 
 export interface IPriceLevel extends IClassification {
-    _id: Schema.Types.ObjectId 
+    _id: mongoose.Schema.Types.ObjectId 
     base: string;
     percentageChange: number;
 }
-export interface IPriceLevelModel extends Model<IPriceLevel>, IExtendedModel<IPriceLevel> {}
+export interface IPriceLevelModel extends mongoose.Model<IPriceLevel>, IExtendedModel<IPriceLevel> {}
 
-export const schema = new Schema<IPriceLevel>(
+export const schema = new mongoose.Schema<IPriceLevel>(
     {
         base: {
             type: String,

@@ -1,14 +1,14 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 import { IFile } from "./storages/file/schema";
 
 export interface IEmailSent extends IExtendedDocument {
-    _id: Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
     type: string;
-    email: Schema.Types.ObjectId;
-    document?: Schema.Types.ObjectId;
-    user: Schema.Types.ObjectId;
+    email: mongoose.Schema.Types.ObjectId;
+    document?: mongoose.Schema.Types.ObjectId;
+    user: mongoose.Schema.Types.ObjectId;
     ref?: string;
     to: string | [string];
     cc?: string | [string];
@@ -17,12 +17,12 @@ export interface IEmailSent extends IExtendedDocument {
     text?: string;
     attachments?: [IFile]
 }
-interface IEmailSentModel extends Model<IEmailSent>, IExtendedModel<IEmailSent> { }
+interface IEmailSentModel extends mongoose.Model<IEmailSent>, IExtendedModel<IEmailSent> { }
 
-export const schema = new Schema<IEmailSent>(
+export const schema = new mongoose.Schema<IEmailSent>(
     {
         user: {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
         },
         type: {
             type: String,
@@ -30,7 +30,7 @@ export const schema = new Schema<IEmailSent>(
             default: "EmailSent"
         },
         document: {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             refPath: "ref",
             autopopulate: true,
         },
@@ -39,7 +39,7 @@ export const schema = new Schema<IEmailSent>(
             input: "text",
         },
         email: {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: "Email",
             autopopulate: true,
             input: "select",
@@ -75,7 +75,7 @@ export const schema = new Schema<IEmailSent>(
             defaultSelect: true,
         },
         attachments: {
-            type: [Schema.Types.ObjectId],
+            type: [mongoose.Schema.Types.ObjectId],
             ref: "File",
             autopopulate: true,
             defaultSelect: true,
@@ -90,6 +90,6 @@ export const schema = new Schema<IEmailSent>(
 
 schema.index({ email: 1 });
 
-const EmailSent: IEmailSentModel = model<IEmailSent, IEmailSentModel>("EmailSent", schema);
+const EmailSent: IEmailSentModel = mongoose.model<IEmailSent, IEmailSentModel>("EmailSent", schema);
 export default EmailSent;
 

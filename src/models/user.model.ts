@@ -1,17 +1,17 @@
-import { Schema, model, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 import Access, { IAccess } from "./access.model";
 import Preference, { IPreference } from "./preference.model";
 import Note from "./note.model";
 export interface IUser extends IExtendedDocument {
-    _id: Schema.Types.ObjectId;
-    account: Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
+    account: mongoose.Schema.Types.ObjectId;
     name: string;
     firstName: string;
     lastName: string;
     jobTitle: string;
-    avatar: Schema.Types.ObjectId;
+    avatar: mongoose.Schema.Types.ObjectId;
     department: string;
     initials: string;
     lastLoginDate: Date;
@@ -27,15 +27,15 @@ export interface IUser extends IExtendedDocument {
 }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
-interface IUserModel extends Model<IUser>, IExtendedModel<IUser> { }
+interface IUserModel extends mongoose.Model<IUser>, IExtendedModel<IUser> { }
 
 const options = {
     discriminatorKey: "type", collection: "users", toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
-const schema = new Schema<IUser>(
+const schema = new mongoose.Schema<IUser>(
     {
-        account: { type: Schema.Types.ObjectId, required: true },
+        account: { type: mongoose.Schema.Types.ObjectId, required: true },
         email: { type: String, input: "Input", validType: "email" },
         name: {
             type: String,
@@ -55,7 +55,7 @@ const schema = new Schema<IUser>(
             input: "Input", validType: "text"
         },
         avatar: {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: "Storage",
             autopopulate: true,
             input: "Salect",
@@ -152,7 +152,7 @@ schema.post('save', function () {
 
 schema.index({ name: 1 });
 
-const User: IUserModel = model<IUser, IUserModel>(
+const User: IUserModel = mongoose.model<IUser, IUserModel>(
     "User",
     schema
 );

@@ -1,4 +1,4 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Accounting, { IAccounting } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 const options = { discriminatorKey: "type", collection: "accounting" };
@@ -6,9 +6,9 @@ const options = { discriminatorKey: "type", collection: "accounting" };
 export interface ITerms extends IAccounting {
 
 }
-export interface ITermsModel extends Model<ITerms>, IExtendedModel<ITerms> { }
+export interface ITermsModel extends mongoose.Model<ITerms>, IExtendedModel<ITerms> { }
 
-export const schema = new Schema<ITerms>(
+export const schema = new mongoose.Schema<ITerms>(
     {},
     options
 );

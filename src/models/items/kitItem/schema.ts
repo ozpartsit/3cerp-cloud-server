@@ -1,16 +1,16 @@
-import { Schema, model, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import Item, { IItem } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import Component, { IComponent } from "./components.schema";
-const componentModel = model("Component", Component);
+const componentModel = mongoose.model("Component", Component);
 const options = { discriminatorKey: "type", collection: "items" };
 
 export interface IKitItem extends IItem {
   components: IComponent[];
 }
-export interface IKitItemModel extends Model<IKitItem>, IExtendedModel<IKitItem> { }
+export interface IKitItemModel extends mongoose.Model<IKitItem>, IExtendedModel<IKitItem> { }
 
-const schema = new Schema<IKitItem>({}, options);
+const schema = new mongoose.Schema<IKitItem>({}, options);
 schema.virtual("components", {
   ref: "Component",
   localField: "_id",

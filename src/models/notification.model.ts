@@ -1,35 +1,35 @@
-import { Schema, model, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../utilities/methods";
 import { IExtendedModel } from "../utilities/static";
 
 
 export interface INotification extends IExtendedDocument {
-    _id: Schema.Types.ObjectId;
-    user: Schema.Types.ObjectId;
-    account: Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
+    user: mongoose.Schema.Types.ObjectId;
+    account: mongoose.Schema.Types.ObjectId;
     type: string;
     name: string;
     description: string;
     date: Date;
     status: string;
     link: string;
-    document: Schema.Types.ObjectId;
+    document: mongoose.Schema.Types.ObjectId;
     ref: string;
 }
 
 
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
-interface INotificationModel extends Model<INotification>, IExtendedModel<INotification> { }
+interface INotificationModel extends mongoose.Model<INotification>, IExtendedModel<INotification> { }
 
 const options = {
     discriminatorKey: "type", collection: "notifications", toJSON: { virtuals: true },
     toObject: { virtuals: true }
 };
-const schema = new Schema<INotification>(
+const schema = new mongoose.Schema<INotification>(
     {
-        account: { type: Schema.Types.ObjectId, required: true },
-        user: { type: Schema.Types.ObjectId },
+        account: { type: mongoose.Schema.Types.ObjectId, required: true },
+        user: { type: mongoose.Schema.Types.ObjectId },
         name: { type: String, default: "New Notification", required: true },
         description: { type: String, default: "New Botification", required: true },
         date: { type: Date, default: new Date(), required: true },
@@ -38,7 +38,7 @@ const schema = new Schema<INotification>(
         document: {
             refPath: 'ref',
             autopopulate: true,
-            type: Schema.Types.Mixed,
+            type: mongoose.Schema.Types.Mixed,
         },
         ref: {
             type: String,
@@ -51,7 +51,7 @@ const schema = new Schema<INotification>(
 
 schema.index({ name: 1 });
 
-const Notification: INotificationModel = model<INotification, INotificationModel>(
+const Notification: INotificationModel = mongoose.model<INotification, INotificationModel>(
     "notification",
     schema
 );

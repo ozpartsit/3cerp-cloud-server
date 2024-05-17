@@ -1,4 +1,4 @@
-import { Schema, Model, model } from "mongoose";
+import * as mongoose from "mongoose";
 import Storage, { IStorage } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import fs from "fs";
@@ -8,10 +8,10 @@ export interface IFolder extends IStorage {
     root: Boolean
     createFolder(): any
 }
-export interface IFolderModel extends Model<IFolder>, IExtendedModel<IFolder> { }
+export interface IFolderModel extends mongoose.Model<IFolder>, IExtendedModel<IFolder> { }
 
 const options = { discriminatorKey: "type", collection: "storage" };
-const schema = new Schema<IFolder>({
+const schema = new mongoose.Schema<IFolder>({
     root: { type: Boolean },
 
 }, options);

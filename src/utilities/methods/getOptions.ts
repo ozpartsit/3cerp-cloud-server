@@ -1,7 +1,7 @@
-import { models, Model } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../methods"
 import { IExtendedModel } from "../static";
-import constants from "../../constants";
+import constants from "../../constants/index.js";
 import path from "path";
 import i18n from "../../config/i18n";
 
@@ -28,7 +28,7 @@ export default async function getOptions(
 
             if (!document) {
                 if (virtual) {
-                    document = await new models[virtual.options.ref]() as IExtendedDocument;
+                    document = await new mongoose.models[virtual.options.ref]() as IExtendedDocument;
                     document.initLocal();
                     if (subdoc_id) {
                         if (virtual.options.justOne) {
@@ -44,7 +44,7 @@ export default async function getOptions(
                     const fieldType = this.schema.path(subdoc);
                     if (fieldType && fieldType.options.ref) {
 
-                        document = new models[fieldType.options.ref]()
+                        document = new mongoose.models[fieldType.options.ref]()
                         if (!document) document = this;
                     } else
                         field = `${subdoc}.${field}`;
@@ -69,7 +69,7 @@ export default async function getOptions(
                 constant = "operator";
             } else {
                 if (fieldType.options.ref) {
-                    let model = models[fieldType.options.ref];
+                    let model = mongoose.models[fieldType.options.ref];
 
                     // query - dodać filtry 
                     let query = fieldType.options.filters || {};

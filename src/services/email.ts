@@ -4,11 +4,15 @@ import EmailTemplate from "email-templates";
 
 import fs from "fs";
 import ejs from "ejs";
-import path from "path";
+import path, { dirname } from "path";
 import { I18n } from "i18n";
 import { IAccess } from "../models/access.model";
 import File from "../models/storages/file/schema";
 import EmailSent from "../models/emailSent.model";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export class Email {
   private transporter: any;
@@ -42,7 +46,7 @@ export class Email {
   }
 
   async verify() {
-    this.transporter.verify(function (error, success) {
+    this.transporter.verify(function (error: any, success: any) {
       if (error) {
         console.log(error);
       } else {

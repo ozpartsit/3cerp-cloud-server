@@ -1,8 +1,12 @@
 import pdf from 'pdfjs';
 import fs from "fs";
-import path from "path";
+import path, { dirname } from "path";
 
 import logo from './logo';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 //fonts
 import OpenSans from './fonts/opensans';
 
@@ -128,20 +132,20 @@ export default async function render() {
 
 }
 
-import CourierBold from 'pdfjs/font/Courier-Bold';
-import CourierBoldOblique from 'pdfjs/font/Courier-BoldOblique';
-import CourierOblique from 'pdfjs/font/Courier-Oblique';
-import Courier from 'pdfjs/font/Courier';
-import HelveticaBold from 'pdfjs/font/Helvetica-Bold';
-import HelveticaBoldOblique from 'pdfjs/font/Helvetica-BoldOblique';
-import HelveticaOblique from 'pdfjs/font/Helvetica-Oblique';
-import Helvetica from 'pdfjs/font/Helvetica';
-import Symbol from 'pdfjs/font/Symbol';
-import TimesBold from 'pdfjs/font/Times-Bold';
-import TimesBoldItalic from 'pdfjs/font/Times-BoldItalic';
-import TimesItalic from 'pdfjs/font/Times-Italic';
-import TimesRoman from 'pdfjs/font/Times-Roman';
-import ZapfDingbats from 'pdfjs/font/ZapfDingbats';
+import CourierBold from 'pdfjs/font/Courier-Bold.js';
+import CourierBoldOblique from 'pdfjs/font/Courier-BoldOblique.js';
+import CourierOblique from 'pdfjs/font/Courier-Oblique.js';
+import Courier from 'pdfjs/font/Courier.js';
+import HelveticaBold from 'pdfjs/font/Helvetica-Bold.js';
+import HelveticaBoldOblique from 'pdfjs/font/Helvetica-BoldOblique.js';
+import HelveticaOblique from 'pdfjs/font/Helvetica-Oblique.js';
+import Helvetica from 'pdfjs/font/Helvetica.js';
+import Symbol from 'pdfjs/font/Symbol.js';
+import TimesBold from 'pdfjs/font/Times-Bold.js';
+import TimesBoldItalic from 'pdfjs/font/Times-BoldItalic.js';
+import TimesItalic from 'pdfjs/font/Times-Italic.js';
+import TimesRoman from 'pdfjs/font/Times-Roman.js';
+import ZapfDingbats from 'pdfjs/font/ZapfDingbats.js';
 //import OpenSans from 'pdfjs/font/OpenSans';
 const fonts = {
   CourierBold,

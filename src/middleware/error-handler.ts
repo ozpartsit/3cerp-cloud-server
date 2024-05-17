@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { Error } from "mongoose";
 import CustomError from "../utilities/errors/customError";
 import i18n from "../config/i18n";
 export const errorHandler = (

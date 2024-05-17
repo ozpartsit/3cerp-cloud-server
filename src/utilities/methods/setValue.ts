@@ -1,4 +1,4 @@
-import { models, Document } from "mongoose";
+import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../methods"
 export default async function setValue(
   this: IExtendedDocument,
@@ -15,7 +15,7 @@ export default async function setValue(
     if (field) {
       let changed = false;
       if (subdoc) {
-        let virtual: any = this.schema.virtual(subdoc);
+        let virtual: any = this.schema.virtuals[subdoc];
         if (virtual && !virtual.options.justOne)
           document = this[subdoc].find((element: any) => {
             return element._id.toString() === subdoc_id;
@@ -23,7 +23,7 @@ export default async function setValue(
 
         if (!document) {
           if (virtual) {
-            document = await new models[virtual.options.ref]() as IExtendedDocument;
+            document = await new mongoose.models[virtual.options.ref]() as IExtendedDocument;
             document.initLocal();
             if (virtual.options.justOne) {
               this[subdoc] = document;

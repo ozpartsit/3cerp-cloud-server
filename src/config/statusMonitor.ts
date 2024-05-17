@@ -1,4 +1,5 @@
-export default require("express-status-monitor")(
+import monitor from "express-status-monitor"
+export default monitor(
     {
         title: '3C Cloud Status',  // Default title
         theme: 'default.css',     // Default styles

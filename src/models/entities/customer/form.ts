@@ -1,4 +1,4 @@
-{
+export default {
     "tabs": [
         {
             "value": "main",
@@ -59,19 +59,73 @@
                 {
                     "value": "billingAddress",
                     "editable": true,
-                    "fields": [
-                        [
-                            "billingAddress"
-                        ]
+                    "subdoc": "billingAddress",
+                    "columns": [
+                        {
+                            "value": "name",
+                            "fields": [
+                                "name",
+                                "addressee"
+                            ]
+                        },
+                        {
+                            "value": "details",
+                            "fields": [
+                                "address",
+                                "address2"
+                            ]
+                        },
+                        {
+                            "value": "",
+                            "fields": [
+                                "city",
+                                "zip",
+                                "country"
+                            ]
+                        },
+                        {
+                            "value": "contact",
+                            "fields": [
+                                "email",
+                                "phone"
+                            ]
+                        }
                     ]
                 },
                 {
                     "value": "shippingAddress",
                     "editable": true,
-                    "fields": [
-                        [
-                            "shippingAddress"
-                        ]
+                    "subdoc": "shippingAddress",
+                    "columns": [
+                        {
+                            "value": "name",
+                            "fields": [
+                                "name",
+                                "addressee"
+                            ]
+                        },
+                        {
+                            "value": "details",
+                            "fields": [
+                                "address",
+                                "address2"
+                            ]
+                        },
+                        {
+                            "value": "",
+                            "fields": [
+                                "city",
+                                "zip",
+                                "country"
+                            ]
+                        },
+                        {
+                            "value": "contact",
+                            "fields": [
+                                "email",
+                                "phone"
+                            ]
+                        }
                     ]
                 },
                 {

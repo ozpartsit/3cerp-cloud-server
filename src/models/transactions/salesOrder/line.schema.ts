@@ -1,4 +1,4 @@
-import { Schema, models } from "mongoose";
+import * as mongoose from "mongoose";
 import { ILine } from "../line.schema";
 const options = {
   collection: "transactions.lines",
@@ -11,7 +11,7 @@ export interface ILineSalesOrder extends ILine {
   eta: Date;
   etaMemo: string;
 }
-const schema = new Schema<ILineSalesOrder>({
+const schema = new mongoose.Schema<ILineSalesOrder>({
   eta: { type: Date, input: "DatePicker", validType: "date", required: false, },
   etaMemo: { type: String, input: "Input", validType: "text" },
 }, options);
