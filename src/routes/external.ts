@@ -28,12 +28,16 @@ export default class Routes {
             //this.Auth.authenticate.bind(this.Auth) as any,
             this.dpdController.shipment.bind(this.dpdController) as any
         );
+        this.RouterDPD.route("/tracking/:param?").post(
+            //this.Auth.authenticate.bind(this.Auth) as any,
+            this.dpdController.tracking.bind(this.dpdController) as any
+        );
     }
     public routerUPS() {
         // UPS
-        this.RouterDPD.route("/token").post(
+        this.RouterUPS.route("/token").get(
             //this.Auth.authenticate.bind(this.Auth) as any,
-            this.upsController.getToken.bind(this.dpdController) as any
+            this.upsController.getToken.bind(this.upsController) as any
         );
     }
 }

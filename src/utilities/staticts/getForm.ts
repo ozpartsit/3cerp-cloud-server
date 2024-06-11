@@ -56,7 +56,7 @@ async function fieldsFill(modelName, section, fields, subdoc?) {
                     filters["account"] = tmpStorage.account;
                     filters["user"] = tmpStorage.user;
                 }
-                const headers = await mongoose.models["Table"].findOne(filters).exec()
+                const headers = await mongoose.model("Table").findOne(filters).exec()
 
                 if (headers) {
                     section.fields[index].preference = headers._id;

@@ -7,7 +7,8 @@ export default async function addToVirtuals(
   index: number
 ) {
   let list = this.schema.virtuals[virtual];
-  newline = new mongoose.models[list.options.ref](newline);
+  let newlineModel = mongoose.model(list.options.ref);
+  newline = new newlineModel(newline)
   newline.initLocal();
   newline.index = index;
   // copy field value from parten document

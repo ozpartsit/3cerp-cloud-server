@@ -64,7 +64,7 @@ const schema = new mongoose.Schema<ILine>(
       required: true,
       autopopulate: { select: "name displayname type _id" },
       input: "Autocomplete",
-      validType: "autocomplete"
+      validType: "url"
     },
     description: {
       type: String,

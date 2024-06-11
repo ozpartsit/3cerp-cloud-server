@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import CustomError from "../utilities/errors/customError";
 import i18n from "../config/i18n";
-export const errorHandler = (
+export default function (
   error: CustomError,
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+) {
   i18n.setLocale(req.locale || "en");
   console.log('ErrorHandler', error.message || error);
 

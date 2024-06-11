@@ -79,13 +79,15 @@ export const schema = new mongoose.Schema<IShop>(
             type: String,
             required: true,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text"
+            input: "Input",
+            validType: "text",
         },
         subdomain: {
             type: String,
             required: true,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text"
+            input: "Input",
+            validType: "text",
         },
         type: {
             type: String,
@@ -97,7 +99,8 @@ export const schema = new mongoose.Schema<IShop>(
             type: String,
             required: true,
             default: "default",
-            input: "text"
+            constant: 'template',
+            input: "Select",
         },
         status: {
             type: String,
@@ -107,7 +110,8 @@ export const schema = new mongoose.Schema<IShop>(
         },
         domain: {
             type: String,
-            input: "text"
+            input: "Input",
+            validType: "text",
         },
         salesRep: {
             type: mongoose.Schema.Types.ObjectId,
@@ -145,27 +149,30 @@ export const schema = new mongoose.Schema<IShop>(
 
         metaTitle: {
             type: String,
-            required: true,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
             help: "The <title> element typically appears as a clickable headline in search engine results"
         },
         metaDescription: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
             help: "Meta description also resides in the <head> of a webpage and is commonly (though not always) displayed in a SERP snippet along with a title and page URL."
         },
         metaKeywords: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
         },
 
         GSC: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
             hint: "Google Search Console",
             help: "Google Search Console ID Tag"
         },
@@ -174,25 +181,29 @@ export const schema = new mongoose.Schema<IShop>(
         ogTitle: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
             help: "Here, you put the title to which you want to be displayed when your page is linked."
         },
         ogDescription: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
             help: "Your page’s description. Remember that Facebook will display only about 300 characters of description."
         },
         ogUrl: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
             help: "Your page’s URL."
         },
         ogImage: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
             help: "Here, you can put the URL of an image you want shown when your page is linked to"
         },
 
@@ -201,28 +212,31 @@ export const schema = new mongoose.Schema<IShop>(
         facebookUrl: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text"
+            input: "Input",
+            validType: "text",
         },
         twitterUrl: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
         },
         instagramUrl: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
         },
         linkedinUrl: {
             type: String,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "text",
+            input: "Input",
+            validType: "text",
         },
 
 
         currencies: {
             type: [String],
-            required: true,
             default: ["PLN"],
             input: "Select",
             constant: 'currency',
@@ -230,7 +244,6 @@ export const schema = new mongoose.Schema<IShop>(
         },
         languages: {
             type: [String],
-            required: true,
             default: ["EN"],
             input: "Select",
             constant: 'language',
@@ -296,20 +309,20 @@ schema.static("form", () => form)
 schema.virtual("pages", {
     ref: "Page",
     localField: "_id",
-    foreignField: "website",
+    foreignField: "webshop",
     justOne: false,
     autopopulate: true,
     //defaultSelect: true,
-    copyFields: ["account", "website"],
+    copyFields: ["account"],
     //options: { sort: { category: 1 } },
 });
 
 schema.index({ name: 1 });
 
-const Shop: IShopModel = mongoose.model<IShop, IShopModel>("Shop", schema);
+const Shop: IShopModel = mongoose.model<IShop, IShopModel>("webshop", schema);
 
 Shop.init().then(function (Event) {
-    console.log('Shop Builded');
+    console.log('Web Shop Builded');
     new Page()
 })
 export default Shop;

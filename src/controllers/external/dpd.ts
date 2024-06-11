@@ -63,6 +63,37 @@ export default class controller {
             return next(error);
         }
     }
+    public async tracking(req: Request, res: Response, next: NextFunction) {
+        // odswieżenie tokena
+        try {
+          
+            let body = {
+                "language": "EN",
+                "parcelNumbers": [
+                    "13359300635402"
+                ]
+            }
+            await axios.post(`https://api.dpdgroup.com/tracking/v2/parcels`, body, {
+                headers: {
+                    apiKey: `261ad8c8-0ba9-41a4-8458-9f6fe4bcd2ad`,
+                    "Content-Type": "application/json"
+                }
+            })
+                .then(function (response) {
+                    res.json({ status: "success", data: response.data });
+                })
+                .catch(function (error) {
+                    let errorMsg = "Unknown Error";
+                    if (!Array.isArray(error.response.data)) errorMsg = error.response.data.errorMessage || error.response.data.errorCode;
+                    else errorMsg = error.response.data[0].errorMessage || error.response.data[0].errorCode;
+                    if (!errorMsg) errorMsg = JSON.stringify(error.response.data);
+                    throw new CustomError(errorMsg, 404);
+
+                });
+        } catch (error) {
+            return next(error);
+        }
+    }
 }
 // parsowanie Queries na url component
 function formatQueryParams(queryObj: any) {

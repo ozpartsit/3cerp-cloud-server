@@ -116,15 +116,16 @@ schema.pre('save', async function () {
 
 schema.virtual('fields').get(function (this: ITablePreference) {
     let sources = this.table.split(".");
-    let model = Object.keys(mongoose.models).find(model => model.toLowerCase() == sources[0].toLowerCase());
+    console.log()
+    let model = mongoose.modelNames().find(model => model.toLowerCase() == sources[0].toLowerCase());
     // Uzupełnienie Ref i Constatnt
     this._someFunction()
 
 
     if (model) {
-        if (mongoose.models[model]) {
+        if (mongoose.model(model)) {
             //console.log(models[model].collection.name)
-            let fields = (mongoose.models[model] as any).getFields("en", "", false, true);
+            let fields = (mongoose.model(model) as any).getFields("en", "", false, true);
             if (sources[1]) {
                 let subdoc = fields.find(f => f.field == sources[1])
                 if (subdoc)
@@ -148,12 +149,12 @@ schema.statics.defaultDocument = function (table) {
 schema.methods._someFunction = function () {
     if (this.filters) {
         let sources = this.table.split(".");
-        let model = Object.keys(mongoose.models).find(model => model.toLowerCase() == sources[0].toLowerCase());
+        let model = mongoose.modelNames().find(model => model.toLowerCase() == sources[0].toLowerCase());
 
         if (model) {
             for (let filterGroup of this.filters) {
                 for (let filter of filterGroup.filters) {
-                    let fields = (mongoose.models[model] as any).getFields("en", "", false, true);
+                    let fields = (mongoose.model(model) as any).getFields("en", "", false, true);
                     if (sources[1]) {
                         let subdoc = fields.find(f => f.field == sources[1])
                         if (subdoc)

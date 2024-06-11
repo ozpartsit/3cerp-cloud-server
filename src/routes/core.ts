@@ -133,13 +133,31 @@ export default class Routes {
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.add.bind(controller) as any
     );
-    if (controller.pdf)
+
+
+    if (controller.pdf){
       this.Router.route(`${path}/:id/pdf`).get(
         this.Auth.authenticate.bind(this.Auth) as any,
         this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
         controller.pdf.bind(controller) as any
       );
+      this.Router.route(`${path}/:id/action/print/:filename?`).get(
+        this.Auth.authenticate.bind(this.Auth) as any,
+        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+        controller.pdf.bind(controller) as any
+      );
+    }
 
+    this.Router.route(`${path}/:id/action/:action`).patch(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.action.bind(controller) as any
+    );
+
+
+
+
+      
       this.Router.route(`${path}/:id/data/:table/:mode?`).get(
         this.Auth.authenticate.bind(this.Auth) as any,
         this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,

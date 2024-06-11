@@ -1,7 +1,30 @@
 import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../methods"
 import i18n from "../../config/i18n";
+import asyncLocalStorage from "../../middleware/asyncLocalStorage";
+
 export default function getFields<T extends IExtendedDocument>(this: mongoose.Model<T>, local: string = "en", parent: string = "", subrecord: boolean = false, table: boolean = true) {
+
+  let tmpStorage: any = asyncLocalStorage.getStore();
+  let permissions = {}
+  if (tmpStorage && tmpStorage.user) {
+    // to do - dodać pobieranie z bazy
+    permissions = {
+      items: {
+        invitem: true,
+        Item: true
+      }
+    }
+  }
+
+  const hasAccess = function (collection, type) {
+
+    if (permissions[collection] && permissions[collection][type]) {
+      return permissions[collection][type]
+    } else return false
+  }
+
+
   let fields: any[] = [];
   let modelSchema = this.schema;
   let modelName = this.modelName.toLowerCase().split("_")[0]
@@ -34,8 +57,9 @@ export default function getFields<T extends IExtendedDocument>(this: mongoose.Mo
           subdoc: true,
         };
         if (value.options.ref) {
-          let refModel: any = mongoose.models[value.options.ref];
-          field.fields = refModel.getFields(local, key, true);
+          let refModel: any = mongoose.model(value.options.ref);
+          if (refModel)
+            field.fields = refModel.getFields(local, key, true);
         }
         fields.push(field)
       }
@@ -67,11 +91,13 @@ export default function getFields<T extends IExtendedDocument>(this: mongoose.Mo
           fields: []
         }
         if (schematype.options.ref) {
-          let refModel: any = mongoose.models[schematype.options.ref];
+          let refModel: any = mongoose.model(schematype.options.ref);
           if (refModel) {
             field.resource = refModel.schema.options.collection;
             field.type = schematype.options.ref//.toLowerCase();
-            field.validType = "url"
+            // to do - dodać sterowanie na podstawie uprawnień
+            if (false)
+              field.validType = "url"
           }
         }
         if (!parent && schematype.schema) for (const [key, value] of Object.entries<any>(schematype.schema.tree)) {
@@ -94,7 +120,7 @@ export default function getFields<T extends IExtendedDocument>(this: mongoose.Mo
             activator: value.input == "DatePicker" ? "Input" : undefined
           }
           if (schematype.options.ref) {
-            let refModel: any = mongoose.models[schematype.options.ref];
+            let refModel: any = mongoose.model(schematype.options.ref);
             if (refModel) {
               field.resource = refModel.schema.options.collection;
             }
@@ -135,18 +161,21 @@ export default function getFields<T extends IExtendedDocument>(this: mongoose.Mo
               max: schematype.options.max,
               hint: schematype.options.hint,
               help: schematype.options.help,
-              validType: schematype.options.validType,
               precision: schematype.options.precision,
               activator: schematype.options.input == "DatePicker" ? "Input" : undefined
             })
           }
           if (schematype.options.ref) {
-            let refModel: any = mongoose.models[schematype.options.ref];
+            let refModel: any = mongoose.model(schematype.options.ref);
             if (refModel) {
               field.resource = refModel.schema.options.collection;
               if (!parent) field.fields = refModel.getFields(local, pathname);
             }
           }
+
+          // zarządzanie dostępem
+          field.validType = field.validType == "url" ? hasAccess(field.resource, field.type) ? "url" : "text" : field.validType;
+
           if (schematype._presplitPath.length > 1) {
             let parent = fields.find(f => f.field == schematype._presplitPath[0])
             if (parent) parent.fields.push(field)

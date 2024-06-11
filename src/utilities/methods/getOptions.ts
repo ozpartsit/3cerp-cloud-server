@@ -28,7 +28,8 @@ export default async function getOptions(
 
             if (!document) {
                 if (virtual) {
-                    document = await new mongoose.models[virtual.options.ref]() as IExtendedDocument;
+                    let Model = mongoose.model(virtual.options.ref);
+                    document = await new Model() as IExtendedDocument;
                     document.initLocal();
                     if (subdoc_id) {
                         if (virtual.options.justOne) {
@@ -43,8 +44,8 @@ export default async function getOptions(
                     document = this;
                     const fieldType = this.schema.path(subdoc);
                     if (fieldType && fieldType.options.ref) {
-
-                        document = new mongoose.models[fieldType.options.ref]()
+                        let Model = mongoose.model(fieldType.options.ref)
+                        document = new Model()
                         if (!document) document = this;
                     } else
                         field = `${subdoc}.${field}`;
@@ -69,8 +70,7 @@ export default async function getOptions(
                 constant = "operator";
             } else {
                 if (fieldType.options.ref) {
-                    let model = mongoose.models[fieldType.options.ref];
-
+                    let model = mongoose.model(fieldType.options.ref);
                     // query - dodać filtry 
                     let query = fieldType.options.filters || {};
                     if (keyword) query.name = { $regex: `.*${keyword}.*` }

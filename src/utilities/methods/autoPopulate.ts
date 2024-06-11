@@ -83,8 +83,9 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
       if (Array.isArray(this[list.path])) {
         for (let index in doc[list.path]) {
           if (!doc[list.path][index].schema) {
-            delete doc[list.path][index]._id
-            doc[list.path][index] = new mongoose.models[list.options.ref](doc[list.path][index])
+            delete doc[list.path][index]._id;
+            let Model = mongoose.model(list.options.ref)
+            doc[list.path][index] = new Model(doc[list.path][index])
           }
           doc[list.path][index] = this[list.path][index].autoPopulate()
         }

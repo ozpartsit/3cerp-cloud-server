@@ -15,7 +15,7 @@ export interface ITransaction extends IExtendedDocument {
   name?: string;
   number?: number;
   status?: string;
-  company: IEntity["_id"];
+  //company: IEntity["_id"];
   entity: IEntity["_id"];
   exchangeRate?: number;
   currency?: string;
@@ -47,14 +47,14 @@ interface ITransactionModel extends mongoose.Model<ITransaction>, IExtendedModel
 const TransactionSchema = {
   name: { type: String, input: "Input", validType: "text" },
   date: { type: Date, input: "DatePicker", validType: "date", required: true, defaultSelect: true },
-  company: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Company",
-    required: false,
-    autopopulate: true,
-    input: "Select",
-    validType: "select",
-  },
+  // company: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "Company",
+  //   required: false,
+  //   autopopulate: true,
+  //   input: "Select",
+  //   validType: "select",
+  // },
   entity: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Entity",

@@ -88,7 +88,7 @@ export default {
         },
         {
             "value": "seo",
-            "editable": false,
+            "editable": true,
             "sections": [
                 {
                     "value": "Meta Tags",

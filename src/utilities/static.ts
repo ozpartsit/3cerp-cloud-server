@@ -63,8 +63,8 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       },
       deleted: {
         type: Boolean,
-        input: "Switch",
-        validType: "switch",
+        // input: "Switch",
+        // validType: "switch",
       }
     })
     schema.add(account);
@@ -79,7 +79,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       let filters = {}
 
       const model = this.model.modelName;
-      if (tmpStorage && model && mongoose.models[model] && mongoose.models[model].schema.paths && mongoose.models[model].schema.paths.user) {
+      if (tmpStorage && model && mongoose.model(model) && mongoose.model(model).schema.paths && mongoose.model(model).schema.paths.user) {
         filters["user"] = tmpStorage.user;
       }
       if (tmpStorage && tmpStorage.account)
@@ -94,7 +94,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       let filters = {}
 
       const model = this.model.modelName;
-      if (tmpStorage && model && mongoose.models[model] && mongoose.models[model].schema.paths && mongoose.models[model].schema.paths.user) {
+      if (tmpStorage && model && mongoose.model(model) && mongoose.model(model).schema.paths && mongoose.model(model).schema.paths.user) {
         filters["user"] = tmpStorage.user;
       }
       if (tmpStorage && tmpStorage.account)
@@ -108,8 +108,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       let filters = {}
 
       const model = this.model.modelName;
-
-      if (tmpStorage && model && mongoose.models[model] && mongoose.models[model].schema.paths && mongoose.models[model].schema.paths.user) {
+      if (tmpStorage && model && mongoose.model(model) && mongoose.model(model).schema.paths && mongoose.model(model).schema.paths.user) {
         filters["user"] = tmpStorage.user;
       }
       if (tmpStorage && tmpStorage.account)

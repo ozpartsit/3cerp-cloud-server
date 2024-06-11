@@ -23,7 +23,8 @@ export default async function setValue(
 
         if (!document) {
           if (virtual) {
-            document = await new mongoose.models[virtual.options.ref]() as IExtendedDocument;
+            let Model = mongoose.model(virtual.options.ref)
+            document = await new Model() as IExtendedDocument;
             document.initLocal();
             if (virtual.options.justOne) {
               this[subdoc] = document;

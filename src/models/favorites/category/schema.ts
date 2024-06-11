@@ -17,7 +17,7 @@ schema.virtual("links", {
     foreignField: "category",
     justOne: false,
     autopopulate: true,
-    //defaultSelect: true,
+    defaultSelect: true,
     copyFields: ["account", "user"],
     options: { sort: { index: 1 } },
 });

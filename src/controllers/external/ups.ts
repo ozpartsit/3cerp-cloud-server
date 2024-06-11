@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Request, Response, NextFunction } from 'express';
+import qs from 'qs';
 import CustomError from "../../utilities/errors/customError";
 const client_id = "TA3eKFeFgGM1uNFDjYsvELpBVApjHrGjdU96SkcCcQ2b1y5e";
 const client_secret = "E2HaUFhIZnp6pS3UcsC8XWyLBAK0Gw86J3GPcQD2CJ71bonE64DM59E1Qvs3VmAX";
@@ -18,10 +19,12 @@ export default class controller {
 
     public async login() {
         try {
+            const data = qs.stringify({
+                grant_type: "client_credentials"
+            });
+
             this.token = await axios.post('https://onlinetools.ups.com/security/v1/oauth/token',
-                {
-                    "grant_type": "client_credentials"
-                },
+                data,
                 {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -29,12 +32,10 @@ export default class controller {
                     }
                 })
                 .then(function (response) {
-                    console.log(response)
-                    return response.headers["access_token"];
+                    return response.data["access_token"];
                 })
                 .catch(function (error) {
-                    console.log(error)
-                    //throw error
+                    throw error
                 });
 
             // Pobierz aktualną datę i czas
@@ -43,7 +44,7 @@ export default class controller {
             now.setHours(now.getHours() + 4);
             this.expires = now;
         } catch (error) {
-             console.log(error)
+            console.log(error)
         }
     }
     public async getToken(req: Request, res: Response, next: NextFunction) {

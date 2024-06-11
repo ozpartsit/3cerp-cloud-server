@@ -19,7 +19,7 @@ export interface ICustomer extends IEntity {
   //accounting
   terms?: mongoose.Schema.Types.ObjectId;
   paymentMethod?: mongoose.Schema.Types.ObjectId;
-  entityType?: mongoose.Schema.Types.ObjectId;
+  //entityType?: mongoose.Schema.Types.ObjectId;
   creditLimit?: Number;
   accountOnHold?: Boolean;
   salesRep?: mongoose.Schema.Types.ObjectId;
@@ -72,13 +72,13 @@ const schema = new mongoose.Schema<ICustomer>(
       input: "Select",
       validType:"select",
     },
-    entityType: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "EntityType",
-      autopopulate: true,
-      input: "Select",
-      validType:"select",
-    },
+    // entityType: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "EntityType",
+    //   autopopulate: true,
+    //   input: "Select",
+    //   validType:"select",
+    // },
     //accounting
     terms: {
       type: mongoose.Schema.Types.ObjectId,

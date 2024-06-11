@@ -34,7 +34,7 @@ export default function getSelect<T extends IExtendedDocument>(this: mongoose.Mo
         } else {
             if (schematype.options.ref && !parent) {
                 //console.log(schematype.options.ref)
-                let refModel: any = mongoose.models[schematype.options.ref];
+                let refModel: any = mongoose.model(schematype.options.ref);
 
                 if (refModel) {
                     schematype.options.resource = refModel.schema.options.collection;

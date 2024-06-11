@@ -5,40 +5,34 @@ import * as dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
-import DB from "./config/database.js";
-import i18n from "./config/i18n.js";
-import StatusMonitor from "./config/statusMonitor.js";
-import { createNuxt } from 'nuxt';
+import DB from "./config/database";
+import i18n from "./config/i18n";
+import StatusMonitor from "./config/statusMonitor";
 // Routing
-import RoutesCore from "./routes/core.js";
-import RoutesUI from "./routes/ui.js";
-import RoutesAuth from "./routes/auth.js";
-import RoutesHosting from "./routes/hosting.js";
-import RoutesMaintenance from "./routes/maintenance.js";
-import RoutesExternal from "./routes/external.js";
-import RoutesPublic from "./routes/public.js";
-import EmitEvents from "./services/emitEvents.js";
-import EmailServer from "./services/email.js";
-import { errorHandler } from "./middleware/error-handler.js";
-import storage from "./config/storage.js";
+import RoutesCore from "./routes/core";
+import RoutesUI from "./routes/ui";
+import RoutesAuth from "./routes/auth";
+import RoutesHosting from "./routes/hosting";
+import RoutesMaintenance from "./routes/maintenance";
+import RoutesExternal from "./routes/external";
+import RoutesPublic from "./routes/public";
+import EmitEvents from "./services/emitEvents";
+import EmailServer from "./services/email";
+import errorHandler from "./middleware/error-handler";
+import storage from "./config/storage";
 //import Cache from "./middleware/cache";
-import Limiter from "./middleware/limiter.js";
+import Limiter from "./middleware/limiter";
 import path, { dirname } from "path";
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-import config from '../nuxt.config.js';
-
 // Custom ENVIRONMENT Veriables
 
 let env = dotenv.config({
   path: path.resolve(`.env.${process.env.NODE_ENV}`)
 });
 
-let configNuxt: any = config
-const nuxt = createNuxt(configNuxt)
-console.log(nuxt)
 
 //export const cache = new Cache();
 export class App3CERP {

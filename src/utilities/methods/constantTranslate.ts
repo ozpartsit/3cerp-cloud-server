@@ -36,9 +36,22 @@ export default function constantTranslate(this: IExtendedDocument, local: string
                     subdoc[schemaType._presplitPath[1]] = { _id: subdoc[schemaType._presplitPath[1]], name: i18n.__(`${schemaType.options.constant}.${subdoc[schemaType._presplitPath[1]]}`) };
             } else {
 
-                if (doc[pathname]) doc[pathname] = {
-                    _id: doc[pathname], name: i18n.__(`${schemaType.options.constant}.${doc[pathname]}`)
-                };
+                if (doc[pathname]) {
+                    if (Array.isArray(doc[pathname])) {
+                        doc[pathname].forEach((value,index) => {
+                            doc[pathname][index] = {
+                                _id: value, name: i18n.__(`${schemaType.options.constant}.${value}`)
+                            };
+                        })
+                    }
+                    else {
+                        doc[pathname] = {
+                            _id: doc[pathname], name: i18n.__(`${schemaType.options.constant}.${doc[pathname]}`)
+                        };
+                    }
+
+                }
+
             }
         }
         if (["Embedded", "Array"].includes(schemaType.instance)) {

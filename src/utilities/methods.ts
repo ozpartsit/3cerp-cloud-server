@@ -136,7 +136,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
         const query: any = {
           account: this.account
         }
-        const count = await mongoose.models[type].countDocuments(query);
+        const count = await mongoose.model(type).countDocuments(query);
         this.uniqNumber = count + 1;
       }
 

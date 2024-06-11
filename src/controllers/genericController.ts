@@ -44,7 +44,6 @@ class GenericController<T extends IExtendedDocument> {
         let { field } = req.query;
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
-
             let document = await this.model.getDocument(id, mode, true, (field || "_id").toString());
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
@@ -191,17 +190,18 @@ class GenericController<T extends IExtendedDocument> {
                 options.limit = parseInt((req.query.limit || 50).toString());
                 if (preference && preference.itemsPerPage) options.limit = parseInt((preference.itemsPerPage || 50).toString());
 
-                let page = Number(req.query.page || 1);
-
 
                 const data: any = {
                     totalDocs: total,
                     limit: options.limit,
                     totalPages: Math.ceil(total / options.limit)
                 }
+                if (req.query.page == "last") req.query.page = data.totalPages;
+                let page = Number(req.query.page || 1);
 
-                let skip = ((page || 1) - 1) * 25;
-                results = results.filter((item: any, index: any) => index >= skip && index < skip + 25)
+
+                let skip = ((page || 1) - 1) * options.limit;
+                results = results.filter((item: any, index: any) => index >= skip && index < skip + options.limit)
 
                 if (!req.query.count) {
                     data["docs"] = results;
@@ -609,7 +609,30 @@ class GenericController<T extends IExtendedDocument> {
             return next(error);
         }
     }
+
+
+    public async action(req: Request, res: Response, next: NextFunction) {
+        try {
+            let { recordtype, id, action } = req.params;
+
+            let update: any = {} // to do - dodać akcje
+            let { document, saved } = await this.model.updateDocument(id, 'simple', "_id", update);
+
+            if (!document) {
+                throw new CustomError("doc_not_found", 404);
+            } else {
+                res.json({ status: "success", data: { document_id: document._id, saved } });
+            }
+        } catch (error) {
+            return next(error);
+        }
+
+    }
+
 }
+
+
+
 
 export default GenericController;
 
@@ -629,12 +652,14 @@ async function findResult<T extends IExtendedDocument>(req: Request, model: IExt
     try {
 
         // ustawienia tabeli przekazane w query
-        let { table } = req.query;
+        let { table, prefid } = req.query;
 
 
         // sprawdzenie zapisanej preferencej gdy podane jest query "table" (identyfikator tabeli)
         let preference: ITablePreference | null = null;
-        if (table) {
+        //if (!table) table = model.modelName;
+        if (table || prefid) {
+            table = (table || prefid || "").toString();
             preference = await Table.findOne({ table: table.toString(), user: req.headers.user });
             if (!preference) preference = await new Table({ table: table.toString(), user: req.headers.user, account: req.headers.account }).save();
         }
@@ -692,7 +717,7 @@ async function findResult<T extends IExtendedDocument>(req: Request, model: IExt
             options.select = select.split(",").reduce((o, f) => { o[f] = 1; return o; }, { name: 1, type: 1, resource: 1, deleted: 1 });
         } else {
             // sprawdź preferencje użytkownika
-            if (preference) {
+            if (preference && preference.selected && preference.selected.length) {
                 options.select = preference.selected.reduce((t, s) => { t[s] = 1; return t; }, { name: 1, type: 1, resource: 1, deleted: 1 });
             } else {
                 // dodaj domyślne pola
@@ -755,7 +780,7 @@ async function findResult<T extends IExtendedDocument>(req: Request, model: IExt
         if (!count) {
             let result = await model.findDocuments(query, options);
             for (let index in result) {
-                result[index] = await result[index].constantTranslate(req.locale);
+                result[index] = await result[index].constantTranslate(req.locale, true);
             }
 
             data["docs"] = result;

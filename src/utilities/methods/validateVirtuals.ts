@@ -24,7 +24,8 @@ export default async function validateVirtuals(this: IExtendedDocument, save: bo
           // if line is new init new document
           if (!line.schema) {
             if(this.isNew) delete line._id; // delete id if copy document - to do - zastanowić sie czy nie dodać warunku
-            line = new mongoose.models[list.options.ref](line);
+            let Model = mongoose.model(list.options.ref)
+            line = new Model(line);
           }
           // assign foreignField to documents from virtual field
           line[list.options.foreignField] = this[list.options.localField];
