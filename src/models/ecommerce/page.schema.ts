@@ -42,7 +42,7 @@ const PageSchema = {
         validType: "text"
     },
     urlcomponent: { type: String, input: "Input", validType: "text" },
-    html: { type: String, input: "Textarea", validType: "html" },
+    html: { type: String, input: "RichText", validType: "richText" },
     type: {
         type: String,
         required: true,

@@ -316,7 +316,7 @@ class GenericController<T extends IExtendedDocument> {
             //     document = await model.updateDocument(id, list, subrecord, field, value, save);
             // }
             let update = req.body;
-            let { document, saved } = await this.model.updateDocument(id, mode, (field || "_id").toString(), update);
+            let { document, subdocument, saved } = await this.model.updateDocument(id, mode, (field || "_id").toString(), update);
 
 
             let newSubDoc;
@@ -331,8 +331,8 @@ class GenericController<T extends IExtendedDocument> {
 
                 //populate response document
                 await document.autoPopulate();
-                document = document.constantTranslate(req.locale, true);
-                res.json({ status: "success", data: { document, saved, newSubDoc } });
+                document = document.constantTranslate(req.locale);
+                res.json({ status: "success", data: { document, subdocument, saved, newSubDoc } });
             }
 
         } catch (error) {

@@ -6,6 +6,8 @@ import path from "path";
 import { I18n } from "i18n";
 import Item, { ItemTypes } from "../models/items/model";
 import Shop from "../models/ecommerce/shop.model";
+import CustomError from "../utilities/errors/customError";
+
 export default class controller {
   public async get(req: Request, res: Response, next: NextFunction) {
     //i18n
@@ -18,7 +20,7 @@ export default class controller {
     // check if exists shop - to do (customize template)
     let shop = await Shop.findOne({ subdomain: req.body.pointer || req.subdomains[0] });
     if (shop) views = path.resolve("templates", shop.template);
-
+    else throw new CustomError("doc_not_found", 404);
 
     // Static files/assets
     let tmp = req.url.toString().split("/")
@@ -30,14 +32,42 @@ export default class controller {
       res.sendFile(filePath);
     } else {
       let filepath = path.join(views, "index" + ".ejs");
-      let data: any;
+      let data: any = {};
+      data["general"] = {
+        title: shop.name,
+        logo: 'tba',
+
+        currencies: shop.currencies,
+        languages: shop.languages,
+
+        // Meta
+        metaTitle: shop.metaTitle,
+        metaDescription: shop.metaDescription,
+        metaKeywords: shop.metaKeywords,
+
+        //Google Tag
+        GSC: shop.GSC,
+
+        //Social Media Tag
+        ogTitle: shop.ogTitle,
+        ogUrl: shop.ogUrl,
+        ogDescription: shop.ogDescription,
+        ogImage: shop.ogImage,
+
+        //Social Media Link
+        twitterUrl: shop.twitterUrl,
+        facebookUrl: shop.instagramUrl,
+        instagramUrl: shop.instagramUrl,
+        linkedinUrl: shop.linkedinUrl,
+
+      }
 
       // if view params exists
       if (req.params.view) {
         let viewpath = path.join(views, "pages", req.params.view + ".ejs");
         if (fs.existsSync(viewpath)) {
-          data = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1 };
-          if (["search", "products"].includes(req.params.view)) {
+          data.items = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1 };
+          if (["search", "products", "items"].includes(req.params.view)) {
 
             let query = {};
             if (req.query.keyword) {
@@ -75,11 +105,11 @@ export default class controller {
             q.searchParams.set('page', '');
             data.url = q.pathname + "?" + q.searchParams.toString();
             // search queries
-            data.docs = result;
-            data.totalDocs = total;
-            data.limit = options.limit;
-            data.page = options.skip;
-            data.totalPages = total / options.limit;
+            data.items.docs = result;
+            data.items.totalDocs = total;
+            data.items.limit = options.limit;
+            data.items.page = options.skip;
+            data.items.totalPages = total / options.limit;
           }
           if (["item", "product"].includes(req.params.view)) {
             let result = await Item.getDocument('60df047fec2924769a00834d', 'view');
@@ -91,7 +121,7 @@ export default class controller {
           req.params.view = "404";
         }
       }
-      
+
       hostingi18n.configure({
         directory: path.join(views, "/locales")
       });

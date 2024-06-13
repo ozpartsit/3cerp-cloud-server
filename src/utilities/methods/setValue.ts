@@ -52,15 +52,18 @@ export default async function setValue(
       if (!changed) {
 
         if (((value || "").toString() !== (document[field] || "").toString()))
-          this.$locals.triggers.push({ type: "setValue", name: `setValue_${field}`, field: field, oldValue: document[field], value: value });
+          document.$locals.triggers.push({ type: "setValue", name: `setValue_${field}`, field: field, oldValue: document[field], value: value });
 
         if (field !== "_id") document[field] = value;
         //populate new field value
         await document.populate(field, "name displayname type _id");
       }
     }
-    if (document)
+    if (document){
       await document.recalcDocument();
+      return document;
+    }
+      
 
   } catch (err) {
     return err;

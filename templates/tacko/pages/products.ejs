@@ -314,7 +314,7 @@
                                             class="hidden">Filter</span></button>
                                     <div class="filters-toolbar__item">
                                         <span class="filters-toolbar__product-count d-none d-sm-block">Showing: <%=
-                                                data.docs.length %>
+                                                data.items.docs.length %>
                                                 products</span>
                                     </div>
                                 </div>
@@ -350,13 +350,13 @@
                 <!--Product Grid-->
                 <div class="products-grid">
                     <div class="row">
-                        <% for(var i=0; i < data.docs.length; i++) { %>
+                        <% for(var i=0; i < data.items.docs.length; i++) { %>
                             <div class="col-6 col-sm-6 col-md-4 col-lg-4">
                                 <!--Product Item-->
                                 <div class="item">
                                     <!--Product Image-->
                                     <div class="product-image">
-                                        <a href="/product/<%= data.docs[i].name %>" class="rounded-3 product-thumb">
+                                        <a href="/product/<%= data.items.docs[i].name %>" class="rounded-3 product-thumb">
                                             <!--Image-->
                                             <img class="primary blur-up lazyload rounded-3"
                                                 data-src="/assets/images/products/250x250.jpg"
@@ -388,10 +388,10 @@
                                     <div class="product-details d-flex">
                                         <div class="product-details-in">
                                             <div class="h3"><a href="#">
-                                                    <%= data.docs[i].name %>
+                                                    <%= data.items.docs[i].name %>
                                                 </a></div>
                                             <div class="price-box"><span class="price">
-                                                    <%= data.docs[i].price %>
+                                                    <%= data.items.docs[i].price %>
                                                 </span></div>
                                         </div>
                                         <div class="product-review">

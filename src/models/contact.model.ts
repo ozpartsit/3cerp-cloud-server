@@ -33,6 +33,15 @@ const schema = new mongoose.Schema<IContact>(
   options
 );
 
+schema.methods.recalc = async function () {
+  if (this.$locals.triggers) for (let trigger of this.$locals.triggers) {
+    if (trigger.type == "setValue") {
+      if (trigger.name == "setValue_firstName" || trigger.name == "setValue_lastName") this.name = `${this.firstName} ${this.lastName}`
+    }
+    this.$locals.triggers.shift();
+  }
+}
+
 const Contact: IContactModel = mongoose.model<IContact, IContactModel>("Contact", schema);
 export default Contact;
 

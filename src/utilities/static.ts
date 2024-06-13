@@ -332,18 +332,24 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
 
     if (document) {
       if (!Array.isArray(updates)) updates = [updates]; // array
+
+      // tablica na zmodyfikowane subdocumenty
+      let subdocument: any = [];
       for (let update of updates) {
-        await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id, update.deepdoc, update.deepdoc_id);
+        let changedDocument = await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id, update.deepdoc, update.deepdoc_id);
+        if (changedDocument && changedDocument._id != id) subdocument.push(changedDocument)
       }
+      // jeżeli tablica jedno-elemenotwa, przekształć w zmienną
+      if (subdocument.length == 1) subdocument = subdocument[0];
 
       if (mode === "advanced") {
         document.recalcDocument();
         cache.set(id, document);
-        return { document, saved: false };
+        return { document, subdocument, saved: false };
 
       } else {
         await document.saveDocument();
-        return { document, saved: true };
+        return { document, subdocument, saved: true };
       }
     } else return { document: null, saved: false };
   } catch (error) {

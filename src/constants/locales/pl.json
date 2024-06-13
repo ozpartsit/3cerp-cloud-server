@@ -10,6 +10,7 @@
   "PL": "Polska",
   "Search": "Search",
   "Sign Up": "Sign Up",
+  "The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined": "The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined",
   "auth.failed_auth_token": "Token autoryzacyjny jest nieprawidłowy, zaloguj się ponownie.",
   "auth.no_token": "Brak tokena autoryzacyjnego, zaloguj się ponownie.",
   "auth.password_updated": "Hasło zostało zaktualizowane.",

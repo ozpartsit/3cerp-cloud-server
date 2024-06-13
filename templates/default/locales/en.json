@@ -1,12 +1,11 @@
 {
-	"PL": "PL",
-	"warehouse": "warehouse",
-	"PLN": "PLN",
-	"pendingapproval": "pendingapproval",
-	"open": "open",
-	"webshop": "webshop",
-	"default": "default",
-	"online": "online",
-	"test": "test",
-	"offline": "offline"
+	"Hello": "Hello",
+	"Search": "Search",
+	"Home": "Home",
+	"Catalogues": "Catalogues",
+	"Brands": "Brands",
+	"About": "About",
+	"Contact": "Contact",
+	"Login": "Login",
+	"Sign Up": "Sign Up"
 }
