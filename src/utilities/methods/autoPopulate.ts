@@ -69,7 +69,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
   for (let path of paths) {
     //console.log("path", path,this[path.path] )
     if ((this[path.path] && !this[path.path].type) || !this[path.path]) // to do - poprawić
-      Promises.push(await this.populate(path));
+      Promises.push(this.populate(path));
   }
   //console.log("Promises1",Promises[0])
   await Promise.all(Promises);

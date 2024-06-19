@@ -46,9 +46,35 @@ export default {
                 {
                     "value": "contacts",
                     "editable": true,
-                    "fields": [
-                        "contacts"
-                    ]
+                    "fields": [],
+                    "table":{
+                        "value": "contacts",
+                        "subdoc": "contacts",
+                        "columns": [
+                            {
+                                "value": "main",
+                                "fields": [
+                                    "firstName",
+                                    "lastName",
+                                    "name"
+                                ]
+                            },
+                            {
+                                "value": "contact",
+                                "fields": [
+                                    "phone",
+                                    "email",
+                                ]
+                            },
+                            {
+                                "value": "other",
+                                "fields": [
+                                    "jobTitle",
+                                    "description",
+                                ]
+                            },
+                        ] 
+                    }
                 }
             ]
         },

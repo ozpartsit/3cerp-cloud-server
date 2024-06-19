@@ -32,13 +32,40 @@ export default {
                                 "shippingCost"
                             ]
                         },
-                        {
-                            "value": "lines",
-                            "fields": [
-                                "lines"
-                            ]
-                        }
-                    ]
+                        // {
+                        //     "value": "lines",
+                        //     "fields": [
+                        //         "lines"
+                        //     ]
+                        // }
+                    ],
+                    "table": {
+                        "value": "lines",
+                        "subdoc": "lines",
+                        "columns": [
+                            {
+                                "value": "Item",
+                                "fields": [
+                                    "item",
+                                    "description",
+                                ]
+                            },
+                            {
+                                "value": "Quantity",
+                                "fields": [
+                                    "quantity",
+                                    "price",
+                                ]
+                            },
+                            {
+                                "value": "Other",
+                                "fields": [
+                                    "eta",
+                                    "taxRate",
+                                ]
+                            },
+                        ],
+                    }
                 }
             ]
         },
@@ -49,7 +76,7 @@ export default {
                 {
                     "value": "billingAddress",
                     "editable": true,
-                    "subdoc":"billingAddress",
+                    "subdoc": "billingAddress",
                     "columns": [
                         {
                             "value": "name",
@@ -85,7 +112,7 @@ export default {
                 {
                     "value": "shippingAddress",
                     "editable": true,
-                    "subdoc":"shippingAddress",
+                    "subdoc": "shippingAddress",
                     "columns": [
                         {
                             "value": "name",
