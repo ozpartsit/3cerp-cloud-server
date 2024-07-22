@@ -32,7 +32,15 @@ export default {
                                 "category",
                                 "group"
                             ]
-                        }
+                        },
+                        {
+                            "value": "metatags",
+                            "fields": [
+                                "metaTitle",
+                                "metaDescription",
+                                "metaKeywords"
+                            ]
+                        },
                     ]
                 },
                 {

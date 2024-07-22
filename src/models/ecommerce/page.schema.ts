@@ -9,11 +9,16 @@ export interface IPage extends IExtendedDocument {
     name: string;
 
     //META TAGS
-    // metaTitle: string;
-    // metaDescription: string;
-    // metaKeywords: string;
+    metaTitle: string;
+    metaDescription: string;
+    metaKeywords: string;
 
-    urlcomponent: string;
+    html: string;
+    pageType: string;
+    urlComponent: string;
+
+    template: string;
+    languages: string[]
 }
 interface IPageModel extends mongoose.Model<IPage>, IExtendedModel<IPage> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -23,26 +28,41 @@ const PageSchema = {
     webshop: { type: mongoose.Schema.Types.ObjectId, copy: "account" },
     metaTitle: {
         type: String,
-        min: [3, "Must be at least 3 characters long, got {VALUE}"],
+        // min: [3, "Must be at least 3 characters long, got {VALUE}"],
         input: "Input",
         validType: "text",
         help: "The <title> element typically appears as a clickable headline in search engine results"
     },
     metaDescription: {
         type: String,
-        min: [3, "Must be at least 3 characters long, got {VALUE}"],
+        //  min: [3, "Must be at least 3 characters long, got {VALUE}"],
         input: "Input",
         validType: "text",
         help: "Meta description also resides in the <head> of a webpage and is commonly (though not always) displayed in a SERP snippet along with a title and page URL."
     },
     metaKeywords: {
         type: String,
-        min: [3, "Must be at least 3 characters long, got {VALUE}"],
+        //  min: [3, "Must be at least 3 characters long, got {VALUE}"],
+        input: "Input",
+        validType: "text",
+    },
+    urlComponent: { type: String, input: "Input", validType: "text" },
+    html: { type: String, input: "RichText", validType: "richText" },
+    template: {
+        type: String,
+        required: true,
+        default: "page.ejs",
         input: "Input",
         validType: "text"
     },
-    urlcomponent: { type: String, input: "Input", validType: "text" },
-    html: { type: String, input: "RichText", validType: "richText" },
+    languages: {
+        type: [String],
+        default: ["en"],
+        input: "Select",
+        constant: 'language',
+        defaultSelect: true,
+    
+    },
     type: {
         type: String,
         required: true,

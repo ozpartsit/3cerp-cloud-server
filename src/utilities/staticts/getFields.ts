@@ -74,13 +74,12 @@ export default function getFields<T extends IExtendedDocument>(this: mongoose.Mo
     ) {
       //console.log(schematype)
       if (["Embedded", "Array"].includes(schematype.instance)) {
-
         let field: any = {
-          field: parent ? `${parent}.${pathname}` : pathname,
+          field: pathname,
           name: i18n.__(`${modelName}.${pathname}`),
           //fieldType: schematype.instance == "Embedded" ? "DocumentNested" : schematype.options.input,
           control: schematype.instance == "Embedded" ? "DocumentNested" : schematype.options.input,
-          subdoc: schematype.instance == "Embedded" ? true : false,
+          subdoc: schematype.instance == "Embedded" ? true : parent || false,
           //array: !!schematype['$isMongooseArray'],
           multiple: !!schematype['$isMongooseArray'],
           type: schematype.options.ref,

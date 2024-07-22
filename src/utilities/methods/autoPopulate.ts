@@ -15,14 +15,14 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
               if (e.value) {
                 paths.push({
                   path: `${pathname}.${index}.value`,
-                  select: "name displayname type _id resource path deleted color",
+                  select: "name displayname type _id resource path deleted color mime",
                   model: e.ref,
                   index: index
                 });
               } else {
                 paths.push({
                   path: pathname,
-                  select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color"
+                  select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color mime"
                 });
               }
             });
@@ -35,14 +35,14 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
                     if (e.value) {
                       paths.push({
                         path: `${pathname}.${index}.${key}.${index2}.value`,
-                        select: "name displayname type _id resource path deleted color",
+                        select: "name displayname type _id resource path deleted color mime",
                         model: e.ref,
                         index: index
                       });
                     } else {
                       paths.push({
                         path: pathname,
-                        select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color"
+                        select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color mime"
                       });
                     }
                   });
@@ -57,7 +57,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
       if ((schemaType.options.ref || schemaType.options.refPath) && schemaType.options.autopopulate) {
         paths.push({
           path: pathname,
-          select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color"
+          select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color mime"
         });
       }
     }

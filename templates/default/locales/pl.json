@@ -1,18 +1,11 @@
 {
-	"Hello": "Hello",
-	"Search": "Wyszukaj",
-	"Home": "Home",
-	"Catalogues": "Katalog",
-	"Brands": "Marki",
-	"About": "O Nas",
-	"Contact": "Kontakt",
-	"Login": "Zaloguj",
-	"Sign Up": "Zarejestruj",
-	"PL": "PL",
-	"warehouse": "warehouse",
-	"webshop": "webshop",
-	"default": "default",
-	"online": "online",
-	"test": "test",
-	"offline": "offline"
+	"language": {
+		"pl": "Polski",
+		"en": "Angielski"
+	},
+	"pl": "Polski",
+	"primary": "Kolor Główny",
+	"secondary": "Kolor Dodatkowy",
+	"accent": "Kolor szczegółow",
+	"en": "Angielski"
 }

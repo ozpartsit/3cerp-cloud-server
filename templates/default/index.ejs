@@ -1,39 +1,35 @@
 <html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <title>
-        <%= data.general.title%>
-    </title>
 
-    <link rel="canonical" href="">
-
-
-</head>
-
+   <!-- HEAD -->
+   <%- include('partials/head') %>
 <body>
+        <!-- HEADER -->
+        <%- include('partials/header') %>
 
-    <pre><%= JSON.stringify(data)  %></pre>
-    <script>
-        const data = JSON.parse(<%= JSON.stringify(data) %>)
-        console.log(data)
-    </script>
+            <!-- NAV -->
+        <%- include('partials/nav') %>
 
-
-    <!-- HEADER -->
-    <%- include('partials/header') %>
         <br />
 
+        
         <!-- VIEW -->
-        <%- include('pages/'+(view||'home')) %>
-            <br />
-            <!-- FOOTER -->
-            <%- include('partials/footer') %>
+        <%- include('views/'+(view||'home')) %>
+        <br />
+        <!-- FOOTER -->
+        <%- include('partials/footer') %>
 
 
 
+      
 </body>
 
+<script>
+    const view =  <%- JSON.stringify(view || 'home') %>;
+    const data =  <%- JSON.stringify(data) %>;
+    console.log("Available data on view:", view)
+    console.log(data)
+</script>
+<script src="/assets/js/scripts.js"></script>
+<script src="/assets/js/cookies.js"></script>
 </html>

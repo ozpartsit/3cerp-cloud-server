@@ -44,14 +44,14 @@ const schema = new mongoose.Schema<ICustomer>(
     status: {
       type: String,
       input: "Select",
-      validType:"select",
+      validType: "select",
       resource: 'constants',
       constant: 'customerstatus'
     },
 
     //addresses
-    shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
-    billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+    shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
+    billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
     //statistics
     firstSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
     lastSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
@@ -70,7 +70,7 @@ const schema = new mongoose.Schema<ICustomer>(
       ref: "Category",
       autopopulate: true,
       input: "Select",
-      validType:"select",
+      validType: "select",
     },
     // entityType: {
     //   type: mongoose.Schema.Types.ObjectId,
@@ -85,14 +85,14 @@ const schema = new mongoose.Schema<ICustomer>(
       ref: "Terms",
       autopopulate: true,
       input: "Select",
-      validType:"select",
+      validType: "select",
     },
     paymentMethod: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "PaymentMethod",
       autopopulate: true,
       input: "Select",
-      validType:"select",
+      validType: "select",
     },
     creditLimit: {
       type: Number,
@@ -111,7 +111,7 @@ const schema = new mongoose.Schema<ICustomer>(
       ref: "User",
       autopopulate: true,
       input: "Select",
-      validType:"url",
+      validType: "url",
       hint: "Sales Representative",
       help: "A sales rep interacts directly with customers throughout all phases of the sales process."
     },

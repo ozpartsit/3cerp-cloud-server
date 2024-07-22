@@ -7,6 +7,7 @@ import CustomError from "../utilities/errors/customError";
 import i18n from "../config/i18n";
 import Preference from "../models/preference.model";
 import asyncLocalStorage from "./asyncLocalStorage";
+import ChartType from "../models/chartTypePreference.model.js";
 interface Response extends express.Response {
   user: string | jwt.JwtPayload;
 }
@@ -239,7 +240,25 @@ export default class Auth {
                       vendor: ["view", "add", "edit"]
                     }
                   }
-                  const preferences = await Preference.findById(value.user);
+                  let preferences = await Preference.findById(value.user);
+
+
+                  if (preferences) {
+                    preferences = preferences.toObject()
+                    const preferencesLine = await ChartType.findOne({ type: 'ChartType', chart: "line" });
+                    const preferencesBar = await ChartType.findOne({ type: 'ChartType', chart: "bar" });
+                    const preferencesPie = await ChartType.findOne({ type: 'ChartType', chart: "pie" });
+
+
+                    preferences['charts'] = {
+                      line: preferencesLine,
+                      bar: preferencesBar,
+                      pie: preferencesPie
+                    }
+
+                  }
+
+
                   res.status(200).json({ user: userLoged, permissions, preferences, token: token, role: value.role, account: "3cerpcloud" });
                 } else {
                   // user nie istnieje

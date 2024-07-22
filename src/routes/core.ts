@@ -16,6 +16,11 @@ import Account from "../models/account.model";
 import User from "../models/user.model";
 import Preference from "../models/preference.model";
 import Table from "../models/tablePreference.model";
+import Dashboard from "../models/dashboardPreference.model";
+import Chart from "../models/chartPreference.model";
+import ChartType from "../models/chartTypePreference.model.js";
+
+
 
 import { StorageTypes } from "../models/storages/model";
 import { TransactionTypes } from "../models/transactions/model";
@@ -52,7 +57,12 @@ export default class Routes {
     this.routeUniversal("preferences", "user", new Controller(Preference))
     //Table Preferences
     this.routeUniversal("preferences", "table", new Controller(Table))
-
+    //Dashboard Preferences
+    this.routeUniversal("preferences", "dashboard", new Controller(Dashboard))
+    //ChartType Preferences
+    this.routeUniversal("preferences", "charttype", new Controller(ChartType))
+    //Chart Preferences
+    this.routeUniversal("preferences", "chart", new Controller(Chart))
     //Upload
     this.routeUpload(new FilesController(StorageTypes.folder))
     //files
@@ -135,7 +145,7 @@ export default class Routes {
     );
 
 
-    if (controller.pdf){
+    if (controller.pdf) {
       this.Router.route(`${path}/:id/pdf`).get(
         this.Auth.authenticate.bind(this.Auth) as any,
         this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
@@ -157,12 +167,12 @@ export default class Routes {
 
 
 
-      
-      this.Router.route(`${path}/:id/data/:table/:mode?`).get(
-        this.Auth.authenticate.bind(this.Auth) as any,
-        this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
-        controller.table.bind(controller) as any
-      );
+
+    this.Router.route(`${path}/:id/data/:table/:mode?`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.table.bind(controller) as any
+    );
 
     this.Router.route(`${path}/:id/logs`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
@@ -190,21 +200,21 @@ export default class Routes {
       controller.copy.bind(controller) as any
     );
     this.Router.route(`${path}/:id/favorite`)
-      // .get(
-      //   this.Auth.authenticate.bind(this.Auth) as any,
-      //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
-      //   controller.favorite.bind(controller) as any
-      // )
-      // .post(
-      //   this.Auth.authenticate.bind(this.Auth) as any,
-      //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
-      //   controller.favorite.bind(controller) as any
-      // )
-      // .delete(
-      //   this.Auth.authenticate.bind(this.Auth) as any,
-      //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
-      //   controller.favorite.bind(controller) as any
-      // );
+    // .get(
+    //   this.Auth.authenticate.bind(this.Auth) as any,
+    //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+    //   controller.favorite.bind(controller) as any
+    // )
+    // .post(
+    //   this.Auth.authenticate.bind(this.Auth) as any,
+    //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+    //   controller.favorite.bind(controller) as any
+    // )
+    // .delete(
+    //   this.Auth.authenticate.bind(this.Auth) as any,
+    //   this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+    //   controller.favorite.bind(controller) as any
+    // );
     this.Router.route(`${path}/:id/:mode?`)
       .get(
         this.Auth.authenticate.bind(this.Auth) as any,

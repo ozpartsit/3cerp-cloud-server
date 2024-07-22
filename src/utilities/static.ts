@@ -22,7 +22,7 @@ export interface IExtendedModel<T extends mongoose.Document> extends mongoose.Mo
   loadDocument: (id: string, field?: string) => Promise<T | null>;
   addDocument: (mode: string, data: Object) => any;
   getDocument: (id: string, mode: string, reload?: boolean, field?: string) => Promise<T | null>;
-  saveDocument: (id: string, data: Object) => Promise<any>;
+  saveDocument: (id: string, field?: string, data?: Object) => Promise<any>;
   updateDocument: (id: string, mode: string, field: string, updates: updateBody | updateBody[]) => any;
   getOptions: (id: string, mode: string, field: any, page: number, keyword: string) => Promise<any>;
   deleteDocument: (id: string) => any;
@@ -55,9 +55,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       type: {
         type: String
       },
-      urlComponent: {
-        type: String
-      },
+      urlComponent: { type: String, input: "Input", validType: "text" },
       uniqNumber: {
         type: Number
       },
@@ -289,22 +287,42 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
 // najpierw sprawdza czy jest w cachu
 // jeżeli tak, zapisuje aktyywny stan i zwraca identyfikator
 // jeżeli nie, zwraca null
-export async function saveDocument<T extends IExtendedDocument>(this: mongoose.Model<T>, id: string, data: Object): Promise<any> {
+export async function saveDocument<T extends IExtendedDocument>(this: mongoose.Model<T>, id: string, field: string, data: Object): Promise<any> {
   try {
-    let document = cache.get<T>(id);
-    // if (!document && data) {
-    //   // do usunięcia
-    //   document = new this(data || {});
-    // } else {
-    //   return null;
-    //   // to do - sprawdzić różnice 
-    // }
-    if (document) {
-      await document.saveDocument();
-      return { document_id: id, saved: true };
+    //obsługa fielda
+    if (data) {
+      let document;
+      if (id == "new") {
+        document = new this(data || {})
+      } else {
+        let query = {};
+        query[field || "_id"] = id;
+        if (field != "_id" || mongoose.Types.ObjectId.isValid(id)) {
+          document = await this.findOne(query);
+          if (document) {
+            document.set(data);
+          }
+        }
+      }
+
+      if (document) {
+        await document.saveDocument();
+        return { document_id: document._id, saved: true };
+      } else {
+        return { document_id: null, saved: false };
+      }
+
     } else {
-      return { document_id: null, saved: false };
+      let document = cache.get<T>(id);
+
+      if (document) {
+        await document.saveDocument();
+        return { document_id: id, saved: true };
+      } else {
+        return { document_id: null, saved: false };
+      }
     }
+
 
   } catch (error) {
     throw error;
@@ -334,13 +352,15 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
       if (!Array.isArray(updates)) updates = [updates]; // array
 
       // tablica na zmodyfikowane subdocumenty
-      let subdocument: any = [];
+      let subdocument: IExtendedDocument[] | IExtendedDocument | null = [];
       for (let update of updates) {
         let changedDocument = await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id, update.deepdoc, update.deepdoc_id);
         if (changedDocument && changedDocument._id != id) subdocument.push(changedDocument)
       }
       // jeżeli tablica jedno-elemenotwa, przekształć w zmienną
+
       if (subdocument.length == 1) subdocument = subdocument[0];
+      else if (subdocument.length == 0) subdocument = null;
 
       if (mode === "advanced") {
         document.recalcDocument();

@@ -35,7 +35,7 @@ export interface IShop extends IExtendedDocument {
     ogTitle: string;
     ogUrl: string;
     ogDescription: string;
-    ogImage: string;
+    ogImage: mongoose.Schema.Types.ObjectId;
 
     //Social Media Link
     twitterUrl: string;
@@ -61,15 +61,19 @@ export interface IShop extends IExtendedDocument {
     //wygląd
     template: string;
     logo: mongoose.Schema.Types.ObjectId;
+    favicon: mongoose.Schema.Types.ObjectId;
     colorPrimary: string
     colorSecondary: string
     colorAccent: string
 
     // CMS
-
     pages: IPage[];
 
-
+    //Templates
+    // loginTemplate:string
+    // registerTemplate:string
+    // contactTemplate:string
+    // basketTemplate:string
 }
 export interface IShopModel extends mongoose.Model<IShop>, IExtendedModel<IShop> { }
 
@@ -200,10 +204,11 @@ export const schema = new mongoose.Schema<IShop>(
             help: "Your page’s URL."
         },
         ogImage: {
-            type: String,
-            min: [3, "Must be at least 3 characters long, got {VALUE}"],
-            input: "Input",
-            validType: "text",
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Storage",
+            autopopulate: true,
+            input: "File",
+            validType: "images",
             help: "Here, you can put the URL of an image you want shown when your page is linked to"
         },
 
@@ -244,13 +249,13 @@ export const schema = new mongoose.Schema<IShop>(
         },
         languages: {
             type: [String],
-            default: ["EN"],
+            default: ["en"],
             input: "Select",
             constant: 'language',
             defaultSelect: true
         },
 
-        address: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+        address: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
 
         paymentMethods: {
             type: [mongoose.Schema.Types.ObjectId],
@@ -271,7 +276,15 @@ export const schema = new mongoose.Schema<IShop>(
         colorPrimary: { type: String, input: "ColorPicker", validType: "colorPicker" },
         colorSecondary: { type: String, input: "ColorPicker", validType: "colorPicker" },
         colorAccent: { type: String, input: "ColorPicker", validType: "colorPicker" },
+
         logo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Storage",
+            autopopulate: true,
+            input: "File",
+            validType: "images"
+        },
+        favicon: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Storage",
             autopopulate: true,

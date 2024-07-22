@@ -26,6 +26,7 @@ class GenericController<T extends IExtendedDocument> {
         try {
             if (!req.body.document) req.body.document = {}
             req.body.document.account = req.headers.account; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
+            console.log(this.model)
             if (this.model.userRequired()) req.body.document.user = req.headers.user;
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let { document, saved } = await this.model.addDocument(mode, req.body.document);
@@ -194,7 +195,7 @@ class GenericController<T extends IExtendedDocument> {
                 const data: any = {
                     totalDocs: total,
                     limit: options.limit,
-                    totalPages: Math.ceil(total / options.limit)
+                    totalPages: Math.ceil(total / options.limit)||1
                 }
                 if (req.query.page == "last") req.query.page = data.totalPages;
                 let page = Number(req.query.page || 1);
@@ -254,9 +255,15 @@ class GenericController<T extends IExtendedDocument> {
     }
     public async save(req: Request, res: Response, next: NextFunction) {
         let { recordtype, id } = req.params;
+        let { field } = req.query;
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
-            let { document_id, saved } = await this.model.saveDocument(id, req.body.document);
+            if(req.body && req.body.document){
+                req.body.document.account = req.headers.account; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
+                if (this.model.userRequired()) req.body.document.user = req.headers.user;
+            }
+
+            let { document_id, saved } = await this.model.saveDocument(id, (field || "_id").toString(), req.body.document);
             if (!document_id) {
                 throw new CustomError("doc_not_found", 404);
             } else {
@@ -332,6 +339,11 @@ class GenericController<T extends IExtendedDocument> {
                 //populate response document
                 await document.autoPopulate();
                 document = document.constantTranslate(req.locale);
+                
+                if(subdocument){
+                    subdocument = subdocument.constantTranslate(req.locale);
+                } 
+
                 res.json({ status: "success", data: { document, subdocument, saved, newSubDoc } });
             }
 

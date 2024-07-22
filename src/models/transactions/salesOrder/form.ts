@@ -39,7 +39,7 @@ export default {
                         //     ]
                         // }
                     ],
-                    "table": {
+                    "tables": [{
                         "value": "lines",
                         "subdoc": "lines",
                         "columns": [
@@ -65,7 +65,7 @@ export default {
                                 ]
                             },
                         ],
-                    }
+                    }]
                 }
             ]
         },

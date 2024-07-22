@@ -1,0 +1,23 @@
+<div>
+    //////////////// partials/nav.ejs ////////////////
+    <br>
+    <ul>
+
+
+        <% data.nav.pages.forEach(function(page) { %>
+            <li> <a rel="alternate" hreflang="<%= data.page.language %>" href="<%= page.path %>">
+                    <%= page.name %>
+                </a> </li>
+            <% }); %>
+
+    </ul>
+
+
+    <% data.page.languages.forEach(function(language) { %>
+       <a rel="alternate" hreflang="<%= language %>" href="/language/<%= language %>">
+            <%= i18n.__(language) %>
+           
+            </a>
+        <% }); %>
+
+</div>

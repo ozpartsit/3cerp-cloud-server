@@ -32,7 +32,7 @@ const options = {
 interface IAddressModel extends mongoose.Model<IAddress>, IExtendedModel<IAddress> { }
 
 //schema to shere
-export const nestedSchema = {
+const nestedSchemaAddress = {
   name: { type: String, required: true, input: "Input", validType: "text", min: 1, max: 256 },
   addressee: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
   address: { type: String, required: true, input: "Input", validType: "text", min: 1, max: 256 },
@@ -51,9 +51,11 @@ export const nestedSchema = {
   longitude: { type: String, input: "Input", readonly: true, validType: "number" }
 }
 
+export const nestedSchema = new mongoose.Schema(nestedSchemaAddress, { _id: false })
+
 export const schema = new mongoose.Schema<IAddress>(
   {
-    ...nestedSchema,
+    ...nestedSchemaAddress,
     entity: { type: mongoose.Schema.Types.ObjectId },
     billingAddress: { type: Boolean, default: false, input: "Switch", validType: "switch" },
     shippingAddress: { type: Boolean, default: false, input: "Switch", validType: "switch" },

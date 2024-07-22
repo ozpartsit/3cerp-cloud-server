@@ -29,17 +29,20 @@ export default async function getForm<T extends IExtendedDocument>(this: IExtend
                         }
                     }
 
-                    if (section.table) {
-                        let table = fields.find((field) => field.field == section.table.subdoc);
-                        section.table.table = `${modelName}.${section.table.subdoc}`;
-                        //if (table) section.table.fields = table.fields;
-                        Object.assign(section.table, table);
-                        if (section.table.columns) {
-                            for (let column of section.table.columns) {
-                                if (column.value) column.name = i18n.__(`${modelName.toLowerCase()}.${column.value}`);
-                                if (column.fields) await fieldsFill(modelName, column, fields, section.table.field)
+                    if (section.tables && section.tables.length) {
+                        for (let table of section.tables) {
+                            let tableObj = fields.find((field) => field.field == table.subdoc);
+                            tableObj.table = `${modelName}.${table.subdoc}`;
+                            //if (table) section.table.fields = table.fields;
+                            Object.assign(table, tableObj);
+                            if (table.columns) {
+                                for (let column of table.columns) {
+                                    if (column.value) column.name = i18n.__(`${modelName.toLowerCase()}.${column.value}`);
+                                    if (column.fields) await fieldsFill(modelName, column, fields, table.field)
+                                }
                             }
                         }
+                     
 
                     }
                 }

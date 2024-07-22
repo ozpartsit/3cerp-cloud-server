@@ -107,8 +107,8 @@ const TransactionSchema = {
   },
 
   //addresses
-  shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
-  billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+  shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
+  billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
 
   type: {
     type: String,

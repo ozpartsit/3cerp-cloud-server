@@ -22,6 +22,11 @@ export interface IItem extends IExtendedDocument {
   firstSalesDate: Date;
   lastSalesDate: Date;
 
+  //META TAGS
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string;
+
   //classsifictaions
   group?: mongoose.Schema.Types.ObjectId[];
   category?: mongoose.Schema.Types.ObjectId[];
@@ -104,6 +109,27 @@ const schema = new mongoose.Schema<IItem>(
       autopopulate: true,
       input: "Select",
       validType: "select",
+    },
+    //META
+    metaTitle: {
+      type: String,
+      min: [3, "Must be at least 3 characters long, got {VALUE}"],
+      input: "Input",
+      validType: "text",
+      help: "The <title> element typically appears as a clickable headline in search engine results"
+    },
+    metaDescription: {
+      type: String,
+      min: [3, "Must be at least 3 characters long, got {VALUE}"],
+      input: "Input",
+      validType: "text",
+      help: "Meta description also resides in the <head> of a webpage and is commonly (though not always) displayed in a SERP snippet along with a title and page URL."
+    },
+    metaKeywords: {
+      type: String,
+      min: [3, "Must be at least 3 characters long, got {VALUE}"],
+      input: "Input",
+      validType: "text",
     },
   },
   options

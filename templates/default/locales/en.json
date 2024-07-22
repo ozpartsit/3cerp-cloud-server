@@ -1,11 +1,11 @@
 {
-	"Hello": "Hello",
-	"Search": "Search",
-	"Home": "Home",
-	"Catalogues": "Catalogues",
-	"Brands": "Brands",
-	"About": "About",
-	"Contact": "Contact",
-	"Login": "Login",
-	"Sign Up": "Sign Up"
+	"language": {
+		"pl": "Polish",
+		"en": "English"
+	},
+	"pl": "Polish",
+	"primary": "Primary Color",
+	"secondary": "Secondary Color",
+	"accent": "Accent Color",
+	"en": "English"
 }

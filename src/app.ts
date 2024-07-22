@@ -3,6 +3,7 @@ import fileUpload from "express-fileupload";
 import http from "http";
 import * as dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import compression from "compression";
 import DB from "./config/database";
@@ -13,6 +14,7 @@ import RoutesCore from "./routes/core";
 import RoutesUI from "./routes/ui";
 import RoutesAuth from "./routes/auth";
 import RoutesHosting from "./routes/hosting";
+import RoutesChartData from "./routes/chart-data.js";
 import RoutesMaintenance from "./routes/maintenance";
 import RoutesExternal from "./routes/external";
 import RoutesPublic from "./routes/public";
@@ -46,6 +48,8 @@ export class App3CERP {
   public routesUI: RoutesUI = new RoutesUI();
   public routesAuth: RoutesAuth = new RoutesAuth();
   public routesHosting: RoutesHosting = new RoutesHosting();
+  public routesChartDatatHosting: RoutesChartData = new RoutesChartData();
+  
   public routesMaintenance: RoutesMaintenance = new RoutesMaintenance();
   public routesExternal: RoutesExternal = new RoutesExternal();
   public routesPublic: RoutesPublic = new RoutesPublic();
@@ -71,6 +75,8 @@ export class App3CERP {
     this.app.use(cors());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: false }));
+    // Użycie cookie-parser middleware
+    this.app.use(cookieParser());
     // enable files upload
     this.app.use(fileUpload({
       createParentPath: true
@@ -95,6 +101,7 @@ export class App3CERP {
     this.routesUI.start(this.app);
     this.routesAuth.start(this.app);
     this.routesHosting.start(this.app);
+    this.routesChartDatatHosting.start(this.app)
     this.routesMaintenance.start(this.app, this);
     this.routesExternal.start(this.app);
     this.routesPublic.start(this.app);

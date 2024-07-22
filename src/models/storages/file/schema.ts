@@ -9,7 +9,7 @@ export interface IFile extends IStorage {
 }
 export interface IFileModel extends mongoose.Model<IFile>, IExtendedModel<IFile> { }
 
-const options = { discriminatorKey: "type", collection: "storage" };
+const options = { discriminatorKey: "type", collection: "storage", toJSON: { virtuals: true }, toObject: { virtuals: true } };
 const schema = new mongoose.Schema<IFile>({
     //size: { type: Number, set: (v: any) => getFileSize(this.path) },
 
@@ -18,7 +18,7 @@ const schema = new mongoose.Schema<IFile>({
 
 schema.virtual('fullPath').get(function () {
     if (this.path)
-        return path.posix.join(process.env.APP_DOMAIN || "", "storage", this.path);
+        return new URL(path.posix.join("storage", this.path), process.env.APP_DOMAIN || "").href;
     else return undefined;
 });
 

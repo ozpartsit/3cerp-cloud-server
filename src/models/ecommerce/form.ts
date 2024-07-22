@@ -133,7 +133,8 @@ export default {
                             "value": "",
                             "fields": [
                                 "template",
-                                "logo"
+                                "logo",
+                                "favicon"
                             ]
                         },
                         {
@@ -159,8 +160,36 @@ export default {
                     "value": "cms",
                     "editable": true,
                     "fields": [
-                        "pages"
-                    ]
+                    ],
+                    "tables": [{
+                        "value": "pages",
+                        "subdoc": "pages",
+                        "columns": [
+                            {
+                                "value": "main",
+                                "fields": [
+                                    "name",
+                                    "urlComponent",
+                                ]
+                            },
+                            {
+                                "value": "meta",
+                                "fields": [
+                                    "metaTitle",
+                                    "metaDescription",
+                                    "metaKeywords"
+                                ]
+                            },
+                            {
+                                "value": "other",
+                                "fields": [
+                                    "html",
+                                    "template",
+                                    "languages"
+                                ]
+                            },
+                        ]
+                    }]
                 }
             ]
         },
