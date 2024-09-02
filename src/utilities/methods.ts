@@ -47,9 +47,10 @@ export interface IExtendedDocument extends mongoose.Document {
 export default function customMethodsPlugin<T extends IExtendedDocument>(schema: mongoose.Schema<T>) {
   // apply method to pre
   async function recalcDocument(this: T) {
-    if (this.type && this.recalc) {
+    if (this.recalc) {
       await this.recalc()
     }
+    if (this.validateVirtuals) this.validateVirtuals(false);
   }
   schema.method('setValue', setValue);
   schema.method('getOptions', getOptions);
@@ -120,8 +121,17 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
   });
 
   //add locals
+  //interfes
+  interface ITriggers {
+    type: string;
+    name: string;
+    field: string;
+    subdoc: string;
+    oldValue: any;
+    value: any;
+  }
   async function initLocal(this: T) {
-    this.$locals["triggers"] = [];
+    this.$locals["triggers"] = [] as ITriggers[];
   }
 
 

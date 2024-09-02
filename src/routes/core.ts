@@ -9,6 +9,7 @@ import ConstantController from "../controllers/constants";
 import FilesController from "../controllers/files";
 import EmailController from "../controllers/emails";
 import AccountController from "../controllers/accounts";
+import PreferenceController from "../controllers/preferences.js";
 
 
 
@@ -44,6 +45,7 @@ export default class Routes {
   public constantController: ConstantController = new ConstantController();
   public emailController = new EmailController(Email);
   public accountController = new AccountController(Account);
+  public preferenceController = new PreferenceController(Table);
 
 
   public start(app: express.Application): void {
@@ -56,7 +58,7 @@ export default class Routes {
     //Preferences
     this.routeUniversal("preferences", "user", new Controller(Preference))
     //Table Preferences
-    this.routeUniversal("preferences", "table", new Controller(Table))
+    this.routeUniversal("preferences", "table", this.preferenceController)
     //Dashboard Preferences
     this.routeUniversal("preferences", "dashboard", new Controller(Dashboard))
     //ChartType Preferences

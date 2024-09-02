@@ -29,7 +29,8 @@ export default {
                             "value": "other",
                             "fields": [
                                 "memo",
-                                "shippingCost"
+                                "shippingCost",
+                                "promoCode",
                             ]
                         },
                         // {
@@ -161,12 +162,24 @@ export default {
                 {
                     "value": "accounting",
                     "editable": true,
-                    "fields": [
-                        "taxRate",
-                        "taxNumber",
-                        "currency",
-                        "terms",
-                        "paymentMethod"
+                    "columns": [
+                        {
+                            "value": "tax",
+                            "fields": [
+                                "taxRate",
+                                "taxNumber",
+                            ]
+                        },
+                        {
+                            "value": "payment",
+                            "fields": [
+                                "currency",
+                                "terms",
+                                "paymentMethod"
+                            ]
+                        }
+
+
                     ]
                 }
             ]

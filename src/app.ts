@@ -13,6 +13,7 @@ import StatusMonitor from "./config/statusMonitor";
 import RoutesCore from "./routes/core";
 import RoutesUI from "./routes/ui";
 import RoutesAuth from "./routes/auth";
+import RoutesWebsite from "./routes/website.js";
 import RoutesHosting from "./routes/hosting";
 import RoutesChartData from "./routes/chart-data.js";
 import RoutesMaintenance from "./routes/maintenance";
@@ -47,6 +48,7 @@ export class App3CERP {
   public routesCore: RoutesCore = new RoutesCore();
   public routesUI: RoutesUI = new RoutesUI();
   public routesAuth: RoutesAuth = new RoutesAuth();
+  public routesWebsite: RoutesWebsite = new RoutesWebsite();
   public routesHosting: RoutesHosting = new RoutesHosting();
   public routesChartDatatHosting: RoutesChartData = new RoutesChartData();
   
@@ -100,6 +102,7 @@ export class App3CERP {
     this.routesCore.start(this.app);
     this.routesUI.start(this.app);
     this.routesAuth.start(this.app);
+    this.routesWebsite.start(this.app);
     this.routesHosting.start(this.app);
     this.routesChartDatatHosting.start(this.app)
     this.routesMaintenance.start(this.app, this);

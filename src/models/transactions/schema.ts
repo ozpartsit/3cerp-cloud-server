@@ -28,14 +28,19 @@ export interface ITransaction extends IExtendedDocument {
   referenceNumber: string;
   memo: string;
 
+  //address
   billingAddress?: IAddress
   shippingAddress?: IAddress
+  shipToDifferentAddress?: Boolean;
 
   //classsifictaions
   group?: mongoose.Schema.Types.ObjectId[];
   category?: mongoose.Schema.Types.ObjectId[];
 
   salesRep?: mongoose.Schema.Types.ObjectId;
+
+
+
 
   recalc(): any;
   autoName(): any;
@@ -107,8 +112,14 @@ const TransactionSchema = {
   },
 
   //addresses
-  shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
-  billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
+  shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+  billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+  shipToDifferentAddress: {
+    type: Boolean,
+    input: "Switch",
+    validType: "switch",
+    default: false,
+  },
 
   type: {
     type: String,
@@ -239,7 +250,15 @@ schema.pre("save", async function (next) {
   }
 
 
+  schema.method("recalc", async function () {
 
+    console.log("recalc", "transaction")
+    for (let trigger of this.$locals.triggers) {
+      console.log(`${trigger.type}_${trigger.field}`)
+      this.$locals.triggers.shift();
+    }
+
+  })
 
 
   await this.autoName();

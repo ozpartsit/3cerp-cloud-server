@@ -12,6 +12,7 @@ export default {
                             "value": "name",
                             "fields": [
                                 "name",
+                                "description",
                                 "subdomain",
                                 "domain"
                             ]
@@ -29,6 +30,7 @@ export default {
                         {
                             "value": "communication",
                             "fields": [
+                                "message",
                                 "email",
                                 "phone"
                             ]
@@ -40,6 +42,22 @@ export default {
                                 "group"
                             ]
                         }
+                    ]
+                },
+                {
+                    "value": "options",
+                    "editable": true,
+                    "columns": [
+                        {
+                            "value": "config",
+                            "fields": [
+                                "loginRequired",
+                                "phoneRequired",
+                                "allowBackorder",
+                                "taxRate"
+                            ]
+                        },
+
                     ]
                 }
             ]
@@ -134,6 +152,7 @@ export default {
                             "fields": [
                                 "template",
                                 "logo",
+                                "image",
                                 "favicon"
                             ]
                         },
@@ -169,6 +188,8 @@ export default {
                                 "value": "main",
                                 "fields": [
                                     "name",
+                                    "description",
+                                    "pageType",
                                     "urlComponent",
                                 ]
                             },
@@ -185,7 +206,37 @@ export default {
                                 "fields": [
                                     "html",
                                     "template",
+                                    "image",
                                     "languages"
+                                ]
+                            },
+                        ]
+                    }]
+                },
+                {
+                    "value": "emailTriggers",
+                    "editable": true,
+                    "fields": [
+                    ],
+                    "tables": [{
+                        "value": "emailTriggers",
+                        "subdoc": "emailTriggers",
+                        "columns": [
+                            {
+                                "value": "main",
+                                "fields": [
+                                    "template",
+                                    "language",
+                                    "trigger"
+                                ]
+                            },
+                            {
+                                "value": "other",
+                                "fields": [
+                                    "email",
+                                    "cc",
+                                    "bcc",
+                                    "replyTo"
                                 ]
                             },
                         ]

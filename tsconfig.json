@@ -38,6 +38,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "sourceMap": true,
     "outDir": "dist", // Folder, do którego trafia skompilowany kod
     "target": "esnext", // Skompilowany kod JavaScript będzie zgodny z ES2020
     "module": "esnext", // Użyj najnowszego standardu modułów ES

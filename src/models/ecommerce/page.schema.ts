@@ -7,6 +7,7 @@ export interface IPage extends IExtendedDocument {
     webshop: mongoose.Schema.Types.ObjectId;
     type: string;
     name: string;
+    description: string;
 
     //META TAGS
     metaTitle: string;
@@ -16,16 +17,18 @@ export interface IPage extends IExtendedDocument {
     html: string;
     pageType: string;
     urlComponent: string;
-
+    // wygląd
     template: string;
     languages: string[]
+    image: mongoose.Schema.Types.ObjectId;
 }
 interface IPageModel extends mongoose.Model<IPage>, IExtendedModel<IPage> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
 
 const PageSchema = {
     name: { type: String, input: "Input", validType: "text" },
-    webshop: { type: mongoose.Schema.Types.ObjectId, copy: "account" },
+    description: { type: String, input: "Input", validType: "text" },
+    webshop: { type: mongoose.Schema.Types.ObjectId },
     metaTitle: {
         type: String,
         // min: [3, "Must be at least 3 characters long, got {VALUE}"],
@@ -55,13 +58,27 @@ const PageSchema = {
         input: "Input",
         validType: "text"
     },
+    image: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Storage",
+        autopopulate: true,
+        input: "File",
+        validType: "images"
+    },
     languages: {
         type: [String],
         default: ["en"],
         input: "Select",
         constant: 'language',
         defaultSelect: true,
-    
+
+    },
+    pageType: {
+        type: String,
+        required: true,
+        input: "Input",
+        validType: "text",
+        default: 'page'
     },
     type: {
         type: String,

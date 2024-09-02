@@ -6,6 +6,8 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
   //console.log(this.schema.path('filters.value').options.refPath);
 
   for (const [pathname, schemaType] of Object.entries<any>(this.schema.paths)) {
+    let options = getOptions(schemaType)
+
     if (["Embedded", "Array"].includes(schemaType.instance)) {
       if ((schemaType.options.ref || schemaType.options.refPath) || schemaType.options.autopopulate) {
 
@@ -15,14 +17,16 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
               if (e.value) {
                 paths.push({
                   path: `${pathname}.${index}.value`,
-                  select: "name displayname type _id resource path deleted color mime",
+                  select: options.select || "name displayname type _id resource path deleted color mime images",
+                  options: options.populate,
                   model: e.ref,
                   index: index
                 });
               } else {
                 paths.push({
                   path: pathname,
-                  select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color mime"
+                  select: options.select || "name displayname type _id resource path deleted color mime images",
+                  options: options.populate,
                 });
               }
             });
@@ -35,14 +39,16 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
                     if (e.value) {
                       paths.push({
                         path: `${pathname}.${index}.${key}.${index2}.value`,
-                        select: "name displayname type _id resource path deleted color mime",
+                        select: options.select || "name displayname type _id resource path deleted color mime images",
+                        options: options.populate,
                         model: e.ref,
                         index: index
                       });
                     } else {
                       paths.push({
                         path: pathname,
-                        select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color mime"
+                        select: options.select || "name displayname type _id resource path deleted color mime images",
+                        options: options.populate,
                       });
                     }
                   });
@@ -55,9 +61,12 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
     } else {
       // if (pathname === "_id") return;
       if ((schemaType.options.ref || schemaType.options.refPath) && schemaType.options.autopopulate) {
+
+
         paths.push({
           path: pathname,
-          select: schemaType.options.autopopulate.select || "name displayname type _id resource path deleted color mime"
+          select: options.select || "name displayname type _id resource path deleted color mime images",
+          options: options.populate,
         });
       }
     }
@@ -68,8 +77,9 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
   let Promises: any[] = [];
   for (let path of paths) {
     //console.log("path", path,this[path.path] )
-    if ((this[path.path] && !this[path.path].type) || !this[path.path]) // to do - poprawić
+    if ((this[path.path] && !this[path.path].type) || !this[path.path]) {// to do - poprawić
       Promises.push(this.populate(path));
+    }
   }
   //console.log("Promises1",Promises[0])
   await Promise.all(Promises);
@@ -96,4 +106,31 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
 
   return doc;
 
+}
+
+function getOptions(schemaType) {
+  let options = schemaType.options.autopopulate && schemaType.options.autopopulate.select ? Array.isArray(schemaType.options.autopopulate.select) ? schemaType.options.autopopulate.select : schemaType.options.autopopulate.select.split(" ") : []
+  let select = options.filter(field => !field.includes("."));
+  select.push("name", "displayname", "type", "_id", "resource", "path", "deleted")
+
+  let deep = options.filter(field => field.includes(".")).reduce((t, v) => {
+    let fields = v.split(".")
+    if (!t.path.includes(fields[0]) && fields[0]) {
+      t.path.push(fields[0]);
+      select.push(fields[0])
+    }
+    if (!t.select.includes(fields[1]) && fields[1]) t.select.push(fields[1])
+    return t
+  }, { path: [], select: ["name", "displayname", "type", "_id", "resource", "path", "deleted"] })
+
+  const populate = {
+    populate: {
+      path: deep.path.join(" "),
+      select: deep.select
+    }
+  }
+  if (deep.path && deep.path.length)
+    return { select, populate: populate }
+  else
+    return { select }
 }

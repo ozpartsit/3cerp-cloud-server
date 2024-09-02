@@ -4,6 +4,7 @@ import language from "./languages"
 import country from "./countries"
 import operator from "./operators"
 import template from "./templates"
+import trigger from "./triggers.js"
 import intervals from "./intervals"
 import dataranges from "./dataranges"
 
@@ -19,6 +20,7 @@ export default {
     trantypes: ["SalesOrder", "Invoice"],
     operator: operator,
     template: template,
+    trigger: trigger,
     interval: intervals,
     datarange: dataranges,
 

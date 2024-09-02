@@ -1,0 +1,128 @@
+<div class="section login-page-in">
+     <div class="container">
+          <div class="row justify-content-center">
+               <div class="col-12 col-sm-12 col-md-12 col-lg-8">
+                    <div class="box box-login">
+                         <form method="post" action="#" class="login-form">
+                              <h3 class="title text-uppercase">
+                                   <%= i18n.__('locales.sign-up.title')%>
+                              </h3>
+                              <p>
+                                <%= i18n.__('locales.sign-up.subtitle')%>
+                              </p>
+
+                              <div class="row">
+                                   <div
+                                        class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                   >
+                                        <div class="form-group">
+                                             <input
+                                                  id="CustomerFirstName"
+                                                  type="text"
+                                                  name="customer[first-name]"
+                                                  placeholder="<%= i18n.__('locales.sign-up.first-name')%>"
+                                                  class="form-control"
+                                                  required=""
+                                             />
+                                        </div>
+                                   </div>
+                                   <div
+                                        class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                   >
+                                        <div class="form-group">
+                                             <input
+                                                  id="CustomerLastName"
+                                                  type="text"
+                                                  name="customer[Last-name]"
+                                                  placeholder="<%= i18n.__('locales.sign-up.last-name')%>"
+                                                  class="form-control"
+                                                  required=""
+                                             />
+                                        </div>
+                                   </div>
+                              </div>
+                              <div class="row">
+                                   <div
+                                        class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3"
+                                   >
+                                        <div class="form-group">
+                                             <input
+                                                  id="CustomerEmail1"
+                                                  type="email"
+                                                  name="customer[email_1]"
+                                                  placeholder="<%= i18n.__('locales.sign-up.email')%>"
+                                                  class="form-control"
+                                                  required=""
+                                             />
+                                        </div>
+                                   </div>
+                              </div>
+                              <div class="row">
+                                   <div
+                                        class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3"
+                                   >
+                                        <div
+                                             class="customCheckbox form-check clearfix"
+                                        >
+                                             <input
+                                                  id="newsletter"
+                                                  name="newsletter"
+                                                  type="checkbox"
+                                                  class="form-check-input"
+                                             />
+                                             <label
+                                                  for="newsletter"
+                                                  class="mx-2"
+                                                  ><%= i18n.__('locales.sign-up.newsletter')%></label
+                                             >
+                                        </div>
+                                   </div>
+                              </div>
+
+                              <div class="row">
+                                   <div
+                                        class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                   >
+                                        <div class="form-group">
+                                             <input
+                                                  id="CustomerPassword1"
+                                                  type="password"
+                                                  name="customer[Password]"
+                                                  placeholder="<%= i18n.__('locales.sign-up.password')%>"
+                                                  class="form-control"
+                                                  required=""
+                                             />
+                                        </div>
+                                   </div>
+                                   <div
+                                        class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                   >
+                                        <div class="form-group">
+                                             <input
+                                                  id="CustomerConfirmPassword"
+                                                  type="Password"
+                                                  name="customer[ConfirmPassword]"
+                                                  placeholder="<%= i18n.__('locales.sign-up.confirm-password')%>"
+                                                  class="form-control"
+                                                  required=""
+                                             />
+                                        </div>
+                                   </div>
+                              </div>
+                              <div class="row">
+                                   <div
+                                        class="text-start col-12 col-sm-12 col-md-6 col-lg-6"
+                                   >
+                                        <input
+                                             type="submit"
+                                             class="btn btn-lg btn-primary rounded"
+                                             value="<%= i18n.__('locales.sign-up.btn')%>"
+                                        />
+                                   </div>
+                              </div>
+                         </form>
+                    </div>
+               </div>
+          </div>
+     </div>
+</div>

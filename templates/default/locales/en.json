@@ -1,11 +1,78 @@
 {
-	"language": {
-		"pl": "Polish",
-		"en": "English"
-	},
-	"pl": "Polish",
-	"primary": "Primary Color",
-	"secondary": "Secondary Color",
-	"accent": "Accent Color",
-	"en": "English"
+     "locales": {
+          "language": {
+               "pl": "Polish",
+               "en": "English"
+          },
+          "pl": "Polish",
+          "primary": "Primary Color",
+          "secondary": "Secondary Color",
+          "accent": "Accent Color",
+          "en": "English",
+          "top-bar": {
+               "my-account": "My account",
+               "search": "Search"
+          },
+          "alerts": {
+               "success": "Changes saved successfully!",
+               "danger": "Something went wrong. Please try again!",
+               "warning": "Warning, changes may not have been saved!"
+          },
+          "stock-status": {
+               "in-stock": "In stock",
+               "not-available": "Not available"
+          },
+          "products": {
+               "pagination": {
+                    "show": "Show",
+                    "sort": "Sort"
+               },
+               "display-system": {
+                    "grid": "Grid view",
+                    "list": "List view"
+               }
+          },
+          "contact": {
+               "phone": "Phone",
+               "email": "Email",
+               "address": "Address",
+               "title": "Get in touch",
+               "send-btn": "Send message",
+               "name": "Name",
+               "topic": "Topic",
+               "message": "Message"
+          },
+          "shopping-cart": {
+               "title": "Your cart",
+               "items": "Items",
+               "checkout": "Checkout",
+               "total": "Total"
+          },
+          "product-view": {
+               "related-title": "Related products"
+          },
+          "login": {
+               "title": "Log in",
+               "subtitle": "You do not have an account with us?",
+               "sign-up": "Sign up",
+               "email": "Email",
+               "password": "Password",
+               "logged-in": "Keep me logged in",
+               "btn": "Login",
+               "forgot": "Forgot your password?",
+               "error": "Incorrect data"
+          },
+          "sign-up": {
+               "title": "Don't have an account? Register Now",
+               "subtitle": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
+               "first-name": "First name",
+               "last-name": "Last name",
+               "email": "Email",
+               "newsletter": "Sign Up for Newsletter",
+               "password": "Password",
+               "confirm-password": "Confirm Password",
+               "btn": "Register Now"
+          }
+     },
+     "my-account": "my-account"
 }

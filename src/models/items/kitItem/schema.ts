@@ -2,11 +2,13 @@ import * as mongoose from "mongoose";
 import Item, { IItem } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import Component, { IComponent } from "./components.schema";
+import { ILine } from "../../transactions/line.schema.js";
 const componentModel = mongoose.model("Component", Component);
 const options = { discriminatorKey: "type", collection: "items" };
 
 export interface IKitItem extends IItem {
   components: IComponent[];
+  syncComponents(line:ILine): any;
 }
 export interface IKitItemModel extends mongoose.Model<IKitItem>, IExtendedModel<IKitItem> { }
 

@@ -1,11 +1,78 @@
 {
-	"language": {
-		"pl": "Polski",
-		"en": "Angielski"
-	},
-	"pl": "Polski",
-	"primary": "Kolor Główny",
-	"secondary": "Kolor Dodatkowy",
-	"accent": "Kolor szczegółow",
-	"en": "Angielski"
+     "locales": {
+          "language": {
+               "pl": "Polski",
+               "en": "Angielski"
+          },
+          "pl": "Polski",
+          "primary": "Kolor Główny",
+          "secondary": "Kolor Dodatkowy",
+          "accent": "Kolor szczegółow",
+          "en": "Angielski",
+          "top-bar": {
+               "my-account": "Moje konto",
+               "search": "Szukaj"
+          },
+          "alerts": {
+               "success": "Pomyślanie zapisano zmiany!",
+               "danger": "Coś poszło nie tak. Spróbuj ponownie!",
+               "warning": "Uwaga zmiany mogły zostanie niezapisane!"
+          },
+          "stock-status": {
+               "in-stock": "Dostępne",
+               "not-available": "Niedostępne"
+          },
+          "products": {
+               "pagination": {
+                    "show": "Pokaz",
+                    "sort": "Sortuj"
+               },
+               "display-system": {
+                    "grid": "Widok siatki",
+                    "list": "Widok listy"
+               }
+          },
+          "contact": {
+               "phone": "Telefon",
+               "email": "E-mail",
+               "address": "Adres",
+               "title": "Skontaktuj się",
+               "send-btn": "Wyślij wiadomość",
+               "name": "Nazwa",
+               "topic": "Temat",
+               "message": "Wiadomość"
+          },
+          "shopping-cart": {
+               "title": "Twój koszyk",
+               "items": "produktów",
+               "checkout": "Kasa",
+               "total": "Suma"
+          },
+          "product-view": {
+               "related-title": "Produkty powiązane"
+          },
+          "login": {
+               "title": "Zaloguj się",
+               "subtitle": "Nie masz u nas konta?",
+               "sign-up": "Zarejestruj się",
+               "email": "Email",
+               "password": "Hasło",
+               "logged-in": "Zapamiętaj mnie",
+               "btn": "Zaloguj się",
+               "forgot": "Zapomniałeś hasła?",
+               "error": "Nieprawidłowe dane"
+          },
+          "sign-up": {
+               "title": "Nie masz konta? Zarejestruj się teraz",
+               "subtitle": "Lorem Ipsum to tekst zastępczy używany w przemyśle drukarskim i składu tekstu. Lorem Ipsum jest standardowym tekstem zastępczym w branży od XVI wieku.",
+               "first-name": "Imię",
+               "last-name": "Nazwisko",
+               "email": "Email",
+               "newsletter": "Zapisz się na newsletter",
+               "password": "Hasło",
+               "confirm-password": "Potwierdź hasło",
+               "btn": "Zarejestruj się teraz"
+          }
+     },
+     "my-account": "my-account"
 }

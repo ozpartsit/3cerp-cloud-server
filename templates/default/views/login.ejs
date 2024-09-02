@@ -1,5 +1,96 @@
-<div> 
-    pages/login.ejs
-
-
+<div>
+     <div class="section login-page-in">
+          <div class="container">
+               <div class="row justify-content-center">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-4">
+                         <div class="mb-4 box box-login">
+                              <form id="main_login_form" class="login-form">
+                                   <h3 class="title text-uppercase">
+                                        <%= i18n.__('locales.login.title')%>
+                                   </h3>
+                                   <p class="mb-3">
+                                        <%= i18n.__('locales.login.subtitle')%>
+                                        <a href="<%= data.page.host%>/sign-up">
+                                             <%=
+                                             i18n.__('locales.login.sign-up')%>
+                                        </a>
+                                   </p>
+                                   <div class="row">
+                                        <div
+                                             class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <input
+                                                       type="email"
+                                                       name="customer[email]"
+                                                       placeholder="<%= i18n.__('locales.login.email')%>"
+                                                       id="CustomerEmail"
+                                                       class="form-control"
+                                                       required
+                                                  />
+                                             </div>
+                                        </div>
+                                        <div
+                                             class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <input
+                                                       type="password"
+                                                       value=""
+                                                       name="customer[password]"
+                                                       placeholder="<%= i18n.__('locales.login.password')%>*"
+                                                       id="CustomerPassword"
+                                                       class="form-control"
+                                                       required
+                                                  />
+                                             </div>
+                                        </div>
+                                        <div
+                                             id="main_login_error"
+                                             class="login-error"
+                                        >
+                                             <%=
+                                             i18n.__('locales.login.error')%>
+                                        </div>
+                                        <div
+                                             class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3"
+                                        >
+                                             <label>
+                                                  <input
+                                                       class="d-inline-block align-middle mb-0 mt-0 margin-5px-right form-check-input"
+                                                       type="checkbox"
+                                                       name="account"
+                                                  />
+                                                  <span
+                                                       class="d-inline-block align-middle mx-2"
+                                                       ><%=
+                                                       i18n.__('locales.login.logged-in')%></span
+                                                  >
+                                             </label>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <div
+                                             class="text-left col-12 col-sm-12 col-md-12 col-lg-12 d-flex justify-content-between align-items-center"
+                                        >
+                                             <input
+                                                  id="main_btn_login"
+                                                  type="submit"
+                                                  class="btn rounded btn-primary btn-lg"
+                                                  value="Login"
+                                             />
+                                             <p class="m-0">
+                                                  <a href="forgot-password.html"
+                                                       ><%=
+                                                       i18n.__('locales.login.forgot')%></a
+                                                  >
+                                             </p>
+                                        </div>
+                                   </div>
+                              </form>
+                         </div>
+                    </div>
+               </div>
+          </div>
+     </div>
 </div>

@@ -1,35 +1,82 @@
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="description" content="description" />
+    <title><%= data.page.title%></title>
+    <!--Favicon Icon-->
+    <link rel="shortcut icon" href="<%= data.page.logo.fullPath %>" />
+    <!--Google Fonts-->
+    <link
+      href="//fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
 
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="/assets/css/plugins.css" />
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/responsive.css" />
+  </head>
+  <body class="home demo1">
+    <!--Preloader-->
+    <div id="preloader">
+      <div class="loader"></div>
+    </div>
 
-   <!-- HEAD -->
-   <%- include('partials/head') %>
-<body>
-        <!-- HEADER -->
-        <%- include('partials/header') %>
+    <!-- CONTENT -->
+    <div class="page-wrapper">
+      <!-- TOP BAR -->
+      <%- include('partials/top-bar') %>
 
-            <!-- NAV -->
-        <%- include('partials/nav') %>
+      <!-- CONTENT -->
+      <main id="page-content">
+        <!-- Page banner -->
+        <%- include('partials/page-banner') %>
 
-        <br />
-
-        
-        <!-- VIEW -->
+        <!-- Views -->
         <%- include('views/'+(view||'home')) %>
-        <br />
-        <!-- FOOTER -->
-        <%- include('partials/footer') %>
+      </main>
 
+      <!-- FOOTER -->
+      <%- include('partials/footer') %>
 
+      <!-- SCROLL TOP -->
+      <%- include('partials/scroll-top') %>
 
-      
-</body>
+      <!-- MINI CART -->
+      <%- include('partials/mini-cart') %>
 
-<script>
-    const view =  <%- JSON.stringify(view || 'home') %>;
-    const data =  <%- JSON.stringify(data) %>;
-    console.log("Available data on view:", view)
-    console.log(data)
-</script>
-<script src="/assets/js/scripts.js"></script>
-<script src="/assets/js/cookies.js"></script>
+      <!-- NEWSLETTER POPUP -->
+      <%- include('partials/newsletter-popup') %>
+
+      <div class="modalOverly"></div>
+    </div>
+
+    <!-- Including Jquery -->
+    <script src="/assets/js/vendor/jquery-min.js"></script>
+    <script src="/assets/js/vendor/js.cookie.js"></script>
+
+    <!--Including Javascript-->
+    <script src="/assets/js/plugins.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <!-- Parts app -->
+    <script src="/assets/js/partials/newsletter-popup.js"></script>
+
+    <!-- Including ejs scripts -->
+    <!-- Create object data -->
+    <%- include('assets/js/scripts') %>
+    <script src="/assets/js/partials/api.js"></script>
+    <script src="/assets/js/partials/shopping-card.js"></script>
+    <script src="/assets/js/partials/login.js"></script>
+    <script src="/assets/js/index.js"></script>
+  </body>
 </html>

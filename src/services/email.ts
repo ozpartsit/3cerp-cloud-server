@@ -73,9 +73,15 @@ export class Email {
     // i18n
     this.emaili18n.setLocale(options.locale || 'en');
     options.i18n = this.emaili18n;
+    if (!options.template) options.template = false;
     const emailContent = await ejs.renderFile(path.join(__dirname, 'templates', template), options);
     return emailContent;
   }
+  async compileText(taxt: string, data: any) {
+    const text = ejs.render(taxt, data);
+    return text;
+  }
+
   // to do - dodać interfejs i możliwość tablicy
   public async send(email: any = {}) {
 
@@ -87,7 +93,7 @@ export class Email {
       html: email.text,
       attachments: []
     }
-    if (email.email) {
+    if (email.email && email.email.name) {
       config.from = `${email.email.name} <${email.email.name}>`
     }
     if (email.attachments) {
@@ -115,7 +121,6 @@ export class Email {
       console.log(err)
       throw err;
     }
-
 
     return await this.transporter.sendMail(config)
     //   , (error: any, info: any) => {

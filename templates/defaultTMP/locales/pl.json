@@ -1,0 +1,15 @@
+{
+	"language": {
+		"pl": "Polski",
+		"en": "Angielski"
+	},
+	"pl": "Polski",
+	"primary": "Kolor Główny",
+	"secondary": "Kolor Dodatkowy",
+	"accent": "Kolor szczegółow",
+	"en": "Angielski",
+	"test.test": "tłumaczenie - test.test",
+	"test": {
+		"test": "test.test"
+	}
+}

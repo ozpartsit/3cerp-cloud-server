@@ -12,12 +12,14 @@ export default {
                             "value": "name",
                             "fields": [
                                 "name",
-                                "description"
+                                "description",
+                                "urlComponent"
                             ]
                         },
                         {
                             "value": "details",
                             "fields": [
+                                "sku",
                                 "barcode",
                                 "manufacturer",
                                 "weight",
@@ -46,9 +48,82 @@ export default {
                 {
                     "value": "prices",
                     "editable": true,
-                    "fields": [
-                        "prices"
-                    ]
+                    "tables": [{
+                        "value": "prices",
+                        "subdoc": "prices",
+                        "columns": [
+                            {
+                                "value": "price",
+                                "fields": [
+                                    "price",
+                                    "currency",
+                                ]
+                            },
+                            {
+                                "value": "moq",
+                                "fields": [
+                                    "moq",
+                                ]
+                            },
+                            {
+                                "value": "other",
+                                "fields": [
+                                    "priceLevel",
+                                ]
+                            },
+                        ],
+                    }]
+                },
+                {
+                    "value": "relatedItems",
+                    "editable": true,
+                    "tables": [{
+                        "value": "relatedItems",
+                        "subdoc": "relatedItems",
+                        "columns": [
+                            {
+                                "value": "item",
+                                "fields": [
+                                    "related",
+                                    "description",
+                                ]
+                            },
+                            {
+                                "value": "other",
+                                "fields": [
+                                    "language",
+                                ]
+                            },
+                        ],
+                    }]
+                },
+                {
+                    "value": "parameters",
+                    "editable": true,
+                    "tables": [{
+                        "value": "parameters",
+                        "subdoc": "parameters",
+                        "columns": [
+                            {
+                                "value": "label",
+                                "fields": [
+                                    "name",
+                                ]
+                            },
+                            {
+                                "value": "value",
+                                "fields": [
+                                    "value",
+                                ]
+                            },
+                            {
+                                "value": "other",
+                                "fields": [
+                                    "language",
+                                ]
+                            },
+                        ],
+                    }]
                 }
             ]
         },

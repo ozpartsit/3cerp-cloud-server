@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -p . && npm run copy-ejs && npm run copy-imgs",
     "start": "SET NODE_ENV=production&node dist/app.mjs",
-    "dev": "SET NODE_ENV=development&& nodemon --exec node --loader ts-node/esm --import=./logError.js src/app.ts",
+    "dev": "SET NODE_ENV=development&& nodemon --exec node --enable-source-maps --loader ts-node/esm --import=./logError.js src/app.ts",
     "pm2": "SET NODE_ENV=development&pm2 start ecosystem.config.js",
     "copy-ejs": "cpy \"src/**/*.ejs\" \"dist/\"",
     "copy-imgs": "cpy \"src/**/*.png\" \"dist/\"",

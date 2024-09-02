@@ -4,6 +4,7 @@ import { IExtendedModel } from "../utilities/static";
 import Access, { IAccess } from "./access.model";
 import User, { IUser } from "./user.model";
 import Folder, { IFolder } from "./storages/folder/schema";
+import EmailTemplate from "./emailTemplate.model.js";
 
 export interface IAccount extends IExtendedDocument {
     id: string;
@@ -16,6 +17,7 @@ export interface IAccount extends IExtendedDocument {
     dbHost: string;
     storageRoot?: mongoose.Schema.Types.ObjectId;
     initStorage(): Promise<IFolder & { _id: any; }>
+    initEmailTemplates(): any
 }
 
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +75,6 @@ schema.virtual("users", {
 schema.index({ name: 1 });
 
 schema.methods.initStorage = async function () {
-
     //let FolderModel = Folder.setAccount(this._id);
     return await Folder.findOne({ path: encodeURI(this.id) }).then(async (res) => {
         //jeżeli folder w DB nie istnieje - dodaj
@@ -92,8 +93,57 @@ schema.methods.initStorage = async function () {
     })
 };
 
+schema.methods.initEmailTemplates = async function () {
+    await EmailTemplate.findOne({ trigger: "contact" }).then(async (res) => {
+        if (!res) {
+            return await new EmailTemplate({
+                account: this._id,
+                name: "contact",
+                type: "EmailTemplate",
+                trigger: "contact",
+                text: "dziękujemy za kontakt"
+            }).save();
+        }
+    })
+    await EmailTemplate.findOne({ trigger: "registration" }).then(async (res) => {
+        if (!res) {
+            return await new EmailTemplate({
+                account: this._id,
+                name: "registration",
+                type: "EmailTemplate",
+                trigger: "registration",
+                text: "dziękujemy za rejestracje"
+            }).save();
+        }
+    })
+    await EmailTemplate.findOne({ trigger: "registration_confirmed" }).then(async (res) => {
+        if (!res) {
+            return await new EmailTemplate({
+                account: this._id,
+                name: "v",
+                type: "EmailTemplate",
+                trigger: "registration_confirmed",
+                text: "Email potwierdzony"
+            }).save();
+        }
+    })
+    await EmailTemplate.findOne({ trigger: "reset_password" }).then(async (res) => {
+        if (!res) {
+            return await new EmailTemplate({
+                account: this._id,
+                name: "reset_password",
+                type: "EmailTemplate",
+                trigger: "reset_password",
+                text: "Reset hasła"
+            }).save();
+        }
+    })
+}
+
+
 schema.post('save', async function () {
     const root = await this.initStorage();
+    await this.initEmailTemplates();
     if (root) {
         await this.$model().updateOne({ _id: this._id }, { $set: { storageRoot: root._id } })
     }
@@ -108,9 +158,9 @@ const Account: IAccountModel = mongoose.model<IAccount, IAccountModel>(
 
 Account.init().then(function (Event) {
     console.log('Account Builded');
-    // Account.findById('64f4cc1c9842bd71489d1fa0').then(res => {
-    //     if (res) res.save()
-    // })
+    Account.findById('64f4cc1c9842bd71489d1fa0').then(res => {
+        if (res) res.save()
+    })
 })
 
 export default Account;

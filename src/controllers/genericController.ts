@@ -26,7 +26,7 @@ class GenericController<T extends IExtendedDocument> {
         try {
             if (!req.body.document) req.body.document = {}
             req.body.document.account = req.headers.account; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
-            console.log(this.model)
+
             if (this.model.userRequired()) req.body.document.user = req.headers.user;
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let { document, saved } = await this.model.addDocument(mode, req.body.document);
@@ -340,7 +340,7 @@ class GenericController<T extends IExtendedDocument> {
                 await document.autoPopulate();
                 document = document.constantTranslate(req.locale);
                 
-                if(subdocument){
+                if(subdocument && subdocument.constantTranslate){
                     subdocument = subdocument.constantTranslate(req.locale);
                 } 
 

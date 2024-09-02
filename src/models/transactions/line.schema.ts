@@ -4,8 +4,10 @@ import { ITransaction } from "./schema";
 import TranLineTypes from "../../constants/transaction.lines.types";
 import { roundToPrecision } from "../../utilities/usefull";
 import { setItem, setQuantity } from "./line.actions";
+import { IExtendedDocument } from "../../utilities/methods.js";
+import { IKitItem } from "../items/kitItem/schema.js";
 
-export interface ILine {
+export interface ILine extends IExtendedDocument {
   _id: mongoose.Schema.Types.ObjectId;
   parent?: any;
   index: number;
@@ -13,7 +15,7 @@ export interface ILine {
   transaction: ITransaction["_id"];
   entity: ITransaction["entity"];
   account: ITransaction["account"];
-  item: IItem;
+  item: IItem | IKitItem;
   kit: mongoose.Schema.Types.ObjectId;
   description: string;
   quantity: number;
@@ -62,7 +64,7 @@ const schema = new mongoose.Schema<ILine>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Item",
       required: true,
-      autopopulate: { select: "name displayname type _id" },
+      autopopulate: { select: "name displayname type _id images.path images.fullPath" },
       input: "Autocomplete",
       validType: "url"
     },
@@ -167,20 +169,24 @@ schema.method("actions", async function (trigger) {
 
 });
 
-schema.pre("validate", async function (next) {
-  //console.log("pre valide transaction line");
+schema.method("recalc", async function () {
 
-  //if (this.deleted) throw new Error.ValidationError();
-
-
+  console.log("recalc", "transaction.line")
+  for (let trigger of this.$locals.triggers) {
+    await this.actions(trigger)
+    this.$locals.triggers.shift();
+  }
   // calc and set amount fields
   this.amount = roundToPrecision(this.quantity * this.price, 2);
-  // tmp tax rate
   this.taxRate = 0.23;
   this.taxAmount = roundToPrecision(this.amount * this.taxRate, 2);
   this.grossAmount = roundToPrecision(this.amount + this.taxAmount, 2);
 
+})
 
+
+schema.pre("validate", async function (next) {
+  //console.log("pre valide transaction line");
 
   next();
 });

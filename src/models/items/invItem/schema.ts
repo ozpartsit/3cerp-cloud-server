@@ -69,6 +69,7 @@ const options = { discriminatorKey: "type", collection: "items" };
 //   preferred: { type: Boolean, required: true, input: "boolean" }
 // });
 export interface IInvItem extends IItem {
+  sku: string;
   //vendors?: IVendors[];
   //warehouses?: IWarehouses[];
   //locations?: ILocations[];
@@ -85,6 +86,7 @@ export interface IInvItemModel extends mongoose.Model<IInvItem>, IExtendedModel<
 
 const schema = new mongoose.Schema<IInvItem>(
   {
+    sku: { type: String, input: "Input", validType: "text" },
     //statistics
     firstReceiptDate: { type: Date },
     lastReceiptDate: { type: Date },

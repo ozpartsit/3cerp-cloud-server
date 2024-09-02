@@ -246,7 +246,8 @@ export async function addDocument<T extends IExtendedDocument>(this: IExtendedMo
     let document = new this(data || {})//await this.create(data || {});
 
     document.initLocal();
-    document.recalcDocument();
+    document.$locals.triggers.push({ type: "addDocument", name: `addDocument`, field: "_id", oldValue: null, value: document._id })
+    await document.recalcDocument();
     //let message = await document.validateDocument();
     if (mode === "advanced") {
       // Zapisanie dokumentu do cache
@@ -266,11 +267,12 @@ export async function getDocument<T extends IExtendedDocument>(this: IExtendedMo
   try {
     let document: T | null | undefined = reload || mode != "advanced" ? await this.loadDocument(id, field) : null;
     if (document && document._id) {
+
       //const cacheID = new Types.ObjectId().toString();
       // to do - cacheID - jeżeli chcemy otwierać ten sam dokument w jedym momencie;
       if (mode === "advanced") cache.set(id, document);
     } else {
-      if (mode === "advanced") {
+      if (mode === "advanced" && id) {
         document = cache.get<T>(id) || null;
       }
       // if (!!this.defaultDocument) {
@@ -353,9 +355,18 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
 
       // tablica na zmodyfikowane subdocumenty
       let subdocument: IExtendedDocument[] | IExtendedDocument | null = [];
+      let newSubdocument = "";
+
       for (let update of updates) {
-        let changedDocument = await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id, update.deepdoc, update.deepdoc_id);
-        if (changedDocument && changedDocument._id != id) subdocument.push(changedDocument)
+
+        let changedDocument = await document.setValue(update.field, update.value, update.subdoc, update.subdoc_id || newSubdocument, update.deepdoc, update.deepdoc_id);
+        if (changedDocument && changedDocument._id != id) {
+          if (!update.subdoc_id) newSubdocument = changedDocument._id;
+          let exists = subdocument.find(doc => doc._id == changedDocument._id)
+          if (!exists) subdocument.push(changedDocument)
+
+        }
+
       }
       // jeżeli tablica jedno-elemenotwa, przekształć w zmienną
 
@@ -363,7 +374,7 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
       else if (subdocument.length == 0) subdocument = null;
 
       if (mode === "advanced") {
-        document.recalcDocument();
+        await document.recalcDocument();
         cache.set(id, document);
         return { document, subdocument, saved: false };
 
@@ -373,6 +384,7 @@ export async function updateDocument<T extends IExtendedDocument>(this: IExtende
       }
     } else return { document: null, saved: false };
   } catch (error) {
+    console.log("updateDocument", error)
     throw error;
   }
 }
@@ -407,7 +419,7 @@ export async function deleteDocument<T extends IExtendedDocument>(this: IExtende
     let document = await this.loadDocument(id);
     if (document) {
       document.deleted = true;
-      document.recalcDocument();
+      await document.recalcDocument();
       // to do - do sprawdzenia
       await document.validateVirtuals(true);
       await document.deleteOne();
@@ -427,7 +439,7 @@ export async function findDocuments<T extends IExtendedDocument>(this: IExtended
     let { limit, select, sort, skip } = options;
     let populated: any = {};
 
-    let fieldsSelect = { name: 1, resource: 1, type: 1, color: 1, mime: 1, createdAt: 1 };
+    let fieldsSelect = { name: 1, resource: 1, type: 1, color: 1, mime: 1, createdAt: 1, images: 1 };
     select = { ...select, ...fieldsSelect }
 
     if (select)

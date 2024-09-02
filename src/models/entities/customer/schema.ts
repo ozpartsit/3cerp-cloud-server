@@ -3,6 +3,9 @@ import Entity, { IEntity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import Address, { IAddress, nestedSchema } from "../../address.model";
 import form from "./form"
+
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 export interface ICustomer extends IEntity {
   firstName?: string;
   lastName?: string;
@@ -28,11 +31,15 @@ export interface ICustomer extends IEntity {
   shippingAddress?: IAddress
 
   //information
-  website?: String
+  website?: string
 
+  password: string
+
+  validatePassword(password: string): boolean;
+  hashPassword(): any;
 
 }
-
+const SALT_WORK_FACTOR = 10;
 
 export interface ICustomerModel extends mongoose.Model<ICustomer>, IExtendedModel<ICustomer> { }
 
@@ -50,8 +57,8 @@ const schema = new mongoose.Schema<ICustomer>(
     },
 
     //addresses
-    shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
-    billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
+    shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+    billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
     //statistics
     firstSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
     lastSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
@@ -123,6 +130,7 @@ const schema = new mongoose.Schema<ICustomer>(
       validType: "url",
     },
 
+    password: { type: String, input: "PasswordField" },
   },
   options
 );
@@ -152,6 +160,25 @@ schema.method("recalc", async function () {
     }
 
 })
+
+// Methods
+schema.methods.hashPassword = async function () {
+  const salt = await bcrypt.genSalt(SALT_WORK_FACTOR);
+  return await bcrypt.hash(this.password, salt);
+};
+
+
+schema.method("validatePassword", async function (newPassword: string) {
+  return await bcrypt.compare(newPassword, this.password);
+});
+
+
+schema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  else this.password = await this.hashPassword();
+
+  next();
+});
 
 const Customer: ICustomerModel = Entity.discriminator<
   ICustomer,

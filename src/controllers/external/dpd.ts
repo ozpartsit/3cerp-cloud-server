@@ -64,15 +64,9 @@ export default class controller {
         }
     }
     public async tracking(req: Request, res: Response, next: NextFunction) {
-        // odswieżenie tokena
         try {
           
-            let body = {
-                "language": "EN",
-                "parcelNumbers": [
-                    "13359300635402"
-                ]
-            }
+            let body = req.body;
             await axios.post(`https://api.dpdgroup.com/tracking/v2/parcels`, body, {
                 headers: {
                     apiKey: `261ad8c8-0ba9-41a4-8458-9f6fe4bcd2ad`,

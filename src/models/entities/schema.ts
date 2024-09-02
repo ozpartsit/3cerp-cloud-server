@@ -12,7 +12,7 @@ export interface IEntity extends IExtendedDocument {
   phone?: string;
   email2?: string;
   phone2?: string;
-  locale?: string;
+  language?: string;
   currency?: string;
   taxNumber: string;
   taxRate: number;
@@ -48,10 +48,16 @@ const schema = new mongoose.Schema<IEntity>(
       type: String,
       required: true
     },
-    locale: { type: String, default: "en" },
+    language: {
+      type: String,
+      default: "en",
+      input: "Select",
+      constant: 'language',
+    },
     currency: {
       type: String,
       required: true,
+      default: "EUR",
       input: "Autocomplete",
       validType: "select",
       constant: 'currency',

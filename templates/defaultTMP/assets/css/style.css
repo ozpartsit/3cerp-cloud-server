@@ -1,0 +1,18 @@
+.primary {
+    background-color: var(--color-primary)
+}
+
+.secondary {
+    background-color: var(--color-secondary)
+}
+
+.accent {
+    background-color: var(--color-accent)
+}
+
+div {
+    border: 1px solid;
+    margin: 5px;
+    padding: 5px;
+    min-height: 50px;
+}

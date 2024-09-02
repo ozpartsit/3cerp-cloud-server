@@ -1,0 +1,28 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <meta name="title" content="<%= data.page.metaTitle || data.page.title || data.page.name %>">
+    <meta name="description" content="<%= data.page.metaDescription || data.page.description  %>">
+    <title>
+        <%= data.page.metaTitle || data.page.title || data.page.name %>
+    </title>
+    <link rel="canonical" href="<%= data.page.url %>">
+
+
+    <!-- Assing store preferences -->
+    <style>
+        :root {
+            --color-primary: <%=data.template.colorPrimary %>;
+            --color-secondary: <%=data.template.colorSecondary %>;
+            --color-accent: <%=data.template.colorAccent %>;
+        }
+    </style>
+
+   
+    <link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>

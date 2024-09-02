@@ -1,0 +1,14 @@
+{
+	"language": {
+		"pl": "Polish",
+		"en": "English"
+	},
+	"pl": "Polish",
+	"primary": "Primary Color",
+	"secondary": "Secondary Color",
+	"accent": "Accent Color",
+	"en": "English",
+	"test": {
+		"test": "test.test"
+	}
+}

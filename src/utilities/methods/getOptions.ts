@@ -19,12 +19,15 @@ export default async function getOptions(
     try {
         let document: IExtendedDocument | null = null;
         if (subdoc) {
-
             let virtual: any = this.schema.virtuals[subdoc];
-            if (virtual && !virtual.options.justOne)
-                document = this[subdoc].find((element: any) => {
-                    return element._id.toString() === subdoc_id;
-                });
+            if (virtual && !virtual.options.justOne) {
+                if (!this[subdoc]) this[subdoc] = [];
+                if (subdoc_id) {
+                    document = this[subdoc].find((element: any) => {
+                        return element._id.toString() === subdoc_id;
+                    });
+                }
+            }
 
             if (!document) {
                 if (virtual) {
@@ -35,6 +38,7 @@ export default async function getOptions(
                         if (virtual.options.justOne) {
                             this[subdoc] = document;
                         } else {
+                            if (!this[subdoc]) this[subdoc] = [];
                             this[subdoc].push(document);
                         }
                     }
@@ -54,13 +58,12 @@ export default async function getOptions(
         } else {
             document = this;
         }
-
+        
         // Pobierz definicję schematu (schema) modelu 
         const schema = document.schema;
 
         // Sprawdź typ pola "name"
-        const fieldType = schema.path(field);
-
+        const fieldType = schema.path(field) || schema.virtuals[field];
         //console.log(schema.paths)
         if (fieldType) {
             let results: any = [];
@@ -69,7 +72,9 @@ export default async function getOptions(
             if (mode === "operator") {
                 constant = "operator";
             } else {
+               
                 if (fieldType.options.ref) {
+                 
                     let model = mongoose.model(fieldType.options.ref);
                     // query - dodać filtry 
                     let query = fieldType.options.filters || {};

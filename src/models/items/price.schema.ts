@@ -3,7 +3,7 @@ import { IItem } from "./schema";
 import { IExtendedModel } from "../../utilities/static";
 import { IExtendedDocument } from "../../utilities/methods";
 import { schema as PriceLevel, IPriceLevel } from "../classifications/pricelevel/schema";
-import Currencies from "../../constants/currencies";
+import { roundToPrecision } from "../../utilities/usefull";
 const options = { discriminatorKey: "type", foreignField: "item", collection: "items.price" };
 
 export interface IPrice extends IExtendedDocument {
@@ -25,7 +25,9 @@ const schema = new mongoose.Schema<IPrice>({
         default: 0,
         required: true,
         input: "Input",
-        validType: "currency"
+        validType: "currency",
+        precision: 2,
+        set: (v: any) => roundToPrecision(v, 0)
     },
     moq: {
         type: Number,
@@ -33,7 +35,8 @@ const schema = new mongoose.Schema<IPrice>({
         required: true,
         input: "Input",
         validType: "number",
-        precision: 0
+        precision: 0,
+        set: (v: any) => roundToPrecision(v, 0)
     },
     currency: {
         type: String,

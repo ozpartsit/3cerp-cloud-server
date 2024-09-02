@@ -4,6 +4,8 @@ import { IExtendedModel } from "../../utilities/static";
 import ItemTypes from "../../constants/item.types";
 import { schema as PriceGroup, IPriceGroup } from "../classifications/pricegroup/schema";
 import Price, { IPrice } from "./price.schema";
+import Related from "./related.schema.js";
+import Parameter from "./parameters.schema.js";
 //import Countries from "../../constants/countries";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface IItem extends IExtendedDocument {
@@ -11,6 +13,7 @@ export interface IItem extends IExtendedDocument {
   name: string;
   type: string;
   description?: string;
+  shortDescription?: string;
   prices: IPrice[];
   priceGroup: mongoose.Schema.Types.ObjectId;
   images: mongoose.Schema.Types.ObjectId[];
@@ -64,7 +67,7 @@ const schema = new mongoose.Schema<IItem>(
     images: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Storage",
-      autopopulate: true,
+      autopopulate: { select: "path fullPath" },
       input: "File",
       validType: "images"
     },
@@ -142,10 +145,32 @@ schema.virtual("prices", {
   autopopulate: true,
   model: Price
 });
+schema.virtual("relatedItems", {
+  ref: "Related",
+  localField: "_id",
+  foreignField: "item",
+  justOne: false,
+  autopopulate: true,
+  model: Related
+});
+schema.virtual("parameters", {
+  ref: "Parameter",
+  localField: "_id",
+  foreignField: "item",
+  justOne: false,
+  autopopulate: true,
+  model: Parameter
+});
 
-schema.method("getPrice", async function (line: any) {
-  if (line.type === "Kit Component") return 0;
-  else return 1.99;
+schema.method("getPrice", async function () {
+  if (this.type === "Kit Component") return 0;
+  else {
+    await this.populate("prices")
+    let price = this.prices.find(price => price.price);
+
+    if (price) return price.price;
+    else return 0;
+  }
 });
 
 const Item: IItemModel = mongoose.model<IItem, IItemModel>("Item", schema);

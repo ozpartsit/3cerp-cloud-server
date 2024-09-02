@@ -1,0 +1,25 @@
+<!--Page Banner-->
+<div
+  id="page_banner"
+  class="page-banner categories-page-banner text-center"
+  <% if(data.page.image) { %>
+  
+    style="background: <%= `url('${data.page.image.fullPath}') no-repeat #FFF` %> ; background-size: cover;"
+
+  <% } %> 
+  >
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="text-uppercase"><%= data.page.name %></h1>
+        <!--Breadcrums-->
+        <nav aria-label="breadcrumb">
+          <p class="breadcrumb-item active" aria-current="page">
+            <%= data.page.description %>
+          </p>
+        </nav>
+        <!--End Breadcrums-->
+      </div>
+    </div>
+  </div>
+</div>

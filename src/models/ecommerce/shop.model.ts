@@ -3,21 +3,29 @@ import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
 import Address, { IAddress, nestedSchema } from "../address.model";
 import Page, { IPage } from "./page.schema";
+import EmailTrigger, { IEmailTrigger } from "./emailTrigger.schema";
+import { roundToPrecision } from "../../utilities/usefull.js";
+import EmailService from "../../services/email";
 
 import form from "./form"
+import Email, { IEmail } from "../email.model.js";
+import EmailTemplate from "../emailTemplate.model.js";
 
 export interface IShop extends IExtendedDocument {
     _id: mongoose.Schema.Types.ObjectId;
     name: string;
+    description: string;
     type: string;
     status: string;
 
     //Main
     subdomain: string;
     domain: string;
-    salesRep: mongoose.Schema.Types.ObjectId;
+    salesRep?: mongoose.Schema.Types.ObjectId;
     email: mongoose.Schema.Types.ObjectId;
     phone?: string;
+    taxRate: number;
+
 
     //classsifictaions
     group?: mongoose.Schema.Types.ObjectId[];
@@ -59,8 +67,10 @@ export interface IShop extends IExtendedDocument {
     // Domains
 
     //wygląd
+    message: string;
     template: string;
     logo: mongoose.Schema.Types.ObjectId;
+    image: mongoose.Schema.Types.ObjectId;
     favicon: mongoose.Schema.Types.ObjectId;
     colorPrimary: string
     colorSecondary: string
@@ -74,12 +84,31 @@ export interface IShop extends IExtendedDocument {
     // registerTemplate:string
     // contactTemplate:string
     // basketTemplate:string
+
+    // options
+    loginRequired: boolean
+    phoneRequired: boolean
+    allowBackorder: boolean
+
+    // Email Trigger
+    emailTriggers: IEmailTrigger[];
+
+    sendEmail(trigger: string, to: string | [string], data: any): any
+
+
 }
 export interface IShopModel extends mongoose.Model<IShop>, IExtendedModel<IShop> { }
 
 export const schema = new mongoose.Schema<IShop>(
     {
         name: {
+            type: String,
+            required: true,
+            min: [3, "Must be at least 3 characters long, got {VALUE}"],
+            input: "Input",
+            validType: "text",
+        },
+        description: {
             type: String,
             required: true,
             min: [3, "Must be at least 3 characters long, got {VALUE}"],
@@ -113,6 +142,11 @@ export const schema = new mongoose.Schema<IShop>(
             default: "offline"
         },
         domain: {
+            type: String,
+            input: "Input",
+            validType: "text",
+        },
+        message: {
             type: String,
             input: "Input",
             validType: "text",
@@ -284,6 +318,13 @@ export const schema = new mongoose.Schema<IShop>(
             input: "File",
             validType: "images"
         },
+        image: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Storage",
+            autopopulate: true,
+            input: "File",
+            validType: "images"
+        },
         favicon: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Storage",
@@ -291,6 +332,33 @@ export const schema = new mongoose.Schema<IShop>(
             input: "File",
             validType: "images"
         },
+        loginRequired: {
+            type: Boolean,
+            input: "Switch",
+            validType: "switch",
+            default: false
+        },
+        phoneRequired: {
+            type: Boolean,
+            input: "Switch",
+            validType: "switch",
+            default: false
+        },
+        allowBackorder: {
+            type: Boolean,
+            input: "Switch",
+            validType: "switch",
+            default: false
+        },
+        taxRate: {
+            type: Number,
+            default: 0,
+            input: "Input",
+            validType: "percent",
+            precision: 2,
+            set: (v: any) => roundToPrecision(v, 2)
+        },
+
 
     },
 
@@ -329,6 +397,50 @@ schema.virtual("pages", {
     copyFields: ["account"],
     //options: { sort: { category: 1 } },
 });
+schema.virtual("emailTriggers", {
+    ref: "EmailTrigger",
+    localField: "_id",
+    foreignField: "webshop",
+    justOne: false,
+    autopopulate: true,
+    //defaultSelect: true,
+    copyFields: ["account"],
+});
+
+schema.methods.sendEmail = async function (trigger: string, to: string | [string], data: any, options: any) {
+
+    if (this.emailTriggers) {
+        const emailTemplate: IEmailTrigger | null = this.emailTriggers.find(email => email.trigger == trigger)
+        if (emailTemplate) {
+            const from = await Email.findById(emailTemplate.email)
+            const template = await EmailTemplate.findById(emailTemplate.template)
+
+            if (template) {
+              
+                let text = await EmailService.compileText(template.html || template.text, data)
+                console.log(text)
+                let content = await EmailService.render("default.ejs", { text: text, ...options })
+                const config = {
+                    email: from,
+                    to: to,
+                    subject: template.subject,
+                    text: content,
+                    html: content,
+                    attachments: []
+                }
+                const emailConfig = {
+                    account: this.account,
+                    ...config
+                }
+                await EmailService.send(emailConfig);
+            }
+        }
+    }
+
+
+
+};
+
 
 schema.index({ name: 1 });
 
@@ -337,6 +449,7 @@ const Shop: IShopModel = mongoose.model<IShop, IShopModel>("webshop", schema);
 Shop.init().then(function (Event) {
     console.log('Web Shop Builded');
     new Page()
+    new EmailTrigger()
 })
 export default Shop;
 

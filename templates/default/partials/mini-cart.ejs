@@ -1,0 +1,32 @@
+<!--MiniCart Drawer-->
+<div class="minicart-right-drawer modal right fade" id="minicart-drawer">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div id="cart-drawer" class="block block-cart">
+        <a
+          href="javascript:void(0);"
+          class="close-cart"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          ><i class="cp cp-times"></i
+        ></a>
+        <h4 id="title_card"><%= i18n.__('locales.shopping-cart.title')%></h4>
+        <div class="minicart-content">
+          <ul id="card_list_products" class="clearfix">
+            <!-- PRODUCTS -->
+          </ul>
+        </div>
+        <div class="minicart-bottom">
+          <div class="subtotal">
+            <span><%= i18n.__('locales.shopping-cart.total')%>:</span>
+            <span id="card_total" class="product-price"></span>
+          </div>
+          <button type="button" class="btn proceed-to-checkout rounded">
+            <%= i18n.__('locales.shopping-cart.checkout')%>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--End MiniCart Drawer-->

@@ -1,0 +1,35 @@
+<html lang="en">
+
+
+   <!-- HEAD -->
+   <%- include('partials/head') %>
+<body>
+        <!-- HEADER -->
+        <%- include('partials/header') %>
+
+            <!-- NAV -->
+        <%- include('partials/nav') %>
+
+        <br />
+
+        
+        <!-- VIEW -->
+        <%- include('views/'+(view||'home')) %>
+        <br />
+        <!-- FOOTER -->
+        <%- include('partials/footer') %>
+
+
+
+      
+</body>
+
+<script>
+    const view =  <%- JSON.stringify(view || 'home') %>;
+    const data =  <%- JSON.stringify(data) %>;
+    console.log("Available data on view:", view)
+    console.log(data)
+</script>
+<script src="/assets/js/scripts.js"></script>
+<script src="/assets/js/cookies.js"></script>
+</html>

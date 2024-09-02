@@ -39,7 +39,14 @@ export default class Routes {
             this.hostingController.setLanguage.bind(this.hostingController) as any as any
         );
 
+        this.RouterHosting.route("/currency/:currency").get(
+            this.hostingController.setCurrency.bind(this.hostingController) as any as any
+        );
 
+        //register confirmed
+        this.RouterHosting.route("/:view/:id/confirmed").get(
+            this.hostingController.get.bind(this.hostingController) as any as any
+        );
 
         this.RouterHosting.route("/view/:param?").get(
             this.hostingController.get.bind(this.hostingController) as any as any
@@ -47,9 +54,7 @@ export default class Routes {
         this.RouterHosting.route("/view/:urlComponent").get(
             this.hostingController.get.bind(this.hostingController) as any as any
         );
-        this.RouterHosting.route("/account").get(
-            this.hostingController.get.bind(this.hostingController) as any as any
-        );
+
         this.RouterHosting.route("/:view?/:param?").get(
             this.hostingController.get.bind(this.hostingController) as any as any
         );
