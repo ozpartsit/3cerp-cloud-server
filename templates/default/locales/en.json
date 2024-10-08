@@ -71,7 +71,47 @@
                "newsletter": "Sign Up for Newsletter",
                "password": "Password",
                "confirm-password": "Confirm Password",
-               "btn": "Register Now"
+               "btn": "Register Now",
+               "errors": {
+                    "passwords-not-same": "Passwords are not the same"
+               }
+          },
+
+          "cart-view": {
+               "headers": {
+                    "product": "Product",
+                    "price": "Price",
+                    "quantity": "Quantity",
+                    "total": "Total"
+               },
+               "rows": {
+                    "description": "Description"
+               },
+               "btns": {
+                    "clear-cart": "Clear Cart",
+                    "checkout": "Proceed to Checkout"
+               }
+          },
+          "favorites-view": {
+               "headers": {
+                    "product": "Product",
+                    "price": "Price",
+                    "add-cart": "Add to cart"
+               },
+               "rows": {
+                    "remove-tooltip": "Remove",
+                    "btn-add-cart": "Add to cart"
+               }
+          },
+          "mobile-nav": {
+               "close-menu": "Close menu"
+          },
+          "footer": {
+               "newsletter": {
+                    "title": "Newsletter",
+                    "subtitle": "Keep up to date with our promotions, discounts, sales, special offers and more.",
+                    "input": "Enter email..."
+               }
           }
      },
      "my-account": "my-account"

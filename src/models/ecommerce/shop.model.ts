@@ -93,7 +93,7 @@ export interface IShop extends IExtendedDocument {
     // Email Trigger
     emailTriggers: IEmailTrigger[];
 
-    sendEmail(trigger: string, to: string | [string], data: any): any
+    sendEmail(trigger: string, locale: string, to: string | [string], data: any): any
 
 
 }
@@ -407,18 +407,16 @@ schema.virtual("emailTriggers", {
     copyFields: ["account"],
 });
 
-schema.methods.sendEmail = async function (trigger: string, to: string | [string], data: any, options: any) {
-
+schema.methods.sendEmail = async function (this: IShop, trigger: string, locale: string, to: string | [string], data: any, options: any) {
     if (this.emailTriggers) {
-        const emailTemplate: IEmailTrigger | null = this.emailTriggers.find(email => email.trigger == trigger)
-        if (emailTemplate) {
-            const from = await Email.findById(emailTemplate.email)
-            const template = await EmailTemplate.findById(emailTemplate.template)
+        let emailTrigger: IEmailTrigger | undefined = this.emailTriggers.find((email: IEmailTrigger) => email.trigger == trigger && email.language == (locale || "en"))
+        emailTrigger = this.emailTriggers.find((email: IEmailTrigger) => email.trigger == trigger && email.language == "en")
+        if (emailTrigger) {
+            const from = await Email.findById(emailTrigger.email)
+            const template = await EmailTemplate.findById(emailTrigger.template)
 
             if (template) {
-              
                 let text = await EmailService.compileText(template.html || template.text, data)
-                console.log(text)
                 let content = await EmailService.render("default.ejs", { text: text, ...options })
                 const config = {
                     email: from,

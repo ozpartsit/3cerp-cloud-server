@@ -23,7 +23,7 @@ export default async function validateVirtuals(this: IExtendedDocument, save: bo
           if (!list.options.justOne) line.index = index;
           // if line is new init new document
           if (!line.schema) {
-            if(this.isNew) delete line._id; // delete id if copy document - to do - zastanowić sie czy nie dodać warunku
+            if (this.isNew) delete line._id; // delete id if copy document - to do - zastanowić sie czy nie dodać warunku
             let Model = mongoose.model(list.options.ref)
             line = new Model(line);
           }
@@ -33,7 +33,7 @@ export default async function validateVirtuals(this: IExtendedDocument, save: bo
           // line.parent = this;
           // copy field value from parten document
           ([...(list.options.copyFields || []), "account"]).forEach((field: string) => {
-            line[field] = this[field] ? this[field]._id : this[field];
+            line[field] = this[field] ? this[field]._id || this[field] : this[field];
           });
           // Validate or validate and save
           try {

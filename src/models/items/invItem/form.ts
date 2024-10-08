@@ -13,7 +13,8 @@ export default {
                             "fields": [
                                 "name",
                                 "description",
-                                "urlComponent"
+                                "urlComponent",
+                                "html"
                             ]
                         },
                         {

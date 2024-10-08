@@ -1,738 +1,906 @@
 <div class="section pb-0">
-  <div class="container">
-    <div class="row">
-      <!--Sidebar-->
-      <div
-        class="col-12 col-sm-12 col-md-12 col-lg-3 sidebar filterbar order-2 order-lg-0 order-md-2 order-sm-2"
-      >
-        <div class="closeFilter d-block d-lg-none">
-          <i class="cps cp-times"></i>
-        </div>
-        <div class="sidebar-filters">
-          <div class="shopby-title text-uppercase"><h3>Shop by</h3></div>
-          <div class="nowshopby">
-            <h3 class="title text-uppercase">Now Shopping by</h3>
-            <ol class="items">
-              <li class="item">
-                <span class="filter-label"><b>Category:</b></span>
-                <a href="#;"
-                  ><span class="filter-value">Grille Guards</span
-                  ><i class="cps cp-times"></i
-                ></a>
-                <a href="#;"
-                  ><span class="filter-value">Susepension</span
-                  ><i class="cps cp-times"></i
-                ></a>
-              </li>
-              <li class="item">
-                <span class="filter-label"><b>Size:</b></span>
-                <a href="#;"
-                  ><span class="filter-value">X</span
-                  ><i class="cps cp-times"></i
-                ></a>
-                <a href="#;"
-                  ><span class="filter-value">XL</span
-                  ><i class="cps cp-times"></i
-                ></a>
-              </li>
-            </ol>
-            <a href="#;" class="btn--link mt-1 text-uppercase small"
-              >Clear All</a
-            >
-          </div>
-          <hr />
-          <!--Category Block-->
-          <div class="block clearfix block-categories">
-            <div class="block-title"><h3>Categories</h3></div>
-            <div class="block-content">
-              <ul class="items">
-                <li class="lvl-1 sub-level">
-                  <a href="#;">Steering Wheels (5)</a>
-                  <ul class="sublinks">
-                    <li class="level2 sub-level sub-sub-level">
-                      <a href="#;">Break</a>
-                      <ul class="sublinks mb-0">
-                        <li class="level3"><a href="#">Bearing</a></li>
-                        <li class="level3"><a href="#">Suspension</a></li>
-                        <li class="level3"><a href="#">Steering</a></li>
-                      </ul>
-                    </li>
-                    <li class="level2"><a href="#">Accessories</a></li>
-                    <li class="level2"><a href="#">Wheels</a></li>
-                    <li class="level2"><a href="#">View All</a></li>
-                  </ul>
-                </li>
-                <li class="lvl-1 sub-level">
-                  <a href="#;">Grille Guards (5)</a>
-                  <ul class="sublinks">
-                    <li class="level2"><a href="#;">Seats</a></li>
-                    <li class="level2"><a href="#">Seat Covers</a></li>
-                    <li class="level2"><a href="#">View All</a></li>
-                  </ul>
-                </li>
-                <li class="lvl-1">
-                  <a href="#" class="active">Seats, Seat Covers (5)</a>
-                </li>
-                <li class="lvl-1"><a href="#">Susepension</a></li>
-                <li class="lvl-1"><a href="#">Tools & Parts</a></li>
-              </ul>
-            </div>
-          </div>
-          <!--End Category Block-->
-
-          <!--Price Filter Block-->
-          <div class="block filterBox filter-widget">
-            <div class="block-title"><h3>Price</h3></div>
-            <form action="#" method="post" class="price-filter filterDD mt-3">
-              <div
-                id="slider-range"
-                class="mt-2 ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"
-              >
-                <div
-                  class="ui-slider-range ui-widget-header ui-corner-all"
-                ></div>
-                <span
-                  class="ui-slider-handle ui-state-default ui-corner-all"
-                  tabindex="0"
-                ></span
-                ><span
-                  class="ui-slider-handle ui-state-default ui-corner-all"
-                  tabindex="0"
-                  style="left: 73.4043%"
-                ></span>
-              </div>
-              <div class="row">
-                <div class="col-6">
-                  <p class="no-margin">
-                    <input id="amount" type="text" class="rounded" />
-                  </p>
-                </div>
-                <div class="col-6 text-end margin-25px-top">
-                  <button class="btn btn--small rounded">filter</button>
-                </div>
-              </div>
-            </form>
-          </div>
-          <!--End Price Filter Block-->
-
-          <!--Color Block-->
-          <div class="block filterBox colorBox filter-color">
-            <div class="block-title"><h3>Color</h3></div>
-            <div class="filter-color swacth-list filterDD clearfix">
-              <ul class="clearfix">
-                <li>
-                  <span class="swacth-btn small rounded-pills black"></span
-                  ><span class="tooltip-label">Black</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills white"></span
-                  ><span class="tooltip-label">White</span>
-                </li>
-                <li>
-                  <span
-                    class="swacth-btn small rounded-pills red checked"
-                  ></span
-                  ><span class="tooltip-label">Red</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills blue"></span
-                  ><span class="tooltip-label">Blue</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills pink"></span
-                  ><span class="tooltip-label">Pink</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills gray"></span
-                  ><span class="tooltip-label">Gray</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills green"></span
-                  ><span class="tooltip-label">Green</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills orange"></span
-                  ><span class="tooltip-label">Orange</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills yellow"></span
-                  ><span class="tooltip-label">Yellow</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills blueviolet"></span
-                  ><span class="tooltip-label">Blue Violet</span>
-                </li>
-                <li>
-                  <span class="swacth-btn small rounded-pills brown"></span
-                  ><span class="tooltip-label">Brown</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!--End Color Block-->
-          <!--Size Block-->
-          <div class="block filterBox filter-widget size-swacthes">
-            <div class="block-title"><h3 class="mb-0">Size</h3></div>
-            <div class="filter-color filter-size swacth-list">
-              <ul class="clearfix">
-                <li>
-                  <span class="swacth-btn">X</span
-                  ><span class="tooltip-label">X</span>
-                </li>
-                <li>
-                  <span class="swacth-btn checked">XL</span
-                  ><span class="tooltip-label">XL</span>
-                </li>
-                <li>
-                  <span class="swacth-btn">XLL</span
-                  ><span class="tooltip-label">XLL</span>
-                </li>
-                <li>
-                  <span class="swacth-btn">M</span
-                  ><span class="tooltip-label">M</span>
-                </li>
-                <li>
-                  <span class="swacth-btn">S</span
-                  ><span class="tooltip-label">S</span>
-                </li>
-                <li>
-                  <span class="swacth-btn">XXL</span
-                  ><span class="tooltip-label">XLL</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!--End Size Block-->
-          <!--Brand Block-->
-          <div class="block filterBox filter-widget size-swacthes brand-filter">
-            <div class="block-title"><h3 class="mb-0">Brands</h3></div>
-            <div class="filterDD">
-              <ul class="clearfix">
-                <li>
-                  <input type="checkbox" value="adidas" id="adidas" /><label
-                    for="adidas"
-                    ><span></span>Bosch</label
-                  >
-                </li>
-                <li>
-                  <input type="checkbox" value="baggit" id="baggit" /><label
-                    for="baggit"
-                    ><span></span>Filtron</label
-                  >
-                </li>
-                <li>
-                  <input type="checkbox" value="campus" id="campus" /><label
-                    for="campus"
-                    ><span></span>Valeo</label
-                  >
-                </li>
-                <li>
-                  <input type="checkbox" value="elle" id="elle" /><label
-                    for="elle"
-                    ><span></span>Mercedes-Benz</label
-                  >
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!--End Brand Block-->
-
-          <!--Availability-->
-          <div class="block filterBox filter-widget size-swacthes availability">
-            <div class="block-title"><h3 class="mb-0">Availability</h3></div>
-            <div class="filterDD">
-              <ul class="clearfix" style="column-count: auto">
-                <li>
-                  <input type="checkbox" value="instock" id="instock" /><label
-                    for="instock"
-                    ><span></span>In stock</label
-                  >
-                </li>
-                <li>
-                  <input
-                    type="checkbox"
-                    value="outofstock"
-                    id="outofstock"
-                  /><label for="outofstock"><span></span>Out of stock</label>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!--End Availability-->
-
-          <!--Popular Tags-->
-          <div class="block clearfix block-tags mb-0">
-            <div class="block-title"><h3>Popular Tags</h3></div>
-            <div class="block-content">
-              <ul class="m-0">
-                <li><a href="#">Wheel</a></li>
-                <li><a href="#">Aloy</a></li>
-                <li><a href="#">Tools</a></li>
-                <li><a href="#">Suspension</a></li>
-                <li><a href="#">Auto parts</a></li>
-                <li><a href="#">Filter</a></li>
-              </ul>
-            </div>
-          </div>
-          <!--End Popular Tags-->
-        </div>
-
-        <!--Popular Products-->
-        <div class="block block-recent-post clearfix">
-          <div class="block-title"><h3>Popular</h3></div>
-          <div class="block-content">
-            <div class="list list-sidebar-products">
-              <div class="row">
-                <div class="col-12 mb-3">
-                  <div class="mini-list-item d-flex mb-10 clearfix">
-                    <div class="mini-view_image flex-1">
-                      <a href="#"
-                        ><img
-                          class="img blur-up rounded-3 lazyloaded"
-                          data-src="assets/images/products/110x110.jpg"
-                          src="assets/images/products/110x110.jpg"
-                          alt="Fuel Injector For Skoda Yeti"
-                      /></a>
-                    </div>
-                    <div class="ms-3 details flex-1">
-                      <a class="title" href="#">Fuel Injector For Skoda Yeti</a>
-                      <div class="product-review">
-                        <i class="cps cp-star"></i><i class="cps cp-star"></i
-                        ><i class="cps cp-star"></i><i class="cpr cp-star"></i
-                        ><i class="cpr cp-star"></i>
-                      </div>
-                      <div class="price-box">
-                        <span class="price">$119.00</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12 mb-3">
-                  <div class="mini-list-item d-flex mb-10 clearfix">
-                    <div class="mini-view_image flex-1">
-                      <a href="#"
-                        ><img
-                          class="blur-up rounded-3 lazyloaded"
-                          data-src="assets/products/110x110.jpg"
-                          src="assets/images/products/110x110.jpg"
-                          alt="ACDelco 335 Professional"
-                      /></a>
-                    </div>
-                    <div class="ms-3 details flex-1">
-                      <a class="title" href="#">ACDelco 335 Professional</a>
-                      <div class="product-review">
-                        <i class="cps cp-star"></i><i class="cps cp-star"></i
-                        ><i class="cps cp-star"></i><i class="cps cp-star"></i
-                        ><i class="cpr cp-star"></i>
-                      </div>
-                      <div class="price-box">
-                        <span class="price">$19.00</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="mini-list-item d-flex mb-10 clearfix">
-                    <div class="mini-view_image flex-1">
-                      <a href="#"
-                        ><img
-                          class="blur-up rounded-3 lazyloaded"
-                          data-src="assets/images/products/110x110.jpg"
-                          src="assets/images/products/110x110.jpg"
-                          alt="Front Wheel Hub For Fiat Punto Diesel"
-                      /></a>
-                    </div>
-                    <div class="ms-3 details flex-1">
-                      <a class="title" href="#"
-                        >Front Wheel Hub For Fiat Punto Diesel</a
-                      >
-                      <div class="product-review">
-                        <i class="cps cp-star"></i><i class="cps cp-star"></i
-                        ><i class="cps cp-star"></i><i class="cps cp-star"></i
-                        ><i class="cps cp-star"></i>
-                      </div>
-                      <div class="price-box">
-                        <span class="price">$79.00</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--End Popular Products-->
-
-        <!-- Banner -->
-        <div class="block clearfix block-tags p-0 border-0">
-          <a href="#">
-            <img
-              class="blur-up rounded lazyload"
-              src="assets/images/sidebar-banner.png"
-              data-src="assets/images/sidebar-banner.png"
-              alt="image"
-              width="450"
-              height="460"
-            />
-          </a>
-        </div>
-        <!--End Banner-->
-      </div>
-      <!--End Sidebar-->
-
-      <!--Content-->
-      <!-- LIST -->
-      <div class="col-12 col-sm-12 col-md-12 col-lg-9 main-col">
-        <!--Toolbar-->
-        <div class="toolbar py-3 pt-0">
-          <div class="filters-toolbar-wrapper">
-            <ul
-              class="list-unstyled d-flex align-items-center justify-content-between m-0"
-            >
-              <li class="collection-view d-flex align-items-center">
-                <div
-                  id="display_products_system"
-                  class="filters-toolbar__item collection-view-as d-flex align-items-center me-3"
-                >
-                  <div id="btn_grid_products_system" class="change-view prd-grid">
-                    <i class="cps cp-th-large" value="grid"></i
-                    ><span class="tooltip-label"><%= `${i18n.__('locales.products.display-system.grid')}` %></span>
-                  </div>
-                  <div id="btn_list_products_system" class="change-view prd-list">
-                    <i class="cps cp-list" value="list"></i
-                    ><span class="tooltip-label"><%= `${i18n.__('locales.products.display-system.list')}` %></span>
-                  </div>
-                </div>
-                <div class="product-count d-flex align-items-center">
-                  <button
-                    type="button"
-                    class="btn rounded btn-filter d-block d-lg-none me-2 me-sm-3"
-                  >
-                    <span class="hidden">Filter</span>
-                  </button>
-                </div>
-              </li>
-              <li
-                class="filters-select ms-auto ms-sm-0 d-flex align-items-center"
-              >
-                <div
-                  class="filters-toolbar-select d-flex align-items-center rounded mx-2"
-                >
-                  <label for="showby" class="m-0 text-uppercase"><%= `${i18n.__('locales.products.pagination.show')}:` %></label>
-                  <!-- Pagination limit -->
-                  <select
-                    id="pagination_limit"
-                    name="showby"
-                    id="showby"
-                    class="show-by border-0"
-                  ></select>
-                </div>
-                <div
-                  class="filters-toolbar-select d-flex align-items-center border-0 p-0"
-                >
-                  <label for="SortBy" class="flex-1 m-0 hidden"><%= `${i18n.__('locales.products.pagination.sort')}:` %></label>
-                  <select
-                    name="SortBy"
-                    id="SortBy"
-                    class="sort-by flex-1 rounded"
-                  >
-                    <option value="Sort" selected="selected"><%= `${i18n.__('locales.products.pagination.sort')}:` %></option>
-                    <option value="best-selling">Best selling</option>
-                    <option value="title-ascending">Alphabetically, A-Z</option>
-                    <option value="title-descending">
-                      Alphabetically, Z-A
-                    </option>
-                    <option value="price-ascending">Price, low to high</option>
-                    <option value="price-descending">Price, high to low</option>
-                    <option value="created-ascending">Date, old to new</option>
-                    <option value="created-descending">Date, new to old</option>
-                  </select>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <!--End Toolbar-->
-
-        <!--Product Grid-->
-        <div id="grid_products_system" class="products-grid" name="container_products">
+     <div class="container">
           <div class="row">
-            <!--ITEMS-->
-            <% data.content.docs.forEach((item, index) => { %>
-            <div class="col-6 col-sm-6 col-md-4 col-lg-4">
-              <div class="item">
-                <!--Product Image-->
-                <div class="product-image">
-                  <% if(item.images.length === 0) { %>
-                  <a href="<%= `${data.page.host}/item/${item.urlComponent}` %>" class="rounded-3 product-thumb">
-                    <img
-                      class="primary blur-up lazyload rounded-3"
-                      data-src="assets/images/products/250x250.jpg"
-                      src="assets/images/products/250x250.jpg"
-                      alt="Hankook DynaPro AT-m RF10"
-                      title="Hankook DynaPro AT-m RF10"
-                    />
-                  </a>
-                  <% } %>
-
-                  <!--Image-->
-                  <% if(item.images.length === 1) {%>
-
-                  <a href="<%= `${data.page.host}/item/${item.urlComponent}` %>" class="rounded-3 product-thumb">
-                    <img
-                      class="primary blur-up lazyload rounded-3"
-                      data-src="<%= item.images[0].fullPath%>"
-                      src="<%= item.images[0].fullPath%>"
-                      alt="<%= item.images[0].name %>"
-                      title="<%= item.images[0].name %>"
-                    />
-                  </a>
-
-                  <% } %>
-
-                  <!--Image-->
-                  <% if(item.images.length >= 2) {%>
-                  <a
-                    href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
-                    class="rounded-3 product-thumb"
-                  >
-                  <% console.log(item) %>
-
-                    <img
-                      class="primary blur-up lazyload rounded-3"
-                      data-src="<%= item.images[0].fullPath%>"
-                      src="<%= item.images[0].fullPath%>"
-                      alt="<%= item.images[0].name %>"
-                      title="<%= item.images[0].name %>"
-                    />
-                    <img
-                      class="hover blur-up lazyload rounded-3"
-                      data-src="<%= item.images[1].fullPath%>"
-                      src="<%= item.images[1].fullPath%>"
-                      alt="<%= item.images[1].name %>"
-                      title="<%= item.images[1].name %>"
-                    />
-                  </a>
-
-                  <% } %>
-
-                  <!-- Green -->
-                  <% if(item.quantityAvailable > 2 ) {%>
-                  <div class="product-labels">
-                    <span class="pr-label3 lbl new rounded"
-                      ><%= `${i18n.__("locales.stock-status.in-stock")}: ${item.quantityAvailable}` %></span
-                    >
-                  </div>
-
-                  <% } %>
-
-                  <!-- Yellow -->
-                  <% if(item.quantityAvailable <= 2 && item.quantityAvailable !== 0) { %>
-                  <div class="product-labels">
-                    <span class="pr-label2 hot lbl new rounded"
-                      ><%= `${i18n.__("locales.stock-status.in-stock")}: ${item.quantityAvailable}` %></span
-                    >
-                  </div>
-
-                  <% } %>
-
-                  <!-- Red -->
-                  <% if(item.quantityAvailable === 0 ) {%>
-                  <div class="product-labels">
-                    <span class="on-sale lbl rounded"
-                      ><%= `${i18n.__("locales.stock-status.not-available")}` %></span
-                    >
-                  </div>
-
-                  <% } %>
-
-                  <!--End Product Label-->
-                  <!--Button Action-->
-                  <div class="button-hover">
-                    <span
-                      class="btn btn-wishlist"
-                      title="Wishlist"
-                      ><i class="cpr cp-heart"></i
-                    ></span>
-                    <span
-                     
-                      class="btn pro-addtocart-popup rounded btn-cart btn-primary"
-                      title="Add To Cart"
-                      ><i  index="<%= index %>" product_id="<%= item.id %>"
-                        action="btn_add_to_card_from_list" class="cps cp-shopping-cart"></i
-                    ></span>
-                  </div>
-                  <!--End Button Action-->
-                </div>
-                <!--End Product Image-->
-                <!--Product Detail-->
-                <div class="product-details d-flex">
-                  <div class="product-details-in">
-                    <div class="h3">
-                      <a href="#"><%= item.name %></a>
+               <!--Sidebar-->
+               <div
+                    class="col-12 col-sm-12 col-md-12 col-lg-3 sidebar filterbar order-2 order-lg-0 order-md-2 order-sm-2"
+               >
+                    <div class="closeFilter d-block d-lg-none">
+                         <i class="cps cp-times"></i>
                     </div>
-                    <div class="price-box">
-                      <span class="price"><%= item.priceFormat %></span>
+                    <div class="sidebar-filters">
+                         <div class="shopby-title text-uppercase">
+                              <h3>Shop by</h3>
+                         </div>
+                         <div class="nowshopby">
+                              <h3 class="title text-uppercase">
+                                   Now Shopping by
+                              </h3>
+                              <ol class="items">
+                                   <li class="item">
+                                        <span class="filter-label"
+                                             ><b>Category:</b></span
+                                        >
+                                        <a href="#;"
+                                             ><span class="filter-value"
+                                                  >Grille Guards</span
+                                             ><i class="cps cp-times"></i
+                                        ></a>
+                                        <a href="#;"
+                                             ><span class="filter-value"
+                                                  >Susepension</span
+                                             ><i class="cps cp-times"></i
+                                        ></a>
+                                   </li>
+                                   <li class="item">
+                                        <span class="filter-label"
+                                             ><b>Size:</b></span
+                                        >
+                                        <a href="#;"
+                                             ><span class="filter-value">X</span
+                                             ><i class="cps cp-times"></i
+                                        ></a>
+                                        <a href="#;"
+                                             ><span class="filter-value"
+                                                  >XL</span
+                                             ><i class="cps cp-times"></i
+                                        ></a>
+                                   </li>
+                              </ol>
+                              <a
+                                   href="#;"
+                                   class="btn--link mt-1 text-uppercase small"
+                                   >Clear All</a
+                              >
+                         </div>
+                         <hr />
+                         <!--Category Block-->
+                         <div class="block clearfix block-categories">
+                              <div class="block-title">
+                                   <h3>Categories</h3>
+                              </div>
+                              <div class="block-content">
+                                   <ul class="items">
+                                        <li class="lvl-1 sub-level">
+                                             <a href="#;"
+                                                  >Steering Wheels (5)</a
+                                             >
+                                             <ul class="sublinks">
+                                                  <li
+                                                       class="level2 sub-level sub-sub-level"
+                                                  >
+                                                       <a href="#;">Break</a>
+                                                       <ul
+                                                            class="sublinks mb-0"
+                                                       >
+                                                            <li class="level3">
+                                                                 <a href="#"
+                                                                      >Bearing</a
+                                                                 >
+                                                            </li>
+                                                            <li class="level3">
+                                                                 <a href="#"
+                                                                      >Suspension</a
+                                                                 >
+                                                            </li>
+                                                            <li class="level3">
+                                                                 <a href="#"
+                                                                      >Steering</a
+                                                                 >
+                                                            </li>
+                                                       </ul>
+                                                  </li>
+                                                  <li class="level2">
+                                                       <a href="#"
+                                                            >Accessories</a
+                                                       >
+                                                  </li>
+                                                  <li class="level2">
+                                                       <a href="#">Wheels</a>
+                                                  </li>
+                                                  <li class="level2">
+                                                       <a href="#">View All</a>
+                                                  </li>
+                                             </ul>
+                                        </li>
+                                        <li class="lvl-1 sub-level">
+                                             <a href="#;">Grille Guards (5)</a>
+                                             <ul class="sublinks">
+                                                  <li class="level2">
+                                                       <a href="#;">Seats</a>
+                                                  </li>
+                                                  <li class="level2">
+                                                       <a href="#"
+                                                            >Seat Covers</a
+                                                       >
+                                                  </li>
+                                                  <li class="level2">
+                                                       <a href="#">View All</a>
+                                                  </li>
+                                             </ul>
+                                        </li>
+                                        <li class="lvl-1">
+                                             <a href="#" class="active"
+                                                  >Seats, Seat Covers (5)</a
+                                             >
+                                        </li>
+                                        <li class="lvl-1">
+                                             <a href="#">Susepension</a>
+                                        </li>
+                                        <li class="lvl-1">
+                                             <a href="#">Tools & Parts</a>
+                                        </li>
+                                   </ul>
+                              </div>
+                         </div>
+                         <!--End Category Block-->
+
+                         <!--Price Filter Block-->
+                         <div class="block filterBox filter-widget">
+                              <div class="block-title">
+                                   <h3>Price</h3>
+                              </div>
+                              <form
+                                   action="#"
+                                   method="post"
+                                   class="price-filter filterDD mt-3"
+                              >
+                                   <div
+                                        id="slider-range"
+                                        class="mt-2 ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"
+                                   >
+                                        <div
+                                             class="ui-slider-range ui-widget-header ui-corner-all"
+                                        ></div>
+                                        <span
+                                             class="ui-slider-handle ui-state-default ui-corner-all"
+                                             tabindex="0"
+                                        ></span
+                                        ><span
+                                             class="ui-slider-handle ui-state-default ui-corner-all"
+                                             tabindex="0"
+                                             style="left: 73.4043%"
+                                        ></span>
+                                   </div>
+                                   <div class="row">
+                                        <div class="col-6">
+                                             <p class="no-margin">
+                                                  <input
+                                                       id="amount"
+                                                       type="text"
+                                                       class="rounded"
+                                                  />
+                                             </p>
+                                        </div>
+                                        <div
+                                             class="col-6 text-end margin-25px-top"
+                                        >
+                                             <button
+                                                  class="btn btn--small rounded"
+                                             >
+                                                  filter
+                                             </button>
+                                        </div>
+                                   </div>
+                              </form>
+                         </div>
+                         <!--End Price Filter Block-->
+
+                         <!--Color Block-->
+                         <div class="block filterBox colorBox filter-color">
+                              <div class="block-title">
+                                   <h3>Color</h3>
+                              </div>
+                              <div
+                                   class="filter-color swacth-list filterDD clearfix"
+                              >
+                                   <ul class="clearfix">
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills black"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Black</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills white"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >White</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills red checked"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Red</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills blue"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Blue</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills pink"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Pink</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills gray"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Gray</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills green"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Green</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills orange"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Orange</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills yellow"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Yellow</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills blueviolet"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Blue Violet</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span
+                                                  class="swacth-btn small rounded-pills brown"
+                                             ></span
+                                             ><span class="tooltip-label"
+                                                  >Brown</span
+                                             >
+                                        </li>
+                                   </ul>
+                              </div>
+                         </div>
+                         <!--End Color Block-->
+                         <!--Size Block-->
+                         <div
+                              class="block filterBox filter-widget size-swacthes"
+                         >
+                              <div class="block-title">
+                                   <h3 class="mb-0">Size</h3>
+                              </div>
+                              <div class="filter-color filter-size swacth-list">
+                                   <ul class="clearfix">
+                                        <li>
+                                             <span class="swacth-btn">X</span
+                                             ><span class="tooltip-label"
+                                                  >X</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span class="swacth-btn checked"
+                                                  >XL</span
+                                             ><span class="tooltip-label"
+                                                  >XL</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span class="swacth-btn">XLL</span
+                                             ><span class="tooltip-label"
+                                                  >XLL</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span class="swacth-btn">M</span
+                                             ><span class="tooltip-label"
+                                                  >M</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span class="swacth-btn">S</span
+                                             ><span class="tooltip-label"
+                                                  >S</span
+                                             >
+                                        </li>
+                                        <li>
+                                             <span class="swacth-btn">XXL</span
+                                             ><span class="tooltip-label"
+                                                  >XLL</span
+                                             >
+                                        </li>
+                                   </ul>
+                              </div>
+                         </div>
+                         <!--End Size Block-->
+                         <!--Brand Block-->
+                         <div
+                              class="block filterBox filter-widget size-swacthes brand-filter"
+                         >
+                              <div class="block-title">
+                                   <h3 class="mb-0">Brands</h3>
+                              </div>
+                              <div class="filterDD">
+                                   <ul class="clearfix">
+                                        <li>
+                                             <input
+                                                  type="checkbox"
+                                                  value="adidas"
+                                                  id="adidas"
+                                             /><label for="adidas"
+                                                  ><span></span>Bosch</label
+                                             >
+                                        </li>
+                                        <li>
+                                             <input
+                                                  type="checkbox"
+                                                  value="baggit"
+                                                  id="baggit"
+                                             /><label for="baggit"
+                                                  ><span></span>Filtron</label
+                                             >
+                                        </li>
+                                        <li>
+                                             <input
+                                                  type="checkbox"
+                                                  value="campus"
+                                                  id="campus"
+                                             /><label for="campus"
+                                                  ><span></span>Valeo</label
+                                             >
+                                        </li>
+                                        <li>
+                                             <input
+                                                  type="checkbox"
+                                                  value="elle"
+                                                  id="elle"
+                                             /><label for="elle"
+                                                  ><span></span
+                                                  >Mercedes-Benz</label
+                                             >
+                                        </li>
+                                   </ul>
+                              </div>
+                         </div>
+                         <!--End Brand Block-->
+
+                         <!--Availability-->
+                         <div
+                              class="block filterBox filter-widget size-swacthes availability"
+                         >
+                              <div class="block-title">
+                                   <h3 class="mb-0">Availability</h3>
+                              </div>
+                              <div class="filterDD">
+                                   <ul
+                                        class="clearfix"
+                                        style="column-count: auto"
+                                   >
+                                        <li>
+                                             <input
+                                                  type="checkbox"
+                                                  value="instock"
+                                                  id="instock"
+                                             /><label for="instock"
+                                                  ><span></span>In stock</label
+                                             >
+                                        </li>
+                                        <li>
+                                             <input
+                                                  type="checkbox"
+                                                  value="outofstock"
+                                                  id="outofstock"
+                                             /><label for="outofstock"
+                                                  ><span></span>Out of
+                                                  stock</label
+                                             >
+                                        </li>
+                                   </ul>
+                              </div>
+                         </div>
+                         <!--End Availability-->
+
+                         <!--End Popular Tags-->
                     </div>
-                  </div>
-                </div>
-                <!--End Product Detail-->
-              </div>
-            </div>
-            <% }); %>
+               </div>
+               <!--End Sidebar-->
+
+               <!--Content-->
+               <div class="col-12 col-sm-12 col-md-12 col-lg-9 main-col">
+                    <!--Toolbar-->
+                    <div class="toolbar py-3 pt-0">
+                         <div class="filters-toolbar-wrapper">
+                              <ul
+                                   class="list-unstyled d-flex align-items-center justify-content-between m-0"
+                              >
+                                   <li
+                                        class="collection-view d-flex align-items-center"
+                                   >
+                                        <div
+                                             id="display_products_system"
+                                             class="filters-toolbar__item collection-view-as d-flex align-items-center me-3"
+                                        >
+                                             <div
+                                                  id="btn_grid_products_system"
+                                                  class="change-view prd-grid"
+                                                  value="grid"
+                                             >
+                                                  <i
+                                                       class="cps cp-th-large"
+                                                  ></i>
+                                                  <span class="tooltip-label"
+                                                       >Siatka</span
+                                                  >
+                                             </div>
+                                             <div
+                                                  id="btn_list_products_system"
+                                                  class="change-view prd-list"
+                                                  value="list"
+                                             >
+                                                  <i class="cps cp-list"></i>
+                                                  <span class="tooltip-label"
+                                                       >Lista</span
+                                                  >
+                                             </div>
+                                        </div>
+                                        <div
+                                             class="product-count d-flex align-items-center"
+                                        >
+                                             <button
+                                                  type="button"
+                                                  class="btn rounded btn-filter d-block d-lg-none me-2 me-sm-3"
+                                             >
+                                                  <span class="hidden"
+                                                       >Filtruj</span
+                                                  >
+                                             </button>
+                                        </div>
+                                   </li>
+                                   <li
+                                        class="filters-select ms-auto ms-sm-0 d-flex align-items-center"
+                                   >
+                                        <!-- ... (pozostaw swój istniejący kod selektorów) -->
+                                   </li>
+                              </ul>
+                         </div>
+                    </div>
+                    <!--End Toolbar-->
+
+                    <!--Product Grid-->
+                    <div
+                         id="grid_products_system"
+                         class="products-grid"
+                         name="container_products"
+                    >
+                         <div class="row">
+                              <!--ITEMS-->
+                              <% data.content.docs.forEach((item, index) => { %>
+                              <div class="col-6 col-sm-6 col-md-4 col-lg-4">
+                                   <div class="item">
+                                        <!--Product Image-->
+                                        <div class="product-image">
+                                             <% if(item.images.length === 0) {
+                                             %>
+                                             <a
+                                                  href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
+                                                  class="rounded-3 product-thumb"
+                                             >
+                                                  <img
+                                                       class="primary blur-up lazyload rounded-3"
+                                                       data-src="assets/images/products/250x250.jpg"
+                                                       src="assets/images/products/250x250.jpg"
+                                                       alt="<%= item.name %>"
+                                                       title="<%= item.name %>"
+                                                  />
+                                             </a>
+                                             <% } %> <% if(item.images.length
+                                             === 1) {%>
+                                             <a
+                                                  href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
+                                                  class="rounded-3 product-thumb"
+                                             >
+                                                  <img
+                                                       class="primary blur-up lazyload rounded-3"
+                                                       data-src="<%= item.images[0].fullPath%>"
+                                                       src="<%= item.images[0].fullPath%>"
+                                                       alt="<%= item.images[0].name %>"
+                                                       title="<%= item.images[0].name %>"
+                                                  />
+                                             </a>
+                                             <% } %> <% if(item.images.length >=
+                                             2) {%>
+                                             <a
+                                                  href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
+                                                  class="rounded-3 product-thumb"
+                                             >
+                                                  <img
+                                                       class="primary blur-up lazyload rounded-3"
+                                                       data-src="<%= item.images[0].fullPath%>"
+                                                       src="<%= item.images[0].fullPath%>"
+                                                       alt="<%= item.images[0].name %>"
+                                                       title="<%= item.images[0].name %>"
+                                                  />
+                                                  <img
+                                                       class="hover blur-up lazyload rounded-3"
+                                                       data-src="<%= item.images[1].fullPath%>"
+                                                       src="<%= item.images[1].fullPath%>"
+                                                       alt="<%= item.images[1].name %>"
+                                                       title="<%= item.images[1].name %>"
+                                                  />
+                                             </a>
+                                             <% } %>
+
+                                             <!--Product Labels-->
+                                             <% if(item.quantityAvailable > 2 )
+                                             {%>
+                                             <div class="product-labels">
+                                                  <span
+                                                       class="pr-label3 lbl new rounded"
+                                                       ><%=
+                                                       `${i18n.__("locales.stock-status.in-stock")}:
+                                                       ${item.quantityAvailable}`
+                                                       %></span
+                                                  >
+                                             </div>
+                                             <% } %> <%
+                                             if(item.quantityAvailable <= 2 &&
+                                             item.quantityAvailable !== 0) { %>
+                                             <div class="product-labels">
+                                                  <span
+                                                       class="pr-label2 hot lbl new rounded"
+                                                       ><%=
+                                                       `${i18n.__("locales.stock-status.in-stock")}:
+                                                       ${item.quantityAvailable}`
+                                                       %></span
+                                                  >
+                                             </div>
+                                             <% } %> <%
+                                             if(item.quantityAvailable === 0 )
+                                             {%>
+                                             <div class="product-labels">
+                                                  <span
+                                                       class="on-sale lbl rounded"
+                                                       ><%=
+                                                       `${i18n.__("locales.stock-status.not-available")}`
+                                                       %></span
+                                                  >
+                                             </div>
+                                             <% } %>
+                                             <!--End Product Labels-->
+
+                                             <!--Button Action-->
+                                             <div class="button-hover">
+                                                  <span
+                                                       class="btn btn-wishlist"
+                                                       title="Wishlist"
+                                                  >
+                                                       <i
+                                                            index="<%= index %>"
+                                                            product_id="<%= item.id %>"
+                                                            action="add_to_favorites"
+                                                            class="cpr cp-heart"
+                                                       ></i>
+                                                  </span>
+                                                  <span
+                                                       class="btn pro-addtocart-popup rounded btn-cart btn-primary"
+                                                       title="Add To Cart"
+                                                  >
+                                                       <i
+                                                            index="<%= index %>"
+                                                            product_id="<%= item.id %>"
+                                                            action="add_to_cart"
+                                                            class="cps cp-shopping-cart"
+                                                       ></i>
+                                                  </span>
+                                             </div>
+                                             <!--End Button Action-->
+                                        </div>
+                                        <!--End Product Image-->
+
+                                        <!--Product Details-->
+                                        <div class="product-details d-flex">
+                                             <div class="product-details-in">
+                                                  <div class="h3">
+                                                       <a
+                                                            href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
+                                                            ><%= item.name %></a
+                                                       >
+                                                  </div>
+                                                  <div class="price-box">
+                                                       <span class="price"
+                                                            ><%=
+                                                            item.priceFormat
+                                                            %></span
+                                                       >
+                                                  </div>
+                                             </div>
+                                        </div>
+                                        <!--End Product Details-->
+                                   </div>
+                              </div>
+                              <% }); %>
+                         </div>
+                    </div>
+                    <!--End Product Grid-->
+
+                    <!--Product List-->
+                    <div
+                         id="list_products_system"
+                         class="products-list"
+                         name="container_products"
+                    >
+                         <div class="row">
+                              <% data.content.docs.forEach((item, index) => { %>
+                              <div class="col-12">
+                                   <!--Product Item-->
+                                   <div class="item d-flex align-items-center">
+                                        <!--Product Image-->
+                                        <div class="product-image flex-1">
+                                             <% if(item.images.length === 0) {
+                                             %>
+                                             <a
+                                                  href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
+                                                  class="rounded-3 product-thumb"
+                                             >
+                                                  <img
+                                                       class="primary blur-up lazyload rounded-3"
+                                                       data-src="assets/images/products/250x250.jpg"
+                                                       src="assets/images/products/250x250.jpg"
+                                                       alt="<%= item.name %>"
+                                                       title="<%= item.name %>"
+                                                  />
+                                             </a>
+                                             <% } %> <% if(item.images.length
+                                             === 1) {%>
+                                             <a
+                                                  href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
+                                                  class="rounded-3 product-thumb"
+                                             >
+                                                  <img
+                                                       class="primary blur-up lazyload rounded-3"
+                                                       data-src="<%= item.images[0].fullPath%>"
+                                                       src="<%= item.images[0].fullPath%>"
+                                                       alt="<%= item.images[0].name %>"
+                                                       title="<%= item.images[0].name %>"
+                                                  />
+                                             </a>
+                                             <% } %> <% if(item.images.length >=
+                                             2) {%>
+                                             <a
+                                                  href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
+                                                  class="rounded-3 product-thumb"
+                                             >
+                                                  <img
+                                                       class="primary blur-up lazyload rounded-3"
+                                                       data-src="<%= item.images[0].fullPath%>"
+                                                       src="<%= item.images[0].fullPath%>"
+                                                       alt="<%= item.images[0].name %>"
+                                                       title="<%= item.images[0].name %>"
+                                                  />
+                                                  <img
+                                                       class="hover blur-up lazyload rounded-3"
+                                                       data-src="<%= item.images[1].fullPath%>"
+                                                       src="<%= item.images[1].fullPath%>"
+                                                       alt="<%= item.images[1].name %>"
+                                                       title="<%= item.images[1].name %>"
+                                                  />
+                                             </a>
+                                             <% } %>
+
+                                             <!--Product Labels-->
+                                             <% if(item.quantityAvailable > 2 )
+                                             {%>
+                                             <div class="product-labels">
+                                                  <span
+                                                       class="pr-label3 lbl new rounded"
+                                                       ><%=
+                                                       `${i18n.__("locales.stock-status.in-stock")}:
+                                                       ${item.quantityAvailable}`
+                                                       %></span
+                                                  >
+                                             </div>
+                                             <% } %> <%
+                                             if(item.quantityAvailable <= 2 &&
+                                             item.quantityAvailable !== 0) { %>
+                                             <div class="product-labels">
+                                                  <span
+                                                       class="pr-label2 hot lbl new rounded"
+                                                       ><%=
+                                                       `${i18n.__("locales.stock-status.in-stock")}:
+                                                       ${item.quantityAvailable}`
+                                                       %></span
+                                                  >
+                                             </div>
+                                             <% } %> <%
+                                             if(item.quantityAvailable === 0 )
+                                             {%>
+                                             <div class="product-labels">
+                                                  <span
+                                                       class="on-sale lbl rounded"
+                                                       ><%=
+                                                       i18n.__("locales.stock-status.not-available")
+                                                       %></span
+                                                  >
+                                             </div>
+                                             <% } %>
+                                             <!--End Product Labels-->
+
+                                             <!--Button Action-->
+                                             <div class="button-hover">
+                                                  <span
+                                                       class="btn btn-wishlist"
+                                                       title="Wishlist"
+                                                  >
+                                                       <i
+                                                            index="<%= index %>"
+                                                            product_id="<%= item.id %>"
+                                                            action="add_to_favorites"
+                                                            class="cpr cp-heart"
+                                                       ></i>
+                                                  </span>
+                                                  <span
+                                                       class="btn pro-addtocart-popup rounded btn-cart btn-primary"
+                                                       title="Add To Cart"
+                                                  >
+                                                       <i
+                                                            index="<%= index %>"
+                                                            product_id="<%= item.id %>"
+                                                            action="add_to_cart"
+                                                            class="cps cp-shopping-cart"
+                                                       ></i>
+                                                  </span>
+                                             </div>
+                                             <!--End Button Action-->
+                                        </div>
+                                        <!--End Product Image-->
+
+                                        <!--Product Details-->
+                                        <div class="product-details flex-1">
+                                             <div class="product-details-in">
+                                                  <div class="h3">
+                                                       <a
+                                                            href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
+                                                            ><%= item.name %></a
+                                                       >
+                                                  </div>
+                                                  <div class="price-box">
+                                                       <span class="price"
+                                                            ><%=
+                                                            item.priceFormat
+                                                            %></span
+                                                       >
+                                                  </div>
+                                                  <div class="product-review">
+                                                       <!-- Przykładowe gwiazdki ocen -->
+                                                       <i
+                                                            class="cps cp-star"
+                                                       ></i
+                                                       ><i
+                                                            class="cps cp-star"
+                                                       ></i
+                                                       ><i
+                                                            class="cps cp-star"
+                                                       ></i
+                                                       ><i
+                                                            class="cps cp-star"
+                                                       ></i
+                                                       ><i
+                                                            class="cpr cp-star"
+                                                       ></i>
+                                                       <span class="sep"
+                                                            >|</span
+                                                       >
+                                                       2 Opinie
+                                                  </div>
+                                                  <div class="sort-description">
+                                                       <p>
+                                                            <%= item.description
+                                                            %>
+                                                       </p>
+                                                  </div>
+                                             </div>
+                                        </div>
+                                        <!--End Product Details-->
+                                   </div>
+                                   <!--End Product Item-->
+                              </div>
+                              <% }); %>
+                         </div>
+                    </div>
+                    <!--End Product List-->
+
+                    <!--Pagination-->
+                    <div class="row">
+                         <div class="col-12">
+                              <div class="pagination">
+                                   <div class="container mb-5">
+                                        <ul
+                                             id="main_pagination_block"
+                                             class="d-flex align-items-center justify-content-center"
+                                        ></ul>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
+                    <!--End Pagination-->
+               </div>
+               <!--End Content-->
           </div>
-        </div>
-        <!--End Product Grid-->
-
-           <!-- LIST -->
-           <div id="list_products_system" class="products-list" name="container_products">
-            <div class="row">
-                <% data.content.docs.forEach((item, index) => { %>
-                <div class="col-12">
-                    <!--Product Item-->
-                    <div  class="item d-flex align-items-center">
-                        <!--Product Image-->
-                        <div class="product-image flex-1">
-
-                                <% if(item.images.length === 0) { %>
-                                    <a href="<%= `${data.page.host}/item/${item.urlComponent}` %>" class="rounded-3 product-thumb">
-                                      <img
-                                        class="primary blur-up lazyload rounded-3"
-                                        data-src="assets/images/products/250x250.jpg"
-                                        src="assets/images/products/250x250.jpg"
-                                        alt="Hankook DynaPro AT-m RF10"
-                                        title="Hankook DynaPro AT-m RF10"
-                                      />
-                                    </a>
-                                    <% } %>
-                  
-                                    <!--Image-->
-                                    <% if(item.images.length === 1) {%>
-                                    <a href="<%= `${data.page.host}/item/${item.urlComponent}` %>" class="rounded-3 product-thumb">
-                                      <img
-                                        class="primary blur-up lazyload rounded-3"
-                                        data-src="<%= item.images[0].fullPath%>"
-                                        src="<%= item.images[0].fullPath%>"
-                                        alt="<%= item.images[0].name %>"
-                                        title="<%= item.images[0].name %>"
-                                      />
-                                    </a>
-                  
-                                    <% } %>
-                  
-                                    <!--Image-->
-                                    <% if(item.images.length >= 2) {%>
-                                    <a
-                                      href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
-                                      class="rounded-3 product-thumb"
-                                    >
-                                      <img
-                                        class="primary blur-up lazyload rounded-3"
-                                        data-src="<%= item.images[0].fullPath%>"
-                                        src="<%= item.images[0].fullPath%>"
-                                        alt="<%= item.images[0].name %>"
-                                        title="<%= item.images[0].name %>"
-                                      />
-                                      <img
-                                        class="hover blur-up lazyload rounded-3"
-                                        data-src="<%= item.images[1].fullPath%>"
-                                        src="<%= item.images[1].fullPath%>"
-                                        alt="<%= item.images[1].name %>"
-                                        title="<%= item.images[1].name %>"
-                                      />
-                                    </a>
-                  
-                                    <% } %>
-
-                            <!--Product Label-->
-                              <!-- Green -->
-                  <% if(item.quantityAvailable > 2 ) {%>
-                    <div class="product-labels">
-                      <span class="pr-label3 lbl new rounded"
-                        ><%= `${i18n.__("locales.stock-status.in-stock")}: ${item.quantityAvailable}` %></span
-                      >
-                    </div>
-  
-                    <% } %>
-  
-                    <!-- Yellow -->
-                    <% if(item.quantityAvailable <= 2 && item.quantityAvailable !== 0) { %>
-                    <div class="product-labels">
-                      <span class="pr-label2 hot lbl new rounded"
-                        ><%= `${i18n.__("locales.stock-status.in-stock")}: ${item.quantityAvailable}` %></span
-                      >
-                    </div>
-  
-                    <% } %>
-  
-                    <!-- Red -->
-                    <% if(item.quantityAvailable === 0 ) {%>
-                    <div class="product-labels">
-                      <span class="on-sale lbl rounded"
-                        ><%= i18n.__("locales.stock-status.not-available") %></span
-                      >
-                    </div>
-  
-                    <% } %>
-                            <!--End Product Label-->
-                            <!--Button Action-->
-                            <div class="button-hover">
-                                <span class="btn btn-wishlist" title="Wishlist"><i class="cpr cp-heart"></i></span>
-                                <span class="btn pro-addtocart-popup rounded btn-cart btn-primary" title="Add To Cart"><i class="cps cp-shopping-cart"  index="<%= index %>" product_id="<%= item.id %>"
-                                    action="btn_add_to_card_from_list"></i></span>
-                            </div>
-                            <!--End Button Action-->
-                        </div>
-                        <!--End Product Image-->
-                        <!--Product Detail-->
-                        <div class="product-details flex-1">
-                            <div class="product-details-in">
-                                <div class="h3"><a href="<%= `${data.page.host}/item/${item.urlComponent}` %>"><%= item.name %></a></div>
-                                <div class="price-box"><span class="price"><%= item.priceFormat %></span></div>
-                                <div class="product-review">
-                                    <i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cps cp-star"></i><i class="cpr cp-star"></i>
-                                    <span class="sep">|</span> 2 Reviews
-                                </div>
-                                <div class="sort-description"><p><%= item.description %></p></div>
-                            </div>
-                        </div>
-                        <!--End Product Detail-->
-                    </div>
-                    <!--End Product Item-->
-                </div>
-                
-                <% }); %>
-               
-             
-              
-            </div>
-        </div>
-        <!--End Product list-->
-
-        <!--Pagination-->
-        <div class="row">
-          <div class="col-12">
-            <div class="pagination">
-              <div class="container mb-5">
-                <ul
-                  id="main_pagination_block"
-                  class="d-flex align-items-center justify-content-center"
-                >
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--End Pagination-->
-      </div>
-        <!--End Content-->
-    </div>
+     </div>
 </div>
-</div>
-      </div>
 
-      <!--End Content-->
-    </div>
-  </div>
-</div>
-<!--End Categories Content-->
+<!-- Skrypt JavaScript -->
+<script>
+     // Pobieranie elementów DOM
+     const btnListView = document.querySelector("#btn_list_products_system");
+     const btnGridView = document.querySelector("#btn_grid_products_system");
+     const listView = document.querySelector("#list_products_system");
+     const gridView = document.querySelector("#grid_products_system");
+
+     const setDisplayProductsSystem = () => {
+          let displaySystem =
+               localStorage.getItem("display_products_system") || "grid";
+
+          if (displaySystem === "list") {
+               if (btnListView) btnListView.classList.add("active");
+               if (btnGridView) btnGridView.classList.remove("active");
+
+               if (gridView) gridView.style.display = "none";
+               if (listView) listView.style.display = "block";
+          } else {
+               if (btnGridView) btnGridView.classList.add("active");
+               if (btnListView) btnListView.classList.remove("active");
+
+               if (listView) listView.style.display = "none";
+               if (gridView) gridView.style.display = "block";
+          }
+     };
+
+     const changeDisplayProductsSystem = () => {
+          const displayProductsSystem = document.querySelector(
+               "#display_products_system"
+          );
+
+          if (!displayProductsSystem) return;
+
+          displayProductsSystem.addEventListener("click", (e) => {
+               const target = e.target.closest(".change-view");
+               if (!target) return;
+               const new_value = target.getAttribute("value");
+
+               if (new_value) {
+                    localStorage.setItem("display_products_system", new_value);
+
+                    setDisplayProductsSystem();
+               }
+          });
+     };
+
+     // Wywołanie funkcji po załadowaniu strony
+     setDisplayProductsSystem();
+     changeDisplayProductsSystem();
+</script>

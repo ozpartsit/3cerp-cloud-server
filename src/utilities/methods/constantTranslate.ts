@@ -19,6 +19,8 @@ export default function constantTranslate(this: IExtendedDocument, local: string
                     for (let index in doc[list.path]) {
                         doc[list.path][index] = this[list.path][index].constantTranslate(local);
                     }
+                    // ukrywami usuniete
+                    doc[list.path] = doc[list.path].filter(line => !line.deleted)
                 }
 
 
@@ -38,7 +40,7 @@ export default function constantTranslate(this: IExtendedDocument, local: string
 
                 if (doc[pathname]) {
                     if (Array.isArray(doc[pathname])) {
-                        doc[pathname].forEach((value,index) => {
+                        doc[pathname].forEach((value, index) => {
                             doc[pathname][index] = {
                                 _id: value, name: i18n.__(`${schemaType.options.constant}.${value}`)
                             };

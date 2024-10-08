@@ -6,10 +6,9 @@ import { roundToPrecision } from "../../utilities/usefull";
 import { setItem, setQuantity } from "./line.actions";
 import { IExtendedDocument } from "../../utilities/methods.js";
 import { IKitItem } from "../items/kitItem/schema.js";
-
+import util from "util";
 export interface ILine extends IExtendedDocument {
   _id: mongoose.Schema.Types.ObjectId;
-  parent?: any;
   index: number;
   type: string;
   transaction: ITransaction["_id"];
@@ -144,10 +143,33 @@ const schema = new mongoose.Schema<ILine>(
       validType: "switch",
       default: false,
       readonly: true
-    }
+    },
   },
   options
 );
+
+schema.virtual('amountFormat').get(function (this: ILine & { parent(): ITransaction }) {
+  if (this.parent().currency)
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.parent().currency }).format(this.amount);
+  else return this.amount.toFixed(2);
+});
+
+schema.virtual('grossAmountFormat').get(function (this: ILine & { parent(): ITransaction }) {
+  if (this.parent().currency)
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.parent().currency }).format(this.grossAmount);
+  else return this.grossAmount.toFixed(2);
+});
+
+schema.virtual('taxAmountFormat').get(function (this: ILine & { parent(): ITransaction }) {
+  if (this.parent().currency)
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.parent().currency }).format(this.taxAmount);
+  else return this.taxAmount.toFixed(2);
+});
+schema.virtual('priceFormat').get(function (this: ILine & { parent(): ITransaction }) {
+  if (this.parent().currency)
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.parent().currency }).format(this.price);
+  else return this.price.toFixed(2);
+});
 
 schema.method("components", async function () {
   await this.populate("item");

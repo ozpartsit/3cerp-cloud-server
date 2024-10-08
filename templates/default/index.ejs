@@ -1,82 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta name="description" content="description" />
-    <title><%= data.page.title%></title>
-    <!--Favicon Icon-->
-    <link rel="shortcut icon" href="<%= data.page.logo.fullPath %>" />
-    <!--Google Fonts-->
-    <link
-      href="//fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
+     <head>
+          <!-- Required meta tags -->
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <meta http-equiv="x-ua-compatible" content="ie=edge" />
+          <meta name="description" content="description" />
+          <title><%= data.page.title%></title>
+          <!--Favicon Icon-->
+          <link rel="shortcut icon" href="<%= data.page.logo.fullPath %>" />
+          <!--Google Fonts-->
+          <link
+               href="//fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700&display=swap"
+               rel="stylesheet"
+          />
+          <link
+               rel="stylesheet"
+               href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+          />
 
-    <!-- Plugins CSS -->
-    <link rel="stylesheet" href="/assets/css/plugins.css" />
-    <!-- Main Style CSS -->
-    <link rel="stylesheet" href="/assets/css/style.css" />
-    <link rel="stylesheet" href="/assets/css/responsive.css" />
-  </head>
-  <body class="home demo1">
-    <!--Preloader-->
-    <div id="preloader">
-      <div class="loader"></div>
-    </div>
+          <!-- Plugins CSS -->
+          <link rel="stylesheet" href="/assets/css/plugins.css" />
 
-    <!-- CONTENT -->
-    <div class="page-wrapper">
-      <!-- TOP BAR -->
-      <%- include('partials/top-bar') %>
+          <!-- Assing store styles -->
+          <style>
+               :root {
+                    --color-primary: <%=data.template.colorPrimary %>;
+                    --color-secondary: <%=data.template.colorSecondary %>;
+                    --color-accent: <%=data.template.colorAccent %>;
+               }
+          </style>
 
-      <!-- CONTENT -->
-      <main id="page-content">
-        <!-- Page banner -->
-        <%- include('partials/page-banner') %>
+          <!-- Main Style CSS -->
+          <link rel="stylesheet" href="/assets/css/style.css" />
+          <link rel="stylesheet" href="/assets/css/responsive.css" />
+     </head>
+     <body class="home demo1">
+          <!-- Including ejs scripts -->
+          <%- include('assets/js/scripts') %>
 
-        <!-- Views -->
-        <%- include('views/'+(view||'home')) %>
-      </main>
+          <!--Preloader-->
+          <div id="preloader">
+               <div class="loader"></div>
+          </div>
 
-      <!-- FOOTER -->
-      <%- include('partials/footer') %>
+          <!-- CONTENT -->
+          <div class="page-wrapper">
+               <!-- TOP BAR -->
+               <%- include('partials/top-bar') %>
 
-      <!-- SCROLL TOP -->
-      <%- include('partials/scroll-top') %>
+               <!-- CONTENT -->
+               <main id="page-content">
+                    <!-- Page banner -->
+                    <%- include('partials/page-banner') %>
 
-      <!-- MINI CART -->
-      <%- include('partials/mini-cart') %>
+                    <!-- Views -->
+                    <%- include('views/'+(view||'home')) %>
+               </main>
 
-      <!-- NEWSLETTER POPUP -->
-      <%- include('partials/newsletter-popup') %>
+               <!-- FOOTER -->
+               <%- include('partials/footer') %>
 
-      <div class="modalOverly"></div>
-    </div>
+               <!-- SCROLL TOP -->
+               <%- include('partials/scroll-top') %>
 
-    <!-- Including Jquery -->
-    <script src="/assets/js/vendor/jquery-min.js"></script>
-    <script src="/assets/js/vendor/js.cookie.js"></script>
+               <!-- MINI CART -->
+               <%- include('partials/mini-cart') %>
 
-    <!--Including Javascript-->
-    <script src="/assets/js/plugins.js"></script>
-    <script src="/assets/js/main.js"></script>
+               <!-- NEWSLETTER POPUP -->
+               <%- include('partials/newsletter-popup') %>
 
-    <!-- Parts app -->
-    <script src="/assets/js/partials/newsletter-popup.js"></script>
+               <div class="modalOverly"></div>
+          </div>
 
-    <!-- Including ejs scripts -->
-    <!-- Create object data -->
-    <%- include('assets/js/scripts') %>
-    <script src="/assets/js/partials/api.js"></script>
-    <script src="/assets/js/partials/shopping-card.js"></script>
-    <script src="/assets/js/partials/login.js"></script>
-    <script src="/assets/js/index.js"></script>
-  </body>
+          <!-- Including Jquery -->
+          <script src="/assets/js/vendor/jquery-min.js"></script>
+          <script src="/assets/js/vendor/js.cookie.js"></script>
+
+          <!--Including Javascript-->
+          <script src="/assets/js/tacko-scripts/plugins.js"></script>
+          <script src="/assets/js/tacko-scripts/main.js"></script>
+
+          <!-- GLOBAL SCRIPTS -->
+          <script src="/assets/js/global/notification.js"></script>
+          <script src="/assets/js/global/favorites.js"></script>
+          <script src="/assets/js/global/cart.js"></script>
+          <script src="/assets/js/global/products.js"></script>
+          <script src="/assets/js/global/banner-settings.js"></script>
+          <script src="/assets/js/global/search.js"></script>
+
+          <!-- Parts app -->
+          <script src="/assets/js/partials/newsletter-popup.js"></script>
+          <script src="/assets/js/partials/account.js"></script>
+
+          <!-- api should be above asynchronous functions -->
+          <script src="/assets/js/partials/api.js"></script>
+          <script src="/assets/js/views/contact.js"></script>
+          <script src="/assets/js/partials/mini-cart.js"></script>
+          <script src="/assets/js/partials/auth.js"></script>
+          <script src="/assets/js/index.js"></script>
+          <script src="/assets/js/partials/cart-view.js"></script>
+
+          <!-- Views js -->
+          <script src="/assets/js/views/summary.js"></script>
+     </body>
 </html>

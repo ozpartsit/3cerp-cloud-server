@@ -1,0 +1,41 @@
+<!--Homepage Slideshow-->
+<div class="slideshow home-slideshow p-0">
+    <% data.slider.pages.forEach((item, index) => { %>
+    <div class="slide" >
+      <div class="blur-up lazyload">
+        <img
+          class="blur-up lazyload desktop-hide"
+          data-src="<%= item.image.fullPath%>"
+          src="<%= item.image.fullPath%>"
+          alt="<%= item.image.name%>"
+          title="<%= item.image.name%>"
+          width="1920"
+          height="620"
+        />
+        <img
+          class="blur-up lazyload mobile-hide"
+          data-src="<%= item.image.fullPath%>"
+          src="<%= item.image.fullPath%>"
+          alt="<%= item.image.name%>"
+          title="<%= item.image.name%>"
+          width="1181"
+          height="620"
+        />
+        <div class="container position-relative">
+          <div class="slideshow-overlay btmleft text-left">
+            <div class="slideshow-content">
+              <div class="wrap-caption animation style1">
+                <h2 class="mega-title white-text text-uppercase">
+                    <%= item.description%>
+                </h2>
+                <a href="<%= `${data.page.host}/${item.urlComponent}` %>" class="btn rounded-pill">Read more</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% }); %>
+    
+  </div>
+  <!--End Homepage Slideshow-->

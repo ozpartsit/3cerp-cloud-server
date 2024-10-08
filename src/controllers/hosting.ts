@@ -13,6 +13,8 @@ import { IRelated } from "../models/items/related.schema.js";
 import cache from "../config/cache.js";
 import Customer from "../models/entities/customer/schema.js";
 import mongoose from "mongoose";
+import { IPage } from "../models/ecommerce/page.schema.js";
+
 
 export default class controller {
   public async setLanguage(req: Request, res: Response, next: NextFunction) {
@@ -56,13 +58,17 @@ export default class controller {
       let filepath = path.join(views, "index" + ".ejs");
       let data: any = { info: {}, page: {}, template: {}, content: null };
 
-      //shoppingcart
-      if (req.cookies.shoppingcart) {
-        const shoppingcart = cache.get(req.cookies.shoppingcart)
-        data["shoppingCart"] = shoppingcart;
-      }
+      //cookes
+      const shoppingcart = req.cookies.shoppingcart ? cache.get(req.cookies.shoppingcart) : null
+      const user = req.cookies.user ? await Customer.getDocument(req.cookies.user, "simple", true) : null
 
+      //shoppingcart
+      data["shoppingCart"] = shoppingcart;
       // logged user
+      if (user) data["user"] = {
+        name: user.name,
+        favoriteItems: user.favoriteItems.length
+      };
 
 
       data["info"] = {
@@ -122,16 +128,87 @@ export default class controller {
       }
       data["nav"] = {
         //pages
-        pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language)).map(p => {
-          return {
+        pages: Object.values(shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.topBar).reduce((t: any, p) => {
+
+          let page = {
             urlComponent: p.urlComponent,
             path: `${data.page.host}/${p.urlComponent}`,
             name: p.name,
+            parentPage: (p.parentPage as any)?._id // do porpawy
           }
-        })
+
+          t[p._id.toString()] = t[p._id.toString()] || { ...page, pages: [] }
+          if (page.parentPage) {
+            if (t[page.parentPage.toString()]) t[page.parentPage.toString()].pages.push(page)
+          }
+          return t;
+        }, {})).filter((page: any) => !page.parentPage)
 
       }
-      console.log("asdasd", req.params.view)
+      data["footer"] = {
+        //pages
+        pages: Object.values(shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.footer).reduce((t: any, p) => {
+
+          let page = {
+            urlComponent: p.urlComponent,
+            path: `${data.page.host}/${p.urlComponent}`,
+            name: p.name,
+            parentPage: (p.parentPage as any)?._id // do porpawy
+          }
+
+          t[p._id.toString()] = t[p._id.toString()] || { ...page, pages: [] }
+          if (page.parentPage) {
+            if (t[page.parentPage.toString()]) t[page.parentPage.toString()].pages.push(page)
+          }
+          return t;
+        }, {})).filter((page: any) => !page.parentPage)
+
+      }
+
+      //slider on home page
+      if (!req.params.view) data["slider"] = {
+        //pages
+        pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.slider).map(p => {
+          let page = {
+            urlComponent: p.urlComponent,
+            path: `${data.page.host}/${p.urlComponent}`,
+            name: p.name,
+            description: p.description,
+            image: p.image
+          }
+          return page
+        })
+      }
+      //banner on home page
+      if (!req.params.view) data["banner"] = {
+        //pages
+        pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.banner).map(p => {
+          let page = {
+            urlComponent: p.urlComponent,
+            path: `${data.page.host}/${p.urlComponent}`,
+            name: p.name,
+            description: p.description,
+            image: p.image
+          }
+          return page
+        })
+      }
+      //blog section on home page
+      if (!req.params.view) data["blog"] = {
+        //pages
+        pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.blog).map(p => {
+          let page = {
+            urlComponent: p.urlComponent,
+            path: `${data.page.host}/${p.urlComponent}`,
+            name: p.name,
+            description: p.description,
+            image: p.image,
+            date: p.date.toISOString().substr(0, 10)
+          }
+          return page
+        })
+      }
+
       try {
         // if view params exists
         if (req.params.view) {
@@ -150,6 +227,16 @@ export default class controller {
                 res.redirect('login');
               }
             }
+
+            if (["wishlist"].includes(req.params.view)) {
+              if (user) {
+                await user.autoPopulate();
+                data.content = user.favoriteItems || {}
+              } else {
+                res.redirect('login');
+              }
+            }
+
             if (["shoppingcart", "basket", "cart", "checkout", "kasa", "summary"].includes(req.params.view)) {
               if (req.cookies.shoppingcart)
                 data.content = cache.get(req.cookies.shoppingcart)
@@ -163,14 +250,21 @@ export default class controller {
                 if (customer) {
 
                   // zmiana statusu na potwierdzony
-                  await shop.sendEmail("registration_confirmed", customer.email, customer)
+                  await shop.sendEmail("registration_confirmed", req.locale, customer.email, customer)
                   data.content = { status: "success", message: "email_confirmed" };
 
                 }
               }
-
             }
-
+            if (["resetpassword"].includes(req.params.view)) {
+              if (req.params.id) {
+                let Entity = mongoose.model("customer");
+                const customer = await Entity.findById(req.params.id, { _id: true, email: true })
+                if (customer) {
+                  data.content = { status: "success", message: "set_password" };
+                }
+              }
+            }
 
 
             if (fs.existsSync(viewpath)) {
@@ -258,19 +352,19 @@ export default class controller {
                     document["relatedItems"].map(async (related: IRelated) => {
                       let item = related.related.toObject();
                       item["quantityAvailable"] = Math.floor(Math.random() * 10);
-                      item["price"] = await related.related.getPrice()//Math.floor(Math.random() * 1000) + 40;
+                      item["price"] = await related.related.getPrice();
                       item["currency"] = data.page.currency;
                       item["priceFormat"] = new Intl.NumberFormat('en-EN', { style: 'currency', currency: data.page.currency }).format(item["price"]);
-
+                      item["grossPrice"] = false;
                       return item
                     })
                   )
 
                   doc["quantityAvailable"] = Math.floor(Math.random() * 10);
-                  doc["price"] = await document.getPrice()//Math.floor(Math.random() * 1000) + 40;
+                  doc["price"] = await document.getPrice()
                   doc["currency"] = data.page.currency;
                   doc["priceFormat"] = new Intl.NumberFormat('en-EN', { style: 'currency', currency: data.page.currency }).format(doc["price"]);
-
+                  doc["grossPrice"] = false;
 
                   data.content = doc;
                 } else {
@@ -283,6 +377,7 @@ export default class controller {
 
             if (!data.content) {
               const page = shop.pages.find(p => { if ((p.languages || []).includes(data.page.language) && (`/${data.page.language}/${p.urlComponent}` == req.path || `/${p.urlComponent}` == req.path)) return true; })
+
               if (page) {
                 data.content = page.html;
                 data.page.name = page.name;
@@ -295,6 +390,7 @@ export default class controller {
                 data.page.metaDescription = page.metaDescription;
                 data.page.metaKeywords = page.metaKeywords;
                 req.params.view = page.template;
+                viewpath = path.join(views, "views", req.params.view);
               } else {
                 // set 404 page
                 req.params.view = "404";
@@ -322,7 +418,7 @@ export default class controller {
       });
       hostingi18n.setLocale(req.cookies.language || req.locale);
       try {
-        console.log(viewpath, fs.existsSync(viewpath))
+
         if (fs.existsSync(viewpath) || !req.params.view || !data.content) {
           ejs.renderFile(
             filepath,

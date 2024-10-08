@@ -10,14 +10,16 @@
             <div class="product-single">
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                        <% if(data.content.images[0]) {%>
                         <div class="product-details-img product-horizontal-style mb-3">
                             <div class="product-zoom">
                                 <div class="zoompro-wrap product-zoom-right pl-20">
                                     <div class="zoompro-span">
                                         
                                         <div style="aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center; padding: 20px;">
+                                           
                                             <img  id="zoompro" class="zoompro prlightbox" src="<%= data.content.images[0].fullPath %>" data-zoom-image="<%= data.content.images[0].fullPath %>" alt="<%= data.content.images[0].name %>" />
-
+                                        
                                         </div>
                                     </div>
                                     <div class="product-buttons">
@@ -52,6 +54,7 @@
                                 
                             </div>
                         </div>
+                        <% } %>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 col-12">
                         <div class="product-single-detail">
@@ -92,7 +95,7 @@
                             <div class="sku mb-1"><b>SKU:</b> <%= data.content.sku %></div>
                         </div>
 
-                        <div class="brands mb-1"><b>Brand:</b> Valeo</div>
+                        <div class="brands mb-1"><b>Brand:</b> <%= data.content.manufacturer %></div>
                         <div class="price-box">
                             <span class="visually-hidden">Regular price</span>
                             <span class="sale-price">
@@ -101,8 +104,10 @@
                         </div>
                         
                         <div class="sort-description">
-                            <h4 class="title">Description</h4>
-                            <p><%= data.content.description %> </p>
+                            <h4 class="title">Description:</h4>
+
+                            <p><%= data.content.description  %></p>
+                            
                             <hr>
                             <b>Specifications</b>
                             <b>Note:</b>
@@ -126,8 +131,8 @@
                                     </div>
                                 </div>
                                 <div class="d-flex btn-icons">
-                                    <a class="btn-link" href="wishlist.html"><i class="cp cp-lg cp-heart"></i></a>
-                                    <a class="btn-link" href="compare-product.html"><i class="cp cp-exchange-alt"></i></a>
+                                    <a id="btn_favorite_add" class="btn-link cursor-pointer"><i class="cp cp-lg cp-heart"></i></a>
+                                    <!-- <a class="btn-link" href="compare-product.html"><i class="cp cp-exchange-alt"></i></a> -->
                                 </div>
                             </div>
                             <!-- End Product Action -->
@@ -144,6 +149,48 @@
                     </div>
                     </div>
                 </div>
+
+                <section class="section-sm store-features">
+                    <div class="row store-info">
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-2 my-md-2">
+                                <div class="d-flex rounded-3">
+                                    <i class="cps cp-truck-moving"></i>
+                                    <div class="detail">
+                                        <h5 class="fs-6 text-uppercase mb-1 body-font">Free Shipping &amp; Return</h5>
+                                        <p class="sub-text">Free shipping on all US orders</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-2 my-md-2">
+                                <div class="d-flex rounded-3">
+                                    <i class="cps cp-shield-alt"></i>
+                                    <div class="detail">
+                                        <h5 class="fs-6 text-uppercase mb-1 body-font">Secure Payment</h5>
+                                        <p class="sub-text">All payment are Secured and trusted.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-2 my-md-2">
+                                <div class="d-flex rounded-3">
+                                    <i class="cps cp-dollar-sign"></i>
+                                    <div class="detail">
+                                        <h5 class="fs-6 text-uppercase mb-1 body-font">Money Gurantee</h5>
+                                        <p class="sub-text">30 days money back guarantee</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-2 my-md-2">
+                                <div class="d-flex rounded-3">
+                                    <i class="cps cp-question-circle"></i>
+                                    <div class="detail">
+                                        <h5 class="fs-6 text-uppercase mb-1 body-font">Have A Questions?</h5>
+                                        <p class="sub-text">our technical will help you</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </section>
+
                 <!--Products Tabs-->
                 <div class="row mt-5">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-12">
@@ -159,8 +206,9 @@
                                 <div id="description" class="tab-content">
                                     <div class="product-description">
                                         <div class="row">
-                                            <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-4 mb-md-0">
-                                                <%= data.content.description %>
+                                            <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-4 mb-md-0 overflow"> 
+                                                <!-- Description HTML -->
+                                                <div style="overflow-x: auto;" id="shadow_DOM"></div>
                                             </div>                                                        
                                         </div>
                                     </div>
@@ -262,13 +310,24 @@
                                 <!--Additional Tabs-->
                                 <h3 class="tabs-ac-style acor-ttl d-md-none" rel="addtional-tabs">Addtional Tabs</h3>
                                 <div id="addtional-tabs" class="tab-content" style="display: block;">
-                                    <p>You can set different tabs for each products.</p>
-                                    <ul class="list-items">
-                                        <li>Comodous in tempor ullamcorper miaculis.</li>
-                                        <li>Pellentesque vitae neque mollis urna mattis laoreet.</li>
-                                        <li>Divamus sit amet purus justo.</li>
-                                        <li>Proin molestie egestas orci ac suscipit risus posuere loremous.</li>
-                                    </ul>
+                                    <div class="table-wrapper table-responsive">
+                                        <table class="table table-stripped mt-5">
+                                            <tbody id="table-compare">
+                                                <tr>
+                                                    <th class="item-row">Name</th>
+                                                    <th class="item-row">Value</th>
+                                                </tr>
+                                       
+                                                <% data.content.parameters.forEach(parameter => { %>
+                                                    <tr>
+                                                        <td class="item-row"><%= parameter.name %></td>
+                                                        <td class="item-row"><%= parameter.value %></td>
+                                                    </tr>
+                                                <% }) %>
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 <!--End Additional Tabs-->
                             </div>
@@ -292,8 +351,6 @@
 
             <div class="productSlider grid-products products-grid" name="container_products">
 
-
-
                 <% if(data.content.relatedItems[0]) { %>
 
                     <% data.content.relatedItems.forEach((item, index) => { %>
@@ -302,12 +359,7 @@
                         <div class="item">
                             <!--Product Image-->
                             <div class="product-image">
-                          
-
-
-
                                     <% if(item.images.length === 0) { %>
-
                                         <a href="<%= `${data.page.host}/item/${item.urlComponent}` %>" class="rounded-3 product-thumb">
                                             <img
                                                 class="primary blur-up lazyload rounded-3"
@@ -317,9 +369,7 @@
                                                 title="Hankook DynaPro AT-m RF10"
                                             />
                                         </a>
-                                        
                                     <% } %>
-                  
                                     <% if(item.images.length === 1) {%>
 
                                         <a href="<%= `${data.page.host}/item/${item.urlComponent}` %>" class="rounded-3 product-thumb">
@@ -395,9 +445,11 @@
 
                                     <!-- ACTIONS -->
                                     <div class="button-hover">
-                                        <a href="wishlist.html" class="btn btn-wishlist" title="Wishlist"><i class="cpr cp-heart"></i></a>
+                                        <span class="btn btn-wishlist cursor-pointer" title="Favorites">
+                                            <i index="<%= index %>" product_id="<%= item.id %>" action="add_to_favorites" class="cpr cp-heart"></i>
+                                        </span>
                                         <span class="btn pro-addtocart-popup rounded btn-cart btn-primary"  title="Add To Cart">
-                                            <i index="<%= index %>" product_id="<%= item.id %>" action="btn_add_to_card_from_list"  class="cps cp-shopping-cart"></i>
+                                            <i index="<%= index %>" product_id="<%= item.id %>" action="add_to_cart"  class="cps cp-shopping-cart"></i>
                                         </span>
                                     </div>
 
@@ -420,10 +472,6 @@
                 
                <% } %>
                 
-                
-             
-                            
-             
             </div>
         </div>
     </section>
@@ -431,3 +479,74 @@
 </main>
 
 </div>
+
+<script>
+
+    // Render html description
+    let div_shadow_dom = document.querySelector('#shadow_DOM')
+
+    if(div_shadow_dom) {
+        let html = data.content.html 
+        let shadow = div_shadow_dom.attachShadow({ mode: 'open' });
+        
+
+        if(html) {   
+            shadow.innerHTML = html
+        }
+    }
+
+
+    // Add product to cart
+    let HTML_quantity = document.querySelector("#input_product_quantity");
+    let HTML_main_btn = document.querySelector("#btn_main_add_to_card");
+
+     HTML_main_btn.addEventListener("click", async (e) => {
+          let id = data.content._id;
+          let quantity = HTML_quantity.value;
+
+          let success = await add_to_cart(id, quantity);
+
+          if(success) {
+            window.location.reload()
+          }
+     });
+
+
+    //  Add product to favorite
+    let HTML_favorite = document.querySelector('#btn_favorite_add')
+
+    HTML_favorite.addEventListener('click', async () => {
+        let id = data.content._id
+        let success = await add_favorites(id)
+
+        if(success) {
+            window.location.reload()
+        }
+    })
+
+
+</script>
+
+<style>
+.store-features .store-info .cps {
+  float: left;
+  margin: 0 15px 0 0;
+  font-size: 45px;
+  line-height: 40px;
+  vertical-align: middle;
+  display: block;
+  width: 50px;
+  text-align: center;
+}
+.store-features .store-info .detail {
+  font-size: 13px;
+}
+.store-features .store-info .detail h5 {
+  color: #303030;
+  margin: 0 !important;
+}
+.store-features .store-info .d-flex {
+  background-color: #f0f0f0;
+  padding: 20px 10px;
+}
+</style>

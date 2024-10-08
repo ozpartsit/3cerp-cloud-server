@@ -1,3 +1,1239 @@
-<div>
-    dssdsdds
+<div class="section login-page-in">
+     <div class="container">
+          <div class="row justify-content-between">
+               <div class="col-lg-4 col-md-4 col-sm-12 col-12">
+                    <div class="nav-box mb-4">
+                         <div class="profile-content">
+                              <div class="d-flex align-items-center mb-4">
+                                   <img
+                                        class="blur-up lazyload rounded-pill"
+                                        src="assets/images/photo1.jpg"
+                                        data-src="assets/images/photo1.jpg"
+                                        alt=""
+                                        title=""
+                                   />
+                                   <div class="detail mx-3">
+                                        <h3 class="text-uppercase mb-0">
+                                             <%= data.content.name %>
+                                        </h3>
+                                        <!-- <p class="mb-0">Joined April 06, 2021</p> -->
+                                   </div>
+                              </div>
+                         </div>
+                         <!-- Nav tabs -->
+                         <ul
+                              class="nav flex-column dashboard-list"
+                              role="tablist"
+                         >
+                              <li>
+                                   <a
+                                        class="nav-link active"
+                                        data-bs-toggle="tab"
+                                        href="#profile"
+                                        >Profile</a
+                                   >
+                              </li>
+                              <li>
+                                   <a
+                                        class="nav-link"
+                                        data-bs-toggle="tab"
+                                        href="#billingAddress"
+                                        >Billing Address</a
+                                   >
+                              </li>
+                              <li>
+                                   <a
+                                        class="nav-link"
+                                        data-bs-toggle="tab"
+                                        href="#shippingAddress"
+                                        >Shipping Address</a
+                                   >
+                              </li>
+                              <li>
+                                   <a
+                                        class="nav-link"
+                                        data-bs-toggle="tab"
+                                        href="#addresses"
+                                        >Addresses</a
+                                   >
+                              </li>
+                         </ul>
+                         <!-- End Nav tabs -->
+                    </div>
+               </div>
+
+               <div class="col-lg-7 col-md-7 col-sm-12 col-12">
+                    <!-- Tab panes -->
+                    <div class="tab-content dashboard-content">
+                         <!-- Profile -->
+                         <div
+                              id="profile"
+                              class="product-order tab-pane fade active show"
+                         >
+                              <h3>Profile</h3>
+                              <form
+                                   method="post"
+                                   action="#"
+                                   class="profile-form"
+                              >
+
+                                    <div div class="row">
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label for="profile_name"
+                                                       >Name</label
+                                                  >
+                                                  <input
+                                                       id="profile_name"
+                                                       type="text"
+                                                       name="customer[Last-name]"
+                                                       placeholder="Last Name"
+                                                       class="form-control"
+                                                       required=""
+                                                       value="<%= data.content.name%>"
+                                                  />
+                                             </div>
+                                        </div>
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label for="profile_email"
+                                                       >Email Address</label
+                                                  >
+                                                  <input
+                                                       id="profile_email"
+                                                       type="email"
+                                                       name="customer[email_1]"
+                                                       placeholder="Email Address"
+                                                       class="form-control"
+                                                       required=""
+                                                       value="<%= data.content.email%>"
+                                                  />
+                                             </div>
+                                        </div>
+                                    </div>
+                                   <div class="row">
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="profile_first_name"
+                                                       >First Name</label
+                                                  >
+                                                  <input
+                                                       id="profile_first_name"
+                                                       type="text"
+                                                       name="customer[first-name]"
+                                                       placeholder="First Name"
+                                                       class="form-control"
+                                                       required=""
+                                                       value="<%= data.content.firstName%>"
+                                                  />
+                                             </div>
+                                        </div>
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="profile_last_name"
+                                                       >Last Name</label
+                                                  >
+                                                  <input
+                                                       id="profile_last_name"
+                                                       type="text"
+                                                       name="customer[last-name]"
+                                                       placeholder="Last Name"
+                                                       class="form-control"
+                                                       required=""
+                                                       value="<%= data.content.lastName%>"
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label for="profile_phone"
+                                                       >Phone Number</label
+                                                  >
+                                                  <input
+                                                       id="profile_phone"
+                                                       type="text"
+                                                       name="customer[phone]"
+                                                       placeholder="Phone Number"
+                                                       class="form-control"
+                                                       required=""
+                                                       value="<%= data.content.phone%>"
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+
+                                   <div
+                                        class="row align-items-center justify-content-between"
+                                   >
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"
+                                        ></div>
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 text-end"
+                                        >
+                                             <input
+                                                  id="profile_submit"
+                                                  type="submit"
+                                                  class="btn btn-lg btn-primary rounded-pill"
+                                                  value="Update Profile"
+                                             />
+                                        </div>
+                                   </div>
+                              </form>
+                         </div>
+                         <!-- End Profile -->
+
+                         <!-- Billing Address -->
+                         <div id="billingAddress" class="address tab-pane">
+                              <h3>Billing Address</h3>
+                              <form
+                                   method="post"
+                                   action="#"
+                                   class="profile-form"
+                              >
+                                   <div class="row">
+                                        <!-- Name -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div
+                                                  class="form-group col-12 col-sm-12 col-md-12 col-lg-12 mb-2"
+                                             >
+                                                  <label
+                                                       for="billing_address_name"
+                                                       class="form-label"
+                                                       >Name</label
+                                                  >
+                                                  <input
+                                                       name="name"
+                                                       id="billing_address_name"
+                                                       type="text"
+                                                       required
+                                                       value="<%= data.content.billingAddress.name %>"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                        <!-- Country -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <label
+                                                  for="billing_address_country"
+                                                  class="form-label"
+                                                  >Country
+                                                  <span class="required"
+                                                       >*</span
+                                                  ></label
+                                             >
+                                             <select
+                                                  id="billing_address_country"
+                                                  name="country"
+                                                  subdoc="billingAddress"
+                                                  class="form-control"
+                                             >
+                                                  <option
+                                                       value="<%= data.content.billingAddress.country %>"
+                                                       selected
+                                                  >
+                                                       <%=
+                                                       data.content.billingAddress.country
+                                                       %>
+                                                  </option>
+                                                  <!-- Dodaj pozostałe opcje krajów tutaj -->
+                                             </select>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <!-- City -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <label
+                                                  for="billing_address_city"
+                                                  class="form-label"
+                                                  >Town / City
+                                                  <span class="required"
+                                                       >*</span
+                                                  ></label
+                                             >
+                                             <input
+                                                  id="billing_address_city"
+                                                  name="city"
+                                                  type="text"
+                                                  class="form-control"
+                                                  value="<%= data.content.billingAddress.city %>"
+                                                  required
+                                             />
+                                        </div>
+                                        <!-- ZIP Code -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="billing_address_zip"
+                                                       class="form-label"
+                                                       >ZIP Code
+                                                       <span class="required"
+                                                            >*</span
+                                                       ></label
+                                                  >
+                                                  <input
+                                                       name="zip"
+                                                       id="billing_address_zip"
+                                                       type="text"
+                                                       class="form-control"
+                                                       placeholder="ZIP Code"
+                                                       value="<%= data.content.billingAddress.zip %>"
+                                                       required
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <!-- Address 1 -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="billing_address_address1"
+                                                       class="form-label"
+                                                       >Address 1</label
+                                                  >
+                                                  <input
+                                                       name="address1"
+                                                       value="<%= data.content.billingAddress.address %>"
+                                                       id="billing_address_address1"
+                                                       type="text"
+                                                       required
+                                                       placeholder="Address Line 1"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                        <!-- Address 2 -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="billing_address_address2"
+                                                       class="form-label"
+                                                       >Address 2</label
+                                                  >
+                                                  <input
+                                                       name="address2"
+                                                       value="<%= data.content.billingAddress.address2 %>"
+                                                       id="billing_address_address2"
+                                                       type="text"
+                                                       placeholder="Address Line 2"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <!-- Email -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="billing_address_email"
+                                                       class="form-label"
+                                                       >Email</label
+                                                  >
+                                                  <input
+                                                       name="email"
+                                                       value="<%= data.content.billingAddress.email %>"
+                                                       id="billing_address_email"
+                                                       type="email"
+                                                       required
+                                                       placeholder="Email"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                        <!-- Phone -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="billing_address_phone"
+                                                       class="form-label"
+                                                       >Phone</label
+                                                  >
+                                                  <input
+                                                       name="phone"
+                                                       value="<%= data.content.billingAddress.phone %>"
+                                                       id="billing_address_phone"
+                                                       type="tel"
+                                                       required
+                                                       placeholder="Phone Number"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <!-- Addressee -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="billing_address_addressee"
+                                                       class="form-label"
+                                                       >Addressee</label
+                                                  >
+                                                  <input
+                                                       name="addressee"
+                                                       value="<%= data.content.billingAddress.addressee %>"
+                                                       id="billing_address_addressee"
+                                                       type="text"
+                                                       placeholder="Addressee"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div
+                                        class="row align-items-center justify-content-between"
+                                   >
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"
+                                        >
+                                        </div>
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 text-end"
+                                        >
+                                             <input
+                                                  type="submit"
+                                                  class="btn btn-lg btn-primary rounded-pill"
+                                                  value="Update Billing Address"
+                                             />
+                                        </div>
+                                   </div>
+                              </form>
+                         </div>
+                         <!-- End Billing Address -->
+
+                         <!-- Shipping Address -->
+                         <div id="shippingAddress" class="address tab-pane">
+                              <h3>Shipping Address</h3>
+                              <form
+                                   method="post"
+                                   action="#"
+                                   class="profile-form"
+                              >
+                                   <div class="row">
+                                        <!-- Name -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div
+                                                  class="form-group col-12 col-sm-12 col-md-12 col-lg-12 mb-2"
+                                             >
+                                                  <label
+                                                       for="shipping_address_name"
+                                                       class="form-label"
+                                                       >Name</label
+                                                  >
+                                                  <input
+                                                       name="name"
+                                                       id="shipping_address_name"
+                                                       type="text"
+                                                       required
+                                                       value="<%= data.content.shippingAddress.name %>"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                        <!-- Country -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <label
+                                                  for="shipping_address_country"
+                                                  class="form-label"
+                                                  >Country
+                                                  <span class="required"
+                                                       >*</span
+                                                  ></label
+                                             >
+                                             <select
+                                                  id="shipping_address_country"
+                                                  name="country"
+                                                  subdoc="shippingAddress"
+                                                  class="form-control"
+                                             >
+                                                  <option
+                                                       value="<%= data.content.shippingAddress.country %>"
+                                                       selected
+                                                  >
+                                                       <%=
+                                                       data.content.shippingAddress.country
+                                                       %>
+                                                  </option>
+                                                  <!-- Dodaj pozostałe opcje krajów tutaj -->
+                                             </select>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <!-- City -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <label
+                                                  for="shipping_address_city"
+                                                  class="form-label"
+                                                  >Town / City
+                                                  <span class="required"
+                                                       >*</span
+                                                  ></label
+                                             >
+                                             <input
+                                                  id="shipping_address_city"
+                                                  name="city"
+                                                  type="text"
+                                                  class="form-control"
+                                                  value="<%= data.content.shippingAddress.city %>"
+                                                  required
+                                             />
+                                        </div>
+                                        <!-- ZIP Code -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="shipping_address_zip"
+                                                       class="form-label"
+                                                       >ZIP Code
+                                                       <span class="required"
+                                                            >*</span
+                                                       ></label
+                                                  >
+                                                  <input
+                                                       name="zip"
+                                                       id="shipping_address_zip"
+                                                       type="text"
+                                                       class="form-control"
+                                                       placeholder="ZIP Code"
+                                                       value="<%= data.content.shippingAddress.zip %>"
+                                                       required
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <!-- Address 1 -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="shipping_address_address1"
+                                                       class="form-label"
+                                                       >Address 1</label
+                                                  >
+                                                  <input
+                                                       name="address1"
+                                                       value="<%= data.content.shippingAddress.address %>"
+                                                       id="shipping_address_address1"
+                                                       type="text"
+                                                       required
+                                                       placeholder="Address Line 1"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                        <!-- Address 2 -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="shipping_address_address2"
+                                                       class="form-label"
+                                                       >Address 2</label
+                                                  >
+                                                  <input
+                                                       name="address2"
+                                                       value="<%= data.content.shippingAddress.address2 %>"
+                                                       id="shipping_address_address2"
+                                                       type="text"
+                                                       placeholder="Address Line 2"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <!-- Email -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="shipping_address_email"
+                                                       class="form-label"
+                                                       >Email</label
+                                                  >
+                                                  <input
+                                                       name="email"
+                                                       value="<%= data.content.shippingAddress.email %>"
+                                                       id="shipping_address_email"
+                                                       type="email"
+                                                       required
+                                                       placeholder="Email"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                        <!-- Phone -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="shipping_address_phone"
+                                                       class="form-label"
+                                                       >Phone</label
+                                                  >
+                                                  <input
+                                                       name="phone"
+                                                       value="<%= data.content.shippingAddress.phone %>"
+                                                       id="shipping_address_phone"
+                                                       type="tel"
+                                                       required
+                                                       placeholder="Phone Number"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <!-- Addressee -->
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
+                                        >
+                                             <div class="form-group">
+                                                  <label
+                                                       for="shipping_address_addressee"
+                                                       class="form-label"
+                                                       >Addressee</label
+                                                  >
+                                                  <input
+                                                       name="addressee"
+                                                       value="<%= data.content.shippingAddress.addressee %>"
+                                                       id="shipping_address_addressee"
+                                                       type="text"
+                                                       placeholder="Addressee"
+                                                       class="form-control"
+                                                  />
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div
+                                        class="row align-items-center justify-content-between"
+                                   >
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"
+                                        >
+                                        </div>
+                                        <div
+                                             class="col-12 col-sm-12 col-md-6 col-lg-6 text-end"
+                                        >
+                                             <input
+                                                  type="submit"
+                                                  class="btn btn-lg btn-primary rounded-pill"
+                                                  value="Update Shipping Address"
+                                             />
+                                        </div>
+                                   </div>
+                              </form>
+                         </div>
+                         <!-- End Shipping address -->
+
+                         <!-- Addresses -->
+                         <div
+                              id="addresses"
+                              class="product-order tab-pane fade overflow"
+                         >
+                              <h3>Addresses</h3>
+                              <div class="table-responsive">
+                                   <table id="addresses_table" class="table">
+                                        <thead class="alt-font">
+                                             <tr>
+                                                  <th>Name</th>
+                                                  <th>Country</th>
+                                                  <th>City</th>
+                                                  <th class="text-end">Actions</th>
+                                             </tr>
+                                        </thead>
+
+                                        <% if(data.content.addresses && data.content.addresses.length > 0) { %>
+                                            <tbody>
+                                                <% data.content.addresses.forEach((item) => { %>
+
+                                                    <tr>
+
+                                                        <td><%= item.name %></td>
+                                                        <td><%= item.country %></td>
+                                                        <td><%= item.city %></td>
+
+                                                        <td class="text-end">
+                                                            <div class="flex justify-content-end" style="display: flex;">
+                                                                <p class="mx-3 underline cursor-pointer" style="cursor: pointer;" name="edit" id="<%= item._id %>">edit</p>
+                                                                <p class="underline text-danger cursor-pointer" style="cursor: pointer;" name="remove" id="<%= item._id %>">remove</p>
+                                                            </div>
+                                                        </td>
+                                                        
+                                                    </tr>
+
+                                                <% }) %>
+                                            </tbody>
+                                        <% } %>
+                                   </table>
+
+                                   <div class="mt-3 text-end">
+                                        <button id="add_new_address_btn_table" class="btn btn-lg btn-primary rounded-pill">
+                                            Add New Address
+                                        </button>
+                                    </div>
+
+                                    <!-- Form edit address -->
+                                    <div id="edit_new_address_form_continer" class="d-none">
+                                        <h3 class="mt-5">Edit Address</h3>
+                                        <form method="post" action="#" class="profile-form row px-0 mx-0">
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- Name -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12 mb-2">
+                                                        <label for="edit_address_name" class="form-label">Name</label>
+                                                        <input
+                                                            name="name"
+                                                            id="edit_address_name"
+                                                            type="text"
+                                                            required
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <!-- Country -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <label for="edit_address_country" class="form-label">Country <span class="required">*</span></label>
+                                                    <select
+                                                        id="edit_address_country"
+                                                        name="country"
+                                                        subdoc="shippingAddress"
+                                                        class="form-control"
+                                                    >
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- City -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <label for="edit_address_city" class="form-label">Town / City <span class="required">*</span></label>
+                                                    <input
+                                                        id="edit_address_city"
+                                                        name="city"
+                                                        type="text"
+                                                        class="form-control"
+                                                        required
+                                                    />
+                                                </div>
+                                                <!-- ZIP Code -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="edit_address_zip" class="form-label">ZIP Code <span class="required">*</span></label>
+                                                        <input
+                                                            name="zip"
+                                                            id="edit_address_zip"
+                                                            type="text"
+                                                            class="form-control"
+                                                            placeholder="ZIP Code"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- Address 1 -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="edit_address_address1" class="form-label">Address 1</label>
+                                                        <input
+                                                            name="address1"
+                                                            id="edit_address_address1"
+                                                            type="text"
+                                                            required
+                                                            placeholder="Address Line 1"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <!-- Address 2 -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="edit_address_address2" class="form-label">Address 2</label>
+                                                        <input
+                                                            name="address2"
+                                                            id="edit_address_address2"
+                                                            type="text"
+                                                            placeholder="Address Line 2"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- Email -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="edit_address_email" class="form-label">Email</label>
+                                                        <input
+                                                            name="email"
+                                                            id="edit_address_email"
+                                                            type="email"
+                                                            required
+                                                            placeholder="Email"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <!-- Phone -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="edit_address_phone" class="form-label">Phone</label>
+                                                        <input
+                                                            name="phone"
+
+                                                            id="edit_address_phone"
+                                                            type="tel"
+                                                            required
+                                                            placeholder="Phone Number"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- Addressee -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="edit_address_addressee" class="form-label">Addressee</label>
+                                                        <input
+                                                            name="addressee"
+                                                            id="edit_address_addressee"
+                                                            type="text"
+                                                            placeholder="Addressee"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex gap-2 align-items-center justify-content-between" style="display: flex;">
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                                      <div style="display: flex; align-items: center; gap: 2;">
+                                                          <input type="checkbox" id="edit_address_billing_address" name="scales" checked style="cursor: pointer;"/>
+                                                          <label for="edit_address_billing_address" style="margin-left: 5px; margin-bottom: 0px; cursor: pointer;">Set billing address</label>
+                                                      </div>
+                                                      <div style="display: flex; align-items: center; gap: 2;">
+                                                        <input type="checkbox" id="edit_address_shipping_address" name="scales" checked style="cursor: pointer;"/>
+                                                        <label for="edit_address_shipping_address" style="margin-left: 5px; margin-bottom: 0px; cursor: pointer;">Set shipping address</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 text-end">
+                                                    <input
+                                                        type="submit"
+                                                        class="btn btn-lg btn-primary rounded-pill"
+                                                        value="Edit Address"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                   <!-- End form edit address -->
+
+                                   <!-- Form new address -->
+                                    <div id="add_new_address_form_container">
+                                        <h3 class="mt-5">New Address</h3>
+                                        <form method="post" action="#" class="profile-form row px-0 mx-0">
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- Name -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12 mb-2">
+                                                        <label for="new_address_name" class="form-label">Name</label>
+                                                        <input
+                                                            name="name"
+                                                            id="new_address_name"
+                                                            type="text"
+                                                            required
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <!-- Country -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <label for="new_address_country" class="form-label">Country <span class="required">*</span></label>
+                                                    <select
+                                                        id="new_address_country"
+                                                        name="country"
+                                                        subdoc="shippingAddress"
+                                                        class="form-control"
+                                                    >
+                                                        <!-- Dodaj opcje krajów tutaj -->
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- City -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <label for="new_address_city" class="form-label">Town / City <span class="required">*</span></label>
+                                                    <input
+                                                        id="new_address_city"
+                                                        name="city"
+                                                        type="text"
+                                                        class="form-control"
+                                                        required
+                                                    />
+                                                </div>
+                                                <!-- ZIP Code -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="new_address_zip" class="form-label">ZIP Code <span class="required">*</span></label>
+                                                        <input
+                                                            name="zip"
+                                                            id="new_address_zip"
+                                                            type="text"
+                                                            class="form-control"
+                                                            placeholder="ZIP Code"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- Address 1 -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="new_address_address1" class="form-label">Address 1</label>
+                                                        <input
+                                                            name="address1"
+                                                            id="new_address_address1"
+                                                            type="text"
+                                                            required
+                                                            placeholder="Address Line 1"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <!-- Address 2 -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="new_address_address2" class="form-label">Address 2</label>
+                                                        <input
+                                                            name="address2"
+                                                            id="new_address_address2"
+                                                            type="text"
+                                                            placeholder="Address Line 2"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- Email -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="new_address_email" class="form-label">Email</label>
+                                                        <input
+                                                            name="email"
+                                                            id="new_address_email"
+                                                            type="email"
+                                                            required
+                                                            placeholder="Email"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <!-- Phone -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="new_address_phone" class="form-label">Phone</label>
+                                                        <input
+                                                            name="phone"
+                                                            id="new_address_phone"
+                                                            type="tel"
+                                                            required
+                                                            placeholder="Phone Number"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2" style="display: flex;">
+                                                <!-- Addressee -->
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="new_address_addressee" class="form-label">Addressee</label>
+                                                        <input
+                                                            name="addressee"
+                                                            id="new_address_addressee"
+                                                            type="text"
+                                                            placeholder="Addressee"
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex gap-2 align-items-center justify-content-between" style="display: flex;">
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                                    <div style="display: flex; align-items: center; gap: 2;">
+                                                        <input type="checkbox" id="edit_address_billing_address" name="scales" checked style="cursor: pointer;"/>
+                                                        <label for="edit_address_billing_address" style="margin-left: 5px; margin-bottom: 0px; cursor: pointer;">Set billing address</label>
+                                                    </div>
+                                                    <div style="display: flex; align-items: center; gap: 2;">
+                                                      <input type="checkbox" id="edit_address_shipping_address" name="scales" checked style="cursor: pointer;"/>
+                                                      <label for="edit_address_shipping_address" style="margin-left: 5px; margin-bottom: 0px; cursor: pointer;">Set shipping address</label>
+                                                  </div>
+                                                </div>
+                                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 text-end">
+                                                    <input
+                                                        id="new_address_sumbit"
+                                                        type="submit"
+                                                        class="btn btn-lg btn-primary rounded-pill"
+                                                        value="Add New Address"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <!-- End form new address -->
+
+                              </div>
+                         </div>
+
+                         <!-- End Addresses -->
+
+                    
+
+
+                    </div>
+                    <!-- End Tab panes -->
+               </div>
+          </div>
+     </div>
 </div>
+
+<script>
+     // PROFILE SECTION
+     const profile_first_name = document.querySelector("#profile_first_name");
+     const profile_last_name = document.querySelector("#profile_last_name")
+     const profile_name = document.querySelector("#profile_name");
+     const profile_email = document.querySelector("#profile_email");
+     const profile_phone = document.querySelector("#profile_phone");
+     const profile_submit = document.querySelector("#profile_submit");
+
+     profile_submit.addEventListener("click", async (e) => {
+          e.preventDefault();
+
+          let first_name = profile_first_name.value;
+          let last_name = profile_last_name.value
+          let name = profile_name.value;
+          let email = profile_email.value;
+          let phone = profile_phone.value;
+
+          let body = [
+            {
+                field: "name",
+                value: name
+            },
+            {
+                field: "firstName",
+                value: first_name
+            },
+            {
+                field: 'lastName',
+                value: last_name
+            },
+            {
+                field: "email",
+                value: email
+            },
+            {
+                field: "phone",
+                value: phone
+            },
+          ]
+               
+
+            await update_account(body)
+
+          return;
+     });
+
+    //  -------------------------------------------------------------------------
+    //  ADDRESSES SECTION
+    const addresses_table = document.querySelector("#addresses_table")
+    const add_new_address_btn_table = document.querySelector("#add_new_address_btn_table")
+    const add_new_address_form_container = document.querySelector("#add_new_address_form_container")
+    const edit_new_address_form_continer = document.querySelector("#edit_new_address_form_continer")    
+
+    const new_address_name = document.querySelector("#new_address_name")
+    const new_address_country = document.querySelector("#new_address_country")
+    const new_address_city = document.querySelector("#new_address_city")
+    const new_address_zip = document.querySelector("#new_address_zip")
+    const new_address_address = document.querySelector("#new_address_address1")
+    const new_address_address_secound = document.querySelector("#new_address_address2")
+    const new_address_email = document.querySelector("#new_address_email")
+    const new_address_phone = document.querySelector("#new_address_phone")
+    const new_address_addressee = document.querySelector("#new_address_addressee")
+    const new_address_sumbit = document.querySelector("#new_address_sumbit")
+
+    const edit_address_name = document.querySelector("#edit_address_name");
+    const edit_address_country = document.querySelector("#edit_address_country");
+    const edit_address_city = document.querySelector("#edit_address_city");
+    const edit_address_zip = document.querySelector("#edit_address_zip");
+    const edit_address_address = document.querySelector("#edit_address_address1");
+    const edit_address_address_secound = document.querySelector("#edit_address_address2");
+    const edit_address_email = document.querySelector("#edit_address_email");
+    const edit_address_phone = document.querySelector("#edit_address_phone");
+    const edit_address_addressee = document.querySelector("#edit_address_addressee");
+    const edit_address_submit = document.querySelector("#edit_address_submit");
+
+    // Listener to submit add new address
+    new_address_sumbit.addEventListener('click', () => {
+
+        let name = new_address_name.value;
+        let country = new_address_country.value;
+        let city = new_address_city.value;
+        let zip = new_address_zip.value;
+        let address = new_address_address.value;
+        let address_secound = new_address_address_secound.value;
+        let email = new_address_email.value;
+        let phone = new_address_phone.value;
+        let addressee = new_address_addressee.value;
+
+    })
+
+    // Set value to edit form after click edit btn in table
+    const set_value_edit_address = (id) => {
+
+        let all_addresses = data.content.addresses
+
+        if (all_addresses.length > 0) {
+
+            let editing_address = all_addresses.find((item) => item._id === id)
+
+            if(!editing_address) return
+
+            edit_address_name.value = editing_address.name;
+            edit_address_country.value = editing_address.country;
+            edit_address_city.value = editing_address.city;
+            edit_address_zip.value = editing_address.zip;
+            edit_address_address.value = editing_address.address;
+            edit_address_address_secound.value = editing_address.address2;
+            edit_address_phone.value = editing_address.phone;
+            edit_address_addressee.value = editing_address.addressee;
+            
+        }
+
+    }
+
+    // Listener add new address
+    add_new_address_btn_table.addEventListener('click', () => {
+        if(add_new_address_form_container.classList.contains('d-none')) {
+            add_new_address_form_container.classList.remove('d-none')
+            edit_new_address_form_continer.classList.add('d-none')
+        } else {
+            add_new_address_form_container.classList.add('d-none')
+            edit_new_address_form_continer.classList.remove('d-none')
+        }
+    })
+
+    // Listener table 
+    addresses_table.addEventListener('click', (e) => {
+        let el = e.target
+
+        let name = el.getAttribute('name')
+        let id = el.getAttribute('id')
+
+        if (name === 'edit') {
+            if(edit_new_address_form_continer.classList.contains('d-none')) {
+                edit_new_address_form_continer.classList.remove('d-none')
+                add_new_address_form_container.classList.add('d-none')
+
+                set_value_edit_address(id)
+            } else {
+                edit_new_address_form_continer.classList.add('d-none')
+                add_new_address_form_container.classList.remove('d-none')
+            }
+        }
+
+        if(name === 'remove') {
+            let removing_address = data.content.addresses.find((item) => item._id === id)
+            let text = `Czy na pewno chcesz usunąć ${removing_address.name} z teczki adresów?`
+
+            window.confirm(text)
+        }
+    })
+
+    // END ADDRESSES SECITON
+    //  -------------------------------------------------------------------------
+
+    // GLOBAL LISTENERS 
+    // Listenner to get options in country selects
+    const country_selects = document.querySelectorAll("[name='country']")
+    if(country_selects) {
+        country_selects.forEach((item) => {
+            item.addEventListener('focus', async (e) => {
+
+                let select = e.target
+                let field = 'country'
+                let subdoc = select.getAttribute('subdoc')
+
+                const options = await get_options_account(field, subdoc)
+
+                if(options.length > 0) {
+                    options.forEach((item, index) => {
+                        let option = document.createElement('option')
+
+                        option.setAttribute('id', index)
+                        option.setAttribute('name', item.name)
+                        option.setAttribute('value', item._id)
+                        option.innerText = item.name
+
+                        select.appendChild(option)
+
+                    })
+                    return
+                }
+            })
+        })
+    }
+</script>

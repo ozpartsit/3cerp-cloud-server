@@ -8,36 +8,34 @@
             <div class="section-title text-start mb-4">
               <h2 class="title text-uppercase mb-2"><%= i18n.__('locales.contact.title') %></h2>
             </div>
+            <!-- Form -->
             <form
-              action="php/ajax_sendmail.php"
-              name="contactus"
-              method="post"
               id="contact-form"
               class="contact-form"
             >
               <div class="row">
                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
                   <div class="form-group">
+                    <!-- ContactFormName -->
                     <input
                       type="text"
                       id="ContactFormName"
                       name="name"
                       class="form-control border-0"
                       placeholder="<%= i18n.__('locales.contact.name') %>"
-                      value=""
                     />
                     <span class="error_msg" id="name_error"></span>
                   </div>
                 </div>
                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
                   <div class="form-group">
+                    <!-- ContactFormEmail -->
                     <input
                       type="email"
                       id="ContactFormEmail"
                       name="email"
                       class="form-control border-0"
                       placeholder="<%= i18n.__('locales.contact.email') %>"
-                      value=""
                     />
                     <span class="error_msg" id="email_error"></span>
                   </div>
@@ -46,6 +44,7 @@
               <div class="row">
                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
                   <div class="form-group">
+                    <!-- ContactFormPhone -->
                     <input
                       class="form-control border-0"
                       type="tel"
@@ -53,12 +52,12 @@
                       name="phone"
                       pattern="[0-9\-]*"
                       placeholder="<%= i18n.__('locales.contact.phone') %>"
-                      value=""
                     />
                   </div>
                 </div>
                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
                   <div class="form-group">
+                    <!-- ContactSubject -->
                     <input
                       type="text"
                       id="ContactSubject"
@@ -74,6 +73,7 @@
               <div class="row">
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
                   <div class="form-group">
+                    <!-- ContactFormMessage -->
                     <textarea
                       id="ContactFormMessage"
                       name="message"
@@ -88,6 +88,7 @@
               <div class="row">
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12">
                   <div class="form-group mailsendbtn mb-0 w-100">
+                    <!-- submit -->
                     <input
                       class="btn btn-primary btn-lg rounded-3"
                       type="submit"

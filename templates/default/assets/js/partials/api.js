@@ -1,114 +1,130 @@
 class Api {
-  host = "http://automotive.lvh.me:8085/api";
-  headers = new Headers();
-  options = {};
+     host = "/api";
+     headers = new Headers();
+     options = {};
 
-  set_cookie() {
-    return this.headers.append(
-      "Cookie",
-      "shoppingcart=j%3A%2266bb272e573f3ceb3a5061b8%22"
-    );
-  }
+     set_cookie() {
+          return this.headers.append(
+               "Cookie",
+               "shoppingcart=j%3A%2266bb272e573f3ceb3a5061b8%22"
+          );
+     }
 
-  set_options(method, body, stringify = true) {
-    this.options = {
-      method: method,
-      headers: this.headers,
-      redirect: "follow",
-      body: stringify ? JSON.stringify(body) : body,
-    };
-    return;
-  }
+     set_hearders(isContentType) {
+          if (!isContentType) return this.headers;
 
-  //   Method to create form data
-  create_form_data(body = {}) {
-    const form_data = new FormData();
+          this.headers.append("content-type", "application/json");
 
-    for (const key in body) {
-      form_data.append(key, body[key]);
-    }
+          return this.headers;
+     }
 
-    return form_data;
-  }
+     set_options(method, body, stringify = true, isContentType = false) {
+          this.options = {
+               method: method,
+               headers: this.set_hearders(isContentType),
+               redirect: "follow",
+               body: stringify ? JSON.stringify(body) : body,
+          };
+          return;
+     }
 
-  create_url(params = {}) {
-    let url = this.host;
+     //   Method to create form data
+     create_form_data(body = {}) {
+          console.log(typeof body);
 
-    for (const param in params) {
-      url = url + "/" + params[param];
-    }
-    return url;
-  }
+          if (body.length) {
+               return body;
+          }
 
-  //  METHOD GET
-  async get(url) {
-    //this.set_cookie();
-    this.set_options("GET");
+          const form_data = new FormData();
 
-    try {
-      const res = await fetch(url, this.options)
-        .then((response) => response.json())
-        .then((result) => result);
+          for (const key in body) {
+               form_data.append(key, body[key]);
+          }
 
-      return res;
-    } catch (error) {
-      create_alert("danger", i18n);
+          return form_data;
+     }
 
-      return null;
-    }
-  }
+     create_url(params = {}) {
+          let url = this.host;
 
-  //   METHOD POST
-  async post(url = "", body = {}, stringify = true) {
-    this.set_cookie();
+          for (const param in params) {
+               url = url + "/" + params[param];
+          }
+          return url;
+     }
 
-    this.set_options("POST", this.create_form_data(body), stringify);
+     //  METHOD GET
+     async get(url) {
+          this.set_cookie();
+          this.set_options("GET");
 
-    try {
-      const res = await fetch(url, this.options)
-        .then((response) => response.json())
-        .then((result) => result);
+          try {
+               const res = await fetch(url, this.options)
+                    .then((response) => response.json())
+                    .then((result) => result);
 
-      return res;
-    } catch (error) {
-      create_alert("danger", i18n);
+               return res;
+          } catch (error) {
+               create_alert("danger", i18n);
 
-      return null;
-    }
-  }
+               return error;
+          }
+     }
 
-  //   METHOD PUT
-  async put(url, body, stringify = true) {
-    this.set_cookie();
-    this.set_options("PUT", this.create_form_data(body), stringify);
+     //   METHOD POST
+     async post(url = "", body = {}, stringify = true) {
+          this.set_cookie();
 
-    try {
-      const res = await fetch(url, this.options)
-        .then((response) => response.json())
-        .then((result) => result);
+          this.set_options("POST", this.create_form_data(body), stringify);
 
-      return res;
-    } catch (error) {
-      create_alert("danger", i18n);
-      return null;
-    }
-  }
+          try {
+               const res = await fetch(url, this.options)
+                    .then((response) => response.json())
+                    .then((result) => result);
 
-  //   METHOD PATCH
-  async patch(url, body = {}, stringify = {}) {
-    this.set_cookie();
-    this.set_options("PATCH", this.create_form_data(body), stringify);
+               return res;
+          } catch (error) {
+               create_alert("danger", i18n);
 
-    try {
-      const res = await fetch(url, this.options)
-        .then((response) => response.json())
-        .then((result) => result);
+               return null;
+          }
+     }
 
-      return res;
-    } catch (error) {
-      create_alert("danger", i18n);
-    }
-  }
+     //   METHOD PUT
+     async put(url, body, stringify = true) {
+          this.set_cookie();
+          this.set_options("PUT", this.create_form_data(body), stringify);
+
+          try {
+               const res = await fetch(url, this.options)
+                    .then((response) => response.json())
+                    .then((result) => result);
+
+               return res;
+          } catch (error) {
+               create_alert("danger", i18n);
+               return null;
+          }
+     }
+
+     //   METHOD PATCH
+     async patch(url, body = {}, stringify = true, isContentType = false) {
+          this.set_cookie();
+          this.set_options("PATCH", this.create_form_data(body), stringify, isContentType);
+
+          console.log(this.options);
+
+          try {
+               const res = await fetch(url, this.options)
+                    .then((response) => response.json())
+                    .then((result) => result);
+
+               return res;
+          } catch (error) {
+               use_notification("danger", error.message);
+          }
+     }
 }
 
 const $api = new Api();

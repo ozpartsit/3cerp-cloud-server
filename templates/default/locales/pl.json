@@ -71,7 +71,46 @@
                "newsletter": "Zapisz się na newsletter",
                "password": "Hasło",
                "confirm-password": "Potwierdź hasło",
-               "btn": "Zarejestruj się teraz"
+               "btn": "Zarejestruj się teraz",
+               "errors": {
+                    "passwords-not-same": "Hasła nie są takie same"
+               }
+          },
+          "cart-view": {
+               "headers": {
+                    "product": "Produkt",
+                    "price": "Cena",
+                    "quantity": "Ilość",
+                    "total": "Razem"
+               },
+               "rows": {
+                    "description": "Opis"
+               },
+               "btns": {
+                    "clear-cart": "Wyczyść koszyk",
+                    "checkout": "Przejdź do kasy"
+               }
+          },
+          "favorites-view": {
+               "headers": {
+                    "product": "Produkt",
+                    "price": "Cena",
+                    "add-cart": "Dodaj do koszyka"
+               },
+               "rows": {
+                    "remove-tooltip": "Usuń",
+                    "btn-add-cart": "Dodaj do koszyka"
+               }
+          },
+          "mobile-nav": {
+               "close-menu": "Zamknij menu"
+          },
+          "footer": {
+               "newsletter": {
+                    "title": "Newsletter",
+                    "subtitle": "Bądź na bierząco z naszymi promocjami, rabatami, wyprzedażami, ofertami specjalnymi i nie tylko.",
+                    "input": "Wprawdź email..."
+               }
           }
      },
      "my-account": "my-account"

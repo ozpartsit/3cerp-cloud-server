@@ -2,6 +2,7 @@ import * as mongoose from "mongoose";
 import Entity, { IEntity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import Address, { IAddress, nestedSchema } from "../../address.model";
+import Favorite, {IFavorite} from "./favorite.schema.js";
 import form from "./form"
 
 import bcrypt from "bcryptjs";
@@ -34,6 +35,8 @@ export interface ICustomer extends IEntity {
   website?: string
 
   password: string
+
+  favoriteItems: IFavorite[];
 
   validatePassword(password: string): boolean;
   hashPassword(): any;
@@ -135,6 +138,15 @@ const schema = new mongoose.Schema<ICustomer>(
   options
 );
 
+
+schema.virtual("favoriteItems", {
+  ref: "Favorite",
+  localField: "_id",
+  foreignField: "customer",
+  justOne: false,
+  autopopulate: true,
+  model: Favorite
+});
 
 schema.static("form", () => form)
 

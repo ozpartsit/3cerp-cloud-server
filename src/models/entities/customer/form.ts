@@ -201,7 +201,7 @@ export default {
         },
         {
             "value": "sales",
-            "editable": false,
+            "editable": true,
             "sections": [
                 {
                     "value": "openOrders",
@@ -212,7 +212,25 @@ export default {
                     "value": "relatedTransactions",
                     "editable": false,
                     "component": "RelatedTransactions"
-                }
+                },
+                {
+                    "value": "favoriteItems",
+                    "editable": true,
+                    "tables": [{
+                        "value": "favoriteItems",
+                        "subdoc": "favoriteItems",
+                        "columns": [
+                            {
+                                "value": "item",
+                                "fields": [
+                                    "item",
+                                    "description",
+                                ]
+                            },
+                           
+                        ],
+                    }]
+                },
             ]
         },
         {

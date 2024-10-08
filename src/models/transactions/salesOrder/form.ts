@@ -31,6 +31,7 @@ export default {
                                 "memo",
                                 "shippingCost",
                                 "promoCode",
+                                "shop"
                             ]
                         },
                         // {

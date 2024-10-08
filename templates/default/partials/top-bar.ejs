@@ -2,29 +2,21 @@
 <div class="top-bar">
   <div class="container-fluid">
     <div class="row align-items-center">
-      <div
-        class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 d-flex justify-content-lg-start justify-content-center"
-      >
+      <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 d-flex justify-content-lg-start justify-content-center">
         <span class="phone-top d-flex align-items-center">
-          <a href="tel:123-456-7890"
-            ><i class="icon cps cp-phone align-middle px-1"></i>
+          <a href="tel:123-456-7890"><i class="icon cps cp-phone align-middle px-1"></i>
             <span class="label">
-                <%= data.info.address.phone %>
+              <%= data.info.address.phone %>
             </span></a>
         </span>
         <!-- Language -->
         <span class="language-dropdown top-dropdown d-flex align-items-center">
           <i class="cps cp-language"></i>
-        
+
           <!-- Select language -->
           <select id="select_language" class="form-select" aria-label="select">
             <% data.page.languages.forEach((item, index) => { %>
-            <option
-              value="<%= item %>"
-              <% if(data.page.language === item) { %>
-                selected
-              <% } %>
-            >
+            <option value="<%= item %>" <% if(data.page.language === item) { %> selected <% } %>>
               <%= i18n.__(`locales.language.${item}`) %>
             </option>
             <% }); %>
@@ -36,12 +28,8 @@
           <i class="cps cp-coins"></i>
           <select id="select_currency" class="form-select" aria-label="select">
             <% data.page.currencies.forEach((item, index) => { %>
-            <option value="<%= item %>"
-                <% if(data.page.currency === item) { %>
-                    selected
-                <% } %>
-                >
-                <%= item %>
+            <option value="<%= item %>" <% if(data.page.currency === item) { %> selected <% } %>>
+              <%= item %>
             </option>
             <% }); %>
           </select>
@@ -52,28 +40,26 @@
         <div class="shipping-msg"><%= data.page.message %></div>
       </div>
       <!-- Profile -->
-      <div
-        class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-4 justify-content-end d-none d-lg-flex"
-      >
+      <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-4 justify-content-end d-none d-lg-flex">
         <div class="setting-link">
-          <a href="javascript:void(0);"
-            ><i class="cp cp-user-circle"></i> <%= i18n.__("locales.top-bar.my-account") %>
+          <a href="<%= data.page.host %>/account">
+            <i class="cp cp-user-circle"></i>
+            <% if(!data.user) { %>
+              <%= i18n.__("locales.top-bar.my-account") %>
+            <% } else { %>
+              <%= data.user.name %>
+            <% } %>
+          </a>
         </div>
         <ul class="list-inline m-0 social-icons">
           <li class="list-inline-item">
-            <a href="<%= data.page.facebookUrl %>" target="_blank" title="Facebook"
-              ><i class="cpb cp-facebook-f"></i
-            ></a>
+            <a href="<%= data.page.facebookUrl %>" target="_blank" title="Facebook"><i class="cpb cp-facebook-f"></i></a>
           </li>
           <li class="list-inline-item">
-            <a href="<%= data.page.instagramUrl %>" target="_blank" title="Instagram"
-              ><i class="cpb cp-instagram"></i
-            ></a>
+            <a href="<%= data.page.instagramUrl %>" target="_blank" title="Instagram"><i class="cpb cp-instagram"></i></a>
           </li>
           <li class="list-inline-item">
-            <a href="<%= data.page.linkedinUrl %>" target="_blank" title="LinkedIn"
-              ><i class="cpb cp-linkedin"></i
-            ></a>
+            <a href="<%= data.page.linkedinUrl %>" target="_blank" title="LinkedIn"><i class="cpb cp-linkedin"></i></a>
           </li>
         </ul>
       </div>
@@ -88,10 +74,7 @@
       <div class="row align-items-center">
         <div class="col-2 col-sm-3 col-md-4 d-flex d-lg-none mobile-icons">
           <!--Mobile Toggle-->
-          <button
-            type="button"
-            class="btn--link site-header__menu js-mobile-nav-toggle mobile-nav--open"
-          >
+          <button type="button" class="btn--link site-header__menu js-mobile-nav-toggle mobile-nav--open">
             <i class="icon cps cp-times"></i>
             <i class="icon cps cp-bars"></i>
           </button>
@@ -99,119 +82,85 @@
         </div>
         <div class="col-6 col-sm-6 col-md-4 col-lg-3 col-xl-2">
           <!--Desktop Logo-->
-          <a class="logo" href="/"
-            ><img
-              src="<%= data.page.logo.fullPath%>"
-              alt="Tacko - Auto Parts eCommerce Bootstrap5 Html Template"
-              title="Tacko - Auto Parts eCommerce Bootstrap5 Html Template"
-          /></a>
+          <a class="logo" href="/"><img src="<%= data.page.logo.fullPath%>" alt="Tacko - Auto Parts eCommerce Bootstrap5 Html Template" title="Tacko - Auto Parts eCommerce Bootstrap5 Html Template" /></a>
           <!--End Desktop Logo-->
         </div>
-        <div
-          class="col-4 col-sm-4 col-md-6 col-lg-5 col-xl-6 prs-0 d-none d-lg-block"
-        >
+        <div class="col-4 col-sm-4 col-md-6 col-lg-5 col-xl-6 prs-0 d-none d-lg-block">
           <!--Desktop Menu-->
           <nav class="grid__item px-1 pr-0" id="AccessibleNav">
             <ul id="siteNav" class="site-nav medium left hidearrow">
-              <% for(let i = 0; i < data.nav.pages.length; i++) { %>
-
-              <li class="lvl1">
-                <a href="<%= data.nav.pages[i].path %>"
-                  ><%= data.nav.pages[i].name %></a
-                >
-              </li>
-              <% } %>
+              <% data.nav.pages.forEach(page => { %>
+                <% if (page.name) { %>
+                  <li class="lvl1 parent dropdown">
+                    <a href="<%= page.path %>" class="<%= data.page.urlComponent === page.urlComponent ? 'active' : '' %>">
+                      <%= page.name %>
+                    </a>
+                    <% if (page.pages && page.pages.length > 0) { %>
+                      <ul class="dropdown">
+                        <% page.pages.forEach(subPage => { %>
+                          <li>
+                            <a href="<%= subPage.path %>" class="site-nav"><%= subPage.name %></a>
+                          </li>
+                        <% }) %>
+                      </ul>
+                    <% } %>
+                  </li>
+                <% } %>
+              <% }) %>
             </ul>
           </nav>
           <!--End Desktop Menu-->
         </div>
-        <div
-          class="col-4 col-sm-3 col-md-4 col-lg-4 col-xl-4 d-flex justify-content-end align-items-center"
-        >
+        <div class="col-4 col-sm-3 col-md-4 col-lg-4 col-xl-4 d-flex justify-content-end align-items-center">
           <!--Search-->
           <div class="serach-site px-3 d-flex d-lg-none">
-            <a
-              href="javascript:void(0)"
-              class="btn btn-secondary btn-lg rounded-circle search-icon"
-              ><i class="cps cp-search align-middle"></i
-            ></a>
+            <a href="javascript:void(0)" class="btn btn-secondary btn-lg rounded-circle search-icon"><i class="cps cp-search align-middle"></i></a>
           </div>
           <div class="search-open d-none d-lg-flex">
             <div>
               <div class="input-box d-flex">
-                <input
-                id="main_search_input"
-                  type="text"
-                  name="q"
-                  value=""
-                  placeholder="<%= i18n.__('locales.top-bar.search') %>"
-                  class="input-text"
-                />
-                <button
-                  type="button"
-                  title="Search"
-                  class="action search"
-                  disabled=""
-                >
-                  <i class="icon cps cp-search cursor-pointer"   id="main_search_button"></i>
+                <input id="main_search_input" type="text" placeholder="<%= i18n.__('locales.top-bar.search') %>" class="input-text" style="background-color: #f6f6f6;"/>
+                <button type="button" title="Search" class="action search" disabled="">
+                  <i class="icon cps cp-search cursor-pointer" id="main_search_button"></i>
                 </button>
               </div>
             </div>
           </div>
           <!--End Search-->
-          <a
-            href="http://automotive.3cerp.cloud/favorites"
-            class="wishlist-icon d-none d-lg-flex"
-            ><i class="cpr cp-heart"></i
-            ><span class="items rounded-circle">3</span></a
-          >
+          <a href="/wishlist" class="wishlist-icon d-none d-lg-flex"><i class="cpr cp-heart"></i>
+            <% if(data.user && data.user.favoriteItems > 0) {%>
+              <span class="items rounded-circle"><%= data.user.favoriteItems%></span>
+            <% } %>  
+          </a>
           <!--Cart Icons-->
-          <a
-            href="javascript:void(0)"
-            data-bs-toggle="modal"
-            data-bs-target="#minicart-drawer"
-            class="btn btn-secondary btn-lg rounded-circle cart-icon"
-            id="card_btn"
-            ><i class="cp cp-shopping-cart"></i>
-            <span id="card_badge" class="items rounded-circle"></span></a
-          >
+          <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#minicart-drawer" class="btn btn-secondary btn-lg rounded-circle cart-icon" id="cart_btn">
+            <i class="cp cp-shopping-cart"></i>
+            <% if(data.shoppingCart && data.shoppingCart.lines.length > 0) { %> 
+              <span id="cart_badge" class="items rounded-circle"><%= data.shoppingCart.quantity %></span>
+            <% } %>
+          </a>
           <!--End Cart Icons-->
         </div>
       </div>
     </div>
+
     <!--Search Popup-->
     <div id="search-popup" class="search-drawer">
       <div class="container">
         <span class="closeSearch cps cp-times"></span>
-        <form
-          class="form minisearch"
-          id="header-search"
-          action="#"
-          method="get"
-        >
+        <div class="form minisearch" id="header-search" method="get">
           <label class="label"><span>Search</span></label>
           <div class="control">
             <div class="searchField">
               <div class="input-box">
-                <button
-                  type="submit"
-                  title="Search"
-                  class="action search"
-                  disabled=""
-                >
-                  <i class="icon cps cp-search"></i>
+                <button class="action search">
+                  <i id="main_search_mobile_button"  class="icon cps cp-search"></i>
                 </button>
-                <input
-                  type="text"
-                  name="q"
-                  value=""
-                  placeholder="ds"
-                  class="input-text"
-                />
+                <input id="main_search_mobile_input" type="text" placeholder="Search" class="input-text" />
               </div>
             </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
     <!--End Search Popup-->
@@ -221,271 +170,116 @@
 
 <!--Mobile Drawer Menu-->
 <div class="mobile-nav-wrapper" role="navigation">
+  
+  <!-- Top -->
   <div class="closemobileMenu">
-    <i class="icon cps cp-times pull-right"></i> Close Menu
+    <i class="icon cps cp-times pull-right"></i> <%= i18n.__(`locales.mobile-nav.close-menu`) %>
   </div>
+
+  <!-- Menu -->
   <ul id="MobileNav" class="mobile-nav">
-    <li class="lvl1"><a href="index.html">Home</a></li>
-    <li class="lvl1 parent">
-      <a href="shop.html" class="active">Shop <i class="cps cp-plus"></i></a>
-      <ul>
-        <li>
-          <a class="title text-uppercase" href="shop-leftsidebar.html"
-            >Shop Pages <i class="cps cp-plus"></i
-          ></a>
-          <ul class="m-items lvl-1">
-            <li>
-              <a href="shop-leftsidebar.html" class="site-nav"
-                >Shop Grid Left Sidebar
-                <span class="lbl nm_label4">Hot</span></a
-              >
-            </li>
-            <li>
-              <a href="shop-rightsidebar.html" class="site-nav"
-                >Shop Grid Right Sidebar</a
-              >
-            </li>
-            <li>
-              <a href="shop-listview.html" class="site-nav"
-                >Shop Listview With Sidebar</a
-              >
-            </li>
-            <li>
-              <a href="shop-grid-2column.html" class="site-nav"
-                >Shop Grid 2 Column</a
-              >
-            </li>
-            <li>
-              <a href="shop-grid-3column.html" class="site-nav"
-                >Shop Grid 3 Column
-                <span class="lbl nm_label3">Popular</span></a
-              >
-            </li>
-            <li>
-              <a href="shop-grid-4column.html" class="site-nav"
-                >Shop Grid 4 Column</a
-              >
-            </li>
-          </ul>
-        </li>
-        <li>
-          <a class="title text-uppercase" href="shopping-cart-style1.html"
-            >Utility Pages <i class="cps cp-plus"></i
-          ></a>
-          <ul class="m-items lvl-1">
-            <li>
-              <a href="shopping-cart-style1.html" class="site-nav"
-                >Shoping Cart Style1</a
-              >
-            </li>
-            <li>
-              <a href="shopping-cart-style2.html" class="site-nav"
-                >Shoping Cart Style2
-                <span class="lbl nm_label3">Popular</span></a
-              >
-            </li>
-            <li>
-              <a href="shopping-cart-style3.html" class="site-nav"
-                >Shoping Cart Style3</a
-              >
-            </li>
-            <li>
-              <a href="checkout-style1.html" class="site-nav"
-                >Checkout Style1</a
-              >
-            </li>
-            <li>
-              <a href="checkout-style2.html" class="site-nav"
-                >Checkout Style2 <span class="lbl nm_label3">Popular</span></a
-              >
-            </li>
-            <li>
-              <a href="checkout-style3.html" class="site-nav"
-                >Checkout Style3</a
-              >
-            </li>
-          </ul>
-        </li>
-        <li>
-          <a class="title text-uppercase" href="shopping-cart-style1.html"
-            >Utility Pages <i class="cps cp-plus"></i
-          ></a>
-          <ul class="m-items lvl-1">
-            <li>
-              <a href="my-account.html" class="site-nav active">
-                <%= i18n.__('my-account') %>
-              </a>
-            </li>
-            <li><a href="wishlist.html" class="site-nav">My Wishlist</a></li>
-            <li>
-              <a href="compare-product.html" class="site-nav"
-                >Compare Product</a
-              >
-            </li>
-            <li>
-              <a href="login-register.html" class="site-nav">Login/Register</a>
-            </li>
-            <li>
-              <a href="forgot-password.html" class="site-nav"
-                >Forgot Password</a
-              >
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-    <li class="lvl1 parent">
-      <a href="product-layout-style1.html"
-        >Products <i class="cps cp-plus"></i
-      ></a>
-      <ul>
-        <li>
-          <a class="title text-uppercase" href="product-layout-style1.html"
-            >Product Types <i class="cps cp-plus"></i
-          ></a>
-          <ul class="m-items lvl-1">
-            <li>
-              <a href="product-layout-style1.html" class="site-nav"
-                >Product Simple</a
-              >
-            </li>
-            <li>
-              <a href="product-layout-style3.html" class="site-nav"
-                >Product Variable</a
-              >
-            </li>
-            <li>
-              <a href="product-affiliate.html" class="site-nav"
-                >Product Affiliate</a
-              >
-            </li>
-            <li>
-              <a href="product-bundle.html" class="site-nav">Product Bundle</a>
-            </li>
-            <li>
-              <a href="product-configurable.html" class="site-nav"
-                >Product Configurable</a
-              >
-            </li>
-            <li>
-              <a href="product-grouped.html" class="site-nav"
-                >Product Grouped</a
-              >
-            </li>
-          </ul>
-        </li>
-        <li>
-          <a class="title text-uppercase" href="product-layout-style1.html"
-            >Product Layouts <i class="cps cp-plus"></i
-          ></a>
-          <ul class="m-items lvl-1">
-            <li>
-              <a href="product-layout-style1.html" class="site-nav"
-                >Product Layout Style1
-                <span class="lbl nm_label3">Popular</span></a
-              >
-            </li>
-            <li>
-              <a href="product-layout-style2.html" class="site-nav"
-                >Product Layout Style2</a
-              >
-            </li>
-            <li>
-              <a href="product-layout-style3.html" class="site-nav"
-                >Product Layout Style3 <span class="lbl nm_label4">Hot</span></a
-              >
-            </li>
-            <li>
-              <a href="product-layout-style4.html" class="site-nav"
-                >Product Layout Style4</a
-              >
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-    <li class="lvl1 parent">
-      <a href="gallery-grid-2column.html"
-        >Gallery <i class="cps cp-plus"></i
-      ></a>
-      <ul class="m-items lvl-1">
-        <li class="lvl1">
-          <a href="gallery-grid-2column.html">Grid 2 Column</a>
-        </li>
-        <li class="lvl1">
-          <a href="gallery-grid-3column.html">Grid 3 Column</a>
-        </li>
-        <li class="lvl1">
-          <a href="gallery-grid-4column.html">Grid 4 Column</a>
-        </li>
-        <li class="lvl1">
-          <a href="gallery-masonry-2column.html">Masonry 2 Column</a>
-        </li>
-        <li class="lvl1">
-          <a href="gallery-masonry-3column.html">Masonry 3 Column</a>
-        </li>
-      </ul>
-    </li>
-    <li class="lvl1 parent">
-      <a href="services.html">Pages <i class="cps cp-plus"></i></a>
-      <ul class="m-items lvl-1">
-        <li class="lvl1"><a href="services.html">Services</a></li>
-        <li class="lvl1"><a href="about-us.html">About Us</a></li>
-        <li class="lvl1"><a href="contact-us.html">Contact Us</a></li>
-        <li class="lvl1"><a href="faq.html">FAQ</a></li>
-        <li class="lvl1"><a href="404-error.html">404 Error</a></li>
-      </ul>
-    </li>
-    <li class="lvl1 parent">
-      <a href="blog.html">Blog <i class="cps cp-plus"></i></a>
-      <ul class="m-items lvl-1">
-        <li><a href="blog-grid-no-sidebar.html">Blog Grid No Sidebar</a></li>
-        <li>
-          <a href="blog-grid-with-sidebar.html">Blog Grid With Sidebar</a>
-        </li>
-        <li>
-          <a href="blog-listing-no-sidebar.html">Blog Listing No Sidebar</a>
-        </li>
-        <li>
-          <a href="blog-listing-with-sidebar.html">Blog Listing With Sidebar</a>
-        </li>
-        <li><a href="blog-single-page.html">Blog Single Page</a></li>
-      </ul>
-    </li>
-    <li class="info">
-      <span class="hours"
-        ><i class="icon cps cp-clock align-middle"></i> Open: 9:00 am - 9:00
-        pm</span
-      >
-    </li>
-    <li class="social">
-      <div class="list-inline m-0 social-icons">
-        <span class="list-inline-item"
-          ><a href="#;" target="_blank" title="Facebook"
-            ><i class="cpb cp-facebook-f"></i></a
-        ></span>
-        <span class="list-inline-item"
-          ><a href="#;" target="_blank" title="Twitter"
-            ><i class="cpb cp-twitter"></i></a
-        ></span>
-        <span class="list-inline-item"
-          ><a href="#;" target="_blank" title="Instagram"
-            ><i class="cpb cp-instagram"></i></a
-        ></span>
-        <span class="list-inline-item"
-          ><a href="#;" target="_blank" title="Google Plus"
-            ><i class="cpb cp-google-plus"></i></a
-        ></span>
-        <span class="list-inline-item"
-          ><a href="#;" target="_blank" title="Linked In"
-            ><i class="cpb cp-linkedin-in"></i></a
-        ></span>
-        <span class="list-inline-item"
-          ><a href="#;" target="_blank" title="Youtube"
-            ><i class="cpb cp-youtube"></i></a
-        ></span>
-      </div>
-    </li>
+
+    <% if(data.nav && data.nav.pages) {%>
+
+      <% data.nav.pages.forEach((item) => { %>
+
+        <% if (item.pages.length === 0 ) { %>
+
+          <li class="lvl1">
+            <a href="<%= item.path %>"><%= item.name %></a>
+          </li>
+
+        <% } else { %>
+          <li class="lvl1">
+            <a href="<%= item.path %>"><%= item.name %> <i class="cps cp-plus"></i> </a>
+
+            <ul class="m-items lvl-1">
+
+              <% item.pages.forEach((subpage) => {  %>
+
+                <li>
+                  <a href="<%= subpage.path%>" class="site-nav"><%= subpage.name %> </a>
+                </li>
+
+              <% }) %>
+            </ul>
+          </li>
+
+        <% } %>
+
+      <% }) %>
+    <% } %>  
   </ul>
 </div>
 <!--End Mobile Drawer Menu-->
+
+<script>
+
+const update_badge_cart = (new_quantity) => {
+  let HTML_cart_badge = document.querySelector("#cart_badge");
+
+  if(HTML_cart_badge) {
+    HTML_cart_badge.innerHTML = new_quantity
+  }
+
+}
+
+// Download products to your shopping cart at the click of a button
+const btn_cart = document.querySelector('#cart_btn')
+
+if(btn_cart) {
+  btn_cart.addEventListener('click', async () => {
+    await handle_get_products_in_mini_cart()
+    return
+  })
+}
+
+// Lisenner to search btn 
+let main_search_input = document.querySelector("#main_search_input");
+let main_search_button = document.querySelector("#main_search_button");
+
+main_search_input.addEventListener("keypress", (e) => {
+    if (e.key !== "Enter") return;
+
+          let keywords = main_search_input.value
+
+          search_product(keywords)
+
+          return;
+    });
+
+
+main_search_button.addEventListener("click", () => {
+  
+    let keywords = main_search_input.value
+
+     search_product(keywords)
+
+     return;
+});
+
+let main_search_mobile_input = document.querySelector('#main_search_mobile_input')
+let main_search_mobile_button = document.querySelector('#main_search_mobile_button')
+
+
+main_search_mobile_input.addEventListener("keypress", (e) => {
+    if (e.key !== "Enter") return;
+
+    let keywords = main_search_mobile_input.value
+
+    search_product(keywords)
+
+    return;
+});
+
+
+main_search_mobile_button.addEventListener("click", () => {
+  
+  let keywords = main_search_mobile_input.value
+
+  search_product(keywords)
+
+  return;
+});
+
+</script>

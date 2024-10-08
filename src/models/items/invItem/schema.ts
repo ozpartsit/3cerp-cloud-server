@@ -70,6 +70,7 @@ const options = { discriminatorKey: "type", collection: "items" };
 // });
 export interface IInvItem extends IItem {
   sku: string;
+
   //vendors?: IVendors[];
   //warehouses?: IWarehouses[];
   //locations?: ILocations[];
@@ -81,6 +82,8 @@ export interface IInvItem extends IItem {
   lastOrderDate?: Date;
   firstPurchaseDate?: Date;
   lastPurchaseDate?: Date;
+
+  html: string;
 }
 export interface IInvItemModel extends mongoose.Model<IInvItem>, IExtendedModel<IInvItem> { }
 
@@ -94,6 +97,9 @@ const schema = new mongoose.Schema<IInvItem>(
     lastOrderDate: { type: Date },
     firstPurchaseDate: { type: Date },
     lastPurchaseDate: { type: Date },
+
+    html: { type: String, input: "RichText", validType: "richText" },
+
     // vendors: {
     //   type: [Vendors],
     //   validate: [

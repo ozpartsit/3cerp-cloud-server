@@ -36,7 +36,7 @@ export default function (
   //   }
   // }
   //})
-
+  console.log(error.message)
   return res.status(error.status || 500).send({ status: "error", error: { message: req.__(error.message || error.toString()) } });
 
 };

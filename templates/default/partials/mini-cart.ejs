@@ -1,32 +1,86 @@
 <!--MiniCart Drawer-->
 <div class="minicart-right-drawer modal right fade" id="minicart-drawer">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div id="cart-drawer" class="block block-cart">
-        <a
-          href="javascript:void(0);"
-          class="close-cart"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-          ><i class="cp cp-times"></i
-        ></a>
-        <h4 id="title_card"><%= i18n.__('locales.shopping-cart.title')%></h4>
-        <div class="minicart-content">
-          <ul id="card_list_products" class="clearfix">
-            <!-- PRODUCTS -->
-          </ul>
-        </div>
-        <div class="minicart-bottom">
-          <div class="subtotal">
-            <span><%= i18n.__('locales.shopping-cart.total')%>:</span>
-            <span id="card_total" class="product-price"></span>
+     <div class="modal-dialog">
+          <div class="modal-content">
+               <div id="cart-drawer" class="block block-cart">
+                    <a
+                         href="javascript:void(0);"
+                         class="close-cart"
+                         data-bs-dismiss="modal"
+                         aria-label="Close"
+                         ><i class="cp cp-times"></i
+                    ></a>
+                    <!-- Title -->
+                    <h4 id="cart_title">
+                         <%= i18n.__('locales.shopping-cart.title')%>
+                    </h4>
+                    <div class="minicart-content">
+                         <ul id="cart_list_products" class="clearfix">
+                              <!-- PRODUCTS -->
+                         </ul>
+                    </div>
+                    <div class="minicart-bottom">
+                         <div class="subtotal">
+                              <span
+                                   ><%=
+                                   i18n.__('locales.shopping-cart.total')%>:</span
+                              >
+                              <!-- Summary total -->
+                              <span
+                                   id="cart_total"
+                                   class="product-price"
+                              ></span>
+                         </div>
+                         <!-- Btn -->
+                         <a href="<%= data.page.host%>/summary">
+                              <button
+                                   type="button"
+                                   class="btn proceed-to-checkout rounded"
+                              >
+                                   <%=
+                                   i18n.__('locales.shopping-cart.checkout')%>
+                              </button>
+                         </a>
+                         <a href="<%= data.page.host%>/cart">
+                              <button
+                                   type="button"
+                                   class="btn btn-secondary cart-btn rounded"
+                              >
+                                   Pokaż koszyk
+                              </button>
+                         </a>
+                    </div>
+               </div>
           </div>
-          <button type="button" class="btn proceed-to-checkout rounded">
-            <%= i18n.__('locales.shopping-cart.checkout')%>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+     </div>
 </div>
 <!--End MiniCart Drawer-->
+
+<script>
+     let HTML_list_products = document.querySelector("#cart_list_products");
+
+     HTML_list_products.addEventListener("click", async (e) => {
+          let product = e.target;
+          let index = product.getAttribute("index");
+          let action = product.getAttribute("name");
+          let id = product.getAttribute("id");
+          let container = product.parentElement;
+          let quantity = container.querySelector(".qty").value;
+
+          if (action === "remove") {
+               await remove_from_cart(id);
+          }
+
+          if (action === "plus") {
+               await update_in_cart(id, "quantity", Number(quantity) + 1);
+          }
+
+          if (action === "minus" && Number(quantity) > 1) {
+               await update_in_cart(id, "quantity", Number(quantity) - 1);
+          }
+
+          await handle_get_products_in_mini_cart();
+
+          return;
+     });
+</script>

@@ -52,7 +52,7 @@ export default class WebsiteController<T extends IExtendedDocument & IShop> exte
                     let shop = await Shop.getDocument(req.body.pointer || req.subdomains[0], "simple", true, "subdomain")
                     if (shop) {
                         // tworzenie lead lub contact form
-                        await shop.sendEmail("reset_password", req.body.email, customer)
+                        await shop.sendEmail("reset_password", req.locale, req.body.email, customer)
                         res.json({ status: "success", data: { user: customer._id }, message: "form_sent" });
                     }
                 } else {
@@ -95,7 +95,7 @@ export default class WebsiteController<T extends IExtendedDocument & IShop> exte
                 if (shop) {
                     // tworzenie lead lub contact form
 
-                    await shop.sendEmail("contact", req.body.email, req.body)
+                    await shop.sendEmail("contact", req.locale, req.body.email, req.body)
                     res.json({ status: "success", data: req.body, message: "form_sent" });
                 }
 
@@ -126,7 +126,7 @@ export default class WebsiteController<T extends IExtendedDocument & IShop> exte
                     }
                     const customer = new Customer(document);
                     await customer.save()
-                    await shop.sendEmail("registration", req.body.email, customer)
+                    await shop.sendEmail("registration", req.locale, req.body.email, customer)
                     res.json({ status: "success", data: { user: customer._id }, message: "form_sent" });
                 }
 

@@ -55,7 +55,7 @@ export default function customStaticsMethods<T extends IExtendedDocument>(schema
       type: {
         type: String
       },
-      urlComponent: { type: String, input: "Input", validType: "text" },
+      urlComponent: { type: String, input: "Input", validType: "text", defaultSelect: true },
       uniqNumber: {
         type: Number
       },
@@ -244,7 +244,13 @@ export async function loadDocument<T extends IExtendedDocument>(this: mongoose.M
 export async function addDocument<T extends IExtendedDocument>(this: IExtendedModel<T>, mode: string, data: Object) {
   try {
     let document = new this(data || {})//await this.create(data || {});
+    // init field
+    for (const key in document.schema.paths) {
+      if (!document.isInit(key)) {
+        document[key] = document[key]
+      }
 
+    }
     document.initLocal();
     document.$locals.triggers.push({ type: "addDocument", name: `addDocument`, field: "_id", oldValue: null, value: document._id })
     await document.recalcDocument();

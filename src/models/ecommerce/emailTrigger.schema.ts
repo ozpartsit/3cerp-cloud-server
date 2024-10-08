@@ -24,17 +24,20 @@ const EmailTriggerSchema = {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Email",
         autopopulate: true,
-        input: "Select"
+        input: "Select",
+        required: true,
     },
     template: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "EmailTemplate",
         autopopulate: true,
-        input: "Select"
+        input: "Select",
+        required: true,
     },
     language: {
         type: String,
         default: "en",
+        required: true,
         input: "Select",
         constant: 'language',
         defaultSelect: true,
@@ -44,6 +47,7 @@ const EmailTriggerSchema = {
         input: "Select",
         constant: 'trigger',
         defaultSelect: true,
+        required: true,
     },
     type: {
         type: String,

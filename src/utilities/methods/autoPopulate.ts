@@ -17,7 +17,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
               if (e.value) {
                 paths.push({
                   path: `${pathname}.${index}.value`,
-                  select: options.select || "name displayname type _id resource path deleted color mime images",
+                  select: options.select || "name displayname type _id resource path deleted color mime images urlComponent",
                   options: options.populate,
                   model: e.ref,
                   index: index
@@ -25,7 +25,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
               } else {
                 paths.push({
                   path: pathname,
-                  select: options.select || "name displayname type _id resource path deleted color mime images",
+                  select: options.select || "name displayname type _id resource path deleted color mime images urlComponent",
                   options: options.populate,
                 });
               }
@@ -39,7 +39,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
                     if (e.value) {
                       paths.push({
                         path: `${pathname}.${index}.${key}.${index2}.value`,
-                        select: options.select || "name displayname type _id resource path deleted color mime images",
+                        select: options.select || "name displayname type _id resource path deleted color mime images urlComponent",
                         options: options.populate,
                         model: e.ref,
                         index: index
@@ -47,7 +47,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
                     } else {
                       paths.push({
                         path: pathname,
-                        select: options.select || "name displayname type _id resource path deleted color mime images",
+                        select: options.select || "name displayname type _id resource path deleted color mime images urlComponent",
                         options: options.populate,
                       });
                     }
@@ -65,7 +65,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
 
         paths.push({
           path: pathname,
-          select: options.select || "name displayname type _id resource path deleted color mime images",
+          select: options.select || "name displayname type _id resource path deleted color mime images urlComponent",
           options: options.populate,
         });
       }
@@ -111,7 +111,7 @@ export default async function autoPopulate(this: IExtendedDocument, local: strin
 function getOptions(schemaType) {
   let options = schemaType.options.autopopulate && schemaType.options.autopopulate.select ? Array.isArray(schemaType.options.autopopulate.select) ? schemaType.options.autopopulate.select : schemaType.options.autopopulate.select.split(" ") : []
   let select = options.filter(field => !field.includes("."));
-  select.push("name", "displayname", "type", "_id", "resource", "path", "deleted")
+  select.push("name", "displayname", "type", "_id", "resource", "path", "deleted", "urlComponent")
 
   let deep = options.filter(field => field.includes(".")).reduce((t, v) => {
     let fields = v.split(".")
@@ -121,7 +121,7 @@ function getOptions(schemaType) {
     }
     if (!t.select.includes(fields[1]) && fields[1]) t.select.push(fields[1])
     return t
-  }, { path: [], select: ["name", "displayname", "type", "_id", "resource", "path", "deleted"] })
+  }, { path: [], select: ["name", "displayname", "type", "_id", "resource", "path", "deleted", "urlComponent"] })
 
   const populate = {
     populate: {

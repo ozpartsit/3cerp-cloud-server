@@ -5,16 +5,16 @@
                <div class="row">
                     <div class="col-12 col-sm-12 col-md-4 col-lg-3">
                          <div class="newsletter mb-3">
-                              <h4 class="title">Our Newsletter</h4>
+                              <h4 class="title"><%= i18n.__(`locales.footer.newsletter.title`) %></h4>
                               <form action="#" method="post">
-                                   <p>to stay up-to-date on our promotions, discounts, sales, special offers and more.</p>
+                                   <p><%= i18n.__(`locales.footer.newsletter.subtitle`) %></p>
                                    <div class="input-group">
                                         <input
                                              type="email"
                                              class="newsletter-input"
                                              name="email"
                                              value=""
-                                             placeholder="Enter email address..."
+                                             placeholder="<%= i18n.__(`locales.footer.newsletter.input`) %>."
                                              required
                                         />
                                         <span class="news-btn">
@@ -26,15 +26,39 @@
                               </form>
                          </div>
                          <div class="social-col mb-3 clearfix">
-                              <a href="#;" target="_blank"><i class="cpb cp-facebook-f"></i></a>
-                              <a href="#;" target="_blank"><i class="cpb cp-twitter"></i></a>
-                              <a href="#;" target="_blank"><i class="cpb cp-instagram"></i></a>
-                              <a href="#;" target="_blank"><i class="cpb cp-google-plus"></i></a>
-                              <a href="#;" target="_blank"><i class="cpb cp-linkedin-in"></i></a> 
-                              <a href="#;" target="_blank"><i class="cpb cp-youtube"></i></a>
+                              <a href="<%= data.page.facebookUrl %>" target="_blank"><i class="cpb cp-facebook-f"></i></a>
+                              <a href="<%= data.page.instagramUrl %>" target="_blank"><i class="cpb cp-instagram"></i></a>
+                              <a href="<%= data.page.linkedinUrl %>" target="_blank"><i class="cpb cp-linkedin-in"></i></a> 
                          </div>
                     </div>
-                    <div class="col-12 col-sm-12 col-md-4 col-lg-3">
+
+                    <% if (data.footer && data.footer.pages.length > 0) { %> 
+
+                         <% data.footer.pages.forEach((item) => { %>
+
+
+                              <div class="col-12 col-sm-12 col-md-4 col-lg-3">
+                                   <div class="footer-col contact-col">
+                                        <h4 class="title"><%= item.name %></h4>
+                                        <ul>
+                                             <li>
+                                                  <a href="mailto:info@example.com"><i class="cps cp-envelope-open"></i> info@example.com</a>
+                                             </li>
+                                             <li>
+                                                  <a href="tel:309-437-4122"><i class="cps cp-phone"></i> 309-437-4122</a>
+                                             </li>
+                                             <li><i class="cps cp-map-marker"></i> 343 Coburn Hollow Road<br />Peoria, Illinois - 61602</li>
+                                             <!-- <li><i class="cps cp-clock"></i> 9:30 am - 6:30 pm</li> -->
+                                        </ul>
+                                    </div>
+                              </div>
+
+
+                         <% }) %>
+
+                    <% } %>
+
+                    <!-- <div class="col-12 col-sm-12 col-md-4 col-lg-3">
                          <div class="footer-col footer-links clearfix">
                               <h4 class="title">Quick Links</h4>
                               <ul>
@@ -83,7 +107,10 @@
                                    <li><i class="cps cp-clock"></i> 9:30 am - 6:30 pm</li>
                               </ul>
                          </div>
-                    </div>
+                    </div> -->
+
+
+
                </div>
           </div>
      </div>

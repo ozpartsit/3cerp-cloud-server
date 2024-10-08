@@ -5,9 +5,11 @@ import { IExtendedModel } from "../../utilities/static";
 export interface IPage extends IExtendedDocument {
     _id: mongoose.Schema.Types.ObjectId;
     webshop: mongoose.Schema.Types.ObjectId;
+    parentPage: mongoose.Schema.Types.ObjectId;
     type: string;
     name: string;
     description: string;
+    date: Date;
 
     //META TAGS
     metaTitle: string;
@@ -21,6 +23,13 @@ export interface IPage extends IExtendedDocument {
     template: string;
     languages: string[]
     image: mongoose.Schema.Types.ObjectId;
+
+    // options
+    topBar: boolean
+    footer: boolean
+    slider: boolean
+    blog: boolean
+    banner: boolean
 }
 interface IPageModel extends mongoose.Model<IPage>, IExtendedModel<IPage> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +38,14 @@ const PageSchema = {
     name: { type: String, input: "Input", validType: "text" },
     description: { type: String, input: "Input", validType: "text" },
     webshop: { type: mongoose.Schema.Types.ObjectId },
+    date: { type: Date, input: "DatePicker", validType: "date", required: true, default: new Date() },
+    parentPage: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Page",
+        autopopulate: true,
+        input: "Select",
+        validType: "select"
+    },
     metaTitle: {
         type: String,
         // min: [3, "Must be at least 3 characters long, got {VALUE}"],
@@ -83,7 +100,37 @@ const PageSchema = {
     type: {
         type: String,
         required: true,
-    }
+    },
+    topBar: {
+        type: Boolean,
+        input: "Switch",
+        validType: "switch",
+        default: true
+    },
+    footer: {
+        type: Boolean,
+        input: "Switch",
+        validType: "switch",
+        default: false
+    },
+    slider: {
+        type: Boolean,
+        input: "Switch",
+        validType: "switch",
+        default: false
+    },
+    blog: {
+        type: Boolean,
+        input: "Switch",
+        validType: "switch",
+        default: false
+    },
+    banner: {
+        type: Boolean,
+        input: "Switch",
+        validType: "switch",
+        default: false
+    },
 }
 const options = {
     discriminatorKey: "type",

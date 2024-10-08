@@ -18,13 +18,14 @@ export interface ITransaction extends IExtendedDocument {
   //company: IEntity["_id"];
   entity: IEntity["_id"];
   exchangeRate?: number;
-  currency?: string;
+  currency: string;
   lines: ILine[];
   amount: number;
   grossAmount: number;
   tax: number;
   taxAmount: number;
   taxNumber: string;
+  taxRate: number;
   referenceNumber: string;
   memo: string;
 
@@ -51,7 +52,7 @@ interface ITransactionModel extends mongoose.Model<ITransaction>, IExtendedModel
 
 const TransactionSchema = {
   name: { type: String, input: "Input", validType: "text" },
-  date: { type: Date, input: "DatePicker", validType: "date", required: true, defaultSelect: true },
+  date: { type: Date, input: "DatePicker", validType: "date", required: true, defaultSelect: true, default: new Date() },
   // company: {
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: "Company",
@@ -186,9 +187,33 @@ schema.virtual("lines", {
   justOne: false,
   autopopulate: true,
   model: Line,
-  copyFields: ["entity", "account"],
+  copyFields: ["entity", "account", "currency"],
   options: { sort: { index: 1 } },
 });
+
+schema.virtual('amountFormat').get(function (this) {
+  if(this.amount!==undefined){
+  if (this.currency)
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.currency }).format(this.amount);
+  else return this.amount.toFixed(2)
+}
+});
+schema.virtual('grossAmountFormat').get(function (this) {
+  if(this.grossAmount!==undefined){
+  if (this.currency)
+    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.currency }).format(this.grossAmount);
+  else return this.grossAmount.toFixed(2)
+}
+});
+schema.virtual('taxAmountFormat').get(function (this) {
+  if(this.taxAmount!==undefined){
+    if (this.currency)
+      return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.currency }).format(this.taxAmount);
+    else return this.taxAmount.toFixed(2)
+  }
+  
+});
+
 schema.method("pdf", async function () {
   return await printPDF();
 });
@@ -197,7 +222,7 @@ schema.method("autoName", async function () {
 
   if (!this.name) {
     //console.log(this);
-    let temp = await this.populate("company");
+    //let temp = await this.populate("company");
     //console.log(temp);
     //console.log(temp.company, temp.company.name, temp.company.tmp);
     // let format = this.company.transactionNumbers.find(

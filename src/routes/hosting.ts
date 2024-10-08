@@ -43,8 +43,12 @@ export default class Routes {
             this.hostingController.setCurrency.bind(this.hostingController) as any as any
         );
 
-        //register confirmed
+        //register confirmed view:register
         this.RouterHosting.route("/:view/:id/confirmed").get(
+            this.hostingController.get.bind(this.hostingController) as any as any
+        );
+        //reset Password :view=resetpasssword
+        this.RouterHosting.route("/:view/:id/newpassword").get(
             this.hostingController.get.bind(this.hostingController) as any as any
         );
 

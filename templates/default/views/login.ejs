@@ -48,15 +48,13 @@
                                         <div
                                              id="main_login_error"
                                              class="login-error"
-                                        >
-                                             <%=
-                                             i18n.__('locales.login.error')%>
-                                        </div>
+                                        ></div>
                                         <div
                                              class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3"
                                         >
                                              <label>
                                                   <input
+                                                       id="checkbox_remember_me"
                                                        class="d-inline-block align-middle mb-0 mt-0 margin-5px-right form-check-input"
                                                        type="checkbox"
                                                        name="account"
@@ -80,7 +78,8 @@
                                                   value="Login"
                                              />
                                              <p class="m-0">
-                                                  <a href="forgot-password.html"
+                                                  <a
+                                                       href="/forgot-password"
                                                        ><%=
                                                        i18n.__('locales.login.forgot')%></a
                                                   >

@@ -58,7 +58,7 @@ export default async function getOptions(
         } else {
             document = this;
         }
-        
+
         // Pobierz definicję schematu (schema) modelu 
         const schema = document.schema;
 
@@ -72,9 +72,8 @@ export default async function getOptions(
             if (mode === "operator") {
                 constant = "operator";
             } else {
-               
+
                 if (fieldType.options.ref) {
-                 
                     let model = mongoose.model(fieldType.options.ref);
                     // query - dodać filtry 
                     let query = fieldType.options.filters || {};
@@ -83,6 +82,11 @@ export default async function getOptions(
                     total = await model.countDocuments(query);
                     let limit = 25;
                     let skip = ((page || 1) - 1) * 25;
+                    if (fieldType.options.input && fieldType.options.input == "Select") {
+                        limit = 0;
+                        skip = 0;
+                    }
+
                     results = await model.find(query).sort({ name: 1 }).skip(skip).limit(limit).select({ name: 1, description: 1, type: 1 });
                     //let results = model.findDocuments({},{})
 
@@ -119,9 +123,12 @@ export default async function getOptions(
                     }
 
                     total = results.length;
-                    if (page) {
-                        let skip = ((page || 1) - 1) * 25;
-                        results = results.filter((item, index) => index >= skip && index < skip + 25)
+
+                    if (fieldType.options.input && fieldType.options.input != "Select") {
+                        if (page) {
+                            let skip = ((page || 1) - 1) * 25;
+                            results = results.filter((item, index) => index >= skip && index < skip + 25)
+                        }
                     }
 
                 }

@@ -190,7 +190,10 @@ export default {
                                     "name",
                                     "description",
                                     "pageType",
+                                    "parentPage",
                                     "urlComponent",
+                                    "template",
+                                    "languages",
                                 ]
                             },
                             {
@@ -205,9 +208,13 @@ export default {
                                 "value": "other",
                                 "fields": [
                                     "html",
-                                    "template",
                                     "image",
-                                    "languages"
+                                    "date",
+                                    "topBar",
+                                    "footer",
+                                    "slider",
+                                    "blog",
+                                    "banner",
                                 ]
                             },
                         ]

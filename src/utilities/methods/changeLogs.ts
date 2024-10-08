@@ -38,26 +38,31 @@ export default async function changeLogs(this: IExtendedDocument, document?: IEx
             })
             // ref dla modeli
             let ref = null;
-            if (this.schema.path(field) && this.schema.path(field).options.ref) {
-              ref = this.schema.path(field).options.ref
+            let instance = "";
+            if (this.schema.path(field)) {
+              if (this.schema.path(field).options.ref)
+                ref = this.schema.path(field).options.ref;
+              else
+                instance = this.schema.path(field).instance;
             }
             this.depopulate();
+            if (instance != "Embedded") { // nie jest nestedDocuemnt
+              if ((value || "").toString() !== (originalValue || "").toString()) {
 
-            if ((value || "").toString() !== (originalValue || "").toString()) {
-
-              let changeLog = new Changelog(
-                {
-                  document: document || this.id,
-                  field: field,
-                  subdoc: subdoc,
-                  subdoc_id: subdoc ? this.id : null,
-                  newValue: value,
-                  oldValue: originalValue,
-                  ref: ref,
-                  createdBy: createdBy
-                }
-              );
-              changeLog.save();
+                let changeLog = new Changelog(
+                  {
+                    document: document || this.id,
+                    field: field,
+                    subdoc: subdoc,
+                    subdoc_id: subdoc ? this.id : null,
+                    newValue: value,
+                    oldValue: originalValue,
+                    ref: ref,
+                    createdBy: createdBy
+                  }
+                );
+                changeLog.save();
+              }
 
             } else {
               this.unmarkModified(field);

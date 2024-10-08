@@ -8,6 +8,9 @@ export interface IAddress extends IExtendedDocument {
   _id: mongoose.Schema.Types.ObjectId;
   entity?: mongoose.Schema.Types.ObjectId;
   name?: string;
+  firstName?: string;
+  lastName?: string;
+  company?: string;
   addressee?: string;
   address: string;
   address2?: string;
@@ -15,6 +18,7 @@ export interface IAddress extends IExtendedDocument {
   zip: string;
   country: string;
   phone?: string;
+  email?: string;
   geoCodeHint?: string;
   latitude?: string;
   longitude?: string;
@@ -34,6 +38,9 @@ interface IAddressModel extends mongoose.Model<IAddress>, IExtendedModel<IAddres
 //schema to shere
 const nestedSchemaAddress = {
   name: { type: String, required: true, input: "Input", validType: "text", min: 1, max: 256 },
+  firstName: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
+  lastName: { type: String,  input: "Input", validType: "text", min: 1, max: 256 },
+  company: { type: String,  input: "Input", validType: "text", min: 1, max: 256 },
   addressee: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
   address: { type: String, required: true, input: "Input", validType: "text", min: 1, max: 256 },
   address2: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
@@ -46,7 +53,8 @@ const nestedSchemaAddress = {
     input: "Select",
     validType: "select"
   },
-  phone: { type: String, required: true, input: "Input", validType: "phone", min: 6, max: 15 },
+  email: { type: String, input: "Input", validType: "email", min: 3, max: 256 },
+  phone: { type: String, input: "Input", validType: "phone", min: 6, max: 15 },
   latitude: { type: String, input: "Input", readonly: true, validType: "number" },
   longitude: { type: String, input: "Input", readonly: true, validType: "number" }
 }
