@@ -30,7 +30,6 @@ class Api {
 
      //   Method to create form data
      create_form_data(body = {}) {
-          console.log(typeof body);
 
           if (body.length) {
                return body;
@@ -112,8 +111,6 @@ class Api {
      async patch(url, body = {}, stringify = true, isContentType = false) {
           this.set_cookie();
           this.set_options("PATCH", this.create_form_data(body), stringify, isContentType);
-
-          console.log(this.options);
 
           try {
                const res = await fetch(url, this.options)

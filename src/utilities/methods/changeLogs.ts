@@ -62,10 +62,10 @@ export default async function changeLogs(this: IExtendedDocument, document?: IEx
                   }
                 );
                 changeLog.save();
+              } else {
+                //this.unmarkModified(field);
               }
 
-            } else {
-              this.unmarkModified(field);
             }
 
           })

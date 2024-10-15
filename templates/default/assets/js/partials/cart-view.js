@@ -126,7 +126,7 @@ const create_cart_product = (product, HTML_list_products, index) => {
      const priceTitle = document.createElement("span");
      priceTitle.className = "product-price";
      priceTitle.setAttribute("data-title", "Price");
-     priceTitle.textContent = product.price;
+     priceTitle.textContent = product.amountFormat;
 
      const descriptionPrice = document.createElement("span");
      descriptionPrice.className = "variation";

@@ -45,11 +45,12 @@ export default class WebsiteController<T extends IExtendedDocument & ISalesOrder
                     res.json({ status: "success", data: { document: docObject, mode: "advanced" } });
                 } else {
                     let document = await this.model.getDocument(id || req.cookies.shoppingcart, "advanced", true, "_id");
+                    
                     if (!document) {
                         req.cookies.shoppingcart = "";
                         this.getShoppingCart(req, res, next)
                     } else {
-
+                        document.account = shop.account;
                         // zalogowany user
                         if (!document.entity && req.cookies.user) {
                             document.setValue("entity", req.cookies.user, null, null, null, null)

@@ -72,8 +72,7 @@
                          >
                               <h3>Profile</h3>
                               <form
-                                   method="post"
-                                   action="#"
+                                   id="profile_form"
                                    class="profile-form"
                               >
 
@@ -200,478 +199,320 @@
                          <!-- Billing Address -->
                          <div id="billingAddress" class="address tab-pane">
                               <h3>Billing Address</h3>
-                              <form
-                                   method="post"
-                                   action="#"
-                                   class="profile-form"
-                              >
-                                   <div class="row">
-                                        <!-- Name -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div
-                                                  class="form-group col-12 col-sm-12 col-md-12 col-lg-12 mb-2"
-                                             >
-                                                  <label
-                                                       for="billing_address_name"
-                                                       class="form-label"
-                                                       >Name</label
-                                                  >
-                                                  <input
-                                                       name="name"
-                                                       id="billing_address_name"
-                                                       type="text"
-                                                       required
-                                                       value="<%= data.content.billingAddress.name %>"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                        <!-- Country -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <label
-                                                  for="billing_address_country"
-                                                  class="form-label"
-                                                  >Country
-                                                  <span class="required"
-                                                       >*</span
-                                                  ></label
-                                             >
-                                             <select
-                                                  id="billing_address_country"
-                                                  name="country"
-                                                  subdoc="billingAddress"
-                                                  class="form-control"
-                                             >
-                                                  <option
-                                                       value="<%= data.content.billingAddress.country %>"
-                                                       selected
-                                                  >
-                                                       <%=
-                                                       data.content.billingAddress.country
-                                                       %>
-                                                  </option>
-                                                  <!-- Dodaj pozostałe opcje krajów tutaj -->
-                                             </select>
-                                        </div>
-                                   </div>
-                                   <div class="row">
-                                        <!-- City -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <label
-                                                  for="billing_address_city"
-                                                  class="form-label"
-                                                  >Town / City
-                                                  <span class="required"
-                                                       >*</span
-                                                  ></label
-                                             >
-                                             <input
-                                                  id="billing_address_city"
-                                                  name="city"
-                                                  type="text"
-                                                  class="form-control"
-                                                  value="<%= data.content.billingAddress.city %>"
-                                                  required
-                                             />
-                                        </div>
-                                        <!-- ZIP Code -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="billing_address_zip"
-                                                       class="form-label"
-                                                       >ZIP Code
-                                                       <span class="required"
-                                                            >*</span
-                                                       ></label
-                                                  >
-                                                  <input
-                                                       name="zip"
-                                                       id="billing_address_zip"
-                                                       type="text"
-                                                       class="form-control"
-                                                       placeholder="ZIP Code"
-                                                       value="<%= data.content.billingAddress.zip %>"
-                                                       required
-                                                  />
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div class="row">
-                                        <!-- Address 1 -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="billing_address_address1"
-                                                       class="form-label"
-                                                       >Address 1</label
-                                                  >
-                                                  <input
-                                                       name="address1"
-                                                       value="<%= data.content.billingAddress.address %>"
-                                                       id="billing_address_address1"
-                                                       type="text"
-                                                       required
-                                                       placeholder="Address Line 1"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                        <!-- Address 2 -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="billing_address_address2"
-                                                       class="form-label"
-                                                       >Address 2</label
-                                                  >
-                                                  <input
-                                                       name="address2"
-                                                       value="<%= data.content.billingAddress.address2 %>"
-                                                       id="billing_address_address2"
-                                                       type="text"
-                                                       placeholder="Address Line 2"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div class="row">
-                                        <!-- Email -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="billing_address_email"
-                                                       class="form-label"
-                                                       >Email</label
-                                                  >
-                                                  <input
-                                                       name="email"
-                                                       value="<%= data.content.billingAddress.email %>"
-                                                       id="billing_address_email"
-                                                       type="email"
-                                                       required
-                                                       placeholder="Email"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                        <!-- Phone -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="billing_address_phone"
-                                                       class="form-label"
-                                                       >Phone</label
-                                                  >
-                                                  <input
-                                                       name="phone"
-                                                       value="<%= data.content.billingAddress.phone %>"
-                                                       id="billing_address_phone"
-                                                       type="tel"
-                                                       required
-                                                       placeholder="Phone Number"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div class="row">
-                                        <!-- Addressee -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="billing_address_addressee"
-                                                       class="form-label"
-                                                       >Addressee</label
-                                                  >
-                                                  <input
-                                                       name="addressee"
-                                                       value="<%= data.content.billingAddress.addressee %>"
-                                                       id="billing_address_addressee"
-                                                       type="text"
-                                                       placeholder="Addressee"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div
-                                        class="row align-items-center justify-content-between"
-                                   >
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"
-                                        >
-                                        </div>
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 text-end"
-                                        >
-                                             <input
-                                                  type="submit"
-                                                  class="btn btn-lg btn-primary rounded-pill"
-                                                  value="Update Billing Address"
-                                             />
-                                        </div>
-                                   </div>
+                              <form id="billing_address_form" class="profile-form">
+                                <div class="row">
+                                  <!-- Name -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12 mb-2">
+                                      <label for="billing_address_name" class="form-label">Name</label>
+                                      <input
+                                        name="name"
+                                        id="billing_address_name"
+                                        type="text"
+                                        required
+                                        value="<%= data.content.billingAddress ? data.content.billingAddress.name : '' %>"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                  <!-- Country -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <label for="billing_address_country" class="form-label">
+                                      Country <span class="required">*</span>
+                                    </label>
+                                    <select id="billing_address_country" name="country" subdoc="billingAddress" class="form-control" required>
+                                      <option value="<%= data.content.billingAddress ? data.content.billingAddress.country : '' %>" selected>
+                                        <%= data.content.billingAddress ? data.content.billingAddress.country : '' %>
+                                      </option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <!-- City -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <label for="billing_address_city" class="form-label">
+                                      Town / City <span class="required">*</span>
+                                    </label>
+                                    <input
+                                      id="billing_address_city"
+                                      name="city"
+                                      type="text"
+                                      class="form-control"
+                                      value="<%= data.content.billingAddress ? data.content.billingAddress.city : '' %>"
+                                      required
+                                    />
+                                  </div>
+                                  <!-- ZIP Code -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="billing_address_zip" class="form-label">
+                                        ZIP Code <span class="required">*</span>
+                                      </label>
+                                      <input
+                                        name="zip"
+                                        id="billing_address_zip"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="ZIP Code"
+                                        value="<%= data.content.billingAddress ? data.content.billingAddress.zip : '' %>"
+                                        required
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <!-- Address 1 -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="billing_address_address1" class="form-label">Address 1</label>
+                                      <input
+                                        name="address1"
+                                        value="<%= data.content.billingAddress ? data.content.billingAddress.address : '' %>"
+                                        id="billing_address_address1"
+                                        type="text"
+                                        required
+                                        placeholder="Address Line 1"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                  <!-- Address 2 -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="billing_address_address2" class="form-label">Address 2</label>
+                                      <input
+                                        name="address2"
+                                        value="<%= data.content.billingAddress ? data.content.billingAddress.address2 : '' %>"
+                                        id="billing_address_address2"
+                                        type="text"
+                                        placeholder="Address Line 2"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <!-- Email -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="billing_address_email" class="form-label">Email</label>
+                                      <input
+                                        name="email"
+                                        value="<%= data.content.billingAddress ? data.content.billingAddress.email : '' %>"
+                                        id="billing_address_email"
+                                        type="email"
+                                        required
+                                        placeholder="Email"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                  <!-- Phone -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="billing_address_phone" class="form-label">Phone</label>
+                                      <input
+                                        name="phone"
+                                        value="<%= data.content.billingAddress ? data.content.billingAddress.phone : '' %>"
+                                        id="billing_address_phone"
+                                        type="tel"
+                                        required
+                                        placeholder="Phone Number"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <!-- Addressee -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="billing_address_addressee" class="form-label">Addressee</label>
+                                      <input
+                                        name="addressee"
+                                        value="<%= data.content.billingAddress ? data.content.billingAddress.addressee : '' %>"
+                                        id="billing_address_addressee"
+                                        type="text"
+                                        placeholder="Addressee"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row align-items-center justify-content-between">
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"></div>
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 text-end">
+                                    <input
+                                      type="submit"
+                                      class="btn btn-lg btn-primary rounded-pill"
+                                      value="Update Billing Address"
+                                      id="billing_address_btn_update"
+                                    />
+                                  </div>
+                                </div>
                               </form>
-                         </div>
+                            </div>
                          <!-- End Billing Address -->
 
                          <!-- Shipping Address -->
                          <div id="shippingAddress" class="address tab-pane">
                               <h3>Shipping Address</h3>
-                              <form
-                                   method="post"
-                                   action="#"
-                                   class="profile-form"
-                              >
-                                   <div class="row">
-                                        <!-- Name -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div
-                                                  class="form-group col-12 col-sm-12 col-md-12 col-lg-12 mb-2"
-                                             >
-                                                  <label
-                                                       for="shipping_address_name"
-                                                       class="form-label"
-                                                       >Name</label
-                                                  >
-                                                  <input
-                                                       name="name"
-                                                       id="shipping_address_name"
-                                                       type="text"
-                                                       required
-                                                       value="<%= data.content.shippingAddress.name %>"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                        <!-- Country -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <label
-                                                  for="shipping_address_country"
-                                                  class="form-label"
-                                                  >Country
-                                                  <span class="required"
-                                                       >*</span
-                                                  ></label
-                                             >
-                                             <select
-                                                  id="shipping_address_country"
-                                                  name="country"
-                                                  subdoc="shippingAddress"
-                                                  class="form-control"
-                                             >
-                                                  <option
-                                                       value="<%= data.content.shippingAddress.country %>"
-                                                       selected
-                                                  >
-                                                       <%=
-                                                       data.content.shippingAddress.country
-                                                       %>
-                                                  </option>
-                                                  <!-- Dodaj pozostałe opcje krajów tutaj -->
-                                             </select>
-                                        </div>
-                                   </div>
-                                   <div class="row">
-                                        <!-- City -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <label
-                                                  for="shipping_address_city"
-                                                  class="form-label"
-                                                  >Town / City
-                                                  <span class="required"
-                                                       >*</span
-                                                  ></label
-                                             >
-                                             <input
-                                                  id="shipping_address_city"
-                                                  name="city"
-                                                  type="text"
-                                                  class="form-control"
-                                                  value="<%= data.content.shippingAddress.city %>"
-                                                  required
-                                             />
-                                        </div>
-                                        <!-- ZIP Code -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="shipping_address_zip"
-                                                       class="form-label"
-                                                       >ZIP Code
-                                                       <span class="required"
-                                                            >*</span
-                                                       ></label
-                                                  >
-                                                  <input
-                                                       name="zip"
-                                                       id="shipping_address_zip"
-                                                       type="text"
-                                                       class="form-control"
-                                                       placeholder="ZIP Code"
-                                                       value="<%= data.content.shippingAddress.zip %>"
-                                                       required
-                                                  />
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div class="row">
-                                        <!-- Address 1 -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="shipping_address_address1"
-                                                       class="form-label"
-                                                       >Address 1</label
-                                                  >
-                                                  <input
-                                                       name="address1"
-                                                       value="<%= data.content.shippingAddress.address %>"
-                                                       id="shipping_address_address1"
-                                                       type="text"
-                                                       required
-                                                       placeholder="Address Line 1"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                        <!-- Address 2 -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="shipping_address_address2"
-                                                       class="form-label"
-                                                       >Address 2</label
-                                                  >
-                                                  <input
-                                                       name="address2"
-                                                       value="<%= data.content.shippingAddress.address2 %>"
-                                                       id="shipping_address_address2"
-                                                       type="text"
-                                                       placeholder="Address Line 2"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div class="row">
-                                        <!-- Email -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="shipping_address_email"
-                                                       class="form-label"
-                                                       >Email</label
-                                                  >
-                                                  <input
-                                                       name="email"
-                                                       value="<%= data.content.shippingAddress.email %>"
-                                                       id="shipping_address_email"
-                                                       type="email"
-                                                       required
-                                                       placeholder="Email"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                        <!-- Phone -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="shipping_address_phone"
-                                                       class="form-label"
-                                                       >Phone</label
-                                                  >
-                                                  <input
-                                                       name="phone"
-                                                       value="<%= data.content.shippingAddress.phone %>"
-                                                       id="shipping_address_phone"
-                                                       type="tel"
-                                                       required
-                                                       placeholder="Phone Number"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div class="row">
-                                        <!-- Addressee -->
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3"
-                                        >
-                                             <div class="form-group">
-                                                  <label
-                                                       for="shipping_address_addressee"
-                                                       class="form-label"
-                                                       >Addressee</label
-                                                  >
-                                                  <input
-                                                       name="addressee"
-                                                       value="<%= data.content.shippingAddress.addressee %>"
-                                                       id="shipping_address_addressee"
-                                                       type="text"
-                                                       placeholder="Addressee"
-                                                       class="form-control"
-                                                  />
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div
-                                        class="row align-items-center justify-content-between"
-                                   >
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"
-                                        >
-                                        </div>
-                                        <div
-                                             class="col-12 col-sm-12 col-md-6 col-lg-6 text-end"
-                                        >
-                                             <input
-                                                  type="submit"
-                                                  class="btn btn-lg btn-primary rounded-pill"
-                                                  value="Update Shipping Address"
-                                             />
-                                        </div>
-                                   </div>
+                              <form id="shipping_address_form" class="profile-form">
+                                <div class="row">
+                                  <!-- Name -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12 mb-2">
+                                      <label for="shipping_address_name" class="form-label">Name</label>
+                                      <input
+                                        name="name"
+                                        id="shipping_address_name"
+                                        type="text"
+                                        required
+                                        value="<%= data.content.shippingAddress ? data.content.shippingAddress.name : '' %>"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                  <!-- Country -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <label for="shipping_address_country" class="form-label">
+                                      Country <span class="required">*</span>
+                                    </label>
+                                    <select id="shipping_address_country" name="country" subdoc="shippingAddress" class="form-control" required>
+                                      <option value="<%= data.content.shippingAddress ? data.content.shippingAddress.country : '' %>" selected>
+                                        <%= data.content.shippingAddress ? data.content.shippingAddress.country : '' %>
+                                      </option>
+                                      <!-- Dodaj pozostałe opcje krajów tutaj -->
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <!-- City -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <label for="shipping_address_city" class="form-label">
+                                      Town / City <span class="required">*</span>
+                                    </label>
+                                    <input
+                                      id="shipping_address_city"
+                                      name="city"
+                                      type="text"
+                                      class="form-control"
+                                      value="<%= data.content.shippingAddress ? data.content.shippingAddress.city : '' %>"
+                                      required
+                                    />
+                                  </div>
+                                  <!-- ZIP Code -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="shipping_address_zip" class="form-label">
+                                        ZIP Code <span class="required">*</span>
+                                      </label>
+                                      <input
+                                        name="zip"
+                                        id="shipping_address_zip"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="ZIP Code"
+                                        value="<%= data.content.shippingAddress ? data.content.shippingAddress.zip : '' %>"
+                                        required
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <!-- Address 1 -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="shipping_address_address1" class="form-label">Address 1</label>
+                                      <input
+                                        name="address1"
+                                        value="<%= data.content.shippingAddress ? data.content.shippingAddress.address : '' %>"
+                                        id="shipping_address_address1"
+                                        type="text"
+                                        required
+                                        placeholder="Address Line 1"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                  <!-- Address 2 -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="shipping_address_address2" class="form-label">Address 2</label>
+                                      <input
+                                        name="address2"
+                                        value="<%= data.content.shippingAddress ? data.content.shippingAddress.address2 : '' %>"
+                                        id="shipping_address_address2"
+                                        type="text"
+                                        placeholder="Address Line 2"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <!-- Email -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="shipping_address_email" class="form-label">Email</label>
+                                      <input
+                                        name="email"
+                                        value="<%= data.content.shippingAddress ? data.content.shippingAddress.email : '' %>"
+                                        id="shipping_address_email"
+                                        type="email"
+                                        required
+                                        placeholder="Email"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                  <!-- Phone -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="shipping_address_phone" class="form-label">Phone</label>
+                                      <input
+                                        name="phone"
+                                        value="<%= data.content.shippingAddress ? data.content.shippingAddress.phone : '' %>"
+                                        id="shipping_address_phone"
+                                        type="tel"
+                                        required
+                                        placeholder="Phone Number"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <!-- Addressee -->
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                    <div class="form-group">
+                                      <label for="shipping_address_addressee" class="form-label">Addressee</label>
+                                      <input
+                                        name="addressee"
+                                        value="<%= data.content.shippingAddress ? data.content.shippingAddress.addressee : '' %>"
+                                        id="shipping_address_addressee"
+                                        type="text"
+                                        placeholder="Addressee"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row align-items-center justify-content-between">
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"></div>
+                                  <div class="col-12 col-sm-12 col-md-6 col-lg-6 text-end">
+                                    <input
+                                      type="submit"
+                                      class="btn btn-lg btn-primary rounded-pill"
+                                      value="Update Shipping Address"
+                                      id="shipping_address_btn_update"
+                                    />
+                                  </div>
+                                </div>
                               </form>
-                         </div>
+                            </div>
                          <!-- End Shipping address -->
+
 
                          <!-- Addresses -->
                          <div
@@ -723,7 +564,7 @@
                                     <!-- Form edit address -->
                                     <div id="edit_new_address_form_continer" class="d-none">
                                         <h3 class="mt-5">Edit Address</h3>
-                                        <form method="post" action="#" class="profile-form row px-0 mx-0">
+                                        <form id="edit_address_form" class="profile-form row px-0 mx-0">
                                             <div class="flex gap-2" style="display: flex;">
                                                 <!-- Name -->
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
@@ -880,7 +721,7 @@
                                    <!-- Form new address -->
                                     <div id="add_new_address_form_container">
                                         <h3 class="mt-5">New Address</h3>
-                                        <form method="post" action="#" class="profile-form row px-0 mx-0">
+                                        <form id="new_address_form" class="profile-form row px-0 mx-0">
                                             <div class="flex gap-2" style="display: flex;">
                                                 <!-- Name -->
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
@@ -903,8 +744,9 @@
                                                         name="country"
                                                         subdoc="shippingAddress"
                                                         class="form-control"
+                                                        required
                                                     >
-                                                        <!-- Dodaj opcje krajów tutaj -->
+                                                        <option value="">Select Country</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -1014,12 +856,12 @@
                                             <div class="flex gap-2 align-items-center justify-content-between" style="display: flex;">
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                                     <div style="display: flex; align-items: center; gap: 2;">
-                                                        <input type="checkbox" id="edit_address_billing_address" name="scales" checked style="cursor: pointer;"/>
-                                                        <label for="edit_address_billing_address" style="margin-left: 5px; margin-bottom: 0px; cursor: pointer;">Set billing address</label>
+                                                        <input type="checkbox" id="new_address_billing_address" name="scales" checked style="cursor: pointer;"/>
+                                                        <label for="new_address_billing_address" style="margin-left: 5px; margin-bottom: 0px; cursor: pointer;">Set billing address</label>
                                                     </div>
                                                     <div style="display: flex; align-items: center; gap: 2;">
-                                                      <input type="checkbox" id="edit_address_shipping_address" name="scales" checked style="cursor: pointer;"/>
-                                                      <label for="edit_address_shipping_address" style="margin-left: 5px; margin-bottom: 0px; cursor: pointer;">Set shipping address</label>
+                                                      <input type="checkbox" id="new_address_shipping_address" name="scales" checked style="cursor: pointer;"/>
+                                                      <label for="new_address_shipping_address" style="margin-left: 5px; margin-bottom: 0px; cursor: pointer;">Set shipping address</label>
                                                   </div>
                                                 </div>
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 text-end">
@@ -1039,10 +881,6 @@
                          </div>
 
                          <!-- End Addresses -->
-
-                    
-
-
                     </div>
                     <!-- End Tab panes -->
                </div>
@@ -1058,8 +896,9 @@
      const profile_email = document.querySelector("#profile_email");
      const profile_phone = document.querySelector("#profile_phone");
      const profile_submit = document.querySelector("#profile_submit");
+     const profile_form = document.querySelector('#profile_form')
 
-     profile_submit.addEventListener("click", async (e) => {
+     profile_form.addEventListener("submit", async (e) => {
           e.preventDefault();
 
           let first_name = profile_first_name.value;
@@ -1098,6 +937,166 @@
      });
 
     //  -------------------------------------------------------------------------
+    //  BILLING ADDRESS SECTION
+
+    const billing_address_name = document.querySelector('#billing_address_name')
+    const billing_address_country = document.querySelector('#billing_address_country')
+    const billing_address_city = document.querySelector('#billing_address_city')
+    const billing_address_zip = document.querySelector('#billing_address_zip')
+    const billing_address_address1 = document.querySelector('#billing_address_address1')
+    const billing_address_address2 = document.querySelector('#billing_address_address2')
+    const billing_address_email = document.querySelector('#billing_address_email')
+    const billing_address_phone = document.querySelector('#billing_address_phone')
+    const billing_address_addressee = document.querySelector('#billing_address_addressee')
+    const billing_address_btn_update = document.querySelector('#billing_address_btn_update')
+    const billing_address_form = document.querySelector('#billing_address_form')
+
+    billing_address_form.addEventListener('submit', async (e) => {
+        e.preventDefault()
+
+        let subdoc = 'billingAddress'
+
+        let body = [
+          {
+               field: 'name', 
+               value: billing_address_name.value,
+               subdoc
+          },
+
+          {
+               field: 'country', 
+               value: billing_address_country.value,
+               subdoc
+          },
+
+          {
+               field: 'city', 
+               value: billing_address_city.value,
+               subdoc
+          },
+
+          {
+               field: 'zip', 
+               value: billing_address_zip.value,
+               subdoc
+          },
+          {
+               field: 'address', 
+               value: billing_address_address1.value,
+               subdoc
+          },
+          {
+               field: 'address2', 
+               value: billing_address_address2.value,
+               subdoc
+          },
+          {
+               field: 'email', 
+               value: billing_address_email.value,
+               subdoc
+          },
+          {
+               field: 'phone', 
+               value: billing_address_phone.value,
+               subdoc
+          },
+          {
+               field: 'addressee', 
+               value: billing_address_addressee.value,
+               subdoc
+          }
+        ]
+
+        await update_account(body)
+
+        return
+
+    })
+
+    // END BILLING ADDRESS SECITON
+    //  -------------------------------------------------------------------------
+
+     //  -------------------------------------------------------------------------
+     //  SHIPPING ADDRESS SECTION
+     const shipping_address_name = document.querySelector('#shipping_address_name')
+     const shipping_address_country = document.querySelector('#shipping_address_country')
+     const shipping_address_city = document.querySelector('#shipping_address_city')
+     const shipping_address_zip = document.querySelector('#shipping_address_zip')
+     const shipping_address_address1 = document.querySelector('#shipping_address_address1')
+     const shipping_address_address2 = document.querySelector('#shipping_address_address2')
+     const shipping_address_email = document.querySelector('#shipping_address_email')
+     const shipping_address_phone = document.querySelector('#shipping_address_phone')
+     const shipping_address_addressee = document.querySelector('#shipping_address_addressee')
+     const shipping_address_btn_update = document.querySelector('#shipping_address_btn_update')
+     const shipping_address_form = document.querySelector('#shipping_address_form')
+
+     shipping_address_form.addEventListener('submit', async (e) => {
+          e.preventDefault()
+
+          let subdoc = 'shippingAddress'
+
+          let body = [
+               {
+                    field: 'name', 
+                    value: shipping_address_name.value,
+                    subdoc
+               },
+
+               {
+                    field: 'country', 
+                    value: shipping_address_country.value,
+                    subdoc
+               },
+
+               {
+                    field: 'city', 
+                    value: shipping_address_city.value,
+                    subdoc
+               },
+
+               {
+                    field: 'zip', 
+                    value: shipping_address_zip.value,
+                    subdoc
+               },
+               {
+                    field: 'address', 
+                    value: shipping_address_address1.value,
+                    subdoc
+               },
+               {
+                    field: 'address2', 
+                    value: shipping_address_address2.value,
+                    subdoc
+               },
+               {
+                    field: 'email', 
+                    value: shipping_address_email.value,
+                    subdoc
+               },
+               {
+                    field: 'phone', 
+                    value: shipping_address_phone.value,
+                    subdoc
+               },
+               {
+                    field: 'addressee', 
+                    value: shipping_address_addressee.value,
+                    subdoc
+               }
+          ]
+
+          await update_account(body)
+
+     return
+     })
+
+     // END SHIPPING ADDRESS SECITON
+     //  -------------------------------------------------------------------------
+
+
+
+    //  -------------------------------------------------------------------------
     //  ADDRESSES SECTION
     const addresses_table = document.querySelector("#addresses_table")
     const add_new_address_btn_table = document.querySelector("#add_new_address_btn_table")
@@ -1114,6 +1113,9 @@
     const new_address_phone = document.querySelector("#new_address_phone")
     const new_address_addressee = document.querySelector("#new_address_addressee")
     const new_address_sumbit = document.querySelector("#new_address_sumbit")
+    const new_address_billing_address = document.querySelector('#new_address_billing_address')
+    const new_address_shipping_address = document.querySelector('#new_address_shipping_address')
+    const new_address_form = document.querySelector('#new_address_form')
 
     const edit_address_name = document.querySelector("#edit_address_name");
     const edit_address_country = document.querySelector("#edit_address_country");
@@ -1124,26 +1126,174 @@
     const edit_address_email = document.querySelector("#edit_address_email");
     const edit_address_phone = document.querySelector("#edit_address_phone");
     const edit_address_addressee = document.querySelector("#edit_address_addressee");
+    const edit_address_billing_address = document.querySelector('#edit_address_billing_address')
+    const edit_address_shipping_address = document.querySelector('#edit_address_shipping_address')
     const edit_address_submit = document.querySelector("#edit_address_submit");
+    const edit_address_form = document.querySelector('#edit_address_form')
 
     // Listener to submit add new address
-    new_address_sumbit.addEventListener('click', () => {
+    new_address_form.addEventListener('submit', async (e) => {
+          e.preventDefault()
 
-        let name = new_address_name.value;
-        let country = new_address_country.value;
-        let city = new_address_city.value;
-        let zip = new_address_zip.value;
-        let address = new_address_address.value;
-        let address_secound = new_address_address_secound.value;
-        let email = new_address_email.value;
-        let phone = new_address_phone.value;
-        let addressee = new_address_addressee.value;
+          let subdoc = 'addresses'
+
+          let body = [
+               {
+                    field: 'name', 
+                    value: new_address_name.value,
+                    subdoc
+               },
+
+               {
+                    field: 'country', 
+                    value: new_address_country.value,
+                    subdoc
+               },
+
+               {
+                    field: 'city', 
+                    value: new_address_city.value,
+                    subdoc
+               },
+
+               {
+                    field: 'zip', 
+                    value: new_address_zip.value,
+                    subdoc
+               },
+               {
+                    field: 'address', 
+                    value: new_address_address.value,
+                    subdoc
+               },
+               {
+                    field: 'address2', 
+                    value: new_address_address_secound.value,
+                    subdoc
+               },
+               {
+                    field: 'email', 
+                    value: new_address_email.value,
+                    subdoc
+               },
+               {
+                    field: 'phone', 
+                    value: new_address_phone.value,
+                    subdoc
+               },
+               {
+                    field: 'addressee', 
+                    value: new_address_addressee.value,
+                    subdoc
+               },
+               {
+                    field: 'billingAddress',
+                    value: new_address_billing_address.checked,
+                    subdoc
+               },
+               {
+                    field: 'shippingAddress',
+                    value: new_address_shipping_address.checked,
+                    subdoc
+               }
+          ]
+
+          await update_account(body)
+
+          return
 
     })
 
+    // Listener to submit edit form address
+    edit_address_form.addEventListener('submit', async (e) => {
+          e.preventDefault()
+
+          let subdoc = 'addresses'
+          let subdoc_id = edit_address_form.getAttribute('subdoc_id')
+
+          if(!subdoc_id) return
+
+          let body = [
+               {
+                    field: 'name', 
+                    value: edit_address_name.value,
+                    subdoc,
+                    subdoc_id
+               },
+
+               {
+                    field: 'country', 
+                    value: edit_address_country.value,
+                    subdoc,
+                    subdoc_id
+               },
+
+               {
+                    field: 'city', 
+                    value: edit_address_city.value,
+                    subdoc,
+                    subdoc_id
+               },
+
+               {
+                    field: 'zip', 
+                    value: edit_address_zip.value,
+                    subdoc,
+                    subdoc_id
+               },
+               {
+                    field: 'address', 
+                    value: edit_address_address.value,
+                    subdoc,
+                    subdoc_id
+               },
+               {
+                    field: 'address2', 
+                    value: edit_address_address_secound.value,
+                    subdoc,
+                    subdoc_id
+               },
+               {
+                    field: 'email', 
+                    value: edit_address_email.value,
+                    subdoc,
+                    subdoc_id
+               },
+               {
+                    field: 'phone', 
+                    value: edit_address_phone.value,
+                    subdoc,
+                    subdoc_id
+               },
+               {
+                    field: 'addressee', 
+                    value: edit_address_addressee.value,
+                    subdoc,
+                    subdoc_id
+               },
+               {
+                    field: 'billingAddress',
+                    value: edit_address_billing_address.checked,
+                    subdoc,
+                    subdoc_id
+               },
+               {
+                    field: 'shippingAddress',
+                    value: edit_address_shipping_address.checked,
+                    subdoc,
+                    subdoc_id
+               }
+          ]
+
+          await update_account(body)
+
+          return
+
+    })
+
+
     // Set value to edit form after click edit btn in table
     const set_value_edit_address = (id) => {
-
         let all_addresses = data.content.addresses
 
         if (all_addresses.length > 0) {
@@ -1153,13 +1303,24 @@
             if(!editing_address) return
 
             edit_address_name.value = editing_address.name;
-            edit_address_country.value = editing_address.country;
+            if (editing_address.country) {
+               let option = document.createElement('option')
+               option.setAttribute('value', editing_address.country)
+               option.innerHTML = editing_address.country
+               edit_address_country.appendChild(option)
+            }
             edit_address_city.value = editing_address.city;
             edit_address_zip.value = editing_address.zip;
             edit_address_address.value = editing_address.address;
             edit_address_address_secound.value = editing_address.address2;
+            edit_address_email.value = editing_address.email
             edit_address_phone.value = editing_address.phone;
             edit_address_addressee.value = editing_address.addressee;
+            edit_address_billing_address.checked = editing_address.billingAddress
+            edit_address_shipping_address.checked = editing_address.shippingAddress
+
+            // Set subdoc_id to from
+            edit_address_form.setAttribute('subdoc_id', editing_address._id)
             
         }
 
@@ -1167,39 +1328,41 @@
 
     // Listener add new address
     add_new_address_btn_table.addEventListener('click', () => {
-        if(add_new_address_form_container.classList.contains('d-none')) {
-            add_new_address_form_container.classList.remove('d-none')
-            edit_new_address_form_continer.classList.add('d-none')
-        } else {
-            add_new_address_form_container.classList.add('d-none')
-            edit_new_address_form_continer.classList.remove('d-none')
-        }
+         add_new_address_form_container.classList.remove('d-none')
+         edit_new_address_form_continer.classList.add('d-none')
     })
 
     // Listener table 
-    addresses_table.addEventListener('click', (e) => {
+    addresses_table.addEventListener('click', async (e) => {
         let el = e.target
 
         let name = el.getAttribute('name')
         let id = el.getAttribute('id')
 
         if (name === 'edit') {
-            if(edit_new_address_form_continer.classList.contains('d-none')) {
-                edit_new_address_form_continer.classList.remove('d-none')
-                add_new_address_form_container.classList.add('d-none')
+             edit_new_address_form_continer.classList.remove('d-none')
+             add_new_address_form_container.classList.add('d-none')
 
-                set_value_edit_address(id)
-            } else {
-                edit_new_address_form_continer.classList.add('d-none')
-                add_new_address_form_container.classList.remove('d-none')
-            }
+             set_value_edit_address(id)
+            
         }
 
         if(name === 'remove') {
             let removing_address = data.content.addresses.find((item) => item._id === id)
             let text = `Czy na pewno chcesz usunąć ${removing_address.name} z teczki adresów?`
 
-            window.confirm(text)
+            let isConfirmed = window.confirm(text)
+
+            if(!isConfirmed) return
+
+            let body = [{
+               field: 'deleted',
+               value: true, 
+               subdoc: 'addresses',
+               subdoc_id: id
+            }]
+
+            await update_account(body)
         }
     })
 
@@ -1209,7 +1372,7 @@
     // GLOBAL LISTENERS 
     // Listenner to get options in country selects
     const country_selects = document.querySelectorAll("[name='country']")
-    if(country_selects) {
+    if (country_selects) {
         country_selects.forEach((item) => {
             item.addEventListener('focus', async (e) => {
 

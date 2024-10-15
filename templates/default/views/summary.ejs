@@ -5,23 +5,616 @@
                <div class="col-lg-7 col-md-6 col-sm-12 mb-3 px-5">
                     <!--Returning customer?-->
                     <div class="customer-box returning-customer mb-3 mt-2">
-                         <div class="rounded-1 m-0">
+                         <div class=" m-0">
+                              <% if(!data.user) { %>
                               <i class="cp-lg cps cp-user"></i> Returning
                               customer?
                               <b class="text-uppercase"
                                    ><a
-                                        href="#customer-login"
+                                        href="<%= data.page.host + '/login' %>"
                                         id="customer"
-                                        data-bs-toggle="collapse"
                                         >Click here to login</a
                                    ></b
                               >
-                         </div>
-                    </div>
+                              <% } %>
 
-                    <hr />
+                              <% if(data.content.message === "empty_shoppingcart") { %>
+                              <br>
+                              <i class="cp-lg cps cp-user"></i> Nie masz nic w koszyku
+                              <b class="text-uppercase"
+                                   ><a
+                                        href="<%= data.page.host %>"
+                                        id="customer"
+                                        >Zacznij robic zakupy</a
+                                   ></b
+                              >
+                              <% } %>
+                         </div>
+
+                         
+                    </div>
                     <!-- FORM -->
-                    <div id="form-container"></div>
+                    <!-- Kontener dla formularza -->
+                     <% if(data.content.message !== "empty_shoppingcart") {%>
+                         <div id="form-container">
+                              <div class="container mb-3 billing-detail">
+                                   <div class="block-content">
+                                        <h2 class="title text-uppercase my-4">
+                                             Billing details
+                                        </h2>
+                                        <div class="cart_term my-3">
+                                             <input
+                                                  type="checkbox"
+                                                  id="ship_input"
+                                                  class="form-check-input cursor-pointer"
+                                             />
+                                             <label
+                                                  for="ship_input"
+                                                  class="mx-2 cursor-pointer"
+                                                  ><b
+                                                       >Ship to a different
+                                                       address?</b
+                                                  ></label
+                                             >
+                                        </div>
+                                        <div class="create-ac-content">
+                                             <form id="billing_form" onsubmit.prevent="">
+                                                  <fieldset>
+                                                       <!-- Wiersz 1: Imię i Nazwisko -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      for="billing_first_name"
+                                                                      class="form-label"
+                                                                 >
+                                                                      First Name
+                                                                      <span
+                                                                           class="required"
+                                                                      >
+                                                                           *
+                                                                      </span>
+                                                                 </label>
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="billing_first_name"
+                                                                      type="text"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 />
+                                                            </div>
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="billing_last_name"
+                                                                      >Last Name
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="billing_last_name"
+                                                                      type="text"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 3: E-Mail i Telefon -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="billing_email"
+                                                                      >E-Mail
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="billing_email"
+                                                                      type="email"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 />
+                                                            </div>
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="billing_phone"
+                                                                      >Phone
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="billing_phone"
+                                                                      type="tel"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 4: Adres Ulica -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="billing_address1"
+                                                                      >Street address
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="billing_address1"
+                                                                      type="text"
+                                                                      required
+                                                                      placeholder="Address 1"
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 5: Apartament/Suite -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="billing_address2"
+                                                                      >Address 2
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="billing_address2"
+                                                                      type="text"
+                                                                      required
+                                                                      placeholder="Address 2"
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 6: Kod pocztowy i Kraj -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="billing_zip"
+                                                                      >Postcode / ZIP
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="billing_zip"
+                                                                      type="text"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 />
+                                                            </div>
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="billing_city"
+                                                                      >City
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="billing_city"
+                                                                      type="text"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 7: Stan i Miasto -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="billing_country"
+                                                                      >Country
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <select
+                                                                      id="billing_country"
+                                                                      name="field_active"
+                                                                      subdoc="billingAddress"
+                                                                      select="select_async"
+                                                                      field="country"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="billingAddress"
+                                                                 >
+                                                                      <option
+                                                                           value=""
+                                                                      >
+                                                                           Select
+                                                                           Country
+                                                                      </option>
+                                                                      <!-- Opcje krajów zostaną tutaj dynamicznie dodane -->
+                                                                 </select>
+                                                            </div>
+                                                       </div>
+                                                       <!-- Przycisk Submit -->
+                                                       <div class="row mt-3">
+                                                            <div
+                                                                 class="form-group col-6 flex align-items-center"
+                                                            >
+                                                                 <input
+                                                                      type="submit"
+                                                                      class="btn btn-primary cursor-pointer"
+                                                                      id="billing_submit"
+                                                                      value="submit"
+                                                                 >
+                                                                      
+                                                                 </input>
+                                                            </div>
+                                                            <div class="col-6 flex justify-content-end align-items-center">
+
+                                                                 <p name="reset_form" subdoc="billingAddress" class="text-end underline cursor-pointer d-none">
+                                                                      resteuj zmiany
+                                                                 </p>
+                                                            </div>
+                                                       </div>
+                                                  </fieldset>
+                                             </form>
+
+                                             <h2
+                                                  class="title text-uppercase my-4 mt-3 d-none"
+                                                  id="shipping_form_title"
+                                             >
+                                                  Shipping address
+                                             </h2>
+                                             <form id="shipping_form" class="d-none" onsubmit.prevent="">
+                                                  <fieldset>
+                                                       <!-- Wiersz 1: Imię i Nazwisko -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      for="shipping_first_name"
+                                                                      class="form-label"
+                                                                 >
+                                                                      First Name
+                                                                      <span
+                                                                           class="required"
+                                                                      >
+                                                                           *
+                                                                      </span>
+                                                                 </label>
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="shipping_first_name"
+                                                                      type="text"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="shippingAddress"
+                                                                 />
+                                                            </div>
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="shipping_last_name"
+                                                                      >Last Name
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="shipping_last_name"
+                                                                      type="text"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="shippingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 3: E-Mail i Telefon -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="shipping_email"
+                                                                      >E-Mail
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      name="field_active"
+                                                                      id="shipping_email"
+                                                                      type="email"
+                                                                      required
+                                                                      class="form-control"
+                                                                      subdoc="shippingAddress"
+                                                                 />
+                                                            </div>
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="shipping_phone"
+                                                                      >Phone
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      id="shipping_phone"
+                                                                      type="tel"
+                                                                      required
+                                                                      class="form-control"
+                                                                      name="field_active"
+                                                                      subdoc="shippingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 4: Adres Ulica -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="shipping_address1"
+                                                                      >Street address
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      id="shipping_address1"
+                                                                      type="text"
+                                                                      required
+                                                                      placeholder="Address 1"
+                                                                      class="form-control"
+                                                                      name="field_active"
+                                                                      subdoc="shippingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 5: Apartament/Suite -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="shipping_address2"
+                                                                      >Address 2
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      id="shipping_address2"
+                                                                      type="text"
+                                                                      required
+                                                                      placeholder="Address 2"
+                                                                      class="form-control"
+                                                                      name="field_active"
+                                                                      subdoc="shippingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 6: Kod pocztowy i Kraj -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="shipping_zip"
+                                                                      >Postcode / ZIP
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      id="shipping_zip"
+                                                                      type="text"
+                                                                      required
+                                                                      class="form-control"
+                                                                      name="field_active"
+                                                                      subdoc="shippingAddress"
+                                                                 />
+                                                            </div>
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="shipping_city"
+                                                                      >City
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <input
+                                                                      id="shipping_city"
+                                                                      type="text"
+                                                                      required
+                                                                      class="form-control"
+                                                                      name="field_active"
+                                                                      subdoc="shippingAddress"
+                                                                 />
+                                                            </div>
+                                                       </div>
+                                                       <!-- Wiersz 7: Stan i Miasto -->
+                                                       <div class="row">
+                                                            <div
+                                                                 class="form-group mb-2 col-12 col-sm-6 col-md-6 col-lg-6"
+                                                            >
+                                                                 <label
+                                                                      class="form-label"
+                                                                      for="shipping_country"
+                                                                      >Country
+                                                                      <span
+                                                                           class="required"
+                                                                           >*</span
+                                                                      ></label
+                                                                 >
+                                                                 <select
+                                                                      id="shipping_country"
+                                                                      subdoc="shippingAddress"
+                                                                      field="country"
+                                                                      select="select_async"
+                                                                      required
+                                                                      class="form-control"
+                                                                      name="field_active"
+                                                                      subdoc="shippingAddress"
+                                                                 >
+                                                                      <option
+                                                                           value=""
+                                                                      >
+                                                                           Select
+                                                                           Country
+                                                                      </option>
+                                                                 </select>
+                                                            </div>
+                                                       </div>
+                                                  
+                                                       <!-- Przycisk Submit -->
+                                                       <div class="row mt-3">
+                                                            <div
+                                                                 class="form-group col-6 align-items-center"
+                                                            >
+                                                                 <input
+                                                                      type="submit"
+                                                                      class="btn btn-primary cursor-pointer"
+                                                                      id="shipping_submit"
+                                                                      value="submit"
+                                                                 >
+                                                                      
+                                                                 </input>
+                                                            </div>
+
+                                                            <div class="col-6 flex justify-content-end align-items-center">
+
+                                                                 <p name="reset_form" subdoc="shippingAddress" class="text-end underline cursor-pointer d-none">
+                                                                      resteuj zmiany
+                                                                 </p>
+                                                            </div>
+                                                       </div>
+                                                  </fieldset>
+                                             </form>
+                                        </div>
+                                        <hr class="mt-3 mb-4" />
+                                        <!-- Sekcja kuponu -->
+                                        <div
+                                             class="customer-box customer-coupon mb-3"
+                                        >
+                                             <div class="rounded-1 m-0">
+                                                  <i class="cp-lg cps cp-gifts"></i>
+                                                  Have a coupon?
+                                             </div>
+                                             <div class="coupon-checkout-content">
+                                                  <div
+                                                       class="rounded-bottom discount-coupon"
+                                                  >
+                                                       <div
+                                                            id="coupon"
+                                                            class="coupon-dec tab-pane active"
+                                                       >
+                                                            <form
+                                                                 id="coupon-form-1"
+                                                            >
+                                                                 <p
+                                                                      class="mb-2 form-text"
+                                                                 >
+                                                                      Enter your
+                                                                      coupon code if
+                                                                      you have one.
+                                                                 </p>
+                                                                 <div
+                                                                      class="form-group mb-0"
+                                                                 >
+                                                                      <input
+                                                                           id="coupon-code-1"
+                                                                           type="text"
+                                                                           class="mb-3 form-control"
+                                                                           placeholder="Coupon Code"
+                                                                           required
+                                                                      />
+                                                                      <button
+                                                                           class="coupon-btn btn btn-secondary rounded"
+                                                                           type="submit"
+                                                                           disabled
+                                                                      >
+                                                                           Apply
+                                                                           Coupon
+                                                                      </button>
+                                                                 </div>
+                                                            </form>
+                                                       </div>
+                                                  </div>
+                                             </div>
+                                        </div>
+                                        <!-- Koniec sekcji kuponu -->
+                                   </div>
+                              </div>
+                         </div>
+                    <% } %>
                </div>
                <div class="col-lg-5 col-md-6 col-sm-12 mb-3">
                     <!--Order Summary-->
@@ -30,41 +623,118 @@
                               <h2 class="title text-uppercase">Your order</h2>
 
                               <!-- SUMMARY ORDER -->
-                              <div id="order-table-container"></div>
+                              <div id="order-table-container">
+
+                                   <div class="table-responsive-sm order-table">
+                                        <table class="table table-hover text-center">
+                                             <thead>
+                                                  <tr>
+                                                       <th class="text-start">Produkt</th>
+                                                       <th class="text-end">Suma</th>
+                                                  </tr>
+                                             </thead>
+                                             <tbody>
+                                                  <% if(data.content.lines) { %> 
+                                                       <% data.content.lines.forEach((line) => { %>
+
+                                                            <tr>
+                                                                 <td class="text-start">
+                                                                      <div><%= line.item.name %></div>
+                                                                 </td>
+                                                                 <td class="text-end">
+                                                                      <%= line.amountFormat %>
+                                                                 </td>
+                                                            </tr>
+                                                            
+                                                       <% }) %>
+                                                  <% } %>
+                                             
+                                             </tbody>
+                                             <tfoot>
+                                                  <tr>
+                                                       <td style="margin-top: 20px;" class="text-start text-uppercase">
+                                                            <b>Subtotal</b>
+                                                       </td>
+                                                       <td class="text-end">
+                                                            <%= data.content.amountFormat %>
+                                                       </td>
+                                                  </tr>
+                                                  <tr>
+                                                       <td style="margin-top: 20px;" class="text-start text-uppercase">
+                                                            <b>Shipping</b>
+                                                       </td>
+                                                       <td class="text-end">
+                                                            <%= data.content.shippingCost %>
+                                                       </td>
+                                                  </tr>
+                                                  <tr>
+                                                       <td style="margin-top: 20px;" class="text-start text-uppercase red-text">
+                                                            <b>Total</b>
+                                                       </td>
+                                                       <td class="text-end">
+                                                            <div class="flex flex-column">
+                                                                <span>
+                                                                      <%= data.content.amountFormat %>
+                                                                </span> 
+                                                                <span>
+                                                                     <%= data.content.grossAmountFormat %> z VAT 23%
+                                                                </span> 
+                                                            </div>
+                                                       </td>
+                                                  </tr>
+                                             </tfoot>
+                                        </table>
+                                    </div>
+                              </div>
 
                               <div class="your-payment mt-4">
                                    <h2 class="title text-uppercase">
-                                        payment method
-                                   </h2>
+                                        Summary
 
-                                   <div class="payment-method">
+                                   <div class="payment-method mt-3">
                                         <select
-                                             name=""
-                                             id=""
+
+                                             id="summary_peyment_method"
                                              class="form-control"
+                                             subdoc="cart"
+                                             select="select_async"
+                                             field="paymentMethod"
                                         >
-                                             <option value="">PayPal</option>
-                                             <option value="">Card</option>
+                                             <option value="">Select Payment Method</option>
                                         </select>
-                                        <div class="cart_tearm mt-3 mb-2">
-                                             <input
-                                                  type="checkbox"
-                                                  id="cbox"
-                                                  value=""
-                                                  class="form-check-input"
-                                             />
-                                             <label for="cbox" class="mx-2"
-                                                  >Create an account ?</label
-                                             >
+                                      
+                                        <div class="row my-3">
+                                             <div class="form-group col-12 mb-0">
+                                                  <textarea
+                                                       id="order-notes"
+                                                       class="resize-both form-control"
+                                                       rows="3"
+                                                       placeholder="Notes about your order, e.g. special notes for delivery."
+                                                  ></textarea>
+                                             </div>
                                         </div>
+                                             <!-- <div class="cart_tearm mt-3 mb-2">  
+                                                  <input
+                                                       type="checkbox"
+                                                       id="cbox"
+                                                       value=""
+                                                       class="form-check-input"
+                                                  />
+                                                  <label for="cbox" class="mx-2"
+                                                       >Create an account ?</label
+                                                  >
+                                             </div> -->
                                         <div
-                                             class="order-button-payment mt-4 clearfix"
+                                        
+                                             class="order-button-payment clearfix"
                                         >
-                                             <a
-                                                  href="#"
-                                                  class="btn btn-primary btn-lg rounded-pill w-100"
-                                                  >Place order</a
-                                             >
+                                             <input
+                                                  type="button"
+                                                  id="place_order_btn"
+                                                  class="btn btn-primary btn-lg rounded-pill w-100 block"
+                                                  value="Place order"
+                                             />
+                                             <p style="color: red; font-size: 14px; margin-top: 20px !important; margin-bottom: -20px !important; text-align: center;" id="place_order_error"></p>
                                         </div>
                                    </div>
                               </div>
@@ -105,7 +775,7 @@
                                    </div>
 
                                    <p class="form-text text-center">
-                                        Create an account by entering the
+                                        Create an account by entering the 
                                         information below. If you are a
                                         returning customer please login at the
                                         top of the page.
@@ -119,3 +789,358 @@
      </div>
 </div>
 <!--End Checkout Content-->
+<script>
+     const ship_input = document.querySelector("#ship_input");
+     const shipping_form = document.querySelector("#shipping_form");
+     const shipping_form_title = document.querySelector("#shipping_form_title");
+
+     const handle_show_shipping_form = () => {
+          ship_input.addEventListener("change", (e) => {
+               if (e.target.checked) {
+                    shipping_form.classList.remove("d-none");
+                    shipping_form_title.classList.remove("d-none");
+               } else {
+                    shipping_form.classList.add("d-none");
+                    shipping_form_title.classList.add("d-none");
+               }
+          });
+     }
+
+     // Show form to shipping address
+     if (ship_input) {
+          handle_show_shipping_form();
+     }
+
+     if (data.shoppingCart.shipToDifferentAddress) {
+          ship_input.checked = true
+          shipping_form.classList.remove("d-none");
+          shipping_form_title.classList.remove("d-none");
+     }
+
+     const billing_first_name = document.querySelector("#billing_first_name");
+     const billing_last_name = document.querySelector("#billing_last_name");
+     const billing_email = document.querySelector("#billing_email");
+     const billing_phone = document.querySelector("#billing_phone");
+     const billing_address1 = document.querySelector("#billing_address1");
+     const billing_address2 = document.querySelector("#billing_address2");
+     const billing_zip = document.querySelector("#billing_zip");
+     const billing_country = document.querySelector("#billing_country");
+     const billing_city = document.querySelector("#billing_city");
+     const billing_form = document.querySelector("#billing_form");
+     const billing_submit = document.querySelector("#billing_submit");
+
+     if (billing_form) {
+          billing_form.addEventListener("submit", async (e) => {
+               e.preventDefault();
+     
+               let subdoc = "billingAddress";
+     
+               let body = [
+                    {
+                         field: "firstName",
+                         value: billing_first_name.value,
+                         subdoc,
+                    },
+                    {
+                         field: "lastName",
+                         value: billing_last_name.value,
+                         subdoc,
+                    },
+                    {
+                         field: "email",
+                         value: billing_email.value,
+                         subdoc,
+                    },
+                    {
+                         field: "phone",
+                         value: billing_phone.value,
+                         subdoc,
+                    },
+                    {
+                         field: "address",
+                         value: billing_address1.value,
+                         subdoc,
+                    },
+                    {
+                         field: "address2",
+                         value: billing_address2.value,
+                         subdoc,
+                    },
+                    {
+                         field: "zip",
+                         value: billing_zip.value,
+                         subdoc,
+                    },
+                    {
+                         field: "country",
+                         value: billing_country.value,
+                         subdoc,
+                    },
+                    {
+                         field: "city",
+                         value: billing_city.value,
+                         subdoc,
+                    },
+               ];
+     
+     
+     
+               if (await update_summary(body)) window.location.reload()
+     
+     
+               return
+          });
+     }
+
+     if (data.content.billingAddress) {
+          let billing_address_data = data.content.billingAddress
+
+          billing_first_name.value = billing_address_data.firstName || null;
+          billing_last_name.value = billing_address_data.lastName || null;
+          billing_email.value = billing_address_data.email || null;
+          billing_phone.value = billing_address_data.phone || null;
+          billing_address1.value = billing_address_data.address || null;
+          billing_address2.value = billing_address_data.address2 || null;
+          billing_zip.value = billing_address_data.zip || null;
+          billing_city.value = billing_address_data.city || null;
+          billing_country.value = billing_address_data.country || null;
+
+          if (billing_address_data.country) {
+               let option = document.createElement('option')
+
+               option.setAttribute('value', billing_address_data.country) 
+               option.setAttribute('selected', true)
+               option.innerHTML = billing_address_data.country
+
+               billing_country.appendChild(option)
+          }
+     }
+
+     const shipping_first_name = document.querySelector("#shipping_first_name");
+     const shipping_last_name = document.querySelector("#shipping_last_name");
+     const shipping_email = document.querySelector("#shipping_email");
+     const shipping_phone = document.querySelector("#shipping_phone");
+     const shipping_address1 = document.querySelector("#shipping_address1");
+     const shipping_address2 = document.querySelector("#shipping_address2");
+     const shipping_zip = document.querySelector("#shipping_zip");
+     const shipping_country = document.querySelector("#shipping_country");
+     const shipping_city = document.querySelector("#shipping_city");
+     const shipping_submit = document.querySelector("#shipping_submit");
+
+     if (shipping_form) {
+
+          shipping_form.addEventListener("submit", async (e) => {
+               e.preventDefault();
+
+               let subdoc = "shippingAddress";
+
+               let body = [
+                    {
+                         field: "firstName",
+                         value: shipping_first_name.value,
+                         subdoc,
+                    },
+                    {
+                         field: "lastName",
+                         value: shipping_last_name.value,
+                         subdoc,
+                    },
+                    {
+                         field: "email",
+                         value: shipping_email.value,
+                         subdoc,
+                    },
+                    {
+                         field: "phone",
+                         value: shipping_phone.value,
+                         subdoc,
+                    },
+                    {
+                         field: "address",
+                         value: shipping_address1.value,
+                         subdoc,
+                    },
+                    {
+                         field: "address2",
+                         value: shipping_address2.value,
+                         subdoc,
+                    },
+                    {
+                         field: "zip",
+                         value: shipping_zip.value,
+                         subdoc,
+                    },
+                    {
+                         field: "country",
+                         value: shipping_country.value,
+                         subdoc,
+                    },
+                    {
+                         field: "city",
+                         value: shipping_city.value,
+                         subdoc,
+                    },
+               ];
+
+               if (await update_summary(body)) window.location.reload();
+
+               return;
+
+          });
+     }
+
+     if (data.content.shippingAddress) {
+          let shipping_address_data = data.content.shippingAddress;
+
+          shipping_first_name.value = shipping_address_data.firstName || null;
+          shipping_last_name.value = shipping_address_data.lastName || null;
+          shipping_email.value = shipping_address_data.email || null;
+          shipping_phone.value = shipping_address_data.phone || null;
+          shipping_address1.value = shipping_address_data.address || null;
+          shipping_address2.value = shipping_address_data.address2 || null;
+          shipping_zip.value = shipping_address_data.zip || null;
+          shipping_city.value = shipping_address_data.city || null;
+          shipping_country.value = shipping_address_data.country || null;
+
+          if (shipping_address_data.country) {
+               let option = document.createElement("option");
+
+               option.setAttribute("value", shipping_address_data.country);
+               option.setAttribute("selected", true);
+               option.innerHTML = shipping_address_data.country;
+
+               shipping_country.appendChild(option);
+          }
+     }
+
+
+     // GET OPTIONS
+     const selects_summary = document.querySelectorAll("[select='select_async']");
+
+     selects_summary.forEach((item) => {
+          item.addEventListener("focus", async () => {
+               let subdoc = item.getAttribute("subdoc");
+               let field = item.getAttribute("field");
+
+               let options = []
+
+               switch (field) {
+                    case 'paymentMethod':
+                         options = await get_summary_options({field});
+                         
+                         break;
+               
+                    default:
+                         options = await get_summary_options({field, subdoc});
+                         break;
+               }
+
+
+               if (options.length === 0) return;
+
+               item.innerHTML = "";
+
+               options.forEach(($item) => {
+                    let option = document.createElement("option");
+
+                    option.setAttribute("value", $item._id);
+                    option.innerHTML = $item.name;
+
+                    item.appendChild(option);
+               });
+          });
+     });
+
+     // FIELDS VALIDTAION
+     const fields_active = document.querySelectorAll("[name='field_active']");
+     const isChanged_data = {
+          billing_form: false,
+          shipping_form: false,
+     }
+
+     fields_active.forEach((item) => {
+
+          item.addEventListener("input", async (e) => {
+               let item = e.target
+
+               let subdoc = item.getAttribute("subdoc");
+
+
+               if (subdoc === "billingAddress") {
+                    isChanged_data.billing_form = true
+                    place_order_btn.disabled = true
+                    place_order_error.innerHTML = "Zatwierdź formularz: Billing Address"
+
+                    let btn_reset_index = null 
+
+                    btns_reset_forms.forEach((item, index) => {
+                         item.getAttribute("subdoc") === "billingAddress" ? btn_reset_index = index : null
+                    })
+
+                    btns_reset_forms[btn_reset_index].classList.remove('d-none')
+               }
+
+               if (subdoc === "shippingAddress") {
+                    isChanged_data.shipping_form = true
+                    place_order_btn.disabled = true
+                    place_order_error.innerHTML = "Zatwierdź formularz: Shipping Address"
+
+                    let btn_reset_index = null 
+
+                    btns_reset_forms.forEach((item, index) => {
+                         item.getAttribute("subdoc") === "shippingAddress" ? btn_reset_index = index : null
+                    })
+
+                    btns_reset_forms[btn_reset_index].classList.remove('d-none')
+               }
+          })
+     })
+
+     // BTNS RESET FORMS 
+     const btns_reset_forms = document.querySelectorAll("[name='reset_form']");
+     
+     btns_reset_forms.forEach((item) => {
+          item.addEventListener("click", async (e) => {
+               window.location.reload();
+          })   
+     })
+
+     // SET PLACE ORDER 
+     const place_order_btn = document.querySelector("#place_order_btn");
+     const place_order_error = document.querySelector("#place_order_error");
+
+     if (place_order_btn) {
+          place_order_btn.addEventListener("click", async () => {
+
+               let url = $api.create_url({ type: "cart", action: "place_order" });
+
+               const isValidBillingAddress = billing_form.checkValidity();
+               const isValidShippingAddress = shipping_form.checkValidity();
+
+
+               if (!isValidBillingAddress) {
+                    use_notification("danger", "Please fill billing form")
+
+                    billing_submit.click()
+                    return
+               }
+
+               if (ship_input.checked && !isValidShippingAddress) {
+                    use_notification("danger", "Please fill shipping form")
+
+                    shipping_submit.click()  
+
+                    return
+               }
+               
+
+               const res = await set_place_order()
+
+               if (res) {
+                    use_notification("success", "Order placed successfully")
+
+                    return
+               }
+          })
+     }    
+</script>
