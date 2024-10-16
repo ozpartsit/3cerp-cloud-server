@@ -142,7 +142,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
     if (model.modelName) {
       const type: any = model.modelName.split("_")[0] as String;
       this.type = type;
-      if (this.isNew) {
+      if (this.isNew || !this.uniqNumber) {
         const query: any = {
           account: this.account
         }

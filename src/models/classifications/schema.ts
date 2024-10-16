@@ -32,6 +32,15 @@ const Classification: IClassificationModel = mongoose.model<IClassification, ICl
 );
 Classification.init().then(function (Event) {
     console.log('Classification Builded');
+
+    // Classification.find().then(res => {
+    //     for (let c of res) {
+    //         console.log(c)
+    //         c.save()
+    //     }
+    // });
     //Classification.updateMany({}, { $set: { account: new mongo.ObjectId('64f4cc1c9842bd71489d1fa0') } }).exec()
 })
+
+
 export default Classification;

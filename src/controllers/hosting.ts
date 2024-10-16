@@ -14,6 +14,8 @@ import cache from "../config/cache.js";
 import Customer from "../models/entities/customer/schema.js";
 import mongoose from "mongoose";
 import { IPage } from "../models/ecommerce/page.schema.js";
+import Group from "../models/classifications/group/schema.js";
+import Category from "../models/classifications/category/schema.js";
 
 
 export default class controller {
@@ -269,15 +271,37 @@ export default class controller {
 
             if (fs.existsSync(viewpath)) {
               if (["search", "products", "items"].includes(req.params.view)) {
+                console.log(req.params, req.query)
                 data.content = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1, filters: [] };
                 let query = {};
                 if (req.query.keyword) {
                   query['name'] = { $regex: `.*${req.query.keyword}.*`, $options: 'i' };
                 };
-                let filters = (req.query.filters || "").toString();
-                if (filters) {
-                  query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+
+                if (req.query.group) {
+                  let filter: any[] = [];
+                  if (!Array.isArray(req.query.group)) filter = [req.query.group];
+                  else filter = req.query.group;
+
+                  const filterGroup = (await Group.find({ urlComponent: { $in: filter } }, { _id: 1 })).map(g => g._id)
+                  query["group"] = { $in: filterGroup }
                 }
+                // if (req.query.manufacturer) {
+                //   let filter: any[] = [];
+                //   if (!Array.isArray(req.query.manufacturer)) filter = [req.query.manufacturer];
+                //   else filter = req.query.manufacturer;
+
+                //   query["manufacturer"] = { $in: filter }
+                // }
+                if (req.params.param && req.params.param) {
+                  const filterCategory = (await Category.find({ urlComponent: { $in: req.params.param } }, { _id: 1 })).map(c => c._id)
+                  query["category"] = { $in: filterCategory }
+                }
+
+                // let filters = (req.query.filters || "").toString();
+                // if (filters) {
+                //   query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+                // }
 
                 let options = { sort: {}, limit: 0, skip: 0, select: { name: 1, description: 1, urlComponent: 1, images: 1, "images.fullPath": 1, "images.path": 1, "images.urlComponent": 1 } };
                 let sort = (req.query.sort || "").toString();
@@ -295,7 +319,7 @@ export default class controller {
                 let page = Number(req.query.page || 1);
                 options.limit = Math.min(parseInt((req.query.limit || req.cookies.limit || 10).toString()), 100);
                 options.skip = ((page || 1) - 1) * options.limit;
-
+                
                 let result = await Item.findDocuments(query, options);
                 let total = await Item.countDocuments(query)
                 for (let index in result) {
@@ -324,6 +348,38 @@ export default class controller {
                 // zapisywanie domyślnych ustawień
                 res.cookie('limit', options.limit, { maxAge: 900000, httpOnly: true });
 
+                //available filters
+                data.content.filters = [];
+                const category = await Category.find({}, { name: 1, urlComponent: 1 })
+                data.content.filters.push({
+                  field: 'category',
+                  type: 'select',
+                  multiple: false,
+                  params: true,
+                  options: category,
+                  example: '/search/4x4',
+                  value: req.params.param
+                })
+                const group = await Group.find({}, { name: 1, urlComponent: 1 })
+                data.content.filters.push({
+                  field: 'group',
+                  type: 'select',
+                  multiple: true,
+                  params: false,
+                  options: group,
+                  example: '/search/?group=group1&group=group2',
+                  example2: '/search/performance/?group=group1&group=group2',
+                  value: req.query.group ? Array.isArray(req.query.group) ? req.query.group : [req.query.group] : []
+                })
+
+                // data.content.filters.push({
+                //   field: 'manufacturer',
+                //   type: 'select',
+                //   multiple: true,
+                //   params: false,
+                //   options: [],
+                //   example: '/search/?manufacturer=dba'
+                // })
               }
               if (["item", "product", "detail"].includes(req.params.view)) {
                 let urlComponent = req.params.param;
