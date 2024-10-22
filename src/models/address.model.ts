@@ -39,8 +39,8 @@ interface IAddressModel extends mongoose.Model<IAddress>, IExtendedModel<IAddres
 const nestedSchemaAddress = {
   name: { type: String, required: true, input: "Input", validType: "text", min: 1, max: 256 },
   firstName: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
-  lastName: { type: String,  input: "Input", validType: "text", min: 1, max: 256 },
-  company: { type: String,  input: "Input", validType: "text", min: 1, max: 256 },
+  lastName: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
+  company: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
   addressee: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
   address: { type: String, required: true, input: "Input", validType: "text", min: 1, max: 256 },
   address2: { type: String, input: "Input", validType: "text", min: 1, max: 256 },
@@ -55,8 +55,8 @@ const nestedSchemaAddress = {
   },
   email: { type: String, input: "Input", validType: "email", min: 3, max: 256 },
   phone: { type: String, input: "Input", validType: "phone", min: 6, max: 15 },
-  latitude: { type: String, input: "Input", readonly: true, validType: "number" },
-  longitude: { type: String, input: "Input", readonly: true, validType: "number" }
+  latitude: { type: String, input: "Input", validType: "number" },
+  longitude: { type: String, input: "Input", validType: "number" }
 }
 
 export const nestedSchema = new mongoose.Schema(nestedSchemaAddress, { _id: false })

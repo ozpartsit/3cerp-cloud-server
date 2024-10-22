@@ -289,7 +289,7 @@ export const schema = new mongoose.Schema<IShop>(
             defaultSelect: true
         },
 
-        address: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses", default: {} },
+        address: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses"},
 
         paymentMethods: {
             type: [mongoose.Schema.Types.ObjectId],

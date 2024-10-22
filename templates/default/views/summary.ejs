@@ -288,7 +288,7 @@
                                                             >
                                                                  <input
                                                                       type="submit"
-                                                                      class="btn btn-primary cursor-pointer"
+                                                                      class="btn btn-primary cursor-pointer d-none"
                                                                       id="billing_submit"
                                                                       value="submit"
                                                                  >
@@ -313,6 +313,29 @@
                                              </h2>
                                              <form id="shipping_form" class="d-none" onsubmit.prevent="">
                                                   <fieldset>
+
+                                                       <div class="row mb-3">
+                                                            <div
+                                                                 class="form-group mb-2 col-12"
+                                                            >
+                                                                 <label
+                                                                      for="shipping_addresses"
+                                                                      class="form-label"
+                                                                 >
+                                                                      Select Address from addressbook
+                                                                 </label>
+                                                                 <select
+                                                                      id="shipping_addresses"
+                                                                      select="select_async"
+                                                                      class="form-control"
+                                                                      subdoc="shippingAddress"
+                                                                      field="addresses"
+                                                                 >
+                                                                 <option value="">Select address</option>
+                                                                 </select>
+                                                            </div>
+                                                       </div>
+
                                                        <!-- Wiersz 1: Imię i Nazwisko -->
                                                        <div class="row">
                                                             <div
@@ -541,7 +564,7 @@
                                                             >
                                                                  <input
                                                                       type="submit"
-                                                                      class="btn btn-primary cursor-pointer"
+                                                                      class="btn btn-primary cursor-pointer d-none"
                                                                       id="shipping_submit"
                                                                       value="submit"
                                                                  >
@@ -550,7 +573,6 @@
                                                             </div>
 
                                                             <div class="col-6 flex justify-content-end align-items-center">
-
                                                                  <p name="reset_form" subdoc="shippingAddress" class="text-end underline cursor-pointer d-none">
                                                                       resteuj zmiany
                                                                  </p>
@@ -577,7 +599,7 @@
                                                             class="coupon-dec tab-pane active"
                                                        >
                                                             <form
-                                                                 id="coupon-form-1"
+                                                                 id="coupon_code_form"
                                                             >
                                                                  <p
                                                                       class="mb-2 form-text"
@@ -590,7 +612,7 @@
                                                                       class="form-group mb-0"
                                                                  >
                                                                       <input
-                                                                           id="coupon-code-1"
+                                                                           id="coupon_code_input"
                                                                            type="text"
                                                                            class="mb-3 form-control"
                                                                            placeholder="Coupon Code"
@@ -599,7 +621,6 @@
                                                                       <button
                                                                            class="coupon-btn btn btn-secondary rounded"
                                                                            type="submit"
-                                                                           disabled
                                                                       >
                                                                            Apply
                                                                            Coupon
@@ -672,10 +693,11 @@
                                                             <b>Total</b>
                                                        </td>
                                                        <td class="text-end">
-                                                            <div class="flex flex-column">
+                                                            <div>
                                                                 <span>
                                                                       <%= data.content.amountFormat %>
                                                                 </span> 
+                                                                <br>
                                                                 <span>
                                                                      <%= data.content.grossAmountFormat %> z VAT 23%
                                                                 </span> 
@@ -690,7 +712,7 @@
                               <div class="your-payment mt-4">
                                    <h2 class="title text-uppercase">
                                         Summary
-
+                                   </h2>
                                    <div class="payment-method mt-3">
                                         <select
 
@@ -700,17 +722,23 @@
                                              select="select_async"
                                              field="paymentMethod"
                                         >
-                                             <option value="">Select Payment Method</option>
+
+                                             <% if (!data.content.paymentMethod) { %>
+                                                  <option value="">Select Payment Method</option>
+                                             <% } else { %>
+                                                  <option value="<%= data.content.paymentMethod._id %>"><%= data.content.paymentMethod.name %></option>
+                                             <% } %> 
+
                                         </select>
                                       
                                         <div class="row my-3">
                                              <div class="form-group col-12 mb-0">
                                                   <textarea
-                                                       id="order-notes"
+                                                       id="summary_notes"
                                                        class="resize-both form-control"
                                                        rows="3"
                                                        placeholder="Notes about your order, e.g. special notes for delivery."
-                                                  ></textarea>
+                                                  ><%= data.content.memo %></textarea>
                                              </div>
                                         </div>
                                              <!-- <div class="cart_tearm mt-3 mb-2">  
@@ -1016,18 +1044,66 @@
 
      // GET OPTIONS
      const selects_summary = document.querySelectorAll("[select='select_async']");
-
      selects_summary.forEach((item) => {
-          item.addEventListener("focus", async () => {
-               let subdoc = item.getAttribute("subdoc");
-               let field = item.getAttribute("field");
+          let subdoc = item.getAttribute("subdoc");
+          let field = item.getAttribute("field");
 
+
+          // get options and save new value
+          item.addEventListener("focus", async () => {
                let options = []
 
                switch (field) {
                     case 'paymentMethod':
                          options = await get_summary_options({field});
+
+                         item.addEventListener("change", async (e) => {
+                              let selectPayment = e.target
+                              let newValue = selectPayment.value
+                              let body = [
+                                   {
+                                        field: "paymentMethod",
+                                        value: newValue,
+                                   },
+                              ];
+                              
+                              const res = await update_summary(body)
+                              
+                              if (res) {
+                                   window.location.reload() 
+
+                                   return
+                              }
+                              return
+
+                         })
                          
+                         break;
+                    case 'addresses':
+
+                         options = await get_summary_options({field});
+
+
+                         item.addEventListener("change", async (e) => {
+                              let selectPayment = e.target
+                              let newValue = selectPayment.value
+                              let body = [
+                                   {
+                                        field: "addresses",
+                                        value: newValue,
+                                   },
+                              ];
+
+                              const res = await update_summary(body)
+
+                              if (res) {
+                                   use_notification("success", res.message)
+                                   window.location.reload()
+                              }
+                              return
+
+                         })
+
                          break;
                
                     default:
@@ -1038,15 +1114,24 @@
 
                if (options.length === 0) return;
 
-               item.innerHTML = "";
+               const exist_options = item.querySelectorAll("option");
+               const id_exist_options = [];
 
+               exist_options.forEach((item) => {
+                    id_exist_options.push(item.value);
+               });
+               
                options.forEach(($item) => {
-                    let option = document.createElement("option");
 
-                    option.setAttribute("value", $item._id);
-                    option.innerHTML = $item.name;
+                    if (!id_exist_options.includes($item._id)) { 
+                         let option = document.createElement("option");
 
-                    item.appendChild(option);
+                         option.setAttribute("value", $item._id);
+                         option.innerHTML = $item.name;
+
+                         item.appendChild(option);
+                                             
+                    }
                });
           });
      });
@@ -1074,10 +1159,14 @@
                     let btn_reset_index = null 
 
                     btns_reset_forms.forEach((item, index) => {
-                         item.getAttribute("subdoc") === "billingAddress" ? btn_reset_index = index : null
+                         if (item.getAttribute("subdoc") === "billingAddress") {
+                              btn_reset_index = index
+                         }
                     })
-
+                    
                     btns_reset_forms[btn_reset_index].classList.remove('d-none')
+
+                    billing_submit.classList.remove('d-none')
                }
 
                if (subdoc === "shippingAddress") {
@@ -1088,10 +1177,16 @@
                     let btn_reset_index = null 
 
                     btns_reset_forms.forEach((item, index) => {
-                         item.getAttribute("subdoc") === "shippingAddress" ? btn_reset_index = index : null
+                         if (item.getAttribute("subdoc") === "shippingAddress") {
+                              btn_reset_index = index
+                         }
+                         
                     })
-
+                    
                     btns_reset_forms[btn_reset_index].classList.remove('d-none')
+                    item.classList.remove('d-none')
+
+                    shipping_submit.classList.remove('d-none')
                }
           })
      })
@@ -1104,6 +1199,69 @@
                window.location.reload();
           })   
      })
+
+     // NOTES TEXTAREA
+     const summary_notes = document.querySelector("#summary_notes");
+     
+     if (summary_notes) {
+          let refresh_timer;
+          summary_notes.addEventListener("input", async (e) => {
+               let item = e.target
+               
+               clearTimeout(refresh_timer);
+
+               const refresh_page = () => {
+                    refresh_timer = setTimeout(async () => {
+                         let body = [
+                              {
+                                   field: "memo",
+                                   value: item.value,
+                              }
+                         ];
+
+                        const res = await update_summary(body)
+
+                        if (res) {
+                              use_notification('success', 'Zapisano zmiany');
+                              window.location.reload();
+                        }
+
+                    }, 3000);
+               };
+               
+               refresh_page();
+                              
+          })
+     }
+
+     // FORM PROMOCODE
+     const coupon_code_form = document.querySelector("#coupon_code_form");
+     const coupon_code_input = document.querySelector("#coupon_code_input");
+
+     if (coupon_code_form) {
+          coupon_code_form.addEventListener("submit", async (e) => {
+               e.preventDefault();
+
+               let value = coupon_code_input.value
+               let body = [
+                    {
+                         field: "couponCode",
+                         value: value,
+                    }
+               ];
+
+
+               const res = await update_summary(body)
+
+               if (res) {
+                    use_notification('success', res.message);
+                    window.location.reload();
+                    return
+               }
+
+               return
+          })
+     }               
 
      // SET PLACE ORDER 
      const place_order_btn = document.querySelector("#place_order_btn");

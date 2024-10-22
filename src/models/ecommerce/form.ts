@@ -94,6 +94,13 @@ export default {
                             ]
                         },
                         {
+                            "value": "cordinates",
+                            "fields": [
+                                "latitude",
+                                "longitude",
+                            ]
+                        },
+                        {
                             "value": "contact",
                             "fields": [
                                 "email",

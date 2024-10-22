@@ -36,9 +36,10 @@
                     <div class="col-12 col-sm-12 col-md-4 col-lg-3">
                          <div class="footer-col footer-links clearfix">
                               <h4 class="title">Other Links</h4>
-                              <% if (data.footer && data.footer.pages.length > 0) { %>
+                              <% var count = Math.floor(data.footer.pages.length - (data.footer.pages.length % 2));
+                               if (data.footer && data.footer.pages.length > 0) { %>
                                    <ul>
-                                        <% data.footer.pages.forEach((item) => { %>
+                                        <% data.footer.pages.splice(0, count/2).forEach((item) => { %>
                                              <li>
                                                   <a href="<%= item.path %>"><%= item.name %></a>
                                              </li>
@@ -47,20 +48,35 @@
                               <% } %>
                          </div>
                     </div>
-
+                    <div class="col-12 col-sm-12 col-md-4 col-lg-3">
+                         <div class="footer-col footer-links clearfix">
+                              <h4 class="title">Other Links</h4>
+                              <% if (data.footer && data.footer.pages.length > 0) { %>
+                                   <ul>
+                                        <% data.footer.pages.splice(0, count/2).forEach((item) => { %>
+                                             <li>
+                                                  <a href="<%= item.path %>"><%= item.name %></a>
+                                             </li>
+                                        <% }) %>
+                                   </ul>
+                              <% } %>
+                         </div>
+                    </div>
                     <div class="col-12 col-sm-12 col-md-4 col-lg-3">
                          <div class="footer-col contact-col">
                               <h4 class="title">Contact</h4>
+                              <% if (data.footer && data.footer.address) { %>
                               <ul>
                                    <li>
-                                        <a href="mailto:info@example.com"><i class="cps cp-envelope-open"></i> info@example.com</a>
+                                        <a href="mailto:<%= data.footer.address.email %>"><i class="cps cp-envelope-open"></i> <%= data.footer.address.email %></a>
                                    </li>
                                    <li>
-                                        <a href="tel:309-437-4122"><i class="cps cp-phone"></i> 309-437-4122</a>
+                                        <a href="tel:<%= data.footer.address.phone %>"><i class="cps cp-phone"></i> <%= data.footer.address.phone %></a>
                                    </li>
-                                   <li><i class="cps cp-map-marker"></i> 343 Coburn Hollow Road<br />Peoria, Illinois - 61602</li>
+                                   <li><i class="cps cp-map-marker"></i> <%= data.footer.address.address %><br /><%= data.footer.address.city %> <%= data.footer.address.zip %>, <%= data.footer.address.country %></li>
                                    <li><i class="cps cp-clock"></i> 9:30 am - 6:30 pm</li>
                               </ul>
+                              <% } %>
                          </div>
                     </div>
 
@@ -70,7 +86,7 @@
      <div class="footer-bottom">
           <div class="container">
                <div class="row">
-                    <p>Copyright &copy; 2022 Tacko. All Rights Reserved.</p>
+                    <p>Copyright &copy; 2024 3C CLOUD. All Rights Reserved.</p>
                </div>
           </div>
      </div>

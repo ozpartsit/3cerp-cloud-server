@@ -95,6 +95,7 @@ const set_pagination_limit = (data, view) => {
                "resetpassword",
                "reset-password-success",
                "cart",
+               "order.ejs"
           ].includes(view)
      )
           return;

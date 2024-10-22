@@ -124,7 +124,7 @@
             <i class="cps cp-envelope-open"></i>
           </div>
           <p class="text-uppercase">
-            <%= data.info.address.mail ? data.info.address.mail : 'no data'  %>
+            <%= data.info.address.email ? data.info.address.email : 'no data'  %>
           </p>
         </div>
         <div class="contact-info">
@@ -133,9 +133,9 @@
             <i class="cps cp-map-marker"></i>
           </div>
           <p class="text-uppercase">
-            <%= data.info.address.country %> <br>
+            <%= data.info.address.address%> <br>
             <%= data.info.address.zip %> <%= data.info.address.city %><br />
-            <%= data.info.address.address%>
+            <%= data.info.address.country %>
           </p>
         </div>
       </div>
@@ -147,7 +147,7 @@
 <!--Google Map-->
 <div class="google-map">
   <iframe
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.3664614531053!2d-73.9971405845951!3d40.70994857933205!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a258273a8b7%3A0x868cd97af3ca999e!2s415+Water+St%2C+New+York%2C+NY+10002%2C+USA!5e0!3m2!1sen!2sin!4v1457951203059"
+    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d307917.99087467534!2d<%= data.info.address.longitude %>!3d<%= data.info.address.latitude %>!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470334e1d994ec19%3A0x744a729a586a89c4!2zVG9ydcWE!5e0!3m2!1spl!2spl!4v1729504915421!5m2!1spl!2spl"
     width="500"
     height="450"
   ></iframe>

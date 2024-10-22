@@ -13,127 +13,29 @@
                               <h3>Shop by</h3>
                          </div>
                          <div class="nowshopby">
-                              <h3 class="title text-uppercase">
-                                   Now Shopping by
-                              </h3>
-                              <ol class="items">
-                                   <li class="item">
-                                        <span class="filter-label"
-                                             ><b>Category:</b></span
-                                        >
-                                        <a href="#;"
-                                             ><span class="filter-value"
-                                                  >Grille Guards</span
-                                             ><i class="cps cp-times"></i
-                                        ></a>
-                                        <a href="#;"
-                                             ><span class="filter-value"
-                                                  >Susepension</span
-                                             ><i class="cps cp-times"></i
-                                        ></a>
-                                   </li>
-                                   <li class="item">
-                                        <span class="filter-label"
-                                             ><b>Size:</b></span
-                                        >
-                                        <a href="#;"
-                                             ><span class="filter-value">X</span
-                                             ><i class="cps cp-times"></i
-                                        ></a>
-                                        <a href="#;"
-                                             ><span class="filter-value"
-                                                  >XL</span
-                                             ><i class="cps cp-times"></i
-                                        ></a>
-                                   </li>
-                              </ol>
-                              <a
-                                   href="#;"
-                                   class="btn--link mt-1 text-uppercase small"
-                                   >Clear All</a
-                              >
+                              <div>
+                                   <% if (data.content.filters) { %>
+                                       <% data.content.filters.forEach((item) => { %>
+                                           <div class="form-group mt-2">
+                                               <label for="<%= item.field %>"><%= item.field %></label>
+                                               <select class="form-control" id="<%= item.field %>"
+                                                  <% if(item.multiple) { %>
+                                                       multiple 
+                                                       style="height: 250px;"
+                                                  <% } %>
+                                                  >
+                                                   <% item.options && item.options.forEach((option) => { %>
+                                                       <option value="<%= option._id %>">
+                                                           <%= option.name %>
+                                                       </option>
+                                                   <% }) %>
+                                               </select>
+                                           </div>
+                                       <% }) %>
+                                   <% } %>
+                               </div>
                          </div>
                          <hr />
-                         <!--Category Block-->
-                         <div class="block clearfix block-categories">
-                              <div class="block-title">
-                                   <h3>Categories</h3>
-                              </div>
-                              <div class="block-content">
-                                   <ul class="items">
-                                        <li class="lvl-1 sub-level">
-                                             <a href="#;"
-                                                  >Steering Wheels (5)</a
-                                             >
-                                             <ul class="sublinks">
-                                                  <li
-                                                       class="level2 sub-level sub-sub-level"
-                                                  >
-                                                       <a href="#;">Break</a>
-                                                       <ul
-                                                            class="sublinks mb-0"
-                                                       >
-                                                            <li class="level3">
-                                                                 <a href="#"
-                                                                      >Bearing</a
-                                                                 >
-                                                            </li>
-                                                            <li class="level3">
-                                                                 <a href="#"
-                                                                      >Suspension</a
-                                                                 >
-                                                            </li>
-                                                            <li class="level3">
-                                                                 <a href="#"
-                                                                      >Steering</a
-                                                                 >
-                                                            </li>
-                                                       </ul>
-                                                  </li>
-                                                  <li class="level2">
-                                                       <a href="#"
-                                                            >Accessories</a
-                                                       >
-                                                  </li>
-                                                  <li class="level2">
-                                                       <a href="#">Wheels</a>
-                                                  </li>
-                                                  <li class="level2">
-                                                       <a href="#">View All</a>
-                                                  </li>
-                                             </ul>
-                                        </li>
-                                        <li class="lvl-1 sub-level">
-                                             <a href="#;">Grille Guards (5)</a>
-                                             <ul class="sublinks">
-                                                  <li class="level2">
-                                                       <a href="#;">Seats</a>
-                                                  </li>
-                                                  <li class="level2">
-                                                       <a href="#"
-                                                            >Seat Covers</a
-                                                       >
-                                                  </li>
-                                                  <li class="level2">
-                                                       <a href="#">View All</a>
-                                                  </li>
-                                             </ul>
-                                        </li>
-                                        <li class="lvl-1">
-                                             <a href="#" class="active"
-                                                  >Seats, Seat Covers (5)</a
-                                             >
-                                        </li>
-                                        <li class="lvl-1">
-                                             <a href="#">Susepension</a>
-                                        </li>
-                                        <li class="lvl-1">
-                                             <a href="#">Tools & Parts</a>
-                                        </li>
-                                   </ul>
-                              </div>
-                         </div>
-                         <!--End Category Block-->
 
                          <!--Price Filter Block-->
                          <div class="block filterBox filter-widget">
@@ -185,208 +87,6 @@
                               </form>
                          </div>
                          <!--End Price Filter Block-->
-
-                         <!--Color Block-->
-                         <div class="block filterBox colorBox filter-color">
-                              <div class="block-title">
-                                   <h3>Color</h3>
-                              </div>
-                              <div
-                                   class="filter-color swacth-list filterDD clearfix"
-                              >
-                                   <ul class="clearfix">
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills black"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Black</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills white"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >White</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills red checked"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Red</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills blue"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Blue</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills pink"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Pink</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills gray"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Gray</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills green"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Green</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills orange"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Orange</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills yellow"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Yellow</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills blueviolet"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Blue Violet</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span
-                                                  class="swacth-btn small rounded-pills brown"
-                                             ></span
-                                             ><span class="tooltip-label"
-                                                  >Brown</span
-                                             >
-                                        </li>
-                                   </ul>
-                              </div>
-                         </div>
-                         <!--End Color Block-->
-                         <!--Size Block-->
-                         <div
-                              class="block filterBox filter-widget size-swacthes"
-                         >
-                              <div class="block-title">
-                                   <h3 class="mb-0">Size</h3>
-                              </div>
-                              <div class="filter-color filter-size swacth-list">
-                                   <ul class="clearfix">
-                                        <li>
-                                             <span class="swacth-btn">X</span
-                                             ><span class="tooltip-label"
-                                                  >X</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span class="swacth-btn checked"
-                                                  >XL</span
-                                             ><span class="tooltip-label"
-                                                  >XL</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span class="swacth-btn">XLL</span
-                                             ><span class="tooltip-label"
-                                                  >XLL</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span class="swacth-btn">M</span
-                                             ><span class="tooltip-label"
-                                                  >M</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span class="swacth-btn">S</span
-                                             ><span class="tooltip-label"
-                                                  >S</span
-                                             >
-                                        </li>
-                                        <li>
-                                             <span class="swacth-btn">XXL</span
-                                             ><span class="tooltip-label"
-                                                  >XLL</span
-                                             >
-                                        </li>
-                                   </ul>
-                              </div>
-                         </div>
-                         <!--End Size Block-->
-                         <!--Brand Block-->
-                         <div
-                              class="block filterBox filter-widget size-swacthes brand-filter"
-                         >
-                              <div class="block-title">
-                                   <h3 class="mb-0">Brands</h3>
-                              </div>
-                              <div class="filterDD">
-                                   <ul class="clearfix">
-                                        <li>
-                                             <input
-                                                  type="checkbox"
-                                                  value="adidas"
-                                                  id="adidas"
-                                             /><label for="adidas"
-                                                  ><span></span>Bosch</label
-                                             >
-                                        </li>
-                                        <li>
-                                             <input
-                                                  type="checkbox"
-                                                  value="baggit"
-                                                  id="baggit"
-                                             /><label for="baggit"
-                                                  ><span></span>Filtron</label
-                                             >
-                                        </li>
-                                        <li>
-                                             <input
-                                                  type="checkbox"
-                                                  value="campus"
-                                                  id="campus"
-                                             /><label for="campus"
-                                                  ><span></span>Valeo</label
-                                             >
-                                        </li>
-                                        <li>
-                                             <input
-                                                  type="checkbox"
-                                                  value="elle"
-                                                  id="elle"
-                                             /><label for="elle"
-                                                  ><span></span
-                                                  >Mercedes-Benz</label
-                                             >
-                                        </li>
-                                   </ul>
-                              </div>
-                         </div>
-                         <!--End Brand Block-->
 
                          <!--Availability-->
                          <div

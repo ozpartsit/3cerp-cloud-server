@@ -118,7 +118,7 @@ export default class controller {
 
         //Social Media Link
         twitterUrl: shop.twitterUrl,
-        facebookUrl: shop.instagramUrl,
+        facebookUrl: shop.facebookUrl,
         instagramUrl: shop.instagramUrl,
         linkedinUrl: shop.linkedinUrl,
       }
@@ -148,6 +148,7 @@ export default class controller {
 
       }
       data["footer"] = {
+        address: shop.address,
         //pages
         pages: Object.values(shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.footer).reduce((t: any, p) => {
 
@@ -319,7 +320,7 @@ export default class controller {
                 let page = Number(req.query.page || 1);
                 options.limit = Math.min(parseInt((req.query.limit || req.cookies.limit || 10).toString()), 100);
                 options.skip = ((page || 1) - 1) * options.limit;
-                
+
                 let result = await Item.findDocuments(query, options);
                 let total = await Item.countDocuments(query)
                 for (let index in result) {
