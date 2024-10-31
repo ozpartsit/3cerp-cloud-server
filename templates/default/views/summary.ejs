@@ -31,7 +31,6 @@
                               <% } %>
                          </div>
 
-                         
                     </div>
                     <!-- FORM -->
                     <!-- Kontener dla formularza -->
@@ -297,7 +296,7 @@
                                                             </div>
                                                             <div class="col-6 flex justify-content-end align-items-center">
 
-                                                                 <p name="reset_form" subdoc="billingAddress" class="text-end underline cursor-pointer d-none">
+                                                                 <p name="reset_form" subdoc="billingAddress" class="text-end text-underline cursor-pointer d-none">
                                                                       resteuj zmiany
                                                                  </p>
                                                             </div>
@@ -714,22 +713,6 @@
                                         Summary
                                    </h2>
                                    <div class="payment-method mt-3">
-                                        <select
-
-                                             id="summary_peyment_method"
-                                             class="form-control"
-                                             subdoc="cart"
-                                             select="select_async"
-                                             field="paymentMethod"
-                                        >
-
-                                             <% if (!data.content.paymentMethod) { %>
-                                                  <option value="">Select Payment Method</option>
-                                             <% } else { %>
-                                                  <option value="<%= data.content.paymentMethod._id %>"><%= data.content.paymentMethod.name %></option>
-                                             <% } %> 
-
-                                        </select>
                                       
                                         <div class="row my-3">
                                              <div class="form-group col-12 mb-0">
@@ -739,6 +722,9 @@
                                                        rows="3"
                                                        placeholder="Notes about your order, e.g. special notes for delivery."
                                                   ><%= data.content.memo %></textarea>
+                                                  <div id="notes_loader" class="container-loader d-none mt-5">
+                                                       <div class="loader" style="margin-top: 25px;"></div>
+                                                  </div>
                                              </div>
                                         </div>
                                              <!-- <div class="cart_tearm mt-3 mb-2">  
@@ -823,13 +809,25 @@
      const shipping_form_title = document.querySelector("#shipping_form_title");
 
      const handle_show_shipping_form = () => {
-          ship_input.addEventListener("change", (e) => {
+          ship_input.addEventListener("change", async (e) => {
                if (e.target.checked) {
                     shipping_form.classList.remove("d-none");
                     shipping_form_title.classList.remove("d-none");
                } else {
                     shipping_form.classList.add("d-none");
                     shipping_form_title.classList.add("d-none");
+               }
+
+               const res = await update_summary([{
+                    field: "shipToDifferentAddress",
+                    value: e.target.checked
+               }])
+
+               if (res) {
+                    use_notification("success", res.message);
+                    window.location.reload();
+
+                    return
                }
           });
      }
@@ -1207,11 +1205,17 @@
           let refresh_timer;
           summary_notes.addEventListener("input", async (e) => {
                let item = e.target
-               
+
+               const notes_loader = document.querySelector("#notes_loader");
+
                clearTimeout(refresh_timer);
 
                const refresh_page = () => {
                     refresh_timer = setTimeout(async () => {
+
+                         notes_loader.classList.remove('d-none');
+                         place_order_btn.classList.add('d-none');
+
                          let body = [
                               {
                                    field: "memo",
@@ -1222,11 +1226,12 @@
                         const res = await update_summary(body)
 
                         if (res) {
-                              use_notification('success', 'Zapisano zmiany');
-                              window.location.reload();
+                              use_notification('success', 'Zapisano zmiany');                              
+                              notes_loader.classList.add('d-none');
+                              place_order_btn.classList.remove('d-none');
                         }
 
-                    }, 3000);
+                    }, 500);
                };
                
                refresh_page();
@@ -1295,10 +1300,24 @@
                const res = await set_place_order()
 
                if (res) {
-                    use_notification("success", "Order placed successfully")
+                    use_notification("success", res.message)
+                    
+                    let url = data.page.host + '/order/' + res.data.document_id
 
+                    window.location.href = url
                     return
                }
+
+
           })
      }    
 </script>
+
+<style>
+     .preloader-container {
+          position: relative !important;
+          background-color: none !important;
+          z-index: -1 !important;
+          display: block !important
+     }
+</style>

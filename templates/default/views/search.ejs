@@ -6,96 +6,85 @@
                     class="col-12 col-sm-12 col-md-12 col-lg-3 sidebar filterbar order-2 order-lg-0 order-md-2 order-sm-2"
                >
                     <div class="closeFilter d-block d-lg-none">
-                         <i class="cps cp-times"></i>
+                         <button aria-label="Zamknij filtry">
+                             <i class="cps cp-times"></i>
+                         </button>
                     </div>
                     <div class="sidebar-filters">
                          <div class="shopby-title text-uppercase">
-                              <h3>Shop by</h3>
+                              <h2>Shop by</h2>
                          </div>
                          <div class="nowshopby">
-                              <div>
-                                   <% if (data.content.filters) { %>
-                                       <% data.content.filters.forEach((item) => { %>
-                                           <div class="form-group mt-2">
-                                               <label for="<%= item.field %>"><%= item.field %></label>
-                                               <select class="form-control" id="<%= item.field %>"
-                                                  <% if(item.multiple) { %>
-                                                       multiple 
-                                                       style="height: 250px;"
-                                                  <% } %>
-                                                  >
-                                                   <% item.options && item.options.forEach((option) => { %>
-                                                       <option value="<%= option._id %>">
-                                                           <%= option.name %>
-                                                       </option>
-                                                   <% }) %>
-                                               </select>
-                                           </div>
-                                       <% }) %>
-                                   <% } %>
-                               </div>
-                         </div>
-                         <hr />
+                         
+                              <div class="block clearfix block-categories">
+                                   <div class="block-title text-secondary"><h3>Kategorie</h3></div>
+                                   <div class="block-content">
+                                       <ul class="items">
 
-                         <!--Price Filter Block-->
-                         <div class="block filterBox filter-widget">
-                              <div class="block-title">
-                                   <h3>Price</h3>
-                              </div>
-                              <form
-                                   action="#"
-                                   method="post"
-                                   class="price-filter filterDD mt-3"
-                              >
-                                   <div
-                                        id="slider-range"
-                                        class="mt-2 ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"
-                                   >
-                                        <div
-                                             class="ui-slider-range ui-widget-header ui-corner-all"
-                                        ></div>
-                                        <span
-                                             class="ui-slider-handle ui-state-default ui-corner-all"
-                                             tabindex="0"
-                                        ></span
-                                        ><span
-                                             class="ui-slider-handle ui-state-default ui-corner-all"
-                                             tabindex="0"
-                                             style="left: 73.4043%"
-                                        ></span>
+                                            <% if(data.content.filters) { %>
+
+                                                 <% data.content.filters.forEach((item) => { %>
+                                                      
+                                                      <% if(item.field === 'category') { %>
+
+                                                            <% item.options.forEach((option) => { %>
+                                                                 <li class="lvl-1">
+                                                                 <a href="<%= data.page.host + '/search/' + option.urlComponent %>" urlComponent="<%= option.urlComponent %>" name="category_link" aria-label="Przejdź do kategorii <%= option.name %>">
+                                                                      <%= option.name %>
+                                                                 </a>
+                                                                 </li>
+                                                            <% }) %>
+                                                        
+
+                                                      <% } %>
+
+                                                 <% }) %>
+
+                                            <% } %>
+                                       </ul>
                                    </div>
-                                   <div class="row">
-                                        <div class="col-6">
-                                             <p class="no-margin">
-                                                  <input
-                                                       id="amount"
-                                                       type="text"
-                                                       class="rounded"
-                                                  />
-                                             </p>
-                                        </div>
-                                        <div
-                                             class="col-6 text-end margin-25px-top"
-                                        >
-                                             <button
-                                                  class="btn btn--small rounded"
-                                             >
-                                                  filter
-                                             </button>
-                                        </div>
-                                   </div>
-                              </form>
+                               </div>
+
+
+                              <div class="block filterBox filter-widget size-swacthes mt-5">
+                                    <div class="block-title"><h3 class="mb-0">Grupy</h3></div>
+                                    <div class="filter-color filter-size swacth-list">
+                                        <ul id="container_group" class="clearfix">
+
+                                            <% if (data.content.filters) { %>
+                                                  <% data.content.filters.forEach((item, index) => { %>
+                                                       <% if (item.field === 'group') { %>
+
+                                                            <% item.options.forEach((option, index) => { %>
+
+                                                                 <li name="group" class="w-100 p-1 <% if(index > 5) { %> d-none <% } %>">
+                                                                      <button class="swacth-btn p-2 w-100" urlComponent="<%= option.urlComponent %>" name="group_link" field="<%= item.field %>" aria-pressed="false">
+                                                                          <%= option.name %>
+                                                                      </button>
+                                                                 </li>
+
+                                                            <% }) %>
+
+                                                            <% if (item.options.length > 5) { %>
+                                                                 <button id="btn_more_group" class="btn-more" name="more">wiecej</button>
+                                                            <% } %>
+
+                                                       <% } %>  
+                                                  <% }) %>
+                                             <% } %>
+                                        </ul>
+                                    </div>
+                                </div>
                          </div>
-                         <!--End Price Filter Block-->
 
                          <!--Availability-->
                          <div
-                              class="block filterBox filter-widget size-swacthes availability"
+                              class="block filterBox"
                          >
                               <div class="block-title">
-                                   <h3 class="mb-0">Availability</h3>
+                                   <h3 class="mb-0">Dostępność</h3>
                               </div>
-                              <div class="filterDD">
+                              <div class="">
                                    <ul
                                         class="clearfix"
                                         style="column-count: auto"
@@ -106,7 +95,7 @@
                                                   value="instock"
                                                   id="instock"
                                              /><label for="instock"
-                                                  ><span></span>In stock</label
+                                                  ><span></span> W magazynie</label
                                              >
                                         </li>
                                         <li>
@@ -115,8 +104,7 @@
                                                   value="outofstock"
                                                   id="outofstock"
                                              /><label for="outofstock"
-                                                  ><span></span>Out of
-                                                  stock</label
+                                                  ><span></span> Niedostępne</label
                                              >
                                         </li>
                                    </ul>
@@ -143,11 +131,14 @@
                                         <div
                                              id="display_products_system"
                                              class="filters-toolbar__item collection-view-as d-flex align-items-center me-3"
+                                             aria-label="Zmień widok produktów"
                                         >
-                                             <div
+                                             <button
                                                   id="btn_grid_products_system"
                                                   class="change-view prd-grid"
                                                   value="grid"
+                                                  aria-pressed="true"
+                                                  aria-label="Widok siatki"
                                              >
                                                   <i
                                                        class="cps cp-th-large"
@@ -155,17 +146,19 @@
                                                   <span class="tooltip-label"
                                                        >Siatka</span
                                                   >
-                                             </div>
-                                             <div
+                                             </button>
+                                             <button
                                                   id="btn_list_products_system"
                                                   class="change-view prd-list"
                                                   value="list"
+                                                  aria-pressed="false"
+                                                  aria-label="Widok listy"
                                              >
                                                   <i class="cps cp-list"></i>
                                                   <span class="tooltip-label"
                                                        >Lista</span
                                                   >
-                                             </div>
+                                             </button>
                                         </div>
                                         <div
                                              class="product-count d-flex align-items-center"
@@ -173,6 +166,7 @@
                                              <button
                                                   type="button"
                                                   class="btn rounded btn-filter d-block d-lg-none me-2 me-sm-3"
+                                                  aria-label="Filtruj produkty"
                                              >
                                                   <span class="hidden"
                                                        >Filtruj</span
@@ -183,7 +177,6 @@
                                    <li
                                         class="filters-select ms-auto ms-sm-0 d-flex align-items-center"
                                    >
-                                        <!-- ... (pozostaw swój istniejący kod selektorów) -->
                                    </li>
                               </ul>
                          </div>
@@ -200,94 +193,107 @@
                               <!--ITEMS-->
                               <% data.content.docs.forEach((item, index) => { %>
                               <div class="col-6 col-sm-6 col-md-4 col-lg-4">
-                                   <div class="item">
+                                   <div class="item" itemscope itemtype="https://schema.org/Product">
                                         <!--Product Image-->
                                         <div class="product-image">
-                                             <% if(item.images.length === 0) {
-                                             %>
+                                             <% if(item.images.length === 0) { %>
                                              <a
                                                   href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
                                                   class="rounded-3 product-thumb"
+                                                  aria-label="<%= item.name %>"
                                              >
                                                   <img
                                                        class="primary blur-up lazyload rounded-3"
                                                        data-src="assets/images/products/250x250.jpg"
                                                        src="assets/images/products/250x250.jpg"
-                                                       alt="<%= item.name %>"
+                                                       alt="Brak obrazu dla <%= item.name %>"
                                                        title="<%= item.name %>"
+                                                       loading="lazy"
                                                   />
                                              </a>
-                                             <% } %> <% if(item.images.length
-                                             === 1) {%>
+                                             <% } %>
+                                             <% if(item.images.length === 1) { %>
                                              <a
                                                   href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
                                                   class="rounded-3 product-thumb"
+                                                  aria-label="<%= item.name %>"
                                              >
                                                   <img
                                                        class="primary blur-up lazyload rounded-3"
                                                        data-src="<%= item.images[0].fullPath%>"
                                                        src="<%= item.images[0].fullPath%>"
-                                                       alt="<%= item.images[0].name %>"
+                                                       alt="<%= item.images[0].name %> - <%= item.name %>"
                                                        title="<%= item.images[0].name %>"
+                                                       loading="lazy"
                                                   />
                                              </a>
-                                             <% } %> <% if(item.images.length >=
-                                             2) {%>
+                                             <% } %>
+                                             <% if(item.images.length >= 2) { %>
                                              <a
                                                   href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
                                                   class="rounded-3 product-thumb"
+                                                  aria-label="<%= item.name %>"
                                              >
                                                   <img
                                                        class="primary blur-up lazyload rounded-3"
                                                        data-src="<%= item.images[0].fullPath%>"
                                                        src="<%= item.images[0].fullPath%>"
-                                                       alt="<%= item.images[0].name %>"
+                                                       alt="<%= item.images[0].name %> - <%= item.name %>"
                                                        title="<%= item.images[0].name %>"
+                                                       loading="lazy"
                                                   />
                                                   <img
                                                        class="hover blur-up lazyload rounded-3"
                                                        data-src="<%= item.images[1].fullPath%>"
                                                        src="<%= item.images[1].fullPath%>"
-                                                       alt="<%= item.images[1].name %>"
+                                                       alt="<%= item.images[1].name %> - <%= item.name %>"
                                                        title="<%= item.images[1].name %>"
+                                                       loading="lazy"
                                                   />
                                              </a>
                                              <% } %>
 
                                              <!--Product Labels-->
-                                             <% if(item.quantityAvailable > 2 )
-                                             {%>
+                                             <% if(item.quantityAvailable > 2 ) { %>
                                              <div class="product-labels">
                                                   <span
                                                        class="pr-label3 lbl new rounded"
-                                                       ><%=
-                                                       `${i18n.__("locales.stock-status.in-stock")}:
-                                                       ${item.quantityAvailable}`
-                                                       %></span
+                                                       itemprop="offers"
+                                                       itemscope
+                                                       itemtype="https://schema.org/Offer"
                                                   >
+                                                       <meta itemprop="availability" content="https://schema.org/InStock" />
+                                                       <%= `${i18n.__("locales.stock-status.in-stock")}: ${item.quantityAvailable}` %>
+                                                  </span>
                                              </div>
-                                             <% } %> <%
+                                             <% } %>
+                                             <%
                                              if(item.quantityAvailable <= 2 &&
                                              item.quantityAvailable !== 0) { %>
                                              <div class="product-labels">
                                                   <span
                                                        class="pr-label2 hot lbl new rounded"
-                                                       ><%=
-                                                       `${i18n.__("locales.stock-status.in-stock")}:
-                                                       ${item.quantityAvailable}`
-                                                       %></span
+                                                       itemprop="offers"
+                                                       itemscope
+                                                       itemtype="https://schema.org/Offer"
                                                   >
+                                                       <meta itemprop="availability" content="https://schema.org/LimitedAvailability" />
+                                                       <%= `${i18n.__("locales.stock-status.in-stock")}: ${item.quantityAvailable}` %>
+                                                  </span>
                                              </div>
-                                             <% } %> <%
-                                             if(item.quantityAvailable === 0 )
-                                             {%>
+                                             <% } %>
+                                             <%
+                                             if(item.quantityAvailable === 0 ) { %>
                                              <div class="product-labels">
                                                   <span
                                                        class="on-sale lbl rounded"
-                                                       ><%=
-                                                       `${i18n.__("locales.stock-status.not-available")}`
-                                                       %></span
+                                                       itemprop="offers"
+                                                       itemscope
+                                                       itemtype="https://schema.org/Offer"
                                                   >
+                                                       <meta itemprop="availability" content="https://schema.org/OutOfStock" />
+                                                       <%= i18n.__("locales.stock-status.not-available") %>
+                                                  </span>
                                              </div>
                                              <% } %>
                                              <!--End Product Labels-->
@@ -296,24 +302,26 @@
                                              <div class="button-hover">
                                                   <span
                                                        class="btn btn-wishlist"
-                                                       title="Wishlist"
+                                                       title="Dodaj do listy życzeń"
                                                   >
                                                        <i
                                                             index="<%= index %>"
                                                             product_id="<%= item.id %>"
                                                             action="add_to_favorites"
                                                             class="cpr cp-heart"
+                                                            aria-label="Dodaj <%= item.name %> do listy życzeń"
                                                        ></i>
                                                   </span>
                                                   <span
                                                        class="btn pro-addtocart-popup rounded btn-cart btn-primary"
-                                                       title="Add To Cart"
+                                                       title="Dodaj do koszyka"
                                                   >
                                                        <i
                                                             index="<%= index %>"
                                                             product_id="<%= item.id %>"
                                                             action="add_to_cart"
                                                             class="cps cp-shopping-cart"
+                                                            aria-label="Dodaj <%= item.name %> do koszyka"
                                                        ></i>
                                                   </span>
                                              </div>
@@ -322,20 +330,19 @@
                                         <!--End Product Image-->
 
                                         <!--Product Details-->
-                                        <div class="product-details d-flex">
+                                        <div class="product-details d-flex" itemprop="description">
                                              <div class="product-details-in">
-                                                  <div class="h3">
+                                                  <h3 itemprop="name">
                                                        <a
                                                             href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
                                                             ><%= item.name %></a
                                                        >
-                                                  </div>
+                                                  </h3>
                                                   <div class="price-box">
-                                                       <span class="price"
-                                                            ><%=
-                                                            item.priceFormat
-                                                            %></span
-                                                       >
+                                                       <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                                                            <meta itemprop="priceCurrency" content="PLN" />
+                                                            <span itemprop="price"><%= item.priceFormat %></span>
+                                                       </span>
                                                   </div>
                                              </div>
                                         </div>
@@ -357,94 +364,107 @@
                               <% data.content.docs.forEach((item, index) => { %>
                               <div class="col-12">
                                    <!--Product Item-->
-                                   <div class="item d-flex align-items-center">
+                                   <div class="item d-flex align-items-center" itemscope itemtype="https://schema.org/Product">
                                         <!--Product Image-->
                                         <div class="product-image flex-1">
-                                             <% if(item.images.length === 0) {
-                                             %>
+                                             <% if(item.images.length === 0) { %>
                                              <a
                                                   href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
                                                   class="rounded-3 product-thumb"
+                                                  aria-label="<%= item.name %>"
                                              >
                                                   <img
                                                        class="primary blur-up lazyload rounded-3"
                                                        data-src="assets/images/products/250x250.jpg"
                                                        src="assets/images/products/250x250.jpg"
-                                                       alt="<%= item.name %>"
+                                                       alt="Brak obrazu dla <%= item.name %>"
                                                        title="<%= item.name %>"
+                                                       loading="lazy"
                                                   />
                                              </a>
-                                             <% } %> <% if(item.images.length
-                                             === 1) {%>
+                                             <% } %>
+                                             <% if(item.images.length === 1) { %>
                                              <a
                                                   href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
                                                   class="rounded-3 product-thumb"
+                                                  aria-label="<%= item.name %>"
                                              >
                                                   <img
                                                        class="primary blur-up lazyload rounded-3"
                                                        data-src="<%= item.images[0].fullPath%>"
                                                        src="<%= item.images[0].fullPath%>"
-                                                       alt="<%= item.images[0].name %>"
+                                                       alt="<%= item.images[0].name %> - <%= item.name %>"
                                                        title="<%= item.images[0].name %>"
+                                                       loading="lazy"
                                                   />
                                              </a>
-                                             <% } %> <% if(item.images.length >=
-                                             2) {%>
+                                             <% } %>
+                                             <% if(item.images.length >= 2) { %>
                                              <a
                                                   href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
                                                   class="rounded-3 product-thumb"
+                                                  aria-label="<%= item.name %>"
                                              >
                                                   <img
                                                        class="primary blur-up lazyload rounded-3"
                                                        data-src="<%= item.images[0].fullPath%>"
                                                        src="<%= item.images[0].fullPath%>"
-                                                       alt="<%= item.images[0].name %>"
+                                                       alt="<%= item.images[0].name %> - <%= item.name %>"
                                                        title="<%= item.images[0].name %>"
+                                                       loading="lazy"
                                                   />
                                                   <img
                                                        class="hover blur-up lazyload rounded-3"
                                                        data-src="<%= item.images[1].fullPath%>"
                                                        src="<%= item.images[1].fullPath%>"
-                                                       alt="<%= item.images[1].name %>"
+                                                       alt="<%= item.images[1].name %> - <%= item.name %>"
                                                        title="<%= item.images[1].name %>"
+                                                       loading="lazy"
                                                   />
                                              </a>
                                              <% } %>
 
                                              <!--Product Labels-->
-                                             <% if(item.quantityAvailable > 2 )
-                                             {%>
+                                             <% if(item.quantityAvailable > 2 ) { %>
                                              <div class="product-labels">
                                                   <span
                                                        class="pr-label3 lbl new rounded"
-                                                       ><%=
-                                                       `${i18n.__("locales.stock-status.in-stock")}:
-                                                       ${item.quantityAvailable}`
-                                                       %></span
+                                                       itemprop="offers"
+                                                       itemscope
+                                                       itemtype="https://schema.org/Offer"
                                                   >
+                                                       <meta itemprop="availability" content="https://schema.org/InStock" />
+                                                       <%= `${i18n.__("locales.stock-status.in-stock")}: ${item.quantityAvailable}` %>
+                                                  </span>
                                              </div>
-                                             <% } %> <%
+                                             <% } %>
+                                             <%
                                              if(item.quantityAvailable <= 2 &&
                                              item.quantityAvailable !== 0) { %>
                                              <div class="product-labels">
                                                   <span
                                                        class="pr-label2 hot lbl new rounded"
-                                                       ><%=
-                                                       `${i18n.__("locales.stock-status.in-stock")}:
-                                                       ${item.quantityAvailable}`
-                                                       %></span
+                                                       itemprop="offers"
+                                                       itemscope
+                                                       itemtype="https://schema.org/Offer"
                                                   >
+                                                       <meta itemprop="availability" content="https://schema.org/LimitedAvailability" />
+                                                       <%= `${i18n.__("locales.stock-status.in-stock")}: ${item.quantityAvailable}` %>
+                                                  </span>
                                              </div>
-                                             <% } %> <%
-                                             if(item.quantityAvailable === 0 )
-                                             {%>
+                                             <% } %>
+                                             <%
+                                             if(item.quantityAvailable === 0 ) { %>
                                              <div class="product-labels">
                                                   <span
                                                        class="on-sale lbl rounded"
-                                                       ><%=
-                                                       i18n.__("locales.stock-status.not-available")
-                                                       %></span
+                                                       itemprop="offers"
+                                                       itemscope
+                                                       itemtype="https://schema.org/Offer"
                                                   >
+                                                       <meta itemprop="availability" content="https://schema.org/OutOfStock" />
+                                                       <%= i18n.__("locales.stock-status.not-available") %>
+                                                  </span>
                                              </div>
                                              <% } %>
                                              <!--End Product Labels-->
@@ -453,24 +473,26 @@
                                              <div class="button-hover">
                                                   <span
                                                        class="btn btn-wishlist"
-                                                       title="Wishlist"
+                                                       title="Dodaj do listy życzeń"
                                                   >
                                                        <i
                                                             index="<%= index %>"
                                                             product_id="<%= item.id %>"
                                                             action="add_to_favorites"
                                                             class="cpr cp-heart"
+                                                            aria-label="Dodaj <%= item.name %> do listy życzeń"
                                                        ></i>
                                                   </span>
                                                   <span
                                                        class="btn pro-addtocart-popup rounded btn-cart btn-primary"
-                                                       title="Add To Cart"
+                                                       title="Dodaj do koszyka"
                                                   >
                                                        <i
                                                             index="<%= index %>"
                                                             product_id="<%= item.id %>"
                                                             action="add_to_cart"
                                                             class="cps cp-shopping-cart"
+                                                            aria-label="Dodaj <%= item.name %> do koszyka"
                                                        ></i>
                                                   </span>
                                              </div>
@@ -479,71 +501,108 @@
                                         <!--End Product Image-->
 
                                         <!--Product Details-->
-                                        <div class="product-details flex-1">
+                                        <div class="product-details flex-1" itemprop="description">
                                              <div class="product-details-in">
-                                                  <div class="h3">
+                                                  <h3 itemprop="name">
                                                        <a
                                                             href="<%= `${data.page.host}/item/${item.urlComponent}` %>"
                                                             ><%= item.name %></a
                                                        >
-                                                  </div>
+                                                  </h3>
                                                   <div class="price-box">
-                                                       <span class="price"
-                                                            ><%=
-                                                            item.priceFormat
-                                                            %></span
-                                                       >
+                                                       <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                                                            <meta itemprop="priceCurrency" content="PLN" />
+                                                            <span itemprop="price"><%= item.priceFormat %></span>
+                                                       </span>
                                                   </div>
                                                   <div class="product-review">
                                                        <!-- Przykładowe gwiazdki ocen -->
-                                                       <i
-                                                            class="cps cp-star"
-                                                       ></i
-                                                       ><i
-                                                            class="cps cp-star"
-                                                       ></i
-                                                       ><i
-                                                            class="cps cp-star"
-                                                       ></i
-                                                       ><i
-                                                            class="cps cp-star"
-                                                       ></i
-                                                       ><i
-                                                            class="cpr cp-star"
-                                                       ></i>
-                                                       <span class="sep"
-                                                            >|</span
-                                                       >
-                                                       2 Opinie
+                                                       <i class="cps cp-star" aria-hidden="true"></i>
+                                                       <i class="cps cp-star" aria-hidden="true"></i>
+                                                       <i class="cps cp-star" aria-hidden="true"></i>
+                                                       <i class="cps cp-star" aria-hidden="true"></i>
+                                                       <i class="cpr cp-star" aria-hidden="true"></i>
+                                                       <span class="sep">|</span>
+                                                       <span>2 Opinie</span>
                                                   </div>
                                                   <div class="sort-description">
                                                        <p>
-                                                            <%= item.description
-                                                            %>
+                                                            <%= item.description %>
                                                        </p>
                                                   </div>
                                              </div>
                                         </div>
                                         <!--End Product Details-->
+
+                                        <!--Structured Data for Product-->
+                                        <script type="application/ld+json">
+                                             {
+                                                  "@context": "https://schema.org/",
+                                                  "@type": "Product",
+                                                  "name": "<%= item.name %>",
+                                                  "image": [
+                                                       <% item.images.forEach((img, idx) => { %>
+                                                            "<%= img.fullPath %>"<%= idx < item.images.length - 1 ? ',' : '' %>
+                                                       <% }) %>
+                                                  ],
+                                                  "description": "<%= item.description.replace(/"/g, '\\"') %>",
+                                                  "sku": "<%= item.id %>",
+                                                  "offers": {
+                                                       "@type": "Offer",
+                                                       "url": "<%= `${data.page.host}/item/${item.urlComponent}` %>",
+                                                       "priceCurrency": "PLN",
+                                                       "price": "<%= item.price %>",
+                                                       "availability": "<%= item.quantityAvailable > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' %>",
+                                                       "itemCondition": "https://schema.org/NewCondition"
+                                                  }
+                                             }
+                                        </script>
+                                        <!--End Structured Data-->
                                    </div>
                                    <!--End Product Item-->
                               </div>
                               <% }); %>
                          </div>
                     </div>
-                    <!--End Product List-->
+                    <!--End Product Grid-->
 
                     <!--Pagination-->
                     <div class="row">
                          <div class="col-12">
-                              <div class="pagination">
-                                   <div class="container mb-5">
-                                        <ul
-                                             id="main_pagination_block"
-                                             class="d-flex align-items-center justify-content-center"
-                                        ></ul>
+                              <nav aria-label="Stronicowanie">
+                                   <div class="pagination">
+                                        <div class="container mb-5">
+                                             <ul
+                                                  id="main_pagination_block"
+                                                  class="d-flex align-items-center justify-content-center"
+                                             >
+                                                  <!-- Sprawdzenie, czy obiekt paginacji istnieje -->
+                                                  <% if (data.content.pagination) { %>
+                                                       <!-- Sprawdzenie, czy istnieje poprzednia strona -->
+                                                       <% if (data.content.pagination.prev) { %>
+                                                            <li>
+                                                                 <a href="<%= data.content.pagination.prev %>" rel="prev" aria-label="Poprzednia strona">« Poprzednia</a>
+                                                            </li>
+                                                       <% } %>
+
+                                                       <!-- Generowanie linków do poszczególnych stron -->
+                                                       <% for(let i = 1; i <= data.content.pagination.totalPages; i++) { %>
+                                                            <li>
+                                                                 <a href="<%= `${data.page.host}/search/${data.content.pagination.query}?page=${i}` %>" aria-label="Strona <%= i %>"><%= i %></a>
+                                                            </li>
+                                                       <% } %>
+
+                                                       <!-- Sprawdzenie, czy istnieje następna strona -->
+                                                       <% if (data.content.pagination.next) { %>
+                                                            <li>
+                                                                 <a href="<%= data.content.pagination.next %>" rel="next" aria-label="Następna strona">Następna »</a>
+                                                            </li>
+                                                       <% } %>
+                                                  <% } %>
+                                             </ul>
+                                        </div>
                                    </div>
-                              </div>
+                              </nav>
                          </div>
                     </div>
                     <!--End Pagination-->
@@ -563,20 +622,22 @@
 
      const setDisplayProductsSystem = () => {
           let displaySystem =
-               localStorage.getItem("display_products_system") || "grid";
+               localStorage.getItem("display_products_system") || 'grid'
+
+          console.log(displaySystem)
 
           if (displaySystem === "list") {
-               if (btnListView) btnListView.classList.add("active");
-               if (btnGridView) btnGridView.classList.remove("active");
+               btnListView.classList.add("active");
+               btnGridView.classList.remove("active");
 
-               if (gridView) gridView.style.display = "none";
-               if (listView) listView.style.display = "block";
+               gridView.style.display = "none";
+               listView.style.display = "block";
           } else {
-               if (btnGridView) btnGridView.classList.add("active");
-               if (btnListView) btnListView.classList.remove("active");
+               btnGridView.classList.add("active");
+               btnListView.classList.remove("active");
 
-               if (listView) listView.style.display = "none";
-               if (gridView) gridView.style.display = "block";
+               listView.style.display = "none";
+               gridView.style.display = "block";
           }
      };
 
@@ -601,6 +662,99 @@
      };
 
      // Wywołanie funkcji po załadowaniu strony
-     setDisplayProductsSystem();
-     changeDisplayProductsSystem();
+     document.addEventListener("DOMContentLoaded", () => {
+          setDisplayProductsSystem();
+          changeDisplayProductsSystem();
+     });
+
+     // CATEGORY LINKS
+     const category_links = document.querySelectorAll("[name='category_link']");
+
+     if (category_links) {
+          category_links.forEach((item) => {
+               let url_component = item.getAttribute("urlComponent"); 
+               let active_url = window.location.pathname.split("/")[2];
+
+               if (url_component === active_url) {
+                    item.classList.add("active");
+               }
+          });
+     }
+
+     // GROUPS LINKS 
+     const group_links = document.querySelectorAll("[name='group_link']");
+
+     if (group_links) {
+          let url = new URL(window.location.href);
+          let current_groups = url.searchParams.getAll("group");
+
+          group_links.forEach((item) => {
+               let url_component = item.getAttribute("urlComponent");
+               let field = item.getAttribute("field");
+
+               item.addEventListener("click", (e) => {
+                    e.preventDefault();
+
+                    if (!url.searchParams.getAll(field).includes(url_component)) {
+                         
+                         url.searchParams.append(field, url_component);
+                    } else {
+
+                         let values = url.searchParams.getAll(field);
+                         url.searchParams.delete(field); 
+                         values.forEach(value => {
+                              if (value !== url_component) {
+                              url.searchParams.append(field, value); 
+                              }
+                         });
+                    }
+
+                    window.location.href = url.href;
+               });
+
+               if (current_groups.includes(url_component)) {
+                    item.classList.add("checked");
+               }
+          });
+     }
+
+     const btn_more_group = document.querySelector("#btn_more_group");
+     
+     btn_more_group.addEventListener("click", (e) => {
+          e.preventDefault();
+          
+          const container_group = document.querySelector("#container_group");
+          const groups = container_group.querySelectorAll("[name='group']");
+
+          groups.forEach((item, index) => {
+
+               if (index > 5) {
+                    item.classList.toggle("d-none");
+               }
+          });
+
+          let name = btn_more_group.getAttribute("name");
+
+          if (name === "more") {
+               btn_more_group.innerHTML = "mniej";
+               btn_more_group.setAttribute("name", "less");
+          } else {
+               btn_more_group.innerHTML = "więcej";
+               btn_more_group.setAttribute("name", "more");
+          }
+     })
+
+
 </script>
+
+
+<style>
+     .btn-more {
+          color: var(--color-secondary);
+          border: none;
+          cursor: pointer;
+          font-size: large;
+          margin-top: 10px;
+          text-decoration: underline;
+     }     
+</style>

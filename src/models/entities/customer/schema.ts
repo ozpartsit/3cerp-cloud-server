@@ -2,7 +2,7 @@ import * as mongoose from "mongoose";
 import Entity, { IEntity } from "../schema";
 import { IExtendedModel } from "../../../utilities/static";
 import Address, { IAddress, nestedSchema } from "../../address.model";
-import Favorite, {IFavorite} from "./favorite.schema.js";
+import Favorite, { IFavorite } from "./favorite.schema.js";
 import form from "./form"
 
 import bcrypt from "bcryptjs";
@@ -30,6 +30,7 @@ export interface ICustomer extends IEntity {
 
   billingAddress?: IAddress
   shippingAddress?: IAddress
+  shipToDifferentAddress?: Boolean
 
   //information
   website?: string
@@ -37,6 +38,8 @@ export interface ICustomer extends IEntity {
   password: string
 
   favoriteItems: IFavorite[];
+
+
 
   validatePassword(password: string): boolean;
   hashPassword(): any;
@@ -62,6 +65,12 @@ const schema = new mongoose.Schema<ICustomer>(
     //addresses
     shippingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
     billingAddress: { type: nestedSchema, validType: "nestedDocument", virtualPath: "addresses" },
+    accountOnHold: {
+      type: Boolean,
+      input: "Switch",
+      validType: "switch",
+      default: false,
+    },
     //statistics
     firstSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
     lastSalesDate: { type: Date, input: 'DatePicker', validType: "date", readonly: true },
@@ -110,7 +119,7 @@ const schema = new mongoose.Schema<ICustomer>(
       validType: "currency",
       precision: 2
     },
-    accountOnHold: {
+    shipToDifferentAddress: {
       type: Boolean,
       input: "Switch",
       validType: "switch",
@@ -170,6 +179,10 @@ schema.method("recalc", async function () {
       // }
 
     }
+
+  // ustawianie znaczynika adresu
+  if (this.billingAddress?.name == this.shippingAddress?.name) this.shipToDifferentAddress = false
+  else this.shipToDifferentAddress = true
 
 })
 

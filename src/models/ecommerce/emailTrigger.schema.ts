@@ -1,7 +1,7 @@
 import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
-import EmailTemplate from "../emailTemplate.model.js";
+import EmailTemplate from "../templates/email/schema.js";
 
 export interface IEmailTrigger extends IExtendedDocument {
     _id: mongoose.Schema.Types.ObjectId;

@@ -30,6 +30,7 @@ import { EntityTypes } from "../models/entities/model";
 import { ClassificationTypes } from "../models/classifications/model";
 import { AccountingTypes } from "../models/accounting/model";
 import { FavoritesTypes } from "../models/favorites/model";
+import { TemplateTypes } from "../models/templates/model";
 import Email from "../models/email.model";
 import EmailSent from "../models/emailSent.model";
 import Shop from "../models/ecommerce/shop.model";
@@ -97,8 +98,11 @@ export default class Routes {
     })
     //favorites
     Object.values(FavoritesTypes).forEach(favorite => {
-      console.log(`favorites`, favorite.modelName)
       this.routeUniversal(`favorites`, favorite.modelName, new Controller(favorite))
+    })
+    //templates
+    Object.values(TemplateTypes).forEach(template => {
+      this.routeUniversal(`templates`, template.modelName, new Controller(template))
     })
     // Emails
     this.routeUniversal("emails", "email", this.emailController);

@@ -4,7 +4,7 @@ import { IExtendedModel } from "../utilities/static";
 import Access, { IAccess } from "./access.model";
 import User, { IUser } from "./user.model";
 import Folder, { IFolder } from "./storages/folder/schema";
-import EmailTemplate from "./emailTemplate.model.js";
+import EmailTemplate from "./templates/email/schema.js";
 
 export interface IAccount extends IExtendedDocument {
     id: string;

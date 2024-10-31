@@ -52,7 +52,7 @@
                                         class="nav-link"
                                         data-bs-toggle="tab"
                                         name="field_hyperlink"
-                                        sudoc="addresses"
+                                        subdoc="addresses"
                                         href="#addresses"
                                         >Addresses</a
                                    >
@@ -186,7 +186,7 @@
                                         <div
                                              class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2"
                                         >
-                                             <p style="text-decoration: underline; cursor: pointer;" class="mt-3" name="undo_changes">cofnij zmiany</p>
+                                             <p style="text-decoration: underline; cursor: pointer;" class="mt-3 d-none" name="undo_changes">cofnij zmiany</p>
                                         </div>
                                         <div
                                              class="col-12 col-sm-12 col-md-6 col-lg-6 text-end"
@@ -357,7 +357,7 @@
                                 </div>
                                 <div class="row align-items-center justify-content-between">
                                   <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
-                                   <p style="text-decoration: underline; cursor: pointer;" class="mt-3" name="undo_changes">cofnij zmiany</p>
+                                   <p style="text-decoration: underline; cursor: pointer;" class="mt-3 d-none" name="undo_changes">cofnij zmiany</p>
                                   </div>
                                   <div class="col-12 col-sm-12 col-md-6 col-lg-6 text-end">
                                     <input
@@ -527,7 +527,7 @@
                                 </div>
                                 <div class="row align-items-center justify-content-between">
                                   <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-2">
-                                   <p style="text-decoration: underline; cursor: pointer;" class="mt-3" name="undo_changes">cofnij zmiany</p>
+                                   <p style="text-decoration: underline; cursor: pointer;" class="mt-3 d-none" name="undo_changes">cofnij zmiany</p>
                                   </div>
                                   <div class="col-12 col-sm-12 col-md-6 col-lg-6 text-end">
                                     <input
@@ -554,8 +554,7 @@
                                         <thead class="alt-font">
                                              <tr>
                                                   <th>Name</th>
-                                                  <th>Country</th>
-                                                  <th>City</th>
+                                                  <th>Address</th>
                                                   <th class="text-end">Actions</th>
                                              </tr>
                                         </thead>
@@ -567,8 +566,10 @@
                                                     <tr>
 
                                                         <td><%= item.name %></td>
-                                                        <td><%= item.country %></td>
-                                                        <td><%= item.city %></td>
+                                                        <td>
+                                                            <%= item.zip %> <%= item.city %> <br>
+                                                            <%= item.address %>
+                                                        </td>
 
                                                         <td class="text-end">
                                                             <div class="flex justify-content-end" style="display: flex;">
@@ -583,12 +584,6 @@
                                             </tbody>
                                         <% } %>
                                    </table>
-
-                                   <div class="mt-3 text-end">
-                                        <button id="add_new_address_btn_table" class="btn btn-lg btn-primary rounded-pill" fieldForm="active">
-                                            Add New Address
-                                        </button>
-                                    </div>
 
                                     <!-- Form edit address -->
                                     <div id="edit_new_address_form_continer" class="d-none">
@@ -747,7 +742,9 @@
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 text-end"></div>
                                             </div>
                                             <div style="display: flex; width: 100%; justify-content: space-between; padding: 0;">
-                                                  <p style="text-decoration: underline; cursor: pointer;" class="mt-3" name="undo_changes">cofnij zmiany</p>
+                                                  <div>
+                                                       <p style="text-decoration: underline; cursor: pointer;" class="mt-3 d-none" name="undo_changes">cofnij zmiany</p>
+                                                  </div>
                                                   <input
                                                         type="submit"
                                                         class="btn btn-lg btn-primary rounded-pill"
@@ -919,7 +916,9 @@
                                                 </div>
                                             </div>
                                             <div style="display: flex; width: 100%; justify-content: space-between; padding: 0;">
-                                                  <p style="text-decoration: underline; cursor: pointer;" class="mt-3" name="undo_changes">cofnij zmiany</p>
+                                                  <div>
+                                                       <p style="text-decoration: underline; cursor: pointer;" class="mt-3 d-none" name="undo_changes">cofnij zmiany</p>
+                                                  </div>
                                                   <input
                                                        id="new_address_sumbit"
                                                        type="submit"
@@ -1152,7 +1151,6 @@
     //  -------------------------------------------------------------------------
     //  ADDRESSES SECTION
     const addresses_table = document.querySelector("#addresses_table")
-    const add_new_address_btn_table = document.querySelector("#add_new_address_btn_table")
     const add_new_address_form_container = document.querySelector("#add_new_address_form_container")
     const edit_new_address_form_continer = document.querySelector("#edit_new_address_form_continer")    
 
@@ -1379,12 +1377,6 @@
 
     }
 
-    // Listener add new address
-    add_new_address_btn_table.addEventListener('click', () => {
-         add_new_address_form_container.classList.remove('d-none')
-         edit_new_address_form_continer.classList.add('d-none')
-    })
-
     // Listener table 
     addresses_table.addEventListener('click', async (e) => {
         let el = e.target
@@ -1453,6 +1445,17 @@
         })
     }
 
+     // UNDO CHANGES 
+     const btn_undo_changes = document.querySelectorAll("[name='undo_changes']")
+
+     if (btn_undo_changes) {
+          btn_undo_changes.forEach((item) => {
+               item.addEventListener('click', (e) => {
+                    window.location.reload()
+               })
+          })
+     }
+
 
     // ACTIVE FIELDS
     const fields_active = document.querySelectorAll("[fieldForm='active']")
@@ -1471,6 +1474,10 @@
                          } else {
                               item.setAttribute('disabled', true)
                          }
+
+                         btn_undo_changes.forEach((item) => {
+                              item.classList.remove('d-none')
+                         })
                     })
 
 
@@ -1481,24 +1488,38 @@
      // Use notifiaction if changes are not saved
      fields_hyperlink.forEach((item) => {
           item.addEventListener('click', (e) => {
+               let subdoc = e.target.getAttribute('subdoc')
 
                if (item.hasAttribute('disabled') ) {
                     use_notification('danger', 'Save or undo changes!')
 
                     return
                }
+
+               window.location.hash = subdoc
           })
      })
 
-     // UNDO CHANGES 
-     const btn_undo_changes = document.querySelectorAll("[name='undo_changes']")
+     document.addEventListener('DOMContentLoaded', () => {
+     const fields_hyperlink = document.querySelectorAll("[name='field_hyperlink']");
 
-     if (btn_undo_changes) {
-          btn_undo_changes.forEach((item) => {
-               item.addEventListener('click', (e) => {
-                    window.location.reload()
-               })
-          })
-     }
+          if (window.location.hash) {
+               fields_hyperlink.forEach((item) => {
+                         let window_location_hash = window.location.hash.slice(1);
+                         let subdoc = item.getAttribute('subdoc');
+
+                         if (window_location_hash === subdoc) {
+                         console.log('Activating tab:', subdoc);
+
+                         // Use Bootstrap's Tab API to activate the tab
+                         var tabTrigger = new bootstrap.Tab(item);
+                         tabTrigger.show();
+
+                         return;
+                    }
+               });
+          }
+     });
+
 
 </script>

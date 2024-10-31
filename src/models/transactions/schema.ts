@@ -192,26 +192,26 @@ schema.virtual("lines", {
 });
 
 schema.virtual('amountFormat').get(function (this) {
-  if(this.amount!==undefined){
-  if (this.currency)
-    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.currency }).format(this.amount);
-  else return this.amount.toFixed(2)
-}
+  if (this.amount !== undefined) {
+    if (this.currency)
+      return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.currency }).format(this.amount);
+    else return this.amount.toFixed(2)
+  }
 });
 schema.virtual('grossAmountFormat').get(function (this) {
-  if(this.grossAmount!==undefined){
-  if (this.currency)
-    return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.currency }).format(this.grossAmount);
-  else return this.grossAmount.toFixed(2)
-}
+  if (this.grossAmount !== undefined) {
+    if (this.currency)
+      return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.currency }).format(this.grossAmount);
+    else return this.grossAmount.toFixed(2)
+  }
 });
 schema.virtual('taxAmountFormat').get(function (this) {
-  if(this.taxAmount!==undefined){
+  if (this.taxAmount !== undefined) {
     if (this.currency)
       return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: this.currency }).format(this.taxAmount);
     else return this.taxAmount.toFixed(2)
   }
-  
+
 });
 
 schema.method("pdf", async function () {
@@ -281,6 +281,14 @@ schema.pre("save", async function (next) {
     for (let trigger of this.$locals.triggers) {
       console.log(`${trigger.type}_${trigger.field}`)
       this.$locals.triggers.shift();
+    }
+
+    // ustawianie znaczynika adresu
+    if (this.billingAddress?.name == this.shippingAddress?.name) this.shipToDifferentAddress = false
+    else this.shipToDifferentAddress = true;
+
+    if (!this.shipToDifferentAddress) {
+      this.shippingAddress = this.billingAddress;
     }
 
   })

@@ -109,12 +109,34 @@ schema.pre("save", async function (next) {
 // })
 
 schema.methods.recalc = async function () {
+
   if (this.$locals.triggers) for (let trigger of this.$locals.triggers) {
+    if (trigger.type == "setValue" && trigger.field == "shippingAddress" && trigger.value) {
+      if (this.$parent() && this.$parent()?.addresses.length) {
+        for (let address of this.$parent().addresses) {
+          if (address._id != this._id) address.shippingAddress = false;
+          else this.$parent().shippingAddress = address;
+        }
+      }
+    }
+    if (trigger.type == "setValue" && trigger.field == "billingAddress" && trigger.value) {
+      if (this.$parent() && this.$parent()?.addresses.length) {
+        for (let address of this.$parent().addresses) {
+          if (address._id != this._id) address.billingAddress = false;
+          else this.$parent().billingAddress = address;
+        }
+      }
+    }
     // if (trigger.type == "setValue") {
     //   if (this.shippingAddress) await updateDefaultAddress(this, trigger.field, "shippingAddress")
     //   if (this.billingAddress) await updateDefaultAddress(this, trigger.field, "billingAddress")
     // }
     this.$locals.triggers.shift();
+  }
+  // ustawianie znaczynika adresu
+  if (this.$parent()) {
+    if (this.$parent().billingAddress?.name == this.$parent().shippingAddress?.name) this.$parent().shipToDifferentAddress = false
+    else this.$parent().shipToDifferentAddress = true
   }
 }
 

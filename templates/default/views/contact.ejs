@@ -1,145 +1,156 @@
 <!--Contact Information-->
 <div class="section contact-info-section">
   <div class="container">
-    <div class="row">
-      <div class="col-12 col-sm-12 col-md-8 col-lg-9 mb-4">
-        <div class="contact-inner rounded-3">
-          <div class="formFeilds contact-form form-vertical">
-            <div class="section-title text-start mb-4">
-              <h2 class="title text-uppercase mb-2"><%= i18n.__('locales.contact.title') %></h2>
-            </div>
-            <!-- Form -->
-            <form
-              id="contact-form"
-              class="contact-form"
-            >
-              <div class="row">
-                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
-                  <div class="form-group">
-                    <!-- ContactFormName -->
-                    <input
-                      type="text"
-                      id="ContactFormName"
-                      name="name"
-                      class="form-control border-0"
-                      placeholder="<%= i18n.__('locales.contact.name') %>"
-                    />
-                    <span class="error_msg" id="name_error"></span>
+      <div class="row">
+          <div class="col-12 col-sm-12 col-md-8 col-lg-9 mb-4">
+              <div class="contact-inner rounded-3">
+                  <div class="formFields contact-form form-vertical">
+                      <div class="section-title text-start mb-4">
+                          <h2 class="title text-uppercase mb-2"><%= i18n.__('locales.contact.title') %></h2>
+                      </div>
+                      <!-- Form -->
+                      <form id="contact-form" class="contact-form" role="form" aria-label="Contact Form">
+                          <div class="row">
+                              <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                  <div class="form-group">
+                                      <!-- ContactFormName -->
+                                      <label for="ContactFormName" class="visually-hidden">Name</label>
+                                      <input
+                                          type="text"
+                                          id="ContactFormName"
+                                          name="name"
+                                          class="form-control border-0"
+                                          placeholder="<%= i18n.__('locales.contact.name') %>"
+                                          required
+                                          aria-required="true"
+                                          aria-describedby="name_error"
+                                      />
+                                      <span class="error_msg" id="name_error"></span>
+                                  </div>
+                              </div>
+                              <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                  <div class="form-group">
+                                      <!-- ContactFormEmail -->
+                                      <label for="ContactFormEmail" class="visually-hidden">Email</label>
+                                      <input
+                                          type="email"
+                                          id="ContactFormEmail"
+                                          name="email"
+                                          class="form-control border-0"
+                                          placeholder="<%= i18n.__('locales.contact.email') %>"
+                                          required
+                                          aria-required="true"
+                                          aria-describedby="email_error"
+                                      />
+                                      <span class="error_msg" id="email_error"></span>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                  <div class="form-group">
+                                      <!-- ContactFormPhone -->
+                                      <label for="ContactFormPhone" class="visually-hidden">Phone</label>
+                                      <input
+                                          class="form-control border-0"
+                                          type="tel"
+                                          id="ContactFormPhone"
+                                          name="phone"
+                                          pattern="[0-9\-]*"
+                                          placeholder="<%= i18n.__('locales.contact.phone') %>"
+                                          aria-describedby="phone_error"
+                                      />
+                                  </div>
+                              </div>
+                              <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
+                                  <div class="form-group">
+                                      <!-- ContactSubject -->
+                                      <label for="ContactSubject" class="visually-hidden">Subject</label>
+                                      <input
+                                          type="text"
+                                          id="ContactSubject"
+                                          name="subject"
+                                          class="form-control border-0"
+                                          placeholder="<%= i18n.__('locales.contact.topic') %>"
+                                          aria-describedby="subject_error"
+                                      />
+                                      <span class="error_msg" id="subject_error"></span>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-12 mb-3">
+                                  <div class="form-group">
+                                      <!-- ContactFormMessage -->
+                                      <label for="ContactFormMessage" class="visually-hidden">Message</label>
+                                      <textarea
+                                          id="ContactFormMessage"
+                                          name="message"
+                                          class="form-control border-0"
+                                          rows="4"
+                                          placeholder="<%= i18n.__('locales.contact.message') %>"
+                                          required
+                                          aria-required="true"
+                                          aria-describedby="message_error"
+                                      ></textarea>
+                                      <span class="error_msg" id="message_error"></span>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-12">
+                                  <div class="form-group mailsendbtn mb-0 w-100">
+                                      <!-- submit -->
+                                      <input
+                                          class="btn btn-primary btn-lg rounded-3"
+                                          type="submit"
+                                          name="contactus"
+                                          value="<%= i18n.__('locales.contact.send-btn') %>"
+                                          aria-label="Send Message"
+                                      />
+                                      <div class="loading" aria-hidden="true">
+                                          <img
+                                              class="img-fluid"
+                                              src="assets/images/ajax-loader.gif"
+                                              alt="Loading"
+                                          />
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </form>
+                      <div class="response-msg" aria-live="polite"></div>
                   </div>
-                </div>
-                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
-                  <div class="form-group">
-                    <!-- ContactFormEmail -->
-                    <input
-                      type="email"
-                      id="ContactFormEmail"
-                      name="email"
-                      class="form-control border-0"
-                      placeholder="<%= i18n.__('locales.contact.email') %>"
-                    />
-                    <span class="error_msg" id="email_error"></span>
-                  </div>
-                </div>
               </div>
-              <div class="row">
-                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
-                  <div class="form-group">
-                    <!-- ContactFormPhone -->
-                    <input
-                      class="form-control border-0"
-                      type="tel"
-                      id="ContactFormPhone"
-                      name="phone"
-                      pattern="[0-9\-]*"
-                      placeholder="<%= i18n.__('locales.contact.phone') %>"
-                    />
-                  </div>
-                </div>
-                <div class="col-12 col-sm-12 col-md-6 col-lg-6 mb-3">
-                  <div class="form-group">
-                    <!-- ContactSubject -->
-                    <input
-                      type="text"
-                      id="ContactSubject"
-                      name="subject"
-                      class="form-control border-0"
-                      placeholder="<%= i18n.__('locales.contact.topic') %>"
-                      value=""
-                    />
-                    <span class="error_msg" id="subject_error"></span>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
-                  <div class="form-group">
-                    <!-- ContactFormMessage -->
-                    <textarea
-                      id="ContactFormMessage"
-                      name="message"
-                      class="form-control border-0"
-                      rows="4"
-                      placeholder="<%= i18n.__('locales.contact.message') %>"
-                    ></textarea>
-                    <span class="error_msg" id="message_error"></span>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-                  <div class="form-group mailsendbtn mb-0 w-100">
-                    <!-- submit -->
-                    <input
-                      class="btn btn-primary btn-lg rounded-3"
-                      type="submit"
-                      name="contactus"
-                      value="<%= i18n.__('locales.contact.send-btn') %>"
-                    />
-                    <div class="loading">
-                      <img
-                        class="img-fluid"
-                        src="assets/images/ajax-loader.gif"
-                        alt="loading"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </form>
-            <div class="response-msg"></div>
           </div>
-        </div>
+          <div class="col-12 col-sm-12 col-md-4 col-lg-3">
+              <div class="contact-info mb-3">
+                  <div class="title d-flex justify-content-between">
+                      <h3 class="text-uppercase"><%= i18n.__('locales.contact.phone') %></h3>
+                      <i class="cps cp-phone" aria-hidden="true"></i>
+                  </div>
+                  <p class="text-uppercase" aria-label="Phone Number"><i class="cps cp-phone"></i> <%= data.info.address.phone %></p>
+              </div>
+              <div class="contact-info mb-3">
+                  <div class="title d-flex justify-content-between">
+                      <h3 class="text-uppercase"><%= i18n.__('locales.contact.email') %></h3>
+                      <i class="cps cp-envelope-open" aria-hidden="true"></i>
+                  </div>
+                  <p class="text-uppercase" aria-label="Email Address"><i class="cps cp-envelope-open"></i> <%= data.info.address.email ? data.info.address.email : 'no data'  %></p>
+              </div>
+              <div class="contact-info">
+                  <div class="title d-flex justify-content-between">
+                      <h3 class="text-uppercase"><%= i18n.__('locales.contact.address') %></h3>
+                      <i class="cps cp-map-marker" aria-hidden="true"></i>
+                  </div>
+                  <p class="text-uppercase" aria-label="Address">
+                      <i class="cps cp-city"></i> <%= data.info.address.address %> <br>
+                      <i class="cps cp-home"></i> <%= data.info.address.zip %> <%= data.info.address.city %> </br>
+                      <i class="cps cp-map"></i> <%= data.info.address.country %>
+                  </p>
+              </div>
+          </div>
       </div>
-      <div class="col-12 col-sm-12 col-md-4 col-lg-3">
-        <div class="contact-info mb-3">
-          <div class="title d-flex justify-content-between">
-            <h3 class="text-uppercase"><%= i18n.__('locales.contact.phone') %></h3>
-            <i class="cps cp-phone"></i>
-          </div>
-          <p class="text-uppercase"><%= data.info.address.phone %></p>
-        </div>
-        <div class="contact-info mb-3">
-          <div class="title d-flex justify-content-between">
-            <h3 class="text-uppercase"><%= i18n.__('locales.contact.email') %></h3>
-            <i class="cps cp-envelope-open"></i>
-          </div>
-          <p class="text-uppercase">
-            <%= data.info.address.email ? data.info.address.email : 'no data'  %>
-          </p>
-        </div>
-        <div class="contact-info">
-          <div class="title d-flex justify-content-between">
-            <h3 class="text-uppercase"><%= i18n.__('locales.contact.address') %></h3>
-            <i class="cps cp-map-marker"></i>
-          </div>
-          <p class="text-uppercase">
-            <%= data.info.address.address%> <br>
-            <%= data.info.address.zip %> <%= data.info.address.city %><br />
-            <%= data.info.address.country %>
-          </p>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 <!--End Contact Information-->
@@ -147,9 +158,104 @@
 <!--Google Map-->
 <div class="google-map">
   <iframe
-    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d307917.99087467534!2d<%= data.info.address.longitude %>!3d<%= data.info.address.latitude %>!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470334e1d994ec19%3A0x744a729a586a89c4!2zVG9ydcWE!5e0!3m2!1spl!2spl!4v1729504915421!5m2!1spl!2spl"
-    width="500"
-    height="450"
+      src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d307917.99087467534!2d<%= data.info.address.longitude %>!3d<%= data.info.address.latitude %>!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470334e1d994ec19%3A0x744a729a586a89c4!2zVG9ydcWE!5e0!3m2!1spl!2spl!4v1729504915421!5m2!1spl!2spl"
+      width="500"
+      height="450"
+      style="border:0"
+      allowfullscreen=""
+      loading="lazy"
+      title="Location Map"
   ></iframe>
 </div>
 <!--End Google Map-->
+
+
+<script>
+  // Function to send a contact form
+const handle_send_contact_form = () => {
+    let HTML_form = document.querySelector("#contact-form");
+
+    if (!HTML_form) return;
+
+    let HTML_name = HTML_form.querySelector("#ContactFormName");
+    let HTML_email = HTML_form.querySelector("#ContactFormEmail");
+    let HTML_phone = HTML_form.querySelector("#ContactFormPhone");
+    let HTML_subject = HTML_form.querySelector("#ContactSubject");
+    let HTML_message = HTML_form.querySelector("#ContactFormMessage");
+
+    //   listening for the form to send a request to the server
+    HTML_form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        let data_form = {
+            name: HTML_name.value,
+            email: HTML_email.value,
+            phone: HTML_phone.value,
+            subject: HTML_subject.value,
+            message: HTML_message.value,
+        };
+
+        let style_input_error = "border: 2px solid red; color: red;";
+
+        if (data_form.email === "") {
+            HTML_email.setAttribute("style", style_input_error);
+            HTML_email.classList.remove("border-0");
+        }
+
+        if (data_form.name === "") {
+            HTML_name.setAttribute("style", style_input_error);
+            HTML_name.classList.remove("border-0");
+        }
+
+        if (data_form.email === "" || data_form.name === "") return;
+
+        const url = $api.create_url({ type: "contact" });
+        const body = data_form;
+
+        const res = await $api.post(url, body, false);
+
+        if (res.status === "success") {
+            use_notification("success", res.message);
+
+            HTML_name.value = "";
+            HTML_email.value = "";
+            HTML_phone.value = "";
+            HTML_subject.value = "";
+            HTML_message.value = "";
+
+            window.location.reload();
+
+            return;
+        }
+
+        if (res.status === "error") {
+          use_notification("danger", res.error.message);
+            return;
+        }
+    });
+
+    //   listening to the form to rectify errors
+    HTML_form.addEventListener("click", (e) => {
+
+        if (["name", "email"].includes(e.target.name)) {
+
+            switch (e.target.name) {
+                case "name":
+                    HTML_name.classList.add("border-0");
+                    HTML_name.removeAttribute("style");
+                  break;
+
+                case "email":
+                    HTML_email.classList.add("border-0");
+                    HTML_email.removeAttribute("style");
+                  break;
+                default:
+                  break;
+            }
+        }
+    });
+
+    return;
+};
+
+</script>

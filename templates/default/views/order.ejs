@@ -1,136 +1,323 @@
-<div class="container">
-    <!-- Top -->
-    <div class="mt-5">
-        <h2>Zamównienie: 8439024728</h2>
-        <h5>Data zamównia: 26.08.2025</h5>
-    </div>
+<!--Checkout Content-->
+<section class="section checkout-style1 pb-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-7 col-md-6 col-sm-12 mb-3 pr-5 pl-2">
+                <article class="customer-box returning-customer mb-3 mt-2">
+                    
+                    <header>
+                        <h2>Zamówienie: <%= data.content.name %></h2>
+                        <h5>Data zamówienia: <span id="order_date"></span></h5>
+                    </header>
+                    
+                    <hr> 
+                    
+                    <div class="order-details" style="display: flex; width: 100%;">
+                        <div style="flex-grow: 1;">
+                            <h5>Status:</h5>
+                            <p style="font-weight: 600;"><%= data.content?.status || 'Brak danych' %></p>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <h5>Warunki:</h5>
+                            <p style="font-weight: 600;"><%= data.content?.terms?.name || 'Brak danych' %></p>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <h5>Typ:</h5>
+                            <p style="font-weight: 600;"><%= data.content?.type || 'Brak danych' %></p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <section class="shipping-address" style="border: 0px solid #c6c6c6; flex-grow: 1; padding: 0px; border-radius: 5px;">
+                        <h5>Adres dostawy:</h5>
+                        <address>
+                            <p>
+                                <strong> <%= data.content?.shippingAddress?.name || 'Brak danych' %> </strong> <br>
+                                <i class="cps cp-user"></i> <%= data.content?.shippingAddress?.addressee || '' %> <br>
+                                <i class="cps cp-city"></i> <%= data.content?.shippingAddress?.address || 'Brak adresu' %> <br>
+                                <i class="cps cp-home"></i> <%= data.content?.shippingAddress?.zip || '' %> <%= data.content?.shippingAddress?.city || '' %> <%= data.content?.shippingAddress?.country || '' %> <br>
+                                <i class="cps cp-phone"></i> <%= data.content?.shippingAddress?.phone || '' %> <i class="cps cp-envelope-open"></i> <%= data.content?.shippingAddress?.email || '' %> <br>
+                            </p>
+                        </address>
+                    </section>
+                    
+                    <hr> 
+                    
+                    <section class="billing-address" style="border: 0px solid #c6c6c6; flex-grow: 1; padding: 0px; border-radius: 5px;">
+                        <h5>Adres rozliczeniowy:</h5>
+                        <address>
+                            
+                            <p>
+                                <strong> <%= data.content?.billingAddress?.name || 'Brak danych' %> </strong> <br>
+                                <i class="cps cp-user"></i> <%= data.content?.billingAddress?.addressee || '' %> <br>
+                                <i class="cps cp-city"></i> <%= data.content?.billingAddress?.address || 'Brak adresu' %> <br>
+                                <i class="cps cp-home"></i> <%= data.content?.billingAddress?.zip || '' %> <%= data.content?.billingAddress?.city || '' %> <%= data.content?.billingAddress?.country || '' %> <br>
+                                <i class="cps cp-phone"></i> <%= data.content?.billingAddress?.phone || '' %> <i class="cps cp-envelope-open"></i> <%= data.content?.billingAddress?.email || '' %> <br>
+                            </p>
 
-    <hr> 
-
-    <div style="display: flex; width: 100%;">
-        <div style="flex-grow: 1;">
-            <h5>Status:</h5>
-            <p style="font-weight: 600;">Closed</p>
+                        </address>
+                    </section>  
+                            
+                </article>
+            </div>
+            <div class="col-lg-5 col-md-6 col-sm-12 mb-3">
+                <!--Order Summary-->
+                <aside class="block mb-3 order-summary" aria-labelledby="order-summary-heading">
+                    <div class="block-content">
+    
+                        <!-- SUMMARY ORDER -->
+                        <div id="order-table-container">
+    
+                            <h5 id="order-summary-heading" class="text-uppercase">Produkty:</h5>
+                            <div class="table-responsive-sm order-table" style="padding: 0px 5px;">
+                                <table class="table table-hover text-center" aria-describedby="order-summary">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-start">Nazwa produktu</th>
+                                            <th class="text-end">Cena</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (data.content.lines && data.content.lines.length > 0) { %>
+                                            <% data.content.lines.forEach(function(item) { %>
+                                                <tr>
+                                                    <td class="text-start">
+                                                        <div><%= item.item.name %></div>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <%= item.priceFormat %>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="2">Brak produktów w zamówieniu.</td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td class="text-start fw-bolder">Suma:</td>
+                                            <td class="text-end fw-bolder"><%= data.content.amountFormat %></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+    
+                            <h5 class="text-uppercase" style="margin-top: 30px;">Podsumowanie:</h5>
+    
+                            <div style="max-width: 650px; width: 100%; padding: 10px;">
+                                <p style="margin: 0px; display: flex;">
+                                    <span style="flex-grow: 1;">Metoda dostawy:</span>
+                                    <span>DHL</span>
+                                </p> 
+                        
+                                <p style="margin: 0px 0px 30px 0px; display: flex;">
+                                    <span style="flex-grow: 1;">Waga zamówienia:</span>
+                                    <span><%= data.content.weight %></span>
+                                </p> 
+                                
+                                <p style="margin: 0px; display: flex;">
+                                    <span style="flex-grow: 1;">Suma częściowa:</span>
+                                    <span><%= data.content.amountFormat %></span>
+                                </p> 
+                                <p style="margin: 0px; display: flex;">
+                                    <span style="flex-grow: 1;">Koszt dostawy:</span>
+                                    <span><%= data.content.shippingCost %></span>
+                                </p> 
+                                <p style="margin: 0px; display: flex;">
+                                    <span style="flex-grow: 1;">Podatek:</span>
+                                    <span><%= data.content.taxAmountFormat %></span>
+                                </p> 
+                                <p style="margin: 0px; display: flex; font-size: 20px;" class="fw-bolder">
+                                    <span style="flex-grow: 1;">Suma całkowita:</span>
+                                    <span><%= data.content.grossAmountFormat %></span>
+                                </p> 
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+                <!--End Order Summary-->
+            </div>
         </div>
-        <div style="flex-grow: 1;">
-            <h5>Warunki:</h5>
-            <p style="font-weight: 600;">Prepaid</p>
-        </div>
-        <div style="flex-grow: 1;">
-            <h5>Typ:</h5>
-            <p style="font-weight: 600;">Sales Order</p>
-        </div>
-    </div>
 
-    <hr>
-
-    <div style="display: flex; width: 100%; gap: 20px;">   
-        <div style="border: 0px solid #c6c6c6; flex-grow: 1; padding: 0px; border-radius: 5px;">
-            <h5>Adres dostawy:</h5>
-            <p style="margin-left: 0px;">
-                Robert Kasprzak <br>
-                tel: 664 783 433 <br>
-                ul. Jednosci Narodowej 143/8 <br>
-                50-303 Wroclaw <br>
-                Poland
-            </p>
-        </div>
-        <div style="border: 0px solid #c6c6c6; flex-grow: 1; padding: 0px; border-radius: 5px;">
-            <h5>Adres rozliczeniowy:</h5>
-            <p style="margin-left: 0px;">
-                Robert Kasprzak <br>
-                tel: 664 783 433 <br>
-                ul. Jednosci Narodowej 143/8 <br>
-                50-303 Wroclaw <br>
-                Poland
-            </p>
-        </div>
-    </div>
-
-    <hr>
-
-    <h5>Szczegoly:</h5>
-
-    <table class="table align-middle mt-3">
-        <tbody>
-            <tr style="border-width: 1px !important;">
-                <td class="product-name"><div class="mb-0"><a href="product-layout1.html">Cylinder Assy brake Master</a></div></td>
-                <td class="stock text-center"><span class="">Ilośc: 2</span></td>
-                <td class="product-price text-end"><span class="amount fw-500">$165.00</span></td>
-            </tr>
-            <tr style="border-width: 1px !important;">
-                <td class="product-name"><div class="mb-0"><a href="product-layout1.html">Cylinder Assy brake Master</a></div></td>
-                <td class="stock text-center"><span class="">Ilośc: 2</span></td>
-                <td class="product-price text-end"><span class="amount fw-500">$165.00</span></td>
-            </tr>
-            <tr style="border-width: 1px !important;">
-                <td class="product-name"><div class="mb-0"><a href="product-layout1.html">Cylinder Assy brake Master</a></div></td>
-                <td class="stock text-center"><span class="">Ilośc: 2</span></td>
-                <td class="product-price text-end"><span class="amount fw-500">$165.00</span></td>
-            </tr>
-            <tr style="border-width: 1px !important;">
-                <td class="product-name"><div class="mb-0"><a href="product-layout1.html">Cylinder Assy brake Master</a></div></td>
-                <td class="stock text-center"><span class="">Ilośc: 2</span></td>
-                <td class="product-price text-end"><span class="amount fw-500">$165.00</span></td>
-            </tr>
-            <tr style="border-width: 1px !important;">
-                <td class="product-name"><div class="mb-0"><a href="product-layout1.html">Cylinder Assy brake Master</a></div></td>
-                <td class="stock text-center"><span class="">Ilośc: 2</span></td>
-                <td class="product-price text-end"><span class="amount fw-500">$165.00</span></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div style="display: flex; width: 100%; justify-content: end;">
-        <p style="font-weight: 600;">Suma: 5467 $</p>
-        <!-- <p style="font-weight: 900;"> 5467 zl</p> -->
-    </div>
-
-    <hr>
-
-    <h5>Podsumowanie:</h5>
-
-    <div style="max-width: 650px; width: 100%;">
-
-        <p style="margin: 0px; display: flex;">
-            <span style="flex-grow: 1;">Metoda dostawy:</span>
-            <span>DHL</span>
-        </p> 
-
-        <p style="margin: 0px 0px 50px 0px; display: flex;">
-            <span style="flex-grow: 1;">Waga zamowienia:</span>
-            <span>25 kg</span>
-        </p> 
+        <!-- Order Progress Stepper -->
+        <div class="container h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col p-0">
+                    <article class="card card-stepper" style="border-radius: 5px;" itemscope itemtype="https://schema.org/Order">
+                        <div class="card-body p-4">
+                    
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex flex-column">
+                                    <span class="lead fw-normal">Twoje zamówienie zostało dostarczone</span>
+                                    <span class="text-muted small">DHL dnia 21 stycznia 2020</span>
+                                </div>
+                                <!-- <div>
+                                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-primary" type="button">Track order details</button>
+                                </div> -->
+                            </div>
         
-        <p style="margin: 0px; display: flex;">
-            <span style="flex-grow: 1;">Suma czesciowa:</span>
-            <span>4359 $</span>
-        </p> 
-        <p style="margin: 0px; display: flex;">
-            <span style="flex-grow: 1;">Koszt dostawy:</span>
-            <span>159 $</span>
-        </p> 
-        <p style="margin: 0px; display: flex;">
-            <span style="flex-grow: 1;">Podatek:</span>
-            <span>0 $</span>
-        </p> 
-        <p style="margin: 0px; display: flex; font-weight: 900;">
-            <span style="flex-grow: 1;">Suma calkowita:</span>
-            <span>4359 $</span>
-        </p> 
-
+                            <hr class="my-4">
+        
+                            <div class="d-flex flex-row justify-content-between align-items-center align-content-center">
+                                <span class="dot" aria-hidden="true"></span>
+                                <hr class="flex-fill track-line"><span class="dot" aria-hidden="true"></span>
+                                <hr class="flex-fill track-line"><span class="dot" aria-hidden="true"></span>
+                                <hr class="flex-fill track-line"><span class="dot" aria-hidden="true"></span>
+                                <hr class="flex-fill track-line">
+                                <span class="d-flex justify-content-center align-items-center big-dot" aria-hidden="true">
+                                    <!-- <i class="fa fa-check text-white"></i> -->
+                                </span>
+                            </div>
+                    
+                            <div class="d-flex flex-row justify-content-between align-items-center">
+                                <div class="d-flex flex-column align-items-start">
+                                    <span>15 Mar</span><span>Order placed</span>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center">
+                                    <span>15 Mar</span><span>Order placed</span>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center align-items-center">
+                                    <span>15 Mar</span><span>Order Dispatched</span>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <span>15 Mar</span><span>Out for delivery</span>
+                                </div>
+                                <div class="d-flex flex-column align-items-end active-track">
+                                    <span>15 Mar</span><span>Delivered</span>
+                                </div>
+                            </div>
+                    
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+     
+        <!-- Action Buttons -->
+        <div style="display: flex; width: 100%; gap: 10px; margin: 50px 0px 50px 0px" class="button-set-bottom">
+            <button type="button" name="clear" class="btn btn-border rounded-3 small--hide checkout" data-action="clear" data-id="" style="flex-grow: 1;" aria-label="Anuluj zamówienie">Anuluj zamówienie</button>
+            <button type="button" name="clear" class="btn btn-border rounded-3 small--hide" data-action="clear" data-id="" aria-label="Zwroć / reklamuj">Zwroć / reklamuj</button>
+            <a href="#" class="btn btn-primary rounded-3 checkout small--hide" style="min-width: 200px;" aria-label="Opłać zamówienie">Opłać zamówienie</a>
+        </div>
     </div>
+</section>
 
+<!-- Skrypt JavaScript -->
+<script defer>
+    // Funkcja do formatowania daty
+    const create_date = (date) => {
+        if(!date) {
+            return '';
+        }
 
-    <div style="display: flex; width: 100%; gap: 10px; margin: 50px 0px 50px 0px">
-        <!-- <button>Anuluj zamowienie</button>
-        <button>Oplac zamownie</button>
-        <button>Reklamuj</button> -->
+        let date_obj = new Date(date);
 
-        <button type="button" name="clear" class="btn btn-border rounded-3 small--hide" data-action="clear" data-id="" style="flex-grow: 1;">Anuluj zamowienie</button>
-        <button type="button" name="clear" class="btn btn-border rounded-3 small--hide" data-action="clear" data-id="">Zwroc / reklamuj</button>
-        <!-- <button type="button" name="clear" class="btn btn-border rounded-3 small--hide" data-action="clear" data-id="">Oplac zamownie</button> -->
-        <a class="btn btn-primary rounded-3 checkout small--hide" style="min-width: 200px;">Oplac zamownie</a>
+        let day = date_obj.getDate();
+        let month = date_obj.getMonth() + 1;
+        let year = date_obj.getFullYear();
 
-    </div>
-</div>
+        let formated_date = `${day}.${month}.${year}`;
+
+        return formated_date;
+    }
+
+    // Formatowanie daty zamówienia
+    const order_date = document.querySelector('#order_date');
+    if(order_date) {
+        order_date.innerHTML = create_date(data.content.date);
+    }
+
+    // CATEGORY LINKS
+    const category_links = document.querySelectorAll("[name='category_link']");
+
+    if (category_links) {
+        category_links.forEach((item) => {
+            let url_component = item.getAttribute("urlComponent"); 
+            let active_url = window.location.pathname.split("/")[2];
+
+            if (url_component === active_url) {
+                item.classList.add("active");
+            }
+        });
+    }
+
+    // GROUPS LINKS 
+    const group_links = document.querySelectorAll("[name='group_link']");
+
+    if (group_links) {
+        let url = new URL(window.location.href);
+        let current_groups = url.searchParams.getAll("group");
+
+        group_links.forEach((item) => {
+            let url_component = item.getAttribute("urlComponent");
+            let field = item.getAttribute("field");
+
+            item.addEventListener("click", (e) => {
+                e.preventDefault();
+
+                if (!url.searchParams.getAll(field).includes(url_component)) {
+                    url.searchParams.append(field, url_component);
+                } else {
+                    let values = url.searchParams.getAll(field);
+                    url.searchParams.delete(field); 
+                    values.forEach(value => {
+                        if (value !== url_component) {
+                            url.searchParams.append(field, value); 
+                        }
+                    });
+                }
+
+                window.location.href = url.href;
+            });
+
+            if (current_groups.includes(url_component)) {
+                item.classList.add("checked");
+            }
+        });
+    }
+</script>
+
+<style>
+.track-line {
+    height: 2px !important;
+    background-color: #488978;
+    opacity: 1;
+}
+
+.dot {
+    height: 15px;
+    width: 60px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 0px;
+    background-color: var(--color-secondary);
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.big-dot {
+    height: 25px;
+    width: 100px;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    display: block;
+    background-color: var(--color-secondary);
+    border-radius: 5px;
+}
+
+.active-track {
+    color: var(--color-secondary);
+}
+
+.big-dot i {
+    font-size: 12px;
+}
+
+.card-stepper {
+    z-index: 0;
+}
+</style>

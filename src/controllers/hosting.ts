@@ -16,6 +16,7 @@ import mongoose from "mongoose";
 import { IPage } from "../models/ecommerce/page.schema.js";
 import Group from "../models/classifications/group/schema.js";
 import Category from "../models/classifications/category/schema.js";
+import SalesOrder from "../models/transactions/salesOrder/schema.js";
 
 
 export default class controller {
@@ -240,11 +241,40 @@ export default class controller {
               }
             }
 
+            if (["news"].includes(req.params.view)) {
+              let result = shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.blog).map(p => {
+                let page = {
+                  urlComponent: p.urlComponent,
+                  path: `${data.page.host}/${p.urlComponent}`,
+                  name: p.name,
+                  description: p.description,
+                  image: p.image,
+                  date: p.date.toISOString().substr(0, 10)
+                }
+                return page
+              })
+              data.content = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1, filters: [] };
+              data.content.docs = result;
+              data.content.totalDocs = result.length;
+              data.content.limit = result.length;
+              data.content.page = 1;
+              data.content.totalPages = 1;
+            }
+
             if (["shoppingcart", "basket", "cart", "checkout", "kasa", "summary"].includes(req.params.view)) {
               if (req.cookies.shoppingcart)
                 data.content = cache.get(req.cookies.shoppingcart)
 
               if (!data.content) data.content = { message: "empty_shoppingcart" }
+            }
+            if (["order", "zamowienie"].includes(req.params.view)) {
+              if (req.params.param) {
+                let document = await SalesOrder.getDocument(req.params.param, "simple", true)
+                if (document) data.content = await document.autoPopulate()
+              }
+
+              if (!data.content) data.content = { message: "order_not_found" }
+
             }
             if (["register"].includes(req.params.view)) {
               if (req.params.id) {
@@ -272,7 +302,7 @@ export default class controller {
 
             if (fs.existsSync(viewpath)) {
               if (["search", "products", "items"].includes(req.params.view)) {
-                console.log(req.params, req.query)
+
                 data.content = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1, filters: [] };
                 let query = {};
                 if (req.query.keyword) {
@@ -297,6 +327,10 @@ export default class controller {
                 if (req.params.param && req.params.param) {
                   const filterCategory = (await Category.find({ urlComponent: { $in: req.params.param } }, { _id: 1 })).map(c => c._id)
                   query["category"] = { $in: filterCategory }
+                }
+
+                if (req.query.price) {
+                  // uzupełnił logiką
                 }
 
                 // let filters = (req.query.filters || "").toString();
@@ -381,6 +415,14 @@ export default class controller {
                 //   options: [],
                 //   example: '/search/?manufacturer=dba'
                 // })
+                data.content.filters.push({
+                  field: 'price',
+                  type: 'range',
+                  multiple: false,
+                  params: false,
+                  options: [0, 5000],
+                  example: '/search/?price=100-450'
+                })
               }
               if (["item", "product", "detail"].includes(req.params.view)) {
                 let urlComponent = req.params.param;

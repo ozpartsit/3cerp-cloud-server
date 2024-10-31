@@ -9,7 +9,7 @@ import EmailService from "../../services/email";
 
 import form from "./form"
 import Email, { IEmail } from "../email.model.js";
-import EmailTemplate from "../emailTemplate.model.js";
+import EmailTemplate from "./../templates/email/schema.js";
 
 export interface IShop extends IExtendedDocument {
     _id: mongoose.Schema.Types.ObjectId;

@@ -1,6 +1,9 @@
 import * as mongoose from "mongoose";
-import { IExtendedDocument } from "../utilities/methods";
-import { IExtendedModel } from "../utilities/static";
+import { IExtendedDocument } from "../../../utilities/methods";
+import { IExtendedModel } from "../../../utilities/static";
+
+import form from "./form"
+
 export interface IEmailTemplate extends IExtendedDocument {
     _id: mongoose.Schema.Types.ObjectId;
     name: string;
@@ -12,7 +15,8 @@ export interface IEmailTemplate extends IExtendedDocument {
     trigger: string;
 
 }
-interface IEmailTemplateModel extends mongoose.Model<IEmailTemplate>, IExtendedModel<IEmailTemplate> { }
+export interface IEmailTemplateModel extends mongoose.Model<IEmailTemplate>, IExtendedModel<IEmailTemplate> { }
+
 
 export const schema = new mongoose.Schema<IEmailTemplate>(
     {
@@ -58,6 +62,7 @@ export const schema = new mongoose.Schema<IEmailTemplate>(
     }
 );
 
+schema.static("form", () => form)
 schema.index({ name: 1 });
 
 const EmailTemplate: IEmailTemplateModel = mongoose.model<IEmailTemplate, IEmailTemplateModel>("EmailTemplate", schema);
