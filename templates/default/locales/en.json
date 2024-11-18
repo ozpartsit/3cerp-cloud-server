@@ -112,6 +112,10 @@
                     "subtitle": "Keep up to date with our promotions, discounts, sales, special offers and more.",
                     "input": "Enter email..."
                }
+          },
+          "news": {
+               "read-more": "Read more",
+               "search": "Search post..."
           }
      },
      "my-account": "my-account"

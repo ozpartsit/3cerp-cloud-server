@@ -111,6 +111,10 @@
                     "subtitle": "Bądź na bierząco z naszymi promocjami, rabatami, wyprzedażami, ofertami specjalnymi i nie tylko.",
                     "input": "Wprawdź email..."
                }
+          },
+          "news": {
+               "read-more": "Czytaj więcej",
+               "search": "Wyszukaj artykuł..."
           }
      },
      "my-account": "my-account"

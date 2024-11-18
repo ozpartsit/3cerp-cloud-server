@@ -1,0 +1,84 @@
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <!--Sidebar-->
+            <aside class="col-12 col-sm-12 col-md-12 col-lg-4 sidebar order-2 order-lg-0 order-md-2 order-sm-2">
+                <!--Search Block-->
+                <section class="block search-block clearfix" aria-labelledby="search-block">
+                    <div class="block-content mt-3 mb-2 my-lg-0">
+                        <form action="/search" method="get" class="input-group flex-nowrap" role="search">
+                            <label for="search" class="visually-hidden"><%= i18n.__('locales.news.search') %></label>
+                            <input class="search__input" id="search" type="search" name="search" placeholder="<%= i18n.__('locales.news.search') %>" aria-label="Search" autocomplete="off">
+                            <span class="input-group__btn">
+                                <button class="btn btnSearch" type="submit" aria-label="Search">
+                                    <i class="cp cp-search" aria-hidden="true"></i>
+                                </button>
+                            </span>
+                        </form>
+                    </div>
+                </section>
+                <!--End Search Block-->
+                
+                <!--Category Block-->
+                <section class="block clearfix block-categories" aria-labelledby="category-block">
+                    <h2 id="category-block" class="block-title">Category</h2>
+                    <div class="block-content">
+                        <ul class="items">
+                            <li class="lvl-1"><a href="/categories/break-and-repairs">Break And Repairs</a></li>
+                            <li class="lvl-1 active"><a href="/categories/car-tuning">Car Tuning</a></li>
+                            <li class="lvl-1"><a href="/categories/engine-care">Engine Care</a></li>
+                            <li class="lvl-1"><a href="/categories/road-assistance">Road Assistance</a></li>
+                            <li class="lvl-1"><a href="/categories/tyre-care">Tyre Care</a></li>
+                            <li class="lvl-1"><a href="/categories/workshop">Workshop</a></li>
+                        </ul>
+                    </div>
+                </section>
+                <!--End Category Block-->
+            </aside>
+            <!--End Sidebar-->
+            
+            <!--Main Blog Content-->
+            <main class="col-12 col-sm-12 col-md-12 col-lg-8 main-col blog-page-list">
+                <div class="row blog-list blog-page-list">
+                    <% if (data.content.docs) { %>
+                        <% data.content.docs.forEach((item) => { %> 
+                            <article class="col-12 mb-5" itemscope itemtype="https://schema.org/BlogPosting">
+                                <div class="item text-center">
+                                    <div class="post-thumb rounded-3 mb-4">
+                                        <a href="<%= data.page.host + '/news/' + item.urlComponent %>" class="d-block">
+                                            <img class="blur-up lazyload rounded-3 w-100" 
+                                                 src="<%= item.image.fullPath %>"  
+                                                 alt="<%= item.image.altText || item.name %>" 
+                                                 title="<%= item.image.name %>" 
+                                                 width="410" height="220" 
+                                                 loading="lazy" 
+                                                 itemprop="image" />
+                                        </a>
+                                    </div>
+                                    <div class="post-detail">
+                                        <h3 itemprop="headline">
+                                            <a href="<%= data.page.host + '/news/' + item.urlComponent %>" class="h3" itemprop="url"><%= item.name %></a>
+                                        </h3>
+                                        <div class="post-excerpt" itemprop="description">
+                                            <%= item.description %>
+                                        </div>
+                                        <div class="meta-post d-flex align-items-center justify-content-between mt-4">
+                                            <time class="date" datetime="<%= item.dateISO %>" itemprop="datePublished">
+                                                <i class="cps cp-calendar-check"></i> <%= item.date %>
+                                            </time>
+                                            <a href="<%= data.page.host + '/news/' + item.urlComponent %>" class="readmore d-flex align-items-center">
+                                                <span><%= i18n.__('locales.news.read-more') %></span> 
+                                                <i class="cps cp-caret-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </main>
+            <!--End Main Blog Content-->
+        </div>
+    </div>
+</div>

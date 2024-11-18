@@ -47,7 +47,7 @@
                                 </div>
                             </div>
                             <div class="lightboximages">
-                                
+
                                 <% data.content.images.forEach((image) => { %>
                                     <a href="<%= image.fullPath %>" data-size="700x700"></a>
                                 <% }) %>
@@ -96,6 +96,7 @@
                         </div>
 
                         <div class="brands mb-1"><b>Brand:</b> <%= data.content.manufacturer %></div>
+                        
                         <div class="price-box">
                             <span class="visually-hidden">Regular price</span>
                             <span class="sale-price">

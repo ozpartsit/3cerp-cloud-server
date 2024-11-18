@@ -35,7 +35,7 @@ export default class Routes {
     }
     public routerUPS() {
         // UPS
-        this.RouterUPS.route("/token").get(
+        this.RouterUPS.route("/token/:account?").get(
             //this.Auth.authenticate.bind(this.Auth) as any,
             this.upsController.getToken.bind(this.upsController) as any
         );
