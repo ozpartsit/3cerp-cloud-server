@@ -30,6 +30,7 @@ export interface ITablePreference extends IExtendedDocument {
     groupBy?: string[];
     itemsPerPage?: number;
     filters?: IFilterGroup[];
+    fields?: any[];
     _someFunction(): any
 }
 

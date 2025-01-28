@@ -40,6 +40,7 @@ export interface IExtendedDocument extends mongoose.Document {
   initLocal: () => void;
   getModel: () => any
   getUser(): any
+  preview(): any;
 }
 
 

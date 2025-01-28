@@ -68,27 +68,32 @@ export default class controller {
         }
     }
     public async getToken(req: Request, res: Response, next: NextFunction) {
-        let token = "";
-        let expires = null;
-        if (!req.params.account) req.params.account = "138R32";
+        try {
+            let token = "";
+            let expires = null;
+            if (!req.params.account) req.params.account = "138R32";
 
-        if (req.params.account) {
-            if (this.tokens[req.params.account]) {
+            if (req.params.account) {
+                if (this.tokens[req.params.account]) {
 
-                token = this.tokens[req.params.account].token;
-                expires = this.tokens[req.params.account].expires;
-
-            }
-
-            if (!token || !expires || (expires && new Date().getTime() > new Date(expires).getTime())) {
-
-                await this.login(req.params.account);
-                if (this.tokens[req.params.account])
                     token = this.tokens[req.params.account].token;
+                    expires = this.tokens[req.params.account].expires;
+
+                }
+
+                if (!token || !expires || (expires && new Date().getTime() > new Date(expires).getTime())) {
+
+                    await this.login(req.params.account);
+                    if (this.tokens[req.params.account])
+                        token = this.tokens[req.params.account].token;
+                }
             }
+
+            res.json({ status: "success", data: { token: token } });
+        } catch (error) {
+            console.log(error)
         }
 
-        res.json({ status: "success", data: { token: token } });
     }
 
 }

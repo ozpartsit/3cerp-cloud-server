@@ -134,6 +134,11 @@ export default class Routes {
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.send.bind(controller) as any
     );
+    this.Router.route(`${path}/:mode?`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.find.bind(controller) as any
+    );
     this.Router.route(`${path}`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
@@ -164,6 +169,12 @@ export default class Routes {
       );
     }
 
+    this.Router.route(`${path}/:id/preview`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.preview.bind(controller) as any
+    );
+
     this.Router.route(`${path}/:id/action/:action`).patch(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
@@ -171,15 +182,12 @@ export default class Routes {
     );
 
 
-
-
-
     this.Router.route(`${path}/:id/data/:table/:mode?`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.table.bind(controller) as any
     );
-
+   
     this.Router.route(`${path}/:id/logs`).get(
       this.Auth.authenticate.bind(this.Auth) as any,
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,

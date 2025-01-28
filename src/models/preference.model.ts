@@ -11,6 +11,7 @@ export interface IPreference extends IExtendedDocument {
     locale: string;
     timezoneOffset: number;
     themeDarkMode: boolean;
+    theme: string;
     exportDecimalSeparator: string;
     exportCsvSeparator: string;
     tooltips: boolean;
@@ -33,6 +34,7 @@ const schema = new mongoose.Schema<IPreference>(
         locale: { type: String, default: "en", input: "SelectField" },
         timezoneOffset: { type: Number, default: 0, input: "NumberField" },
         themeDarkMode: { type: Boolean, default: true, input: "SwitchField" },
+        theme: { type: String, default: "default_light_theme", input: "SelectField" },
         exportDecimalSeparator: { type: String, default: "en", input: "SelectField" },
         exportCsvSeparator: { type: String, default: "en", input: "SelectField" },
         tooltips: { type: Boolean, default: true, input: "SwitchField" },

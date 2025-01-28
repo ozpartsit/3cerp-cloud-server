@@ -1,5 +1,7 @@
 import i18n from "../../config/i18n";
 import { IExtendedDocument } from "../methods"
+import constants from "../../constants/index.js";
+
 export default function constantTranslate(this: IExtendedDocument, local: string, returnVirtuals: boolean) {
 
     let doc = this.toObject({ getters: true, virtuals: true });
@@ -32,6 +34,7 @@ export default function constantTranslate(this: IExtendedDocument, local: string
         i18n.setLocale(local || "en");
         //constats
         if (schemaType.options.constant) {
+            let constantsObj = (constants[schemaType.options.constant]||[]).reduce((t, v) => { t[v._id] = v; return t; }, {});
             if (schemaType._presplitPath.length > 1) {
                 let subdoc = doc[schemaType._presplitPath[0]];
                 if (subdoc && subdoc[schemaType._presplitPath[1]])
@@ -48,7 +51,7 @@ export default function constantTranslate(this: IExtendedDocument, local: string
                     }
                     else {
                         doc[pathname] = {
-                            _id: doc[pathname], name: i18n.__(`${schemaType.options.constant}.${doc[pathname]}`)
+                            _id: doc[pathname], name: i18n.__(`${schemaType.options.constant}.${doc[pathname]}`), type: constantsObj[doc[pathname]] ? i18n.__(`${schemaType.options.constant}Type.${constantsObj[doc[pathname]].type}`) : undefined
                         };
                     }
 

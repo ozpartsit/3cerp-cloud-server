@@ -13,7 +13,8 @@ export default {
                             "fields": [
                                 "name",
                                 "description",
-                                "trigger"
+                                "trigger",
+                                "language"
                             ]
                         },
                         {

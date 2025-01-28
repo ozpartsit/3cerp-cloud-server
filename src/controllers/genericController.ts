@@ -8,6 +8,7 @@ import CustomError from "../utilities/errors/customError";
 import Table, { ITablePreference } from '../models/tablePreference.model';
 import Transactions from '../models/transactions/schema';
 import Email from '../models/email.model';
+import useExporter from '../utilities/export/exporter.js';
 import { FavoritesTypes } from '../models/favorites/model'
 
 // Typ generyczny dla modelu Mongoose
@@ -66,7 +67,7 @@ class GenericController<T extends IExtendedDocument> {
         //let { field, page } = req.query;
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
-            let document = await this.model.getDocument(id, mode, false, ("_id").toString());
+            let document = await this.model.getDocument(id, mode == "export" ? "simple" : mode, false, ("_id").toString());
 
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
@@ -195,13 +196,19 @@ class GenericController<T extends IExtendedDocument> {
                 const data: any = {
                     totalDocs: total,
                     limit: options.limit,
-                    totalPages: Math.ceil(total / options.limit)||1
+                    totalPages: Math.ceil(total / options.limit) || 1
                 }
                 if (req.query.page == "last") req.query.page = data.totalPages;
                 let page = Number(req.query.page || 1);
 
-
                 let skip = ((page || 1) - 1) * options.limit;
+
+                if (mode == "export") {
+                    if (!req.query.page) {
+                        options.limit = results.length;
+                        skip = 0
+                    }
+                }
                 results = results.filter((item: any, index: any) => index >= skip && index < skip + options.limit)
 
                 if (!req.query.count) {
@@ -215,7 +222,45 @@ class GenericController<T extends IExtendedDocument> {
                 if (preference) {
                     data["preference"] = preference._id;
                 }
-                res.json({ status: "success", data: data });
+
+                if (preference && preference.fields) {
+                    data["preference"] = preference._id;
+                    if (preference.table) data["table"] = preference.table;
+
+                    data["headers"] = preference.selected.map(field => {
+                        if (preference && preference.fields)
+                            return preference.fields.find(f => f.field == field)
+                        else null
+                    }).filter(col => col)
+
+                }
+
+
+                if (mode == "export" && preference) {
+                    let format = (req.query.format || "csv").toString()
+                    const file = await useExporter(data.docs, data.headers, format);
+                    res.setHeader('Content-disposition', `attachment; filename=${preference.table}.${format}`);
+
+                    if (format == 'csv') {
+                        res.set('Content-Type', 'text/csv');
+                    }
+                    if (format == 'json') {
+                        res.set('Content-Type', 'application/json');
+                    }
+                    if (format == 'xml') {
+                        res.set('Content-Type', 'application/xml');
+                    }
+                    if (format == 'xlsx') {
+                        res.set('Content-Type', 'application/xhtml+xml');
+                    }
+
+                    res.send(Buffer.from(file.urlFile).toString())
+                    res.end();
+
+                } else {
+                    res.json({ status: "success", data: data });
+                }
+
 
 
             }
@@ -258,7 +303,7 @@ class GenericController<T extends IExtendedDocument> {
         let { field } = req.query;
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
-            if(req.body && req.body.document){
+            if (req.body && req.body.document) {
                 req.body.document.account = req.headers.account; // to do - przypisanie ownerAccount dla każdego nowego dokumentu
                 if (this.model.userRequired()) req.body.document.user = req.headers.user;
             }
@@ -339,10 +384,10 @@ class GenericController<T extends IExtendedDocument> {
                 //populate response document
                 await document.autoPopulate();
                 document = document.constantTranslate(req.locale);
-                
-                if(subdocument && subdocument.constantTranslate){
+
+                if (subdocument && subdocument.constantTranslate) {
                     subdocument = subdocument.constantTranslate(req.locale);
-                } 
+                }
 
                 res.json({ status: "success", data: { document, subdocument, saved, newSubDoc } });
             }
@@ -434,6 +479,26 @@ class GenericController<T extends IExtendedDocument> {
             let form = await this.model.getForm(req.locale);
 
             res.json({ status: "success", data: { form } });
+        } catch (error) {
+            return next(error);
+        }
+    }
+    public async preview(req: Request, res: Response, next: NextFunction) {
+        let { id } = req.params;
+        try {
+            let document = await this.model.getDocument(id, "simple", true, "_id");
+            if (!document) {
+                throw new CustomError("doc_not_found", 404);
+            } else {
+                if (document.preview) {
+                    let preview = await document.preview();
+                    res.json({ status: "success", data: preview });
+                } else {
+                    res.json({ status: "success", data: null });
+                }
+            }
+
+
         } catch (error) {
             return next(error);
         }
@@ -614,9 +679,33 @@ class GenericController<T extends IExtendedDocument> {
     public async find(req: Request, res: Response, next: NextFunction) {
 
         try {
+            let { mode } = req.params;
             const data = await findResult(req, this.model)
+            if (mode == "export" && data.table) {
+                let format = (req.query.format || 'csv').toString()
 
-            res.json({ status: "success", data: data });
+                const file = await useExporter(data.docs, data.headers, format);
+                res.setHeader('Content-disposition', `attachment; filename=${data.table}.${format}`);
+
+                if (format == 'csv') {
+                    res.set('Content-Type', 'text/csv');
+                }
+                if (format == 'json') {
+                    res.set('Content-Type', 'application/json');
+                }
+                if (format == 'xml') {
+                    res.set('Content-Type', 'application/xml');
+                }
+                if (format == 'xlsx') {
+                    res.set('Content-Type', 'application/xhtml+xml');
+                }
+                res.send(Buffer.from(file.urlFile).toString())
+                res.end()
+
+            } else {
+                res.json({ status: "success", data: data });
+            }
+
         } catch (error) {
             return next(error);
         }
@@ -789,9 +878,19 @@ async function findResult<T extends IExtendedDocument>(req: Request, model: IExt
             totalPages: Math.ceil(total / options.limit)
         }
         let { count } = req.query;
+
+        // wyłączanie limitów dla exportu
+        if (req.params.mode == "export") {
+            if (!page) {
+                options.limit = total;
+                options.skip = 0;
+            }
+        }
+
         if (!count) {
             let result = await model.findDocuments(query, options);
             for (let index in result) {
+                //console.log( result[index])
                 result[index] = await result[index].constantTranslate(req.locale, true);
             }
 
@@ -801,8 +900,16 @@ async function findResult<T extends IExtendedDocument>(req: Request, model: IExt
             if (table) {
                 data["table"] = table;
             }
-            if (preference) {
+            if (preference && preference.fields) {
                 data["preference"] = preference._id;
+                if (preference.table) data["table"] = preference.table;
+
+                data["headers"] = preference.selected.map(field => {
+                    if (preference && preference.fields)
+                        return preference.fields.find(f => f.field == field)
+                    else null
+                }).filter(col => col)
+
             }
 
             // przekazanie dodatkowych wartości do odpowiedzi
