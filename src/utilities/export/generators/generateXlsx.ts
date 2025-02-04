@@ -48,7 +48,7 @@ const generateXLSX = (
           flatten = true,
      } = options;
      const workbook = XLSX.utils.book_new();
-     let flattenedData: any[];
+     let flattenedData: any[] = [];
 
      if (Array.isArray(data)) {
           flattenedData = data.map((item) => flattenObject(item));

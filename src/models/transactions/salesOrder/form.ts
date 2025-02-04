@@ -151,8 +151,43 @@ export default {
                     "value": "addressbook",
                     "editable": true,
                     "fields": [
-                        "addresses"
-                    ]
+                    ],
+                    "tables": [{
+                        "value": "addresses",
+                        "subdoc": "addresses",
+                        "columns": [
+                            {
+                                "value": "main",
+                                "fields": [
+                                    "name",
+                                    "addressee",
+
+                                ]
+                            },
+                            {
+                                "value": "Address",
+                                "fields": [
+                                    "address",
+                                    "address2",
+                                ]
+                            },
+                            {
+                                "value": "",
+                                "fields": [
+                                    "city",
+                                    "zip",
+                                    "country",
+                                ]
+                            },
+                            {
+                                "value": "contact",
+                                "fields": [
+                                    "phone",
+                                    "email",
+                                ]
+                            }
+                        ]
+                    }]
                 }
             ]
         },

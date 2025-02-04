@@ -33,6 +33,7 @@ export interface ITransaction extends IExtendedDocument {
   billingAddress?: IAddress
   shippingAddress?: IAddress
   shipToDifferentAddress?: Boolean;
+  addresses?: IAddress[];
 
   //classsifictaions
   group?: mongoose.Schema.Types.ObjectId[];
@@ -66,8 +67,8 @@ const TransactionSchema = {
     ref: "Entity",
     required: true,
     autopopulate: true,
-    input: "Autocomplete",
-    validType: "autocomplete",
+    input: "Select",
+    validType: "select",
     defaultSelect: true
   },
   number: { type: Number, input: "Input", validType: "number", readonly: true },
@@ -153,7 +154,7 @@ const TransactionSchema = {
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Group",
     autopopulate: true,
-    input: "Autocomplete"
+    input: "Select"
   },
   category: {
     type: [mongoose.Schema.Types.ObjectId],
@@ -212,6 +213,20 @@ schema.virtual('taxAmountFormat').get(function (this) {
     else return this.taxAmount.toFixed(2)
   }
 
+});
+
+schema.virtual("addresses", {
+  ref: "Address",
+  localField: "entity",
+  foreignField: "entity",
+  justOne: false,
+  autopopulate: true,
+  sortable: true,
+  editable: true,
+  removable: true,
+  addable: true,
+  groupable: true,
+  model: Address
 });
 
 schema.method("pdf", async function () {

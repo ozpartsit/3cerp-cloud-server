@@ -87,6 +87,15 @@ schema.pre("save", async function (next) {
     if (coordinate && coordinate.latitude && coordinate.longitude) {
       this.latitude = coordinate.latitude;
       this.longitude = coordinate.longitude;
+      // zaktualizuj na koncie
+      if (this.shippingAddress) {
+        await updateDefaultAddress(this, "longitude", "shippingAddress")
+        await updateDefaultAddress(this, "latitude", "shippingAddress")
+      }
+      if (this.billingAddress) {
+        await updateDefaultAddress(this, "longitude", "billingAddress")
+        await updateDefaultAddress(this, "latitude", "billingAddress")
+      }
     }
   } else
     return next();
@@ -108,10 +117,12 @@ schema.pre("save", async function (next) {
 //   }
 // })
 
-schema.methods.recalc = async function () {
+schema.methods.recalc = async function (this: any) {
 
   if (this.$locals.triggers) for (let trigger of this.$locals.triggers) {
-    if (trigger.type == "setValue" && trigger.field == "shippingAddress" && trigger.value) {
+
+    //modifikowanie domyślnego adresu
+    if (trigger.type == "setValue" && ["shippingAddress", "billingAddress"].includes(trigger.field) && trigger.value) {
       if (this.$parent() && this.$parent()?.addresses.length) {
         for (let address of this.$parent().addresses) {
           if (address._id != this._id) address.shippingAddress = false;
@@ -119,18 +130,11 @@ schema.methods.recalc = async function () {
         }
       }
     }
-    if (trigger.type == "setValue" && trigger.field == "billingAddress" && trigger.value) {
-      if (this.$parent() && this.$parent()?.addresses.length) {
-        for (let address of this.$parent().addresses) {
-          if (address._id != this._id) address.billingAddress = false;
-          else this.$parent().billingAddress = address;
-        }
-      }
+    // aktualizacja 
+    if (trigger.type == "setValue") {
+      if (this.shippingAddress) await updateDefaultAddress(this, trigger.field, "shippingAddress")
+      if (this.billingAddress) await updateDefaultAddress(this, trigger.field, "billingAddress")
     }
-    // if (trigger.type == "setValue") {
-    //   if (this.shippingAddress) await updateDefaultAddress(this, trigger.field, "shippingAddress")
-    //   if (this.billingAddress) await updateDefaultAddress(this, trigger.field, "billingAddress")
-    // }
     this.$locals.triggers.shift();
   }
   // ustawianie znaczynika adresu
@@ -144,10 +148,12 @@ const Address: IAddressModel = mongoose.model<IAddress, IAddressModel>("Address"
 export default Address;
 
 //aktualizuje domyśne adresy w głownym dokumencie
-async function updateDefaultAddress(doc, change, type) {
+async function updateDefaultAddress(doc: IAddress, change: string, type: string) {
   const parent = doc.$parent() as IExtendedDocument;
-  Object.keys(nestedSchema).forEach(async (field) => {
-    if (field == change && parent) await parent.setValue(field, doc[field], type, null, null, null);
+  Object.keys(nestedSchema.paths).forEach(async (field) => {
+    if (((field == change) || ["shippingAddress", "billingAddress"].includes(change)) && parent && !["_id", "createdAt"].includes(field)) {
+      await parent.setValue(field, doc[field], type, null, null, null);
+    }
   })
 
 }

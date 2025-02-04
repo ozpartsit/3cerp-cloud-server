@@ -35,7 +35,7 @@ const writeFile = async (fileName: string, data: string) => {
 
           // Create file
           await fs.promises.writeFile(urlFile, data);
-          const file = fs.readFileSync(urlFile);
+          const file = fs.readFileSync(urlFile, { encoding: 'base64' });
           return file
      } catch (error) {
           throw error;

@@ -175,7 +175,8 @@ export const schema = new mongoose.Schema<IShop>(
             type: [mongoose.Schema.Types.ObjectId],
             ref: "Group",
             autopopulate: true,
-            input: "Autocomplete"
+            input: "Select",
+            validType: "select",
         },
         category: {
             type: [mongoose.Schema.Types.ObjectId],

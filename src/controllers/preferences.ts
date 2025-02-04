@@ -2,11 +2,10 @@ import controller from "./genericController";
 import { Request, Response, NextFunction } from "express";
 import { IExtendedModel } from "../utilities/static";
 import { IExtendedDocument } from "../utilities/methods";
-import Table, { ITablePreference } from '../models/tablePreference.model';
 import CustomError from "../utilities/errors/customError";
 // Typ generyczny dla modelu Mongoose
 interface IModel<T extends IExtendedDocument> extends IExtendedModel<T> { }
-export default class TransactionController<T extends IExtendedDocument & ITablePreference> extends controller<T> {
+export default class TransactionController<T extends IExtendedDocument> extends controller<T> {
     constructor(model: IModel<T>) {
         super(model);
     }
@@ -17,8 +16,11 @@ export default class TransactionController<T extends IExtendedDocument & ITableP
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let document = await this.model.getDocument(id, mode, true, (field || "_id").toString());
             if (!document) {
-                if (field == "table") {
-                    await new Table({ table: id.toString(), user: req.headers.user, account: req.headers.account }).save();
+                field = (field || "").toString();
+                if (["table", "dashboard", "chart"].includes(field)) {
+                    let prefObj = { user: req.headers.user, account: req.headers.account }
+                    prefObj[field] = id.toString()
+                    await new this.model(prefObj).save();
                     this.get(req, res, next)
                 } else {
                     throw new CustomError("doc_not_found", 404);
@@ -36,6 +38,46 @@ export default class TransactionController<T extends IExtendedDocument & ITableP
             }
         } catch (error) {
             return next(error);
+        }
+    }
+    public async update(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, id, mode } = req.params;
+        let { field } = req.query;
+        let document = await this.model.getDocument(id, mode, true, (field || "_id").toString());
+        if (!document) {
+            field = (field || "").toString();
+            if (["table", "dashboard", "chart"].includes(field)) {
+                let prefObj = { user: req.headers.user, account: req.headers.account }
+                prefObj[field] = id.toString()
+                await new this.model(prefObj).save();
+                this.update(req, res, next)
+            } else {
+                throw new CustomError("doc_not_found", 404);
+            }
+
+            super.update(req, res, next);
+        } else {
+            super.update(req, res, next);
+        }
+    }
+
+    public async save(req: Request, res: Response, next: NextFunction) {
+        let { recordtype, id, mode } = req.params;
+        let { field } = req.query;
+        let document = await this.model.getDocument(id, mode, true, (field || "_id").toString());
+
+        if (!document) {
+            field = (field || "").toString();
+            if (["table", "dashboard", "chart"].includes(field)) {
+                let prefObj = { user: req.headers.user, account: req.headers.account }
+                prefObj[field] = id.toString()
+                await new this.model(prefObj).save();
+                this.save(req, res, next)
+            } else {
+                throw new CustomError("doc_not_found", 404);
+            }
+        } else {
+            super.save(req, res, next);
         }
     }
 }

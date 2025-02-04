@@ -10,7 +10,7 @@ export default async function setValue(
   deepdoc_id: string | null = null,
 ) {
   try {
-    console.log("setValue");
+    console.log("setValue", subdoc, field);
     let document: IExtendedDocument | null = null;
     if (field) {
       let changed = false;
@@ -40,10 +40,10 @@ export default async function setValue(
           } else {
             document = this;
 
-            if (((value || "").toString() !== (document[field] || "").toString()))
+            if (((value || "").toString() !== (document[field] || "").toString())) {
               this.$locals.triggers.push({ type: "setValue", name: `setValue_${subdoc}.${field}`, field: field, subdoc: subdoc, oldValue: document[subdoc][field], value: value });
-
-            if (field !== "_id") document[subdoc][field] = value;
+            }
+            if (!["_id", "createdAt"].includes(field)) document[subdoc][field] = value;
             await document.populate(`${subdoc}.${field}`, "name displayname type _id images");
             changed = true;
           }
@@ -60,7 +60,7 @@ export default async function setValue(
 
         if (((value || "").toString() !== (document[field] || "").toString()))
           document.$locals.triggers.push({ type: "setValue", name: `setValue_${field}`, field: field, oldValue: document[field], value: value });
-        if (field !== "_id") document[field] = value;
+        if (!["_id", "createdAt"].includes(field)) document[field] = value;
         //populate new field value
         await document.autoPopulate()
         //await document.populate(field, "name displayname type _id images");

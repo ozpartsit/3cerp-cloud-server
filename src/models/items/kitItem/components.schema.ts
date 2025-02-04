@@ -20,7 +20,8 @@ const schema = new mongoose.Schema<IComponent>(
       ref: "Item",
       required: true,
       autopopulate: { select: "name displayname type _id" },
-      input: "autocomplete"
+      input: "Select",
+      validType: "select",
     },
     description: {
       type: String,

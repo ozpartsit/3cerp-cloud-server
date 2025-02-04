@@ -64,7 +64,7 @@ const schema = new mongoose.Schema<ILine>(
       ref: "Item",
       required: true,
       autopopulate: { select: "name displayname type _id images.path images.fullPath" },
-      input: "Autocomplete",
+      input: "Select",
       validType: "url"
     },
     description: {
@@ -186,7 +186,7 @@ schema.method("actions", async function (trigger) {
       await setQuantity(this);
       break;
     default:
-      console.log(`Sorry, trigger dose nto exist ${trigger.type}_${trigger.field}.`);
+      console.log(`Sorry, trigger dose not exist ${trigger.type}_${trigger.field}.`);
   }
 
 });

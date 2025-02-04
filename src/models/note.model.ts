@@ -21,7 +21,14 @@ const options = {
 interface INoteModel extends mongoose.Model<INote>, IExtendedModel<INote> { }
 const schema = new mongoose.Schema<INote>(
     {
-        user: { type: mongoose.Schema.Types.ObjectId, input: "Autocomplete", validType: "select", required: true, ref: "User", autopopulate: true, defaultSelect: true },
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            input: "Select",
+            validType: "select",
+            required: true,
+            ref: "User",
+            autopopulate: true, defaultSelect: true
+        },
         name: { type: String, input: "TextField" },
         description: { type: String, defaultSelect: true, input: "TextareaField" },
         index: { type: Number, defaultSelect: true },
@@ -39,7 +46,8 @@ const schema = new mongoose.Schema<INote>(
             type: [mongoose.Schema.Types.ObjectId],
             ref: "Tag",
             autopopulate: true,
-            input: "Autocomplete",
+            input: "Select",
+            validType: "select",
             defaultSelect: true
         },
     },

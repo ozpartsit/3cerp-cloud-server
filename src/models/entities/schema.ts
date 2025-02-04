@@ -58,7 +58,7 @@ const schema = new mongoose.Schema<IEntity>(
       type: String,
       required: true,
       default: "EUR",
-      input: "Autocomplete",
+      input: "Select",
       validType: "select",
       constant: 'currency',
       hint: "Primary currency",

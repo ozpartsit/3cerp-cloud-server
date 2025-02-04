@@ -251,10 +251,9 @@ class GenericController<T extends IExtendedDocument> {
                         res.set('Content-Type', 'application/xml');
                     }
                     if (format == 'xlsx') {
-                        res.set('Content-Type', 'application/xhtml+xml');
+                        res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                     }
-
-                    res.send(Buffer.from(file.urlFile).toString())
+                    res.send(Buffer.from(file.urlFile, 'base64'))
                     res.end();
 
                 } else {
@@ -299,7 +298,7 @@ class GenericController<T extends IExtendedDocument> {
         }
     }
     public async save(req: Request, res: Response, next: NextFunction) {
-        let { recordtype, id } = req.params;
+        let { id, mode } = req.params;
         let { field } = req.query;
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
@@ -310,6 +309,10 @@ class GenericController<T extends IExtendedDocument> {
 
             let { document_id, saved } = await this.model.saveDocument(id, (field || "_id").toString(), req.body.document);
             if (!document_id) {
+                if (req.body && req.body.document && mode !== "advanced") {
+                    let newDoc = await new this.model(req.body.document).save();
+                    document_id = newDoc._id;
+                }
                 throw new CustomError("doc_not_found", 404);
             } else {
                 res.json({ status: "success", data: { document_id, saved } });
@@ -697,9 +700,9 @@ class GenericController<T extends IExtendedDocument> {
                     res.set('Content-Type', 'application/xml');
                 }
                 if (format == 'xlsx') {
-                    res.set('Content-Type', 'application/xhtml+xml');
+                    res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 }
-                res.send(Buffer.from(file.urlFile).toString())
+                res.send(Buffer.from(file.urlFile, 'base64'))
                 res.end()
 
             } else {

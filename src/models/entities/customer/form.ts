@@ -193,7 +193,13 @@ export default {
                                     "email",
                                 ]
                             },
-
+                            {
+                                "value": "default",
+                                "fields": [
+                                    "billingAddress",
+                                    "shippingAddress",
+                                ]
+                            },
                         ]
                     }]
                 }

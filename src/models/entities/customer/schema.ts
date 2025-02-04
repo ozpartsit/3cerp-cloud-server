@@ -82,7 +82,8 @@ const schema = new mongoose.Schema<ICustomer>(
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Group",
       autopopulate: true,
-      input: "Autocomplete"
+      input: "Select",
+      validType: "select",
     },
     category: {
       type: [mongoose.Schema.Types.ObjectId],
@@ -164,20 +165,14 @@ schema.method("recalc", async function () {
   console.log("recalc", "customer")
   if (this.$locals.triggers)
     for (let trigger of this.$locals.triggers) {
-      this.$locals.triggers.shift();
-      // if (trigger.subdoc == "billingAddress" && trigger.field == "_id") {
-      //   await updateAddress(this, "billingAddress")
-      // }
-      // if (trigger.subdoc == "shippingAddress" && trigger.field == "_id") {
-      //   await updateAddress(this, "shippingAddress")
-      // }
-      // if (trigger.subdoc == "billingAddress") {
-      //   await updateDefaultAddress(this, "billingAddress")
-      // }
-      // if (trigger.subdoc == "shippingAddress") {
-      //   await updateDefaultAddress(this, "shippingAddress")
-      // }
+      if (["billingAddress", "shippingAddress"].includes(trigger.subdoc) && trigger.field == "_id") {
+        await updateAddress(this, trigger.subdoc)
+      }
+      if (["billingAddress", "shippingAddress"].includes(trigger.subdoc)) {
+        await updateDefaultAddress(this, trigger.field, trigger.subdoc)
+      }
 
+      this.$locals.triggers.shift();
     }
 
   // ustawianie znaczynika adresu
@@ -220,24 +215,23 @@ export default Customer;
 
 
 // aktualizuje dokument powiązany jako domyślny
-async function updateDefaultAddress(doc: ICustomer, type: string) {
+async function updateDefaultAddress(doc: ICustomer, field: string, type: string) {
   const address = (doc.addresses || []).find(address => address[type]);
   if (address) {
-    for (let field of Object.keys(nestedSchema)) {
+    if (!["_id", "createdAt"].includes(field))
       await address.setValue(field, doc[type][field], null, null, null, null);
-    }
   } else {
     let defaultAddress = { ...doc[type] };
     defaultAddress[type] = true;
-    await doc.addToVirtuals("addresses", defaultAddress);
+    doc.addToVirtuals("addresses", defaultAddress);
   }
 }
 async function updateAddress(doc: ICustomer, type: string) {
   const address = (doc.addresses || []).find(address => doc[type] && doc[type]._id && address._id.toString() == doc[type]._id.toString());
-  //console.log(address)
   if (address) {
-    for (let field of Object.keys(nestedSchema)) {
-      await doc.setValue(field, address[field], type, null, null, null);
+    for (let field of Object.keys(nestedSchema.paths)) {
+      if (!["_id", "createdAt"].includes(field))
+        await doc.setValue(field, address[field], type, null, null, null);
     }
   }
 }
