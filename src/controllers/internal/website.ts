@@ -19,6 +19,20 @@ export default class WebsiteController<T extends IExtendedDocument & IShop> exte
     constructor(model: IModel<T>) {
         super(model);
     }
+    async confs(req: Request, res: Response, next: NextFunction) {
+        try {
+            let { id } = req.params;
+            // check if exists shop - to do (customize template)
+            let shop = await Shop.getDocument(id || req.body.pointer || req.subdomains[0], "simple", true, "subdomain")
+            if (shop) {
+                await shop.autoPopulate()
+            }
+            else throw new CustomError("doc_not_found", 404);
+            res.json({ status: "success", data: shop });
+        } catch (error) {
+            return next(error);
+        }
+    }
     async login(req: Request, res: Response, next: NextFunction) {
         try {
             if (req.body.email) {
@@ -28,7 +42,7 @@ export default class WebsiteController<T extends IExtendedDocument & IShop> exte
                     let correct = await customer.validatePassword(req.body.password);
                     if (correct) {
                         res.cookie('user', customer._id, { maxAge: 900000, httpOnly: true });
-                        res.json({ status: "success", data: { user: customer }, message: "login_success" });
+                        res.json({ status: "success", data: { user: customer }, message: "login_success", cookies: { user: customer._id } });
                     } else {
                         throw new CustomError("wrong_password", 500);
                     }

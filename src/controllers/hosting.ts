@@ -225,9 +225,14 @@ export default class controller {
 
 
             if (["konto", "account"].includes(req.params.view)) {
-              if (req.cookies.user)
-                data.content = await Customer.getDocument(req.cookies.user, "simple", true)
-              else {
+              if (req.cookies.user) {
+                data.content = JSON.parse(JSON.stringify(await Customer.getDocument(req.cookies.user, "simple", true)));
+                let result = await Transaction.findDocuments({ entity: req.cookies.user }, { select: { status: 1, date: 1, amount: 1, grossAmount: 1, type: 1 } });
+                for (let index in result) {
+                  result[index] = await result[index].constantTranslate(req.locale);
+                }
+                data.content.relatedTransactions = result;
+              } else {
                 res.redirect('login');
               }
             }

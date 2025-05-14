@@ -38,7 +38,7 @@ export default function getFields<T extends IExtendedDocument>(this: mongoose.Mo
   if (table) {
     const virtuals: Virtuals = modelSchema.virtuals;
     Object.entries(virtuals).forEach(([key, value]) => {
-      if (!parent && value && value.options.ref) {
+      if (value && value.options.ref) {
         let field: any = {
           field: key,
           name: i18n.__(`${modelName}.${key}`),

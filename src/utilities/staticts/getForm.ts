@@ -35,10 +35,29 @@ export default async function getForm<T extends IExtendedDocument>(this: IExtend
                             tableObj.table = `${modelName}.${table.subdoc}`;
                             //if (table) section.table.fields = table.fields;
                             Object.assign(table, tableObj);
+                          
                             if (table.columns) {
                                 for (let column of table.columns) {
                                     if (column.value) column.name = i18n.__(`${modelName.toLowerCase()}.${column.value}`);
                                     if (column.fields) await fieldsFill(modelName, column, fields, table.field)
+                                }
+                            }
+                            if(table.tabels){
+                                //console.log(table.tabels)
+                                for (let subtable of table.tabels) {
+                           
+                                    let subtableObj = table.fields.find((field) => field.field == subtable.subdoc);
+                                   
+                                    subtableObj.table = `${tableObj.table}.${subtable.subdoc}`;
+                                    Object.assign(subtable, subtableObj);
+                                  
+                                    if (subtable.columns) {
+                                        for (let column of subtable.columns) {
+                                            console.log(table.field, subtable.field)
+                                            if (column.value) column.name = i18n.__(`${modelName.toLowerCase()}.${column.value}`);
+                                            if (column.fields) await fieldsFill(modelName, column, fields, table.field, subtable.field)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -52,11 +71,17 @@ export default async function getForm<T extends IExtendedDocument>(this: IExtend
 
 }
 
-async function fieldsFill(modelName, section, fields, subdoc?) {
+async function fieldsFill(modelName, section, fields, subdoc?, deepdoc?) {
     if (section.fields) for (let [index, field] of section.fields.entries()) {
         if (subdoc) {
+           
             section.fields[index] = fields.find((f: any) => f.field == subdoc) || null;
-            if (section.fields[index] && section.fields[index].fields) section.fields[index] = section.fields[index].fields.find((f: any) => f.field == field) || null;
+            if (section.fields[index] && section.fields[index].fields && !deepdoc) section.fields[index] = section.fields[index].fields.find((f: any) => f.field == field) || null;
+           // console.log(section.fields[index])
+            if(deepdoc){
+                section.fields[index] = section.fields[index].fields.find((f: any) => f.field == deepdoc) || null;
+                if (section.fields[index] && section.fields[index].fields) section.fields[index] = section.fields[index].fields.find((f: any) => f.field == field) || null;
+            }
         }
         else section.fields[index] = fields.find((f: any) => f.field == field) || null;
         if (section.fields[index]) {

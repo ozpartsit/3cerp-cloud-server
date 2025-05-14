@@ -11,7 +11,7 @@ export interface IEmailTemplate extends IExtendedDocument {
     type: string;
     description: string;
     subject: string;
-    html: string;
+    //html: string;
     text: string;
     trigger: string;
     language?: string;
@@ -51,12 +51,8 @@ export const schema = new mongoose.Schema<IEmailTemplate>(
             input: "Input",
             validType: "text",
         },
-        text: {
-            type: String,
-            input: "Input",
-            validType: "text",
-        },
-        html: { type: String, input: "RichText", validType: "richText" },
+        text: { type: String, input: "RichText", validType: "richText" },
+        //html: { type: String, input: "RichText", validType: "richText" },
         language: {
             type: String,
             default: "en",

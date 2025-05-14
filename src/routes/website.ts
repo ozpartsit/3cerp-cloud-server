@@ -55,6 +55,10 @@ export default class Routes {
             this.cartController.shoppingCartClear.bind(this.cartController) as any
         );
 
+        this.RouterWebsite.route("/account/:id?").get(
+            //this.Auth.authenticate.bind(this.Auth) as any,
+            this.accountController.getAccount.bind(this.accountController) as any
+        );
         this.RouterWebsite.route("/account/update/:id?").patch(
             //this.Auth.authenticate.bind(this.Auth) as any,
             this.accountController.updateAccount.bind(this.accountController) as any
@@ -64,6 +68,10 @@ export default class Routes {
             this.accountController.accountOptions.bind(this.accountController) as any
         );
 
+        this.RouterWebsite.route("/confs/:id?").get(
+            //this.Auth.authenticate.bind(this.Auth) as any,
+            this.siteController.confs.bind(this.siteController) as any
+        );
         this.RouterWebsite.route("/login").post(
             //this.Auth.authenticate.bind(this.Auth) as any,
             this.siteController.login.bind(this.siteController) as any

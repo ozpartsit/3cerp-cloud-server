@@ -42,10 +42,10 @@ export default class WebsiteController<T extends IExtendedDocument & ISalesOrder
 
                     let docObject = document.constantTranslate(req.locale, true);
 
-                    res.json({ status: "success", data: { document: docObject, mode: "advanced" } });
+                    res.json({ status: "success", data: { document: docObject, mode: "advanced" }, cookies: { 'shoppingcart': document._id } });
                 } else {
                     let document = await this.model.getDocument(id || req.cookies.shoppingcart, "advanced", true, "_id");
-                    
+
                     if (!document) {
                         req.cookies.shoppingcart = "";
                         this.getShoppingCart(req, res, next)
@@ -74,8 +74,6 @@ export default class WebsiteController<T extends IExtendedDocument & ISalesOrder
     async addToShoppingCart(req: Request, res: Response, next: NextFunction) {
 
         let { id } = req.params;
-
-
         try {
             let document = await this.model.getDocument(id || req.cookies.shoppingcart, "advanced", true, "_id");
             req.params.mode = "advanced"
@@ -97,7 +95,7 @@ export default class WebsiteController<T extends IExtendedDocument & ISalesOrder
                 { subdoc: "lines", field: "quantity", value: req.body.quantity || 1 }
             ]
             let response = await this.model.updateDocument(id, "advanced", "_id", update);
-            res.json({ status: "success", data: { document: response.document }, message: "added_to_cart" });
+            res.json({ status: "success", data: { document: response.document }, message: "added_to_cart", cookies: { 'shoppingcart': id } });
 
 
         } catch (error) {
@@ -139,9 +137,9 @@ export default class WebsiteController<T extends IExtendedDocument & ISalesOrder
 
             if (req.cookies.shoppingcart || id) {
                 req.params.id = id || req.cookies.shoppingcart;
-            } 
+            }
             if (!req.params.id) throw new CustomError("doc_not_found", 404);
-            
+
             this.options(req, res, next)
             this.model = mongoose.model("salesorder") as IExtendedModel<T>;
 

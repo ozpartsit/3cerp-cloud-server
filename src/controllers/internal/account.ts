@@ -19,7 +19,29 @@ export default class WebsiteController<T extends IExtendedDocument & ICustomer> 
         super(model);
     }
 
+    async getAccount(req: Request, res: Response, next: NextFunction) {
+        let { id } = req.params;
+        try {
+            if (req.cookies.user || id) {
+                id = id || req.cookies.user;
+            }
+            if (id) {
+                let document = await this.model.getDocument(id || req.cookies.user, "simple", true, "_id");
+                if (document) {
+                    //populate response document
+                    await document.autoPopulate();
+                    let docObject = document.constantTranslate(req.locale, true);
+                    res.json({ status: "success", data: { document: docObject } });
+                }
+            
+            } else throw new CustomError("account_not_found", 404)
 
+
+        } catch (error) {
+            return next(error);
+        }
+
+    }
     async updateAccount(req: Request, res: Response, next: NextFunction) {
 
         let { id } = req.params;
@@ -48,7 +70,7 @@ export default class WebsiteController<T extends IExtendedDocument & ICustomer> 
                 req.params.id = id || req.cookies.user;
             }
             if (!req.params.id) throw new CustomError("doc_not_found", 404);
-            
+
             this.options(req, res, next)
 
         } catch (error) {

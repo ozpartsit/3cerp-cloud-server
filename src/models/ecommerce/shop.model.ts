@@ -417,7 +417,7 @@ schema.methods.sendEmail = async function (this: IShop, trigger: string, locale:
             const template = await EmailTemplate.findById(emailTrigger.template)
 
             if (template) {
-                let text = await EmailService.compileText(template.html || template.text, data)
+                let text = await EmailService.compileText(template.text, data)
                 let content = await EmailService.render("default.ejs", { text: text, ...options })
                 const config = {
                     email: from,

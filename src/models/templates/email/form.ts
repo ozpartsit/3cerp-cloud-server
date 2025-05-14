@@ -21,8 +21,7 @@ export default {
                             "value": "email",
                             "fields": [
                                 "subject",
-                                "text",
-                                "html"
+                                "text"
                             ]
                         },
 

@@ -1,6 +1,7 @@
 import * as mongoose from "mongoose";
 import { IExtendedDocument } from "../../utilities/methods";
 import { IExtendedModel } from "../../utilities/static";
+import Translation, { ITranslation } from "../translations.model.js";
 
 export interface IPage extends IExtendedDocument {
     _id: mongoose.Schema.Types.ObjectId;
@@ -30,6 +31,9 @@ export interface IPage extends IExtendedDocument {
     slider: boolean
     blog: boolean
     banner: boolean
+
+    // Translations
+    translations: ITranslation[];
 }
 interface IPageModel extends mongoose.Model<IPage>, IExtendedModel<IPage> { }
 // Schemas ////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +135,7 @@ const PageSchema = {
         validType: "switch",
         default: false
     },
+
 }
 const options = {
     discriminatorKey: "type",
@@ -139,6 +144,18 @@ const options = {
     toObject: { virtuals: true }
 };
 const schema = new mongoose.Schema<IPage>(PageSchema, options);
+
+schema.virtual("translations", {
+    ref: "Translation",
+    localField: "_id",
+    foreignField: "document",
+    justOne: false,
+    autopopulate: true,
+    model: Translation
+    //defaultSelect: true,
+    //copyFields: ["account"],
+});
+
 const Page: IPageModel = mongoose.model<IPage, IPageModel>(
     "Page",
     schema

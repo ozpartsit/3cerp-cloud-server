@@ -98,7 +98,7 @@ schema.virtual("accessess", {
     model: Access
 });
 schema.virtual("preference", {
-    ref: "Preference",
+    ref: "UserPreference",
     localField: "_id",
     foreignField: "user",
     justOne: true,

@@ -6,6 +6,7 @@ import { schema as PriceGroup, IPriceGroup } from "../classifications/pricegroup
 import Price, { IPrice } from "./price.schema";
 import Related from "./related.schema.js";
 import Parameter from "./parameters.schema.js";
+import Translation, { ITranslation } from "../translations.model.js";
 //import Countries from "../../constants/countries";
 // Iterfaces ////////////////////////////////////////////////////////////////////////////////
 export interface IItem extends IExtendedDocument {
@@ -33,6 +34,11 @@ export interface IItem extends IExtendedDocument {
   //classsifictaions
   group?: mongoose.Schema.Types.ObjectId[];
   category?: mongoose.Schema.Types.ObjectId[];
+
+
+  // Translations
+  translations: ITranslation[];
+
   getPrice(): any;
 }
 interface IItemModel extends mongoose.Model<IItem>, IExtendedModel<IItem> { }
@@ -161,6 +167,17 @@ schema.virtual("parameters", {
   justOne: false,
   autopopulate: true,
   model: Parameter
+});
+
+schema.virtual("translations", {
+  ref: "Translation",
+  localField: "_id",
+  foreignField: "document",
+  justOne: false,
+  autopopulate: true,
+  model: Translation
+  //defaultSelect: true,
+  //copyFields: ["account"],
 });
 
 schema.method("getPrice", async function () {

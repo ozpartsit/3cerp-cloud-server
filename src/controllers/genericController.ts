@@ -63,19 +63,28 @@ class GenericController<T extends IExtendedDocument> {
     }
 
     async table(req: Request, res: Response, next: NextFunction) {
-        let { recordtype, id, mode, table } = req.params;
+        let { recordtype, id, mode, table, subdoc_id, subtable } = req.params;
         //let { field, page } = req.query;
         try {
             //this.model = this.model.setAccount(req.headers.account, req.headers.user);
             let document = await this.model.getDocument(id, mode == "export" ? "simple" : mode, false, ("_id").toString());
-
+       
             if (!document) {
                 throw new CustomError("doc_not_found", 404);
             } else {
+            
                 //populate response document
                 await document.autoPopulate();
+             
                 let docObject: any = document.constantTranslate(req.locale, true);
                 let results = docObject[table];
+                if (subdoc_id && subtable && results) {
+                    let line = results.find(line => line._id.toString() == subdoc_id)
+                    console.log(line)
+                    results = line ? line[subtable] || [] : [];
+                    table = subtable;
+                }
+
                 let total = results.length;
 
 

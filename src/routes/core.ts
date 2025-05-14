@@ -187,6 +187,11 @@ export default class Routes {
       this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
       controller.table.bind(controller) as any
     );
+    this.Router.route(`${path}/:id/data/:table/:subdoc_id/:subtable/:mode?`).get(
+      this.Auth.authenticate.bind(this.Auth) as any,
+      this.Auth.authorization(collection, recordtype).bind(this.Auth) as any,
+      controller.table.bind(controller) as any
+    );
    
     this.Router.route(`${path}/:id/logs`).get(
       this.Auth.authenticate.bind(this.Auth) as any,

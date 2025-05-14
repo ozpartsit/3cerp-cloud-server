@@ -1,4 +1,5 @@
 import * as mongoose from "mongoose";
+import i18n from "../config/i18n";
 import setValue from "./methods/setValue";
 import getOptions from "./methods/getOptions";
 import changeLogs from "./methods/changeLogs";
@@ -17,6 +18,7 @@ export interface IExtendedDocument extends mongoose.Document {
   account: mongoose.Schema.Types.ObjectId;
   deleted: boolean;
   resource: string;
+  typeName: string;
   type: string;
   index?: number;
   uniqNumber?: number;
@@ -120,7 +122,14 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
       return resources[0];
     }
   });
-
+  // add typeName
+  schema.virtual('typeName').get(function (this: T) {
+    if (this.type) {
+      return {
+        _id: this.type, name: i18n.__(`type.${this.type}`)
+      };
+    }
+  });
   //add locals
   //interfes
   interface ITriggers {

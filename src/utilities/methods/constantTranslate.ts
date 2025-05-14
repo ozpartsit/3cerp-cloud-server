@@ -19,13 +19,11 @@ export default function constantTranslate(this: IExtendedDocument, local: string
                     doc[list.path] = [];
                 else {
                     for (let index in doc[list.path]) {
-                        doc[list.path][index] = this[list.path][index].constantTranslate(local);
+                        doc[list.path][index] = this[list.path][index].constantTranslate(local, returnVirtuals);
                     }
                     // ukrywami usuniete
                     doc[list.path] = doc[list.path].filter(line => !line.deleted)
                 }
-
-
             }
         }
     }
@@ -34,7 +32,7 @@ export default function constantTranslate(this: IExtendedDocument, local: string
         i18n.setLocale(local || "en");
         //constats
         if (schemaType.options.constant) {
-            let constantsObj = (constants[schemaType.options.constant]||[]).reduce((t, v) => { t[v._id] = v; return t; }, {});
+            let constantsObj = (constants[schemaType.options.constant] || []).reduce((t, v) => { t[v._id] = v; return t; }, {});
             if (schemaType._presplitPath.length > 1) {
                 let subdoc = doc[schemaType._presplitPath[0]];
                 if (subdoc && subdoc[schemaType._presplitPath[1]])

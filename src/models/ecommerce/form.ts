@@ -224,8 +224,30 @@ export default {
                                     "banner",
                                 ]
                             },
+                        ],
+                        tabels: [
+                            {
+                                "value": "translations",
+                                "subdoc": "translations",
+                                "columns": [
+                                    {
+                                        "value": "language",
+                                        "fields": [
+                                            "language",
+                                            "field",
+                                        ]
+                                    },
+                                    {
+                                        "value": "other",
+                                        "fields": [
+                                            "value",
+                                        ]
+                                    },
+                                ],
+                            }
                         ]
-                    }]
+                    }
+                    ]
                 },
                 {
                     "value": "emailTriggers",

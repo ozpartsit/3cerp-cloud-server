@@ -125,7 +125,30 @@ export default {
                             },
                         ],
                     }]
-                }
+                },
+                {
+                    "value": "translations",
+                    "editable": true,
+                    "tables": [{
+                        "value": "translations",
+                        "subdoc": "translations",
+                        "columns": [
+                            {
+                                "value": "language",
+                                "fields": [
+                                    "language",
+                                    "field",
+                                ]
+                            },
+                            {
+                                "value": "other",
+                                "fields": [
+                                    "value",
+                                ]
+                            },
+                        ],
+                    }]
+                },
             ]
         },
         {

@@ -55,7 +55,7 @@ class Api {
 
      //  METHOD GET
      async get(url) {
-          this.set_cookie();
+          //this.set_cookie();
           this.set_options("GET");
 
           try {
@@ -73,7 +73,7 @@ class Api {
 
      //   METHOD POST
      async post(url = "", body = {}, stringify = true) {
-          this.set_cookie();
+          //this.set_cookie();
 
           this.set_options("POST", this.create_form_data(body), stringify);
 
@@ -92,7 +92,7 @@ class Api {
 
      //   METHOD PUT
      async put(url, body, stringify = true) {
-          this.set_cookie();
+          //this.set_cookie();
           this.set_options("PUT", this.create_form_data(body), stringify);
 
           try {
@@ -109,7 +109,7 @@ class Api {
 
      //   METHOD PATCH
      async patch(url, body = {}, stringify = true, isContentType = false) {
-          this.set_cookie();
+          //this.set_cookie();
           this.set_options("PATCH", this.create_form_data(body), stringify, isContentType);
 
           try {
