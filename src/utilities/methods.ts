@@ -79,7 +79,7 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
 
   schema.method('saveDocument', async function (this: T): Promise<T> {
     console.log("save document");
-    this.recalcDocument();
+    await this.recalcDocument(); // Dodano await
     await this.validateVirtuals(true);
     await this.changeLogs();
     let document = await this.save();
@@ -191,4 +191,3 @@ export default function customMethodsPlugin<T extends IExtendedDocument>(schema:
   //});
 
 }
-

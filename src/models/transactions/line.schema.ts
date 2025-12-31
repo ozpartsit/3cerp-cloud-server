@@ -194,9 +194,9 @@ schema.method("actions", async function (trigger) {
 schema.method("recalc", async function () {
 
   console.log("recalc", "transaction.line")
-  for (let trigger of this.$locals.triggers) {
+  while (this.$locals.triggers.length > 0) { // Zmieniono na while loop
+    const trigger = this.$locals.triggers.shift();
     await this.actions(trigger)
-    this.$locals.triggers.shift();
   }
   // calc and set amount fields
   this.amount = roundToPrecision(this.quantity * this.price, 2);

@@ -263,7 +263,7 @@ schema.pre("validate", async function (next) {
   console.log("transaction pre valide");
   next();
 });
-schema.pre("save", async function (next) {
+schema.pre("save", async function (this: ITransaction, next) { // Jawnie typuj 'this'
 
   //billing
   if (this.billingAddress) {
@@ -290,26 +290,26 @@ schema.pre("save", async function (next) {
   }
 
 
-  schema.method("recalc", async function () {
-
-    console.log("recalc", "transaction")
-    for (let trigger of this.$locals.triggers) {
-      console.log(`${trigger.type}_${trigger.field}`)
-      this.$locals.triggers.shift();
-    }
-
-    // ustawianie znaczynika adresu
-    if (this.billingAddress?.name == this.shippingAddress?.name) this.shipToDifferentAddress = false
-    else this.shipToDifferentAddress = true;
-
-    if (!this.shipToDifferentAddress) {
-      this.shippingAddress = this.billingAddress;
-    }
-
-  })
-
-
   await this.autoName();
+  next(); // Wywołaj next, aby kontynuować operację zapisu
+});
+
+// Zdefiniuj metodę recalc bezpośrednio w schemacie, a nie wewnątrz pre-save
+schema.method("recalc", async function (this: ITransaction) { // Jawnie typuj 'this'
+
+  console.log("recalc", "transaction")
+  for (let trigger of this.$locals.triggers) {
+    console.log(`${trigger.type}_${trigger.field}`)
+    this.$locals.triggers.shift();
+  }
+
+  // ustawianie znaczynika adresu
+  if (this.billingAddress?.name == this.shippingAddress?.name) this.shipToDifferentAddress = false
+  else this.shipToDifferentAddress = true;
+
+  if (!this.shipToDifferentAddress) {
+    this.shippingAddress = this.billingAddress;
+  }
 });
 
 const Transaction: ITransactionModel = mongoose.model<ITransaction, ITransactionModel>(
@@ -317,5 +317,3 @@ const Transaction: ITransactionModel = mongoose.model<ITransaction, ITransaction
   schema
 );
 export default Transaction;
-
-

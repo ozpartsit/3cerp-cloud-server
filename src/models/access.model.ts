@@ -83,8 +83,8 @@ schema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
     else this.password = await this.hashPassword();
 
-    //send email to gain access
-    this.setPassword()
+    // Wyślij email, aby uzyskać dostęp, tylko jeśli to nowy dokument
+    if (this.isNew) await this.setPassword();
     next();
 });
 

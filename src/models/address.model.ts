@@ -20,8 +20,8 @@ export interface IAddress extends IExtendedDocument {
   phone?: string;
   email?: string;
   geoCodeHint?: string;
-  latitude?: string;
-  longitude?: string;
+  latitude?: number;
+  longitude?: number;
 
   billingAddress?: boolean;
   shippingAddress?: boolean;
@@ -82,7 +82,7 @@ schema.method("geoCode", async (geoCodeHint) => geocode(geoCodeHint));
 schema.pre("save", async function (next) {
   if (!this.geoCodeHint || this.isModified("zip") || this.isModified("city") || this.isModified("country"))
     this.geoCodeHint = `${this.zip} ${this.city} ${this.country}`;
-  if (this.isModified("geoCodeHint") || !this.latitude || this.longitude) {
+  if (this.isModified("geoCodeHint") || !this.latitude || !this.longitude) { // Poprawiony warunek
     const coordinate = await this.geoCode(this.geoCodeHint || "");
     if (coordinate && coordinate.latitude && coordinate.longitude) {
       this.latitude = coordinate.latitude;

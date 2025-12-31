@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
+import { MongooseError } from "mongoose"; // Importuj MongooseError
 import Static from "../utilities/static.js";
 import Methods from "../utilities/methods.js";
 mongoose.plugin(mongoosePaginate);
@@ -17,12 +18,6 @@ export default class Database {
     this.server = process.env.DB_SERVER || "";
   }
   public connect() {
-    const db2 = mongoose.createConnection(`mongodb://mo1069_backup:Test1!@${this.server}/mo1069_backup`,
-      {
-        // useNewUrlParser: true,
-        // useUnifiedTopology: true,
-        autoIndex: true // false for production
-      });
     mongoose
       .connect(
         `mongodb://${this.database}:${this.password}@${this.server}/${this.database}`,
@@ -35,8 +30,9 @@ export default class Database {
       .then(() => {
         console.log("Database connection successful");
       })
-      .catch((err: any) => {
-        console.error("Database connection error");
+      .catch((err: MongooseError) => {
+        console.error("Database connection error", err);
+        process.exit(1); // Zakończ proces, jeśli połączenie z bazą danych się nie powiedzie
       });
 
     //mongoose.set('debug', true);
