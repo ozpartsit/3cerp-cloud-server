@@ -13,7 +13,7 @@ export default class controller {
         // odswieżenie tokena
         try {
 
-            await axios.post(`https://api-uat.vigocloud.com/api/v1/consignments?code=QVBJOmNjNTRhM2U2ZjJiMTQzOTFhMzFhODFmOWFjODA1Y2I2Om8rT3FkcHJ6cjBwWjJER2RYRUpabCs0UjArdjU3K2VWSFZUYmFEblczWUU9`, req.body, {
+            await axios.post(`https://api.vigocloud.com/api/v1/consignments?code=QVBJOmNjNTRhM2U2ZjJiMTQzOTFhMzFhODFmOWFjODA1Y2I2Om8rT3FkcHJ6cjBwWjJER2RYRUpabCs0UjArdjU3K2VWSFZUYmFEblczWUU9`, req.body, {
                 headers: {
                     "Content-Type": "application/json"
                 }
@@ -37,7 +37,7 @@ export default class controller {
         try {
             let body = req.body;
             console.log(req.params.shipmentId)
-            await axios.get(`https://api-uat.vigocloud.com/api/v1/consignments/${req.params.shipmentId}/labels?code=QVBJOmNjNTRhM2U2ZjJiMTQzOTFhMzFhODFmOWFjODA1Y2I2Om8rT3FkcHJ6cjBwWjJER2RYRUpabCs0UjArdjU3K2VWSFZUYmFEblczWUU9`, {
+            await axios.get(`https://api.vigocloud.com/api/v1/consignments/${req.params.shipmentId}/labels?code=QVBJOmNjNTRhM2U2ZjJiMTQzOTFhMzFhODFmOWFjODA1Y2I2Om8rT3FkcHJ6cjBwWjJER2RYRUpabCs0UjArdjU3K2VWSFZUYmFEblczWUU9`, {
                 headers: {
                     "Content-Type": "application/json"
                 }

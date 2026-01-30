@@ -3,6 +3,9 @@
  * Inicjalizuje serwer Express, konfiguruje middleware, łączy się z bazą danych,
  * montuje trasy i uruchamia serwer.
  */
+import fs from "fs";
+import gracefulFs from "graceful-fs";
+gracefulFs.gracefulify(fs); // To "naprawia" fs globalnie
 
 import express from "express";
 import fileUpload from "express-fileupload";
@@ -63,7 +66,7 @@ export class App3CERP {
   public routesWebsite: RoutesWebsite = new RoutesWebsite();
   public routesHosting: RoutesHosting = new RoutesHosting();
   public routesChartData: RoutesChartData = new RoutesChartData();
-  
+
   public routesMaintenance: RoutesMaintenance = new RoutesMaintenance();
   public routesExternal: RoutesExternal = new RoutesExternal();
   public routesPublic: RoutesPublic = new RoutesPublic();

@@ -415,6 +415,13 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
+"@types/graceful-fs@^4.1.9":
+  version "4.1.9"
+  resolved "https://registry.npmjs.org/@types/graceful-fs/-/graceful-fs-4.1.9.tgz"
+  integrity sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/html-to-text@*":
   version "8.0.1"
   resolved "https://registry.npmjs.org/@types/html-to-text/-/html-to-text-8.0.1.tgz"

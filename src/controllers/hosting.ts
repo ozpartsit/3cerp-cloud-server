@@ -31,497 +31,498 @@ export default class controller {
     res.redirect('back');
   }
   public async get(req: Request, res: Response, next: NextFunction) {
-    //i18n
-    const hostingi18n = new I18n();
+    try {
+      //i18n
+      const hostingi18n = new I18n();
 
-    let hostingPath = path.resolve("hosting");
-    let views = path.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
+      let hostingPath = path.resolve("hosting");
+      let views = path.resolve(hostingPath, req.body.pointer || req.subdomains[0]);
 
-    // check if exists shop - to do (customize template)
-    let shop = await Shop.getDocument(req.body.pointer || req.subdomains[0], "simple", true, "subdomain")
-    if (shop) {
-      await shop.autoPopulate()
-      views = path.resolve("templates", shop.template);
-    }
-    else throw new CustomError("doc_not_found", 404);
-    let viewpath = path.join(views, "views", req.params.view + ".ejs");
-
-    // Static files/assets
-    let tmp = req.url.toString().split("/")
-    let filePath = path.resolve(hostingPath, req.body.pointer || req.subdomains[0], ...tmp);
-    // if does not exist on main dir check templates folder
-    if (shop && !fs.existsSync(filePath)) filePath = path.resolve("templates", shop.template, ...tmp);
-    if (fs.existsSync(filePath) && !fs.lstatSync(filePath).isDirectory()) {
-
-      res.sendFile(filePath);
-    } else {
-      let urlComponent = ""
-      if (req.params && req.params.view) urlComponent = `${req.params.param || req.params.view}`;
-
-      let filepath = path.join(views, "index" + ".ejs");
-      let data: any = { info: {}, page: {}, template: {}, content: null };
-
-      //cookes
-      const shoppingcart = req.cookies.shoppingcart ? cache.get(req.cookies.shoppingcart) : null
-      const user = req.cookies.user ? await Customer.getDocument(req.cookies.user, "simple", true) : null
-
-      //shoppingcart
-      data["shoppingCart"] = shoppingcart;
-      // logged user
-      if (user) data["user"] = {
-        name: user.name,
-        favoriteItems: user.favoriteItems.length
-      };
-
-
-      data["info"] = {
-        //address
-        address: shop.address,
+      // check if exists shop - to do (customize template)
+      let shop = await Shop.getDocument(req.body.pointer || req.subdomains[0], "simple", true, "subdomain")
+      if (shop) {
+        await shop.autoPopulate()
+        views = path.resolve("templates", shop.template);
       }
+      else throw new CustomError("doc_not_found", 404);
+      let viewpath = path.join(views, "views", req.params.view + ".ejs");
 
-      data["views"] = {
-        findItems: ["search", "products", "items"],
-        getItem: ["item", "product", "detail"],
-        cart: ["TBA"],
-        checkout: ["TBA"],
+      // Static files/assets
+      let tmp = req.url.toString().split("/")
+      let filePath = path.resolve(hostingPath, req.body.pointer || req.subdomains[0], ...tmp);
+      // if does not exist on main dir check templates folder
+      if (shop && !fs.existsSync(filePath)) filePath = path.resolve("templates", shop.template, ...tmp);
+      if (fs.existsSync(filePath) && !fs.lstatSync(filePath).isDirectory()) {
 
-      }
+        res.sendFile(filePath);
+      } else {
+        let urlComponent = ""
+        if (req.params && req.params.view) urlComponent = `${req.params.param || req.params.view}`;
 
-      data["page"] = {
-        host: `${req.protocol}://${req.get('host')}`,
-        language: shop.languages.includes(req.cookies.language || req.locale) ? req.cookies.language || req.locale : shop.languages[0],
-        currency: shop.currencies.includes(req.cookies.currency) ? req.cookies.currency : shop.currencies[0],
-        defaultLanguage: shop.languages[0],
-        name: shop.name,
-        description: shop.description,
-        logo: shop.logo,
-        image: shop.image,
-        message: shop.message,
-        urlComponent: urlComponent,
-        path: req.path,
+        let filepath = path.join(views, "index" + ".ejs");
+        let data: any = { info: {}, page: {}, template: {}, content: null };
 
-        currencies: shop.currencies,
-        languages: shop.languages,
+        //cookes
+        const shoppingcart = req.cookies.shoppingcart ? cache.get(req.cookies.shoppingcart) : null
+        const user = req.cookies.user ? await Customer.getDocument(req.cookies.user, "simple", true) : null
 
-        // Meta
-        metaTitle: shop.metaTitle,
-        metaDescription: shop.metaDescription,
-        metaKeywords: shop.metaKeywords,
-
-        //Google Tag
-        GSC: shop.GSC,
-
-        //Social Media Tag
-        ogTitle: shop.ogTitle,
-        ogUrl: shop.ogUrl,
-        ogDescription: shop.ogDescription,
-        ogImage: shop.ogImage,
-
-        //Social Media Link
-        twitterUrl: shop.twitterUrl,
-        facebookUrl: shop.facebookUrl,
-        instagramUrl: shop.instagramUrl,
-        linkedinUrl: shop.linkedinUrl,
-      }
-      data["template"] = {
-        //colors
-        colorAccent: shop.colorAccent,
-        colorPrimary: shop.colorPrimary,
-        colorSecondary: shop.colorSecondary,
-      }
-      data["nav"] = {
-        //pages
-        pages: Object.values(shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.topBar).reduce((t: any, p) => {
-
-          let page = {
-            urlComponent: p.urlComponent,
-            path: `${data.page.host}/${p.urlComponent}`,
-            name: p.name,
-            parentPage: (p.parentPage as any)?._id // do porpawy
-          }
-
-          t[p._id.toString()] = t[p._id.toString()] || { ...page, pages: [] }
-          if (page.parentPage) {
-            if (t[page.parentPage.toString()]) t[page.parentPage.toString()].pages.push(page)
-          }
-          return t;
-        }, {})).filter((page: any) => !page.parentPage)
-
-      }
-      data["footer"] = {
-        address: shop.address,
-        //pages
-        pages: Object.values(shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.footer).reduce((t: any, p) => {
-
-          let page = {
-            urlComponent: p.urlComponent,
-            path: `${data.page.host}/${p.urlComponent}`,
-            name: p.name,
-            parentPage: (p.parentPage as any)?._id // do porpawy
-          }
-
-          t[p._id.toString()] = t[p._id.toString()] || { ...page, pages: [] }
-          if (page.parentPage) {
-            if (t[page.parentPage.toString()]) t[page.parentPage.toString()].pages.push(page)
-          }
-          return t;
-        }, {})).filter((page: any) => !page.parentPage)
-
-      }
-
-      //slider on home page
-      if (!req.params.view) data["slider"] = {
-        //pages
-        pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.slider).map(p => {
-          let page = {
-            urlComponent: p.urlComponent,
-            path: `${data.page.host}/${p.urlComponent}`,
-            name: p.name,
-            description: p.description,
-            image: p.image
-          }
-          return page
-        })
-      }
-      //banner on home page
-      if (!req.params.view) data["banner"] = {
-        //pages
-        pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.banner).map(p => {
-          let page = {
-            urlComponent: p.urlComponent,
-            path: `${data.page.host}/${p.urlComponent}`,
-            name: p.name,
-            description: p.description,
-            image: p.image
-          }
-          return page
-        })
-      }
-      //blog section on home page
-      if (!req.params.view) data["blog"] = {
-        //pages
-        pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.blog).map(p => {
-          let page = {
-            urlComponent: p.urlComponent,
-            path: `${data.page.host}/${p.urlComponent}`,
-            name: p.name,
-            description: p.description,
-            image: p.image,
-            date: p.date.toISOString().substr(0, 10)
-          }
-          return page
-        })
-      }
-
-      try {
-        // if view params exists
-        if (req.params.view) {
-
-          if (req.params.view == "favicon.ico") {
-            console.log("favicon.ico not found")
-            req.params.view = "404.ejs"
-          } else {
+        //shoppingcart
+        data["shoppingCart"] = shoppingcart;
+        // logged user
+        if (user) data["user"] = {
+          name: user.name,
+          favoriteItems: user.favoriteItems.length
+        };
 
 
+        data["info"] = {
+          //address
+          address: shop.address,
+        }
 
-            if (["konto", "account"].includes(req.params.view)) {
-              if (req.cookies.user) {
-                data.content = JSON.parse(JSON.stringify(await Customer.getDocument(req.cookies.user, "simple", true)));
-                let result = await Transaction.findDocuments({ entity: req.cookies.user }, { select: { status: 1, date: 1, amount: 1, grossAmount: 1, type: 1 } });
-                for (let index in result) {
-                  result[index] = await result[index].constantTranslate(req.locale);
-                }
-                data.content.relatedTransactions = result;
-              } else {
-                res.redirect('login');
-              }
-            }
-
-            if (["wishlist"].includes(req.params.view)) {
-              if (user) {
-                await user.autoPopulate();
-                data.content = user.favoriteItems || {}
-              } else {
-                res.redirect('login');
-              }
-            }
-
-            if (["news"].includes(req.params.view)) {
-              let result = shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.blog).map(p => {
-                let page = {
-                  urlComponent: p.urlComponent,
-                  path: `${data.page.host}/${p.urlComponent}`,
-                  name: p.name,
-                  description: p.description,
-                  image: p.image,
-                  date: p.date.toISOString().substr(0, 10)
-                }
-                return page
-              })
-              data.content = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1, filters: [] };
-              data.content.docs = result;
-              data.content.totalDocs = result.length;
-              data.content.limit = result.length;
-              data.content.page = 1;
-              data.content.totalPages = 1;
-            }
-
-            if (["shoppingcart", "basket", "cart", "checkout", "kasa", "summary"].includes(req.params.view)) {
-              if (req.cookies.shoppingcart)
-                data.content = cache.get(req.cookies.shoppingcart)
-
-              if (!data.content) data.content = { message: "empty_shoppingcart" }
-            }
-            if (["order", "zamowienie"].includes(req.params.view)) {
-              if (req.params.param) {
-                let document = await SalesOrder.getDocument(req.params.param, "simple", true)
-                if (document) data.content = await document.autoPopulate()
-              }
-
-              if (!data.content) data.content = { message: "order_not_found" }
-
-            }
-            if (["register"].includes(req.params.view)) {
-              if (req.params.id) {
-                let Entity = mongoose.model("customer");
-                const customer = await Entity.findById(req.params.id, { _id: true, email: true })
-                if (customer) {
-
-                  // zmiana statusu na potwierdzony
-                  await shop.sendEmail("registration_confirmed", req.locale, customer.email, customer)
-                  data.content = { status: "success", message: "email_confirmed" };
-
-                }
-              }
-            }
-            if (["resetpassword"].includes(req.params.view)) {
-              if (req.params.id) {
-                let Entity = mongoose.model("customer");
-                const customer = await Entity.findById(req.params.id, { _id: true, email: true })
-                if (customer) {
-                  data.content = { status: "success", message: "set_password" };
-                }
-              }
-            }
-
-
-            if (fs.existsSync(viewpath)) {
-              if (["search", "products", "items"].includes(req.params.view)) {
-
-                data.content = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1, filters: [] };
-                let query = {};
-                if (req.query.keyword) {
-                  query['name'] = { $regex: `.*${req.query.keyword}.*`, $options: 'i' };
-                };
-
-                if (req.query.group) {
-                  let filter: any[] = [];
-                  if (!Array.isArray(req.query.group)) filter = [req.query.group];
-                  else filter = req.query.group;
-
-                  const filterGroup = (await Group.find({ urlComponent: { $in: filter } }, { _id: 1 })).map(g => g._id)
-                  query["group"] = { $in: filterGroup }
-                }
-                // if (req.query.manufacturer) {
-                //   let filter: any[] = [];
-                //   if (!Array.isArray(req.query.manufacturer)) filter = [req.query.manufacturer];
-                //   else filter = req.query.manufacturer;
-
-                //   query["manufacturer"] = { $in: filter }
-                // }
-                if (req.params.param && req.params.param) {
-                  const filterCategory = (await Category.find({ urlComponent: { $in: req.params.param } }, { _id: 1 })).map(c => c._id)
-                  query["category"] = { $in: filterCategory }
-                }
-
-                if (req.query.price) {
-                  // uzupełnił logiką
-                }
-
-                // let filters = (req.query.filters || "").toString();
-                // if (filters) {
-                //   query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
-                // }
-
-                let options = { sort: {}, limit: 0, skip: 0, select: { name: 1, description: 1, urlComponent: 1, images: 1, "images.fullPath": 1, "images.path": 1, "images.urlComponent": 1 } };
-                let sort = (req.query.sort || "").toString();
-                if (sort) {
-                  options.sort = sort.split(",").reduce((o, f) => {
-                    // -date = desc sort per date field
-                    if (f[0] == "-") {
-                      f = f.substring(1);
-                      o[f] = -1;
-                    } else
-                      o[f] = 1;
-                    return o;
-                  }, {});
-                }
-                let page = Number(req.query.page || 1);
-                options.limit = Math.min(parseInt((req.query.limit || req.cookies.limit || 10).toString()), 100);
-                options.skip = ((page || 1) - 1) * options.limit;
-
-                let result = await Item.findDocuments(query, options);
-                let total = await Item.countDocuments(query)
-                for (let index in result) {
-                  let price: IItem = await result[index].getPrice()
-                  result[index] = await result[index].constantTranslate(req.locale);
-
-                  // tymczasowe dane
-                  result[index].quantityAvailable = Math.floor(Math.random() * 10);
-                  result[index].price = price//Math.floor(Math.random() * 1000) + 40;
-                  result[index].currency = data.page.currency;
-                  result[index].priceFormat = new Intl.NumberFormat('en-EN', { style: 'currency', currency: data.page.currency }).format(result[index].price);
-                }
-
-                // Pagination url halper
-                var q = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
-                q.searchParams.delete('page');
-                q.searchParams.set('page', '');
-                data.url = q.pathname + "?" + q.searchParams.toString();
-                // search queries
-                data.content.docs = result;
-                data.content.totalDocs = total;
-                data.content.limit = options.limit;
-                data.content.page = page;
-                data.content.totalPages = Math.ceil(total / options.limit) || 1;
-
-                // zapisywanie domyślnych ustawień
-                res.cookie('limit', options.limit, { maxAge: 900000, httpOnly: true });
-
-                //available filters
-                data.content.filters = [];
-                const category = await Category.find({}, { name: 1, urlComponent: 1 })
-                data.content.filters.push({
-                  field: 'category',
-                  type: 'select',
-                  multiple: false,
-                  params: true,
-                  options: category,
-                  example: '/search/4x4',
-                  value: req.params.param
-                })
-                const group = await Group.find({}, { name: 1, urlComponent: 1 })
-                data.content.filters.push({
-                  field: 'group',
-                  type: 'select',
-                  multiple: true,
-                  params: false,
-                  options: group,
-                  example: '/search/?group=group1&group=group2',
-                  example2: '/search/performance/?group=group1&group=group2',
-                  value: req.query.group ? Array.isArray(req.query.group) ? req.query.group : [req.query.group] : []
-                })
-
-                // data.content.filters.push({
-                //   field: 'manufacturer',
-                //   type: 'select',
-                //   multiple: true,
-                //   params: false,
-                //   options: [],
-                //   example: '/search/?manufacturer=dba'
-                // })
-                data.content.filters.push({
-                  field: 'price',
-                  type: 'range',
-                  multiple: false,
-                  params: false,
-                  options: [0, 5000],
-                  example: '/search/?price=100-450'
-                })
-              }
-              if (["item", "product", "detail"].includes(req.params.view)) {
-                let urlComponent = req.params.param;
-                let document = await Item.getDocument(urlComponent, 'view', false, "urlComponent");
-                if (document) {
-                  await document.autoPopulate();
-
-                  data.page.name = document.name;
-                  if ('sku' in document) data.page.sku = document.sku;
-                  data.page.description = document.description;
-
-                  // Meta
-                  data.page.metaTitle = document.metaTitle;
-                  data.page.metaDescription = document.metaDescription;
-                  data.page.metaKeywords = document.metaKeywords;
-
-
-                  // tymczasowe dane
-                  let doc = document.toObject({ getters: true, virtuals: true });
-
-                  // relatedItem
-
-                  doc.relatedItems = [] as any[]
-
-                  doc["relatedItems"] = await Promise.all(
-                    document["relatedItems"].map(async (related: IRelated) => {
-                      let item = related.related.toObject();
-                      item["quantityAvailable"] = Math.floor(Math.random() * 10);
-                      item["price"] = await related.related.getPrice();
-                      item["currency"] = data.page.currency;
-                      item["priceFormat"] = new Intl.NumberFormat('en-EN', { style: 'currency', currency: data.page.currency }).format(item["price"]);
-                      item["grossPrice"] = false;
-                      return item
-                    })
-                  )
-
-                  doc["quantityAvailable"] = Math.floor(Math.random() * 10);
-                  doc["price"] = await document.getPrice()
-                  doc["currency"] = data.page.currency;
-                  doc["priceFormat"] = new Intl.NumberFormat('en-EN', { style: 'currency', currency: data.page.currency }).format(doc["price"]);
-                  doc["grossPrice"] = false;
-
-                  data.content = doc;
-                } else {
-                  req.params.view = "404";
-                }
-
-              }
-
-            }
-
-            if (!data.content) {
-              const page = shop.pages.find(p => { if ((p.languages || []).includes(data.page.language) && (`/${data.page.language}/${p.urlComponent}` == req.path || `/${p.urlComponent}` == req.path)) return true; })
-
-              if (page) {
-                data.content = page.html;
-                data.page.name = page.name;
-                data.page.description = page.description;
-
-                data.page.image = page.image;
-
-                // Meta
-                data.page.metaTitle = page.metaTitle;
-                data.page.metaDescription = page.metaDescription;
-                data.page.metaKeywords = page.metaKeywords;
-                req.params.view = page.template;
-                viewpath = path.join(views, "views", req.params.view);
-              } else {
-                // set 404 page
-                req.params.view = "404";
-              }
-
-            } else {
-              if (!fs.existsSync(viewpath)) {
-                req.params.view = "404";
-
-              }
-            }
-          }
-
+        data["views"] = {
+          findItems: ["search", "products", "items"],
+          getItem: ["item", "product", "detail"],
+          cart: ["TBA"],
+          checkout: ["TBA"],
 
         }
 
-      } catch (error) {
-        res.send(error)
-        return next(error);
-      }
+        data["page"] = {
+          host: `${req.protocol}://${req.get('host')}`,
+          language: shop.languages.includes(req.cookies.language || req.locale) ? req.cookies.language || req.locale : shop.languages[0],
+          currency: shop.currencies.includes(req.cookies.currency) ? req.cookies.currency : shop.currencies[0],
+          defaultLanguage: shop.languages[0],
+          name: shop.name,
+          description: shop.description,
+          logo: shop.logo,
+          image: shop.image,
+          message: shop.message,
+          urlComponent: urlComponent,
+          path: req.path,
 
-      hostingi18n.configure({
-        directory: path.join(views, "/locales"),
-        objectNotation: true
-      });
-      hostingi18n.setLocale(req.cookies.language || req.locale);
-      try {
+          currencies: shop.currencies,
+          languages: shop.languages,
+
+          // Meta
+          metaTitle: shop.metaTitle,
+          metaDescription: shop.metaDescription,
+          metaKeywords: shop.metaKeywords,
+
+          //Google Tag
+          GSC: shop.GSC,
+
+          //Social Media Tag
+          ogTitle: shop.ogTitle,
+          ogUrl: shop.ogUrl,
+          ogDescription: shop.ogDescription,
+          ogImage: shop.ogImage,
+
+          //Social Media Link
+          twitterUrl: shop.twitterUrl,
+          facebookUrl: shop.facebookUrl,
+          instagramUrl: shop.instagramUrl,
+          linkedinUrl: shop.linkedinUrl,
+        }
+        data["template"] = {
+          //colors
+          colorAccent: shop.colorAccent,
+          colorPrimary: shop.colorPrimary,
+          colorSecondary: shop.colorSecondary,
+        }
+        data["nav"] = {
+          //pages
+          pages: Object.values(shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.topBar).reduce((t: any, p) => {
+
+            let page = {
+              urlComponent: p.urlComponent,
+              path: `${data.page.host}/${p.urlComponent}`,
+              name: p.name,
+              parentPage: (p.parentPage as any)?._id // do porpawy
+            }
+
+            t[p._id.toString()] = t[p._id.toString()] || { ...page, pages: [] }
+            if (page.parentPage) {
+              if (t[page.parentPage.toString()]) t[page.parentPage.toString()].pages.push(page)
+            }
+            return t;
+          }, {})).filter((page: any) => !page.parentPage)
+
+        }
+        data["footer"] = {
+          address: shop.address,
+          //pages
+          pages: Object.values(shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.footer).reduce((t: any, p) => {
+
+            let page = {
+              urlComponent: p.urlComponent,
+              path: `${data.page.host}/${p.urlComponent}`,
+              name: p.name,
+              parentPage: (p.parentPage as any)?._id // do porpawy
+            }
+
+            t[p._id.toString()] = t[p._id.toString()] || { ...page, pages: [] }
+            if (page.parentPage) {
+              if (t[page.parentPage.toString()]) t[page.parentPage.toString()].pages.push(page)
+            }
+            return t;
+          }, {})).filter((page: any) => !page.parentPage)
+
+        }
+
+        //slider on home page
+        if (!req.params.view) data["slider"] = {
+          //pages
+          pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.slider).map(p => {
+            let page = {
+              urlComponent: p.urlComponent,
+              path: `${data.page.host}/${p.urlComponent}`,
+              name: p.name,
+              description: p.description,
+              image: p.image
+            }
+            return page
+          })
+        }
+        //banner on home page
+        if (!req.params.view) data["banner"] = {
+          //pages
+          pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.banner).map(p => {
+            let page = {
+              urlComponent: p.urlComponent,
+              path: `${data.page.host}/${p.urlComponent}`,
+              name: p.name,
+              description: p.description,
+              image: p.image
+            }
+            return page
+          })
+        }
+        //blog section on home page
+        if (!req.params.view) data["blog"] = {
+          //pages
+          pages: shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.blog).map(p => {
+            let page = {
+              urlComponent: p.urlComponent,
+              path: `${data.page.host}/${p.urlComponent}`,
+              name: p.name,
+              description: p.description,
+              image: p.image,
+              date: p.date.toISOString().substr(0, 10)
+            }
+            return page
+          })
+        }
+
+        try {
+          // if view params exists
+          if (req.params.view) {
+
+            if (req.params.view == "favicon.ico") {
+              console.log("favicon.ico not found")
+              req.params.view = "404.ejs"
+            } else {
+
+
+
+              if (["konto", "account"].includes(req.params.view)) {
+                if (req.cookies.user) {
+                  data.content = JSON.parse(JSON.stringify(await Customer.getDocument(req.cookies.user, "simple", true)));
+                  let result = await Transaction.findDocuments({ entity: req.cookies.user }, { select: { status: 1, date: 1, amount: 1, grossAmount: 1, type: 1 } });
+                  for (let index in result) {
+                    result[index] = await result[index].constantTranslate(req.locale);
+                  }
+                  data.content.relatedTransactions = result;
+                } else {
+                  res.redirect('login');
+                }
+              }
+
+              if (["wishlist"].includes(req.params.view)) {
+                if (user) {
+                  await user.autoPopulate();
+                  data.content = user.favoriteItems || {}
+                } else {
+                  res.redirect('login');
+                }
+              }
+
+              if (["news"].includes(req.params.view)) {
+                let result = shop.pages.filter(p => (p.languages || []).includes(data.page.language) && p.blog).map(p => {
+                  let page = {
+                    urlComponent: p.urlComponent,
+                    path: `${data.page.host}/${p.urlComponent}`,
+                    name: p.name,
+                    description: p.description,
+                    image: p.image,
+                    date: p.date.toISOString().substr(0, 10)
+                  }
+                  return page
+                })
+                data.content = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1, filters: [] };
+                data.content.docs = result;
+                data.content.totalDocs = result.length;
+                data.content.limit = result.length;
+                data.content.page = 1;
+                data.content.totalPages = 1;
+              }
+
+              if (["shoppingcart", "basket", "cart", "checkout", "kasa", "summary"].includes(req.params.view)) {
+                if (req.cookies.shoppingcart)
+                  data.content = cache.get(req.cookies.shoppingcart)
+
+                if (!data.content) data.content = { message: "empty_shoppingcart" }
+              }
+              if (["order", "zamowienie"].includes(req.params.view)) {
+                if (req.params.param) {
+                  let document = await SalesOrder.getDocument(req.params.param, "simple", true)
+                  if (document) data.content = await document.autoPopulate()
+                }
+
+                if (!data.content) data.content = { message: "order_not_found" }
+
+              }
+              if (["register"].includes(req.params.view)) {
+                if (req.params.id) {
+                  let Entity = mongoose.model("customer");
+                  const customer = await Entity.findById(req.params.id, { _id: true, email: true })
+                  if (customer) {
+
+                    // zmiana statusu na potwierdzony
+                    await shop.sendEmail("registration_confirmed", req.locale, customer.email, customer)
+                    data.content = { status: "success", message: "email_confirmed" };
+
+                  }
+                }
+              }
+              if (["resetpassword"].includes(req.params.view)) {
+                if (req.params.id) {
+                  let Entity = mongoose.model("customer");
+                  const customer = await Entity.findById(req.params.id, { _id: true, email: true })
+                  if (customer) {
+                    data.content = { status: "success", message: "set_password" };
+                  }
+                }
+              }
+
+
+              if (fs.existsSync(viewpath)) {
+                if (["search", "products", "items"].includes(req.params.view)) {
+
+                  data.content = { docs: [], totalDocs: 0, limit: 0, page: 1, totalPages: 1, filters: [] };
+                  let query = {};
+                  if (req.query.keyword) {
+                    query['name'] = { $regex: `.*${req.query.keyword}.*`, $options: 'i' };
+                  };
+
+                  if (req.query.group) {
+                    let filter: any[] = [];
+                    if (!Array.isArray(req.query.group)) filter = [req.query.group];
+                    else filter = req.query.group;
+
+                    const filterGroup = (await Group.find({ urlComponent: { $in: filter } }, { _id: 1 })).map(g => g._id)
+                    query["group"] = { $in: filterGroup }
+                  }
+                  // if (req.query.manufacturer) {
+                  //   let filter: any[] = [];
+                  //   if (!Array.isArray(req.query.manufacturer)) filter = [req.query.manufacturer];
+                  //   else filter = req.query.manufacturer;
+
+                  //   query["manufacturer"] = { $in: filter }
+                  // }
+                  if (req.params.param && req.params.param) {
+                    const filterCategory = (await Category.find({ urlComponent: { $in: req.params.param } }, { _id: 1 })).map(c => c._id)
+                    query["category"] = { $in: filterCategory }
+                  }
+
+                  if (req.query.price) {
+                    // uzupełnił logiką
+                  }
+
+                  // let filters = (req.query.filters || "").toString();
+                  // if (filters) {
+                  //   query = filters.split(",").reduce((o, f) => { let filter = f.split("="); o[filter[0]] = filter[1]; return o; }, {});
+                  // }
+
+                  let options = { sort: {}, limit: 0, skip: 0, select: { name: 1, description: 1, urlComponent: 1, images: 1, "images.fullPath": 1, "images.path": 1, "images.urlComponent": 1 } };
+                  let sort = (req.query.sort || "").toString();
+                  if (sort) {
+                    options.sort = sort.split(",").reduce((o, f) => {
+                      // -date = desc sort per date field
+                      if (f[0] == "-") {
+                        f = f.substring(1);
+                        o[f] = -1;
+                      } else
+                        o[f] = 1;
+                      return o;
+                    }, {});
+                  }
+                  let page = Number(req.query.page || 1);
+                  options.limit = Math.min(parseInt((req.query.limit || req.cookies.limit || 10).toString()), 100);
+                  options.skip = ((page || 1) - 1) * options.limit;
+
+                  let result = await Item.findDocuments(query, options);
+                  let total = await Item.countDocuments(query)
+                  for (let index in result) {
+                    let price: IItem = await result[index].getPrice()
+                    result[index] = await result[index].constantTranslate(req.locale);
+
+                    // tymczasowe dane
+                    result[index].quantityAvailable = Math.floor(Math.random() * 10);
+                    result[index].price = price//Math.floor(Math.random() * 1000) + 40;
+                    result[index].currency = data.page.currency;
+                    result[index].priceFormat = new Intl.NumberFormat('en-EN', { style: 'currency', currency: data.page.currency }).format(result[index].price);
+                  }
+
+                  // Pagination url halper
+                  var q = new URL(req.protocol + '://' + req.get('host') + req.originalUrl);
+                  q.searchParams.delete('page');
+                  q.searchParams.set('page', '');
+                  data.url = q.pathname + "?" + q.searchParams.toString();
+                  // search queries
+                  data.content.docs = result;
+                  data.content.totalDocs = total;
+                  data.content.limit = options.limit;
+                  data.content.page = page;
+                  data.content.totalPages = Math.ceil(total / options.limit) || 1;
+
+                  // zapisywanie domyślnych ustawień
+                  res.cookie('limit', options.limit, { maxAge: 900000, httpOnly: true });
+
+                  //available filters
+                  data.content.filters = [];
+                  const category = await Category.find({}, { name: 1, urlComponent: 1 })
+                  data.content.filters.push({
+                    field: 'category',
+                    type: 'select',
+                    multiple: false,
+                    params: true,
+                    options: category,
+                    example: '/search/4x4',
+                    value: req.params.param
+                  })
+                  const group = await Group.find({}, { name: 1, urlComponent: 1 })
+                  data.content.filters.push({
+                    field: 'group',
+                    type: 'select',
+                    multiple: true,
+                    params: false,
+                    options: group,
+                    example: '/search/?group=group1&group=group2',
+                    example2: '/search/performance/?group=group1&group=group2',
+                    value: req.query.group ? Array.isArray(req.query.group) ? req.query.group : [req.query.group] : []
+                  })
+
+                  // data.content.filters.push({
+                  //   field: 'manufacturer',
+                  //   type: 'select',
+                  //   multiple: true,
+                  //   params: false,
+                  //   options: [],
+                  //   example: '/search/?manufacturer=dba'
+                  // })
+                  data.content.filters.push({
+                    field: 'price',
+                    type: 'range',
+                    multiple: false,
+                    params: false,
+                    options: [0, 5000],
+                    example: '/search/?price=100-450'
+                  })
+                }
+                if (["item", "product", "detail"].includes(req.params.view)) {
+                  let urlComponent = req.params.param;
+                  let document = await Item.getDocument(urlComponent, 'view', false, "urlComponent");
+                  if (document) {
+                    await document.autoPopulate();
+
+                    data.page.name = document.name;
+                    if ('sku' in document) data.page.sku = document.sku;
+                    data.page.description = document.description;
+
+                    // Meta
+                    data.page.metaTitle = document.metaTitle;
+                    data.page.metaDescription = document.metaDescription;
+                    data.page.metaKeywords = document.metaKeywords;
+
+
+                    // tymczasowe dane
+                    let doc = document.toObject({ getters: true, virtuals: true });
+
+                    // relatedItem
+
+                    doc.relatedItems = [] as any[]
+
+                    doc["relatedItems"] = await Promise.all(
+                      document["relatedItems"].map(async (related: IRelated) => {
+                        let item = related.related.toObject();
+                        item["quantityAvailable"] = Math.floor(Math.random() * 10);
+                        item["price"] = await related.related.getPrice();
+                        item["currency"] = data.page.currency;
+                        item["priceFormat"] = new Intl.NumberFormat('en-EN', { style: 'currency', currency: data.page.currency }).format(item["price"]);
+                        item["grossPrice"] = false;
+                        return item
+                      })
+                    )
+
+                    doc["quantityAvailable"] = Math.floor(Math.random() * 10);
+                    doc["price"] = await document.getPrice()
+                    doc["currency"] = data.page.currency;
+                    doc["priceFormat"] = new Intl.NumberFormat('en-EN', { style: 'currency', currency: data.page.currency }).format(doc["price"]);
+                    doc["grossPrice"] = false;
+
+                    data.content = doc;
+                  } else {
+                    req.params.view = "404";
+                  }
+
+                }
+
+              }
+
+              if (!data.content) {
+                const page = shop.pages.find(p => { if ((p.languages || []).includes(data.page.language) && (`/${data.page.language}/${p.urlComponent}` == req.path || `/${p.urlComponent}` == req.path)) return true; })
+
+                if (page) {
+                  data.content = page.html;
+                  data.page.name = page.name;
+                  data.page.description = page.description;
+
+                  data.page.image = page.image;
+
+                  // Meta
+                  data.page.metaTitle = page.metaTitle;
+                  data.page.metaDescription = page.metaDescription;
+                  data.page.metaKeywords = page.metaKeywords;
+                  req.params.view = page.template;
+                  viewpath = path.join(views, "views", req.params.view);
+                } else {
+                  // set 404 page
+                  req.params.view = "404";
+                }
+
+              } else {
+                if (!fs.existsSync(viewpath)) {
+                  req.params.view = "404";
+
+                }
+              }
+            }
+
+
+          }
+
+        } catch (error) {
+          res.send(error)
+          return next(error);
+        }
+
+        hostingi18n.configure({
+          directory: path.join(views, "/locales"),
+          objectNotation: true
+        });
+        hostingi18n.setLocale(req.cookies.language || req.locale);
+
 
         if (fs.existsSync(viewpath) || !req.params.view || !data.content) {
           ejs.renderFile(
@@ -545,12 +546,13 @@ export default class controller {
         } else {
           res.json({ viewpath, data });
         }
-      } catch (error) {
-        return next(error);
+
+
+
+
       }
-
-
-
+    } catch (error) {
+      return next(error);
     }
   }
 
